@@ -3,7 +3,8 @@ name: ci
 on:
   push:
     branches:  [ main ]
-    tags: [ v* ]
+    tags:
+      - 'v*.*.*'
 
   pull_request:
     branches: [ main ]
@@ -22,12 +23,19 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    env:
-      GIT_REF: ${{ github.head_ref || github.ref_name }} # ref_name to get tags/branches
     steps:
       -
         name: Checkout
         uses: actions/checkout@v3
+      - name: Set env
+        run: echo "TAG_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Test
+        run: |
+          echo $TAG_NAME
+          echo ${{ env.TAG_NAME }}
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
       -
         name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -41,9 +49,10 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
+          platforms: linux/amd64,linux/arm64
           context: .
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/baileys-cloud-api:$GIT_REF
-            ${{ secrets.DOCKERHUB_USERNAME }}/baileys-cloud-api:latest
+            ${{ github.repository }}:${{ env.TAG_NAME }}
+            ${{ github.repository }}:latest
