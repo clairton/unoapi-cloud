@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: 'development'
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: yarn dev
+    ports:
+      - 9876:9876

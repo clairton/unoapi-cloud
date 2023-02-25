@@ -1,0 +1,29 @@
+{
+  "name": "baileys-cloud-api",
+  "version": "1.0.0",
+  "description": "Baileys Cloud API",
+  "main": "src/index.ts",
+  "repository": "github.com/clairton/baileys-cloud-api",
+  "author": "Clairton Rodrig Heinzen<clairton.rodrigo@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "nodemon",
+    "build": "npx tsc",
+    "start": "node build/index.js"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.14.1",
+    "jest": "^29.4.3",
+    "nodemon": "^2.0.20",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@adiwajshing/baileys": "^5.0.0",
+    "express": "^4.18.2"
+  }
+}

@@ -1,11 +1,14 @@
-# syntax=docker/dockerfile:1
-FROM busybox:latest
-COPY --chmod=755 <<EOF /app/run.sh
-#!/bin/sh
-while true; do
-  echo -ne "The time is now $(date +%T)\\r"
-  sleep 1
-done
-EOF
+FROM node/node:alpine
 
-ENTRYPOINT /app/run.sh
+ARG NODE_ENV=production
+
+WORKDIR /app
+
+ADD ./src ./src
+ADD ./package.json ./package.json
+ADD ./yarn.lock ./yarn.lock
+
+RUN yarn
+RUN yarn build
+
+ENTRYPOINT yarn start
