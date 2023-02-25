@@ -2,7 +2,7 @@
 
 An implementation of Baileys(`https://github.com/adiwajshing/Baileys`) as RESTful API service with multi device support with a Whatsapp Cloud API format `https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
-The audios, videos, document use base64 urls
+The media files are saved in file system at folder data with the session.
 
 Up service for development `docker compose up`
 
