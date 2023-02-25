@@ -5,7 +5,7 @@ services:
     build:
       dockerfile: Dockerfile
       args:
-        NODE_ENV: 'development'
+        NODE_ENV: 'production'
     volumes:
       - ./:/app
     working_dir: /app
