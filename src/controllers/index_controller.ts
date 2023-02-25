@@ -3,7 +3,8 @@ import { Request, Response } from "express";
 class IndexController {
 
   public ping(_req: Request, res: Response) {
-    return res.send("pong!")
+    res.set("Content-Type", "text/plain");
+    return res.status(200).send("pong!")
   }
 }
 

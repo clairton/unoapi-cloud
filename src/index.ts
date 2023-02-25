@@ -1,7 +1,10 @@
-import { App } from "./app";
+import app from "./app";
 
-const app = new App();
+const PORT: Number = parseInt(process.env.PORT || "9876");
 
-const port = process.env.PORT || 9876
+app.server.listen(PORT, async () => {
+  console.info(`Baileys Cloud API listening on *:${PORT}`)
+  console.info(`Successful started app!`)
+});
 
-app.server.listen(port);
+export default app;
