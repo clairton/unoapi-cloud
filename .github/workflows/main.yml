@@ -19,6 +19,8 @@ jobs:
           node-version: 18
           cache: yarn
       - run: yarn install
+      - run: yarn eslint src
+      - run: yarn format
       - run: yarn test
 
   build:

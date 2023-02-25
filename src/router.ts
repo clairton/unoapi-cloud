@@ -1,9 +1,10 @@
-import { Router } from "express";
-import { indexController } from "./controllers/index_controller";
+import { Router } from 'express'
+
+import { indexController } from './controllers/index_controller'
 
 const router: Router = Router()
 
 //Routes
-router.get("/ping", indexController.ping);
+router.get('/ping', indexController.ping)
 
-export { router };
+export { router }
