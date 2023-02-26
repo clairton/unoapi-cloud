@@ -19,13 +19,13 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       response[type] = { url }
       break
 
-      /*
-      case 'template':
-        const valuesTemplate = payload?.template
-        const bindTemplate = await getTemplate(phone, valuesTemplate?.name)
-        response.text = bindTemplate?.components[0]?.text
-        break
-      */
+    /*
+    case 'template':
+      const valuesTemplate = payload?.template
+      const bindTemplate = await getTemplate(phone, valuesTemplate?.name)
+      response.text = bindTemplate?.components[0]?.text
+      break
+    */
 
     default:
       throw new Error(`Unknow message type ${type}`)
@@ -33,7 +33,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
   return response
 }
 
-export const toBaileysJid = (phone: string) => `${phone}@s.whatsapp.net`
+export const toBaileysJid = (phone: string) => (phone.indexOf('@') >= 0 ? phone : `${phone}@s.whatsapp.net`)
 
 export const toBaileysMessageKey = (_phone: string, _payload: any) => {
   throw 'toBaileysMessageKey not implement yest'
