@@ -1,24 +1,23 @@
 import express, { Application } from 'express'
 
 import { router } from './router'
+import { Incoming } from './services/incoming'
 
-class App {
+export class App {
   public server: Application
 
-  constructor() {
+  constructor(service: Incoming) {
     this.server = express()
     this.middleware()
-    this.router()
+    this.router(service)
   }
 
   private middleware() {
     this.server.use(express.json())
   }
 
-  private router() {
-    this.server.use(router)
+  private router(service: Incoming) {
+    const r = router(service)
+    this.server.use(r)
   }
 }
-
-const app: App = new App()
-export default app
