@@ -13,7 +13,7 @@ export class CloudApi implements Outgoing {
     this.header = header
   }
 
-  public async sendMany(phone: string, messages: [any]) {
+  public async sendMany(phone: string, messages: any[]) {
     return Promise.all(messages.map((m: any) => this.sendOne(phone, m)))
   }
 

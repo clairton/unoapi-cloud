@@ -1,11 +1,16 @@
 import { App } from './app'
 import { Baileys } from './services/baileys'
 import { Incoming } from './services/incoming'
+import { Outgoing } from './services/outgoing'
+import { CloudApi } from './services/cloud_api'
 import { MultiFileStore as store } from './services/multi_file_store'
+const { WEBHOOK_URL, WEBHOOK_TOKEN, WEBHOOK_HEADER } = process.env
 
-const service: Incoming = new Baileys(store)
+const outgoing: Outgoing = new CloudApi(WEBHOOK_URL || 'http://localhost:9876', WEBHOOK_TOKEN || 'abc123', WEBHOOK_HEADER || 'Authorization')
 
-const app: App = new App(service)
+const inconming: Incoming = new Baileys(store, outgoing)
+
+const app: App = new App(inconming)
 
 const PORT: number = parseInt(process.env.PORT || '9876')
 

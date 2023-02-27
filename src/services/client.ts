@@ -1,36 +1,9 @@
 const clients: Map<string, Client> = new Map()
-import makeWASocket, { DisconnectReason, WASocket, AnyMessageContent, WAMessageKey, downloadMediaMessage } from '@adiwajshing/baileys'
-import { Boom } from '@hapi/boom'
+import { AnyMessageContent, WAMessageKey } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
+import { connect } from './socket'
 import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey } from './transformer'
-
-const connectToWhatsApp = async (store: any, client: Client) => {
-  const { state, saveCreds } = await store()
-  const config: any = {
-    // can provide additional config here
-    printQRInTerminal: true,
-    auth: state,
-  }
-  const sock: WASocket = makeWASocket(config)
-  sock.ev.on('creds.update', saveCreds)
-  sock.ev.on('connection.update', (update: any) => {
-    const { connection, lastDisconnect } = update
-    if (connection === 'close') {
-      const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
-      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
-      // reconnect if not logged out
-      if (shouldReconnect) {
-        return connectToWhatsApp(store, client)
-      }
-    } else if (connection === 'open') {
-      console.log('opened connection')
-      return sock
-    }
-  })
-  sock.ev.on('messages.upsert', (messages) => {
-    client.receive(messages)
-  })
-}
+import { v1 as uuid } from 'uuid'
 
 export const getClient = async (phone: string, store: any, outgoing: Outgoing) => {
   if (!clients.has(phone)) {
@@ -42,7 +15,7 @@ export const getClient = async (phone: string, store: any, outgoing: Outgoing) =
 }
 
 export class Client {
-  private phone: string
+  public phone: string
   private store: any // Store
   private sock: any // WASocket
   private outgoing: Outgoing
@@ -54,7 +27,21 @@ export class Client {
   }
 
   async connect() {
-    this.sock = await connectToWhatsApp(this.store, this)
+    this.sock = await connect(this.store, this)
+  }
+
+  async sendStatus(text: string) {
+    const payload = {
+      key: {
+        remoteJid: toBaileysJid(this.phone),
+        id: uuid(),
+      },
+      message: {
+        conversation: text,
+      },
+      messageTimestamp: new Date().getTime(),
+    }
+    return this.outgoing.sendOne(this.phone, payload)
   }
 
   async send(payload: any) {
@@ -73,7 +60,7 @@ export class Client {
       if (['text', 'image', 'audio', 'document', 'video', 'template'].includes(type)) {
         const jid: string = toBaileysJid(to)
         const content: AnyMessageContent = toBaileysMessageContent(payload)
-        const { key } = this.sock.sendMessage(jid, content)
+        const { key } = await this.sock.sendMessage(jid, content)
         return {
           messaging_product: 'whatsapp',
           contacts: [
@@ -93,7 +80,7 @@ export class Client {
     }
   }
 
-  async receive(messages: [any]) {
-    return this.outgoing.send(this.phone, messages)
+  async receive(messages: any[]) {
+    return this.outgoing.sendMany(this.phone, messages)
   }
 }
