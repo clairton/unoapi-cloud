@@ -1,51 +1,60 @@
 const clients: Map<string, Client> = new Map()
-import makeWASocket, { DisconnectReason, WASocket, AnyMessageContent, WAMessageKey } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, WASocket, AnyMessageContent, WAMessageKey, downloadMediaMessage } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
+import { Outgoing } from './outgoing'
 import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey } from './transformer'
 
-const connectToWhatsApp = async () => {
-  const sock: WASocket = makeWASocket({
+const connectToWhatsApp = async (store: any, client: Client) => {
+  const { state, saveCreds } = await store()
+  const config: any = {
     // can provide additional config here
     printQRInTerminal: true,
-  })
-  sock.ev.on('connection.update', (update) => {
+    auth: state,
+  }
+  const sock: WASocket = makeWASocket(config)
+  sock.ev.on('creds.update', saveCreds)
+  sock.ev.on('connection.update', (update: any) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
       const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
       console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
       // reconnect if not logged out
       if (shouldReconnect) {
-        return connectToWhatsApp()
+        return connectToWhatsApp(store, client)
       }
     } else if (connection === 'open') {
       console.log('opened connection')
       return sock
     }
   })
-  sock.ev.on('messages.upsert', (m) => {})
+  sock.ev.on('messages.upsert', (messages) => {
+    client.receive(messages)
+  })
 }
-// run in main file
-connectToWhatsApp()
 
-export const getClient = async (phone: string) => {
+export const getClient = async (phone: string, store: any, outgoing: Outgoing) => {
   if (!clients.has(phone)) {
-    const client = new Client(phone)
+    const client = new Client(phone, store, outgoing)
     await client.connect()
     clients.set(phone, client)
   }
   return clients.get(phone)
 }
 
-class Client {
+export class Client {
   private phone: string
+  private store: any // Store
   private sock: any // WASocket
+  private outgoing: Outgoing
 
-  constructor(phone: string) {
+  constructor(phone: string, store: any, outgoing: Outgoing) {
     this.phone = phone
+    this.store = store
+    this.outgoing = outgoing
   }
 
   async connect() {
-    this.sock = await connectToWhatsApp()
+    this.sock = await connectToWhatsApp(this.store, this)
   }
 
   async send(payload: any) {
@@ -84,7 +93,7 @@ class Client {
     }
   }
 
-  async receive() {
-    return true
+  async receive(messages: [any]) {
+    return this.outgoing.send(this.phone, messages)
   }
 }
