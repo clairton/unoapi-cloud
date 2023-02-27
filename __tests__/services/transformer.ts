@@ -169,4 +169,64 @@ describe('service transformer', () => {
     }
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
   })
+
+  test('fromBaileysMessageContent with contact', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = 'Forrest Gump'
+    const messageTimestamp = new Date().getTime()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      message: {
+        contactMessage: {
+          vcard: ['BEGIN:VCARD', 'VERSION:4.0', 'N:Einstein', `FN:${pushName}`, `TEL:${remotePhoneNumber}`, 'END:VCARD'].join('\r\n'),
+        },
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber }],
+                messages: [
+                  {
+                    from: phoneNumer,
+                    id,
+                    timestamp: messageTimestamp,
+                    contacts: [
+                      {
+                        name: {
+                          formatted_name: pushName,
+                        },
+                        phones: remotePhoneNumber,
+                      },
+                    ],
+                    type: 'contacts',
+                  },
+                ],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
 })

@@ -227,15 +227,12 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         for (let i = 0; i < vcards.length; i++) {
           const vcard = vcards[i]
           if (vcard) {
-            const parsedCcard: any = new vCard().parse(vcard)
-            const card = parsedCcard?.vCard?.data
+            const card: vCard = new vCard().parse(vcard)
             contacts.push({
               name: {
-                formatted_name: card.fn[0].value,
+                formatted_name: card.get('fn').valueOf(),
               },
-              phones: card.tel.map((t: any) => {
-                return { phone: t.value }
-              }),
+              phones: card.get('tel').valueOf(),
             })
           }
         }
@@ -387,7 +384,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         }
         state.errors = [error]
       }
-      change.value.contacts = []
       change.value.statuses.push(state)
     } else {
       // const remoteJid = await formatJid(payload.key.remoteJid)
