@@ -35,16 +35,13 @@ import { Request, Response } from 'express'
 import { Incoming } from '../services/incoming'
 
 export class MessagesController {
-  service: Incoming
+  private service: Incoming
 
   constructor(service: Incoming) {
     this.service = service
   }
 
   public async index(req: Request, res: Response) {
-    console.debug('messages headers', req.headers)
-    console.debug('messages body', JSON.stringify(req.body))
-    console.debug('messages params', req.params)
     const { phone } = req.params
     const payload: any = req.body
     try {

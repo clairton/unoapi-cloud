@@ -1,6 +1,5 @@
 import {
   toBaileysJid,
-  toBaileysMessageContent,
   getMessageType,
   isIndividualJid,
   isIndividualMessage,
