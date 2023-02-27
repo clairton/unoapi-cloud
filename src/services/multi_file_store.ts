@@ -1,3 +1,4 @@
 import { useMultiFileAuthState } from '@adiwajshing/baileys'
+import { store } from './store'
 
-export const MultiFileStore = async () => useMultiFileAuthState('./data/sessions')
+export const multiFileStore: store = async () => useMultiFileAuthState('./data/sessions')

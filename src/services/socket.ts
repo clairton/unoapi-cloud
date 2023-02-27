@@ -1,17 +1,15 @@
-import makeWASocket, { DisconnectReason, WASocket, BaileysEventMap } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
+import { store } from './store'
 import { v1 as uuid } from 'uuid'
 import { toBaileysJid } from './transformer'
-const counts: any = {}
-const connectings: any = {}
+const counts: Map<string, number> = new Map()
+const connectings: Map<string, number> = new Map()
 const max = 6
 
 const onQrCode = async (client: Client, qrCode: any) => {
-  if (!counts[client.phone]) {
-    counts[client.phone] = 0
-  }
-  counts[client.phone]++
+  counts.set(client.phone, (counts.get(client.phone) || 0) + 1)
   console.debug(`Received qrcode ${qrCode}`)
   const messageTimestamp = new Date().getTime()
   const mediaKey = uuid()
@@ -27,51 +25,29 @@ const onQrCode = async (client: Client, qrCode: any) => {
         fileName: `qrcode-unoapi-${messageTimestamp}.png`,
         mediaKey,
         fileLength: qrCode.length,
-        caption: `Leia o QR Code para conectar ao Whatsapp Web, tentativa ${counts[client.phone]} de ${max}`,
+        caption: `Leia o QR Code para conectar ao Whatsapp Web, tentativa ${counts.get(client.phone)} de ${max}`,
       },
     },
     messageTimestamp,
   })
-  if (counts[client.phone] >= max) {
-    delete counts[client.phone]
-    delete connectings[client.phone]
+  if (counts.get(client.phone) || 0 >= max) {
+    counts.delete(client.phone)
+    connectings.delete(client.phone)
     return false
   }
   return true
 }
 
-export const connect = async (store: any, client: Client) => {
+export async function connect(store: store, client: Client): Promise<WASocket> {
   const { state, saveCreds } = await store()
-  const config: any = {
+  const config: UserFacingSocketConfig = {
     // can provide additional config here
     printQRInTerminal: true,
     auth: state,
+    shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
   }
   const sock: WASocket = makeWASocket(config)
   sock.ev.on('creds.update', saveCreds)
-  sock.ev.on('connection.update', async (update: any) => {
-    const { connection, lastDisconnect } = update
-    if (connection === 'close') {
-      const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
-      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
-      // reconnect if not logged out
-      if (shouldReconnect) {
-        return connect(store, client)
-      }
-    } else if (connection === 'open') {
-      console.log('opened connection')
-      return sock
-    } else if (update.qr) {
-      if (!(await onQrCode(client, update.qr))) {
-        const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
-        events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
-        await sock?.ws?.close()
-        const message = `The ${max} times of generate qrcide is exceded!`
-        await client.sendStatus(message)
-        throw new Error(message) // @TODO
-      }
-    }
-  })
   const listener = (messages: any[]) => client.receive(messages)
   sock.ev.on('messages.upsert', (payload: any) => listener(payload.messages))
   sock.ev.on('messages.update', listener)
@@ -82,5 +58,29 @@ export const connect = async (store: any, client: Client) => {
       return { key, update: { status: 'DELETED' } }
     })
     listener(payload)
+  })
+  return new Promise<WASocket>((resolve, reject) => {
+    sock.ev.on('connection.update', async (update: any) => {
+      const { connection, lastDisconnect } = update
+      if (connection === 'close') {
+        const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+        console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
+        // reconnect if not logged out
+        if (shouldReconnect) {
+          return connect(store, client)
+        }
+      } else if (connection === 'open') {
+        return resolve(sock)
+      } else if (update.qr) {
+        if (!(await onQrCode(client, update.qr))) {
+          const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
+          events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
+          await sock?.ws?.close()
+          const message = `The ${max} times of generate qrcide is exceded!`
+          await client.sendStatus(message)
+          return reject(message) // @TODO
+        }
+      }
+    })
   })
 }

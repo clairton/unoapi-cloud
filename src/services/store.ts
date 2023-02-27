@@ -1,6 +1,8 @@
 import { AuthenticationState } from '@adiwajshing/baileys'
 
-export declare const Store: () => Promise<{
-  state: AuthenticationState
-  saveCreds: () => Promise<void>
-}>
+export interface store {
+  (): Promise<{
+    state: AuthenticationState
+    saveCreds: () => Promise<void>
+  }>
+}

@@ -1,26 +1,17 @@
-const clients: Map<string, Client> = new Map()
-import { AnyMessageContent, WAMessageKey } from '@adiwajshing/baileys'
+import { AnyMessageContent, WAMessageKey, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
+import { store } from './store'
 import { connect } from './socket'
 import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey } from './transformer'
 import { v1 as uuid } from 'uuid'
 
-export const getClient = async (phone: string, store: any, outgoing: Outgoing) => {
-  if (!clients.has(phone)) {
-    const client = new Client(phone, store, outgoing)
-    await client.connect()
-    clients.set(phone, client)
-  }
-  return clients.get(phone)
-}
-
 export class Client {
   public phone: string
-  private store: any // Store
-  private sock: any // WASocket
+  private store: store // Store
+  private sock: WASocket | undefined // WASocket
   private outgoing: Outgoing
 
-  constructor(phone: string, store: any, outgoing: Outgoing) {
+  constructor(phone: string, store: store, outgoing: Outgoing) {
     this.phone = phone
     this.store = store
     this.outgoing = outgoing
@@ -45,12 +36,15 @@ export class Client {
   }
 
   async send(payload: any) {
+    if (!this.sock) {
+      throw `Connect first calling connect`
+    }
     const { status, type, to } = payload
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
         if (status == 'read') {
           const key: WAMessageKey = toBaileysMessageKey(this.phone, payload)
-          this.sock.readMessages([key])
+          await this.sock?.readMessages([key])
         }
         return { success: true }
       } else {
@@ -60,19 +54,22 @@ export class Client {
       if (['text', 'image', 'audio', 'document', 'video', 'template'].includes(type)) {
         const jid: string = toBaileysJid(to)
         const content: AnyMessageContent = toBaileysMessageContent(payload)
-        const { key } = await this.sock.sendMessage(jid, content)
-        return {
-          messaging_product: 'whatsapp',
-          contacts: [
-            {
-              wa_id: to,
-            },
-          ],
-          messages: [
-            {
-              id: key.id,
-            },
-          ],
+        const response = await this.sock?.sendMessage(jid, content)
+        if (response) {
+          const key = response.key
+          return {
+            messaging_product: 'whatsapp',
+            contacts: [
+              {
+                wa_id: to,
+              },
+            ],
+            messages: [
+              {
+                id: key.id,
+              },
+            ],
+          }
         }
       } else {
         throw new Error(`Unknow message type ${type}`)
@@ -80,7 +77,7 @@ export class Client {
     }
   }
 
-  async receive(messages: any[]) {
+  async receive(messages: object[]) {
     return this.outgoing.sendMany(this.phone, messages)
   }
 }
