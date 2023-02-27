@@ -43,12 +43,12 @@ export class MessagesController {
 
   public async index(req: Request, res: Response) {
     const { phone } = req.params
-    const payload: any = req.body
+    const payload: unknown = req.body
     try {
-      const response: any = await this.service.send(phone, payload)
+      const response: unknown = await this.service.send(phone, payload)
       return res.status(200).json(response)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      console.error('Error on send message', e)
       return res.status(400).json({ status: 'error', message: e.message })
     }
   }
