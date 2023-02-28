@@ -32,7 +32,6 @@ const onQrCode = async (client: Client, qrCode: string) => {
       messageTimestamp,
     },
   ])
-  console.log('counts.get(client.phone)', counts.get(client.phone))
   if ((counts.get(client.phone) || 0) >= max) {
     counts.delete(client.phone)
     connectings.delete(client.phone)

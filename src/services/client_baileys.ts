@@ -3,7 +3,7 @@ import { Outgoing } from './outgoing'
 import { store } from './store'
 import { connect } from './socket'
 import { Client } from './client'
-import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey } from './transformer'
+import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 
 export class ClientBaileys implements Client {
@@ -80,7 +80,37 @@ export class ClientBaileys implements Client {
       }
     } else if (type) {
       if (['text', 'image', 'audio', 'document', 'video', 'template'].includes(type)) {
-        const jid: string = toBaileysJid(to)
+        const jid: string = await this.toJid(to)
+        if (!jid) {
+          const id = uuid()
+          return {
+            messaging_product: 'whatsapp',
+            contacts: [
+              {
+                wa_id: to,
+              },
+            ],
+            messages: [
+              {
+                id,
+              },
+            ],
+            statuses: [
+              {
+                id,
+                recipient_id: to,
+                status: 'failed',
+                timestamp: Math.floor(Date.now() / 1000),
+                errors: [
+                  {
+                    code: 2,
+                    title: `The number ${to} does not have Whatsapp Account`,
+                  },
+                ],
+              },
+            ],
+          }
+        }
         const content: AnyMessageContent = toBaileysMessageContent(payload)
         const response = await this.sock?.sendMessage(jid, content)
         if (response) {
@@ -107,5 +137,21 @@ export class ClientBaileys implements Client {
 
   async receive(messages: object[]) {
     return this.outgoing.sendMany(this.phone, messages)
+  }
+
+  private async toJid(phoneNumber: string) {
+    const bindJid: string = toBaileysJid(phoneNumber)
+    if (isIndividualJid(bindJid)) {
+      const results = await this.sock?.onWhatsApp(bindJid)
+      const result = results && results[0]
+      if (result && result.exists) {
+        console.debug(`${bindJid} exists on WhatsApp, as jid: ${result.jid}`)
+        return result.jid
+      } else {
+        console.warn(`${bindJid} not exists on WhatsApp`)
+        return ''
+      }
+    }
+    return bindJid
   }
 }
