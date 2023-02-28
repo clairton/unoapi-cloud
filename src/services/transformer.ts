@@ -348,11 +348,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         return
 
       default:
-        if (payload.update.messageStubType == 1) {
-          cloudApiStatus = 'deleted'
-        } else {
-          throw new Error(`Unknown baileys status type ${baileysStatus}`)
-        }
+        throw new Error(`Unknown baileys status type ${baileysStatus}`)
     }
     // const repository = await getRepository(this.phone, this.config)
     if (cloudApiStatus) {
