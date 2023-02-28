@@ -30,6 +30,7 @@ curl -X  POST \
 */
 // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#successful-response
 // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages#text-messages
+// https://developers.facebook.com/docs/whatsapp/cloud-api/guides/mark-message-as-read
 
 import { Request, Response } from 'express'
 import { Incoming } from '../services/incoming'

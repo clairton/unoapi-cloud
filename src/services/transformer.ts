@@ -68,8 +68,14 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
 
 export const toBaileysJid = (phone: string) => (phone.indexOf('@') >= 0 ? phone : `${phone}@s.whatsapp.net`)
 
-export const toBaileysMessageKey = (_phone: string, _payload: any) => {
-  throw 'toBaileysMessageKey not implement yest'
+export const toBaileysMessageKey = (payload: any) => {
+  const { message_id } = payload
+  const status = {
+    fromMe: false,
+    id: message_id,
+    // remoteJid || remoteJid && parcitipant
+  }
+  return status
 }
 
 export const isIndividualJid = (jid: any) => jid.indexOf('@s.whatsapp.net') >= 0

@@ -7,6 +7,8 @@ import {
   jidToPhoneNumber,
   phoneNumberToJid,
   fromBaileysMessageContent,
+  toBaileysMessageContent,
+  toBaileysMessageKey
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
@@ -520,6 +522,106 @@ describe('service transformer', () => {
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
   })
 
+  test('fromBaileysMessageContent with receipt read', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Forrest Gump ${new Date().getTime()}`
+    const messageTimestamp = new Date().getTime()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      receipt: {
+        readTimestamp: messageTimestamp,
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber }],
+                statuses: [
+                  {
+                    id,
+                    recipient_id: phoneNumer,
+                    status: 'read',
+                    timestamp: messageTimestamp,
+                  },
+                ],
+                messages: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
+  test('fromBaileysMessageContent with receipt read', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Patricia ${new Date().getTime()}`
+    const messageTimestamp = new Date().getTime()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      receipt: {
+        receiptTimestamp: messageTimestamp,
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber }],
+                statuses: [
+                  {
+                    id,
+                    recipient_id: phoneNumer,
+                    status: 'delivered',
+                    timestamp: messageTimestamp,
+                  },
+                ],
+                messages: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
   test('getMessageType with viewOnceMessage', async () => {
     const input = {
       message: {
@@ -527,5 +629,65 @@ describe('service transformer', () => {
       },
     }
     expect(getMessageType(input)).toEqual('viewOnceMessage')
+  })
+
+  test('toBaileysMessageContent text', async () => {
+    const body = `ladiuad87hodlnkd ${new Date().getTime()} askpdasioashfjh`
+    const input = {
+      type: 'text',
+      text: {
+        body,
+      },
+    }
+    const output = {
+      text: body,
+    }
+    expect(toBaileysMessageContent(input)).toEqual(output)
+  })
+
+  test('toBaileysMessageContent media', async () => {
+    const body = `ladiuad87hodlnkd ${new Date().getTime()} askpdasioashfjh`
+    const text = `${new Date().getTime()}`
+    const link = `${text}.pdf`
+    const mimetype = 'application/pdf'
+    const input = {
+      type: 'video',
+      video: {
+        caption: body,
+        link,
+      },
+    }
+    const output = {
+      caption: body,
+      mimeType: mimetype,
+      video: {
+        url: link,
+      },
+    }
+    expect(toBaileysMessageContent(input)).toEqual(output)
+  })
+
+  test('toBaileysMessageContent unknown', async () => {
+    const input = {
+      type: 'unknown',
+    }
+    try {
+      toBaileysMessageContent(input)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      expect(e.message).toBe(`Unknow message type unknown`)
+    }
+  })
+
+  test('toBaileysMessageKey valid', async () => {
+    const id = `wa.${new Date().getTime()}`
+    const input = {
+      message_id: id,
+    }
+    const output = {
+      fromMe: false,
+      id,
+    }
+    expect(toBaileysMessageKey(input)).toEqual(output)
   })
 })

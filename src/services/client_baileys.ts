@@ -42,7 +42,7 @@ export class ClientBaileys implements Client {
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
         if (status == 'read') {
-          const key: WAMessageKey = toBaileysMessageKey(this.phone, payload)
+          const key: WAMessageKey = toBaileysMessageKey(payload)
           await this.sock?.readMessages([key])
         }
         return { success: true }
