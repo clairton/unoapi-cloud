@@ -2,7 +2,6 @@ import { Baileys } from '../../src/services/baileys'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
 import { store } from '../../src/services/store'
-import { getClient } from '../../src/services/get_client'
 import { Client } from '../../src/services/Client'
 import { multiFileStore } from '../../src/services/multi_file_store'
 jest.mock('../../src/services/Client')
