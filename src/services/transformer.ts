@@ -160,11 +160,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     let cloudApiStatus
     let messageTimestamp = payload.messageTimestamp
     const groupMetadata: any = {}
-    if (!isIndividual && !['update', 'receipt'].includes(messageType)) {
-      //   const repository = await getRepository(this.phone, this.config)
-      //   const groupMetadata = repository.getGroupMetadata(chatJid)
+    if (payload.groupMetadata) {
+      groupMetadata.group_subject = payload.groupMetadata.subject
       groupMetadata.group_id = chatJid
-      //   groupMetadata.group_subject = groupMetadata?.subject
     }
     const statuses: any[] = []
     const messages: any[] = []
@@ -364,19 +362,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         recipient_id: phone.replace('+', ''),
         status: cloudApiStatus,
         timestamp: messageTimestamp || Math.floor(Date.now() / 1000),
-        // "conversation": {
-        //   "id": "CONVERSATION_ID",
-        //   "expiration_timestamp": TIMESTAMP,
-        //   "origin": {
-        //     "type": "user_initiated"
-        //     }
-        //   },
-        // "pricing": {
-        //   "pricing_model": "CBP",
-        //   "billable": true,
-        //   "category": "user_initiated"
-        //   }
-        // }
       }
       if (cloudApiStatus == 'failed') {
         // https://github.com/tawn33y/whatsapp-cloud-api/issues/40#issuecomment-1290036629

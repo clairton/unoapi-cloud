@@ -1,6 +1,6 @@
 import { AnyMessageContent, WAMessageKey, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
-import { store } from './store'
+import { store, DataStore } from './store'
 import { connect } from './socket'
 import { Client } from './client'
 import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey, isIndividualJid } from './transformer'
@@ -10,6 +10,7 @@ export class ClientBaileys implements Client {
   public phone: string
   private sock: WASocket | undefined
   private outgoing: Outgoing
+  private dataStore: DataStore | undefined
 
   constructor(phone: string, outgoing: Outgoing) {
     this.phone = phone
@@ -17,7 +18,9 @@ export class ClientBaileys implements Client {
   }
 
   async connect(store: store) {
-    this.sock = await connect({ store, client: this })
+    const { sock, dataStore } = await connect({ store, client: this })
+    this.sock = sock
+    this.dataStore = dataStore
   }
 
   async sendStatus(text: string) {

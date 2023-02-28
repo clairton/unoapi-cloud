@@ -1,9 +1,9 @@
 import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
-import { store } from './store'
+import { store, DataStore } from './store'
 import { v1 as uuid } from 'uuid'
-import { toBaileysJid } from './transformer'
+import { toBaileysJid, isIndividualJid } from './transformer'
 const counts: Map<string, number> = new Map()
 const connectings: Map<string, number> = new Map()
 const max = 6
@@ -40,8 +40,13 @@ const onQrCode = async (client: Client, qrCode: string) => {
   return true
 }
 
-export const connect = async ({ store, client }: { store: store; client: Client }): Promise<WASocket> => {
-  const { state, saveCreds } = await store(client.phone)
+export declare type Connection = {
+  sock: WASocket
+  dataStore: DataStore
+}
+
+export const connect = async ({ store, client }: { store: store; client: Client }): Promise<Connection> => {
+  const { state, saveCreds, dataStore } = await store(client.phone)
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
@@ -49,8 +54,18 @@ export const connect = async ({ store, client }: { store: store; client: Client 
   }
   const sock = await makeWASocket(config)
   sock.ev.on('creds.update', saveCreds)
+  dataStore.bind(sock.ev)
   const listener = (messages: any[]) => client.receive(messages)
-  sock.ev.on('messages.upsert', (payload: any) => listener(payload.messages))
+  sock.ev.on('messages.upsert', async (payload: any) => {
+    const messages = payload.messages.map(async (m: any) => {
+      const { key: remoteJid } = m
+      if (!isIndividualJid(remoteJid)) {
+        m.groupMetadata = await dataStore.fetchGroupMetadata(remoteJid, sock)
+      }
+      return m
+    })
+    listener(messages)
+  })
   sock.ev.on('messages.update', listener)
   sock.ev.on('message-receipt.update', listener)
   sock.ev.on('messages.delete', (update: any) => {
@@ -60,7 +75,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
     })
     listener(payload)
   })
-  return new Promise<WASocket>((resolve, reject) => {
+  return new Promise<Connection>((resolve, reject) => {
     return sock.ev.on('connection.update', async (update: any) => {
       const { connection, lastDisconnect } = update
       if (connection === 'close') {
@@ -73,7 +88,11 @@ export const connect = async ({ store, client }: { store: store; client: Client 
       } else if (connection === 'open') {
         const message = `Connnected!`
         await client.sendStatus(message)
-        return resolve(sock)
+        const connection: Connection = {
+          sock: sock,
+          dataStore: dataStore,
+        }
+        return resolve(connection)
       } else if (update.qr) {
         if (!(await onQrCode(client, update.qr))) {
           const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
