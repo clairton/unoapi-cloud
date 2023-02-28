@@ -1,9 +1,9 @@
 {
   "exclude": ["./coverage", "./dist", "__tests__", "jest.config.js"],
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": ["esnext"],
     "allowJs": true,
     "outDir": "./dist",
     "rootDir": "./src",

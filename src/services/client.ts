@@ -7,8 +7,8 @@ import { v1 as uuid } from 'uuid'
 
 export class Client {
   public phone: string
-  private store: store // Store
-  private sock: WASocket | undefined // WASocket
+  private store: store
+  private sock: WASocket | undefined
   private outgoing: Outgoing
 
   constructor(phone: string, store: store, outgoing: Outgoing) {
@@ -18,7 +18,7 @@ export class Client {
   }
 
   async connect() {
-    this.sock = await connect(this.store, this)
+    this.sock = await connect({ store: this.store, client: this })
   }
 
   async sendStatus(text: string) {

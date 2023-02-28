@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, BaileysEventEmitter, UserFacingSocketConfig } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
 import { store } from './store'
@@ -8,7 +8,7 @@ const counts: Map<string, number> = new Map()
 const connectings: Map<string, number> = new Map()
 const max = 6
 
-const onQrCode = async (client: Client, qrCode: any) => {
+const onQrCode = async (client: Client, qrCode: string) => {
   counts.set(client.phone, (counts.get(client.phone) || 0) + 1)
   console.debug(`Received qrcode ${qrCode}`)
   const messageTimestamp = new Date().getTime()
@@ -25,7 +25,7 @@ const onQrCode = async (client: Client, qrCode: any) => {
         fileName: `qrcode-unoapi-${messageTimestamp}.png`,
         mediaKey,
         fileLength: qrCode.length,
-        caption: `Leia o QR Code para conectar ao Whatsapp Web, tentativa ${counts.get(client.phone)} de ${max}`,
+        caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(client.phone)} of ${max}`,
       },
     },
     messageTimestamp,
@@ -38,15 +38,14 @@ const onQrCode = async (client: Client, qrCode: any) => {
   return true
 }
 
-export async function connect(store: store, client: Client): Promise<WASocket> {
+export const connect = async ({ store, client }: { store: store; client: Client }) => {
   const { state, saveCreds } = await store()
   const config: UserFacingSocketConfig = {
-    // can provide additional config here
     printQRInTerminal: true,
     auth: state,
     shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
   }
-  const sock: WASocket = makeWASocket(config)
+  const sock = await makeWASocket(config)
   sock.ev.on('creds.update', saveCreds)
   const listener = (messages: any[]) => client.receive(messages)
   sock.ev.on('messages.upsert', (payload: any) => listener(payload.messages))
@@ -67,7 +66,7 @@ export async function connect(store: store, client: Client): Promise<WASocket> {
         console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
         // reconnect if not logged out
         if (shouldReconnect) {
-          return connect(store, client)
+          return connect({ store, client })
         }
       } else if (connection === 'open') {
         return resolve(sock)
@@ -76,9 +75,10 @@ export async function connect(store: store, client: Client): Promise<WASocket> {
           const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
           events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
           await sock?.ws?.close()
+          await sock?.logout()
           const message = `The ${max} times of generate qrcide is exceded!`
           await client.sendStatus(message)
-          return reject(message) // @TODO
+          return reject(message)
         }
       }
     })
