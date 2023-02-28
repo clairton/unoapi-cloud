@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, BaileysEventEmitter, UserFacingSocketConfig } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
 import { store } from './store'
@@ -13,24 +13,27 @@ const onQrCode = async (client: Client, qrCode: string) => {
   console.debug(`Received qrcode ${qrCode}`)
   const messageTimestamp = new Date().getTime()
   const mediaKey = uuid()
-  await client.send({
-    key: {
-      remoteJid: toBaileysJid(client.phone),
-      id: mediaKey,
-    },
-    message: {
-      imageMessage: {
-        url: qrCode,
-        mimetype: 'image/png',
-        fileName: `qrcode-unoapi-${messageTimestamp}.png`,
-        mediaKey,
-        fileLength: qrCode.length,
-        caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(client.phone)} of ${max}`,
+  await client.receive([
+    {
+      key: {
+        remoteJid: toBaileysJid(client.phone),
+        id: mediaKey,
       },
+      message: {
+        imageMessage: {
+          url: qrCode,
+          mimetype: 'image/png',
+          fileName: `qrcode-unoapi-${messageTimestamp}.png`,
+          mediaKey,
+          fileLength: qrCode.length,
+          caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(client.phone)} of ${max}`,
+        },
+      },
+      messageTimestamp,
     },
-    messageTimestamp,
-  })
-  if (counts.get(client.phone) || 0 >= max) {
+  ])
+  console.log('counts.get(client.phone)', counts.get(client.phone))
+  if ((counts.get(client.phone) || 0) >= max) {
     counts.delete(client.phone)
     connectings.delete(client.phone)
     return false
@@ -38,8 +41,8 @@ const onQrCode = async (client: Client, qrCode: string) => {
   return true
 }
 
-export const connect = async ({ store, client }: { store: store; client: Client }) => {
-  const { state, saveCreds } = await store()
+export const connect = async ({ store, client }: { store: store; client: Client }): Promise<WASocket> => {
+  const { state, saveCreds } = await store(client.phone)
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
@@ -59,7 +62,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
     listener(payload)
   })
   return new Promise<WASocket>((resolve, reject) => {
-    sock.ev.on('connection.update', async (update: any) => {
+    return sock.ev.on('connection.update', async (update: any) => {
       const { connection, lastDisconnect } = update
       if (connection === 'close') {
         const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
@@ -69,6 +72,8 @@ export const connect = async ({ store, client }: { store: store; client: Client 
           return connect({ store, client })
         }
       } else if (connection === 'open') {
+        const message = `Connnected!`
+        await client.sendStatus(message)
         return resolve(sock)
       } else if (update.qr) {
         if (!(await onQrCode(client, update.qr))) {
@@ -76,10 +81,15 @@ export const connect = async ({ store, client }: { store: store; client: Client 
           events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
           await sock?.ws?.close()
           await sock?.logout()
-          const message = `The ${max} times of generate qrcide is exceded!`
+          const message = `The ${max} times of generate qrcode is exceded!`
           await client.sendStatus(message)
           return reject(message)
         }
+      } else if (connection === 'connecting') {
+        const message = `Connnecting...`
+        await client.sendStatus(message)
+      } else {
+        console.debug('connection.update', update)
       }
     })
   })

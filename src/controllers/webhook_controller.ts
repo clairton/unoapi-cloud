@@ -5,7 +5,7 @@ class WebwookController {
     console.debug('webhook headers', req.headers)
     console.debug('webhook params', req.params)
     console.debug('webhook body', JSON.stringify(req.body))
-    res.status(200).send(`Success received ${req.params.phone}`)
+    res.status(200).send(`{"success": true}`)
   }
 }
 

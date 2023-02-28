@@ -6,48 +6,6 @@ The media files are saved in file system at folder data with the session.
 
 Up service for development `docker compose up`
 
-## Create/Update connection
-
-Connect with number 5549988290955
-
-```sh
-curl --request POST \
---location 'http://localhost:9876/v15.0/5549988290955/register' \
---header 'Content-Type: application/json' \
---data-raw '{
-  "webhook_header": "Authorization",
-  "webhook_url": "http://localhost:9876/webhooks/whatsapp",
-  "webhook_token": "M8pidiAbiSkuD3XJ8oYkP9SL"
-}'
-```
-
-## Get current config
-
-```sh
-curl --request POST \
---location 'http://localhost:9876/v15.0/5549988290955/config'
-```
-
-## To deregister
-
-```ssh
-curl --request POST \
---location 'http://localhost:9876/v15.0/5549988290955/deregister' \
---header 'Content-Type: application/json' \
---header 'Authorization: Bearer 123abc'
-```
-
-## Available Connection params:
-
-```json
-{
-  webhook_url: url to post messages received
-  webhook_header: header do authentication post messages received
-  webhook_token: token do authentication post messages received
-  auto_connect: auto connect whatsapp on start, default is true
-}
-```
-
 ## Send a Message
 
 The payload is based on `https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object`

@@ -1,5 +1,5 @@
 import express, { Application } from 'express'
-
+import morgan from 'morgan'
 import { router } from './router'
 import { Incoming } from './services/incoming'
 
@@ -10,6 +10,7 @@ export class App {
     this.server = express()
     this.middleware()
     this.router(service)
+    this.server.use(morgan('combined'))
   }
 
   private middleware() {

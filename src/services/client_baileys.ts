@@ -35,10 +35,39 @@ export class ClientBaileys implements Client {
   }
 
   async send(payload: any) {
-    if (!this.sock) {
-      throw `Connect first calling connect`
-    }
     const { status, type, to } = payload
+    if (!this.sock) {
+      const message = 'Please, read the QRCode!'
+      await this.sendStatus(message)
+      const id = uuid()
+      return {
+        messaging_product: 'whatsapp',
+        contacts: [
+          {
+            wa_id: to,
+          },
+        ],
+        messages: [
+          {
+            id,
+          },
+        ],
+        statuses: [
+          {
+            id,
+            recipient_id: to,
+            status: 'failed',
+            timestamp: Math.floor(Date.now() / 1000),
+            errors: [
+              {
+                code: 1,
+                title: message,
+              },
+            ],
+          },
+        ],
+      }
+    }
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
         if (status == 'read') {

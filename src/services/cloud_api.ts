@@ -18,12 +18,15 @@ export class CloudApi implements Outgoing {
   }
 
   public async sendOne(phone: string, message: any) {
-    const body = fromBaileysMessageContent(phone, message)
+    const data = fromBaileysMessageContent(phone, message)
+    const body = JSON.stringify(data)
     const headers = {
-      'Content-Type': 'application/json; utf8',
+      'Content-Type': 'application/json; charset=utf-8',
       [this.header]: this.token,
     }
-    const response: Response = await fetch(this.url, { method: 'POST', body, headers })
+    const url = `${this.url}/${phone}`
+    console.debug(`Send url ${url} with headers %s and body %s`, headers, body)
+    const response: Response = await fetch(url, { method: 'POST', body, headers })
     if (response.ok) {
       return response.json()
     }
