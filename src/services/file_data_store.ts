@@ -11,29 +11,30 @@ import {
 } from '@adiwajshing/baileys'
 import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
+import { existsSync, mkdirSync } from 'fs'
 import { DataStore } from './data_store'
+import mime from 'mime-types'
 
 const MEDIA_DIR = './data/files'
 
-export const getFileName = async (waMessage: proto.IWebMessageInfo) => {
+export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
   const { message, key } = waMessage
   if (message) {
     const mediaMessage = getMediaValue(message)
     if (mediaMessage?.mimetype) {
-      const contentType = mediaMessage?.mimetype.split(';')[0]
-      const extension = contentType.split('/')[1]
-      return `${key.id}.${extension}`
+      const extension = mime.extension(mediaMessage?.mimetype)
+      return `${phone}/${key.id}.${extension}`
     }
   }
   throw 'Not possible get file name'
 }
 
-const getFilePatByMessage = async (phone: string, waMessage: proto.IWebMessageInfo) => {
-  return getFilePath(phone, await getFileName(waMessage))
+const getFilePatByMessage = (phone: string, waMessage: proto.IWebMessageInfo) => {
+  return getFilePath(getFileName(phone, waMessage))
 }
 
-export const getFilePath = async (phone: string, fileName: string) => {
-  return `${MEDIA_DIR}/${phone}/${fileName}`
+export const getFilePath = (fileName: string) => {
+  return `${MEDIA_DIR}/${fileName}`
 }
 
 type MessageUpdate = {
@@ -66,6 +67,11 @@ const saveMedia = async (phone: string, waMessage: proto.IWebMessageInfo) => {
   if (TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
     const buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     const filePath = await getFilePatByMessage(phone, waMessage)
+    const parts = filePath.split('/')
+    const dir: string = parts.splice(0, parts.length - 1).join('/')
+    if (!existsSync(dir)) {
+      mkdirSync(dir)
+    }
     await writeFile(filePath, buffer)
   }
 }

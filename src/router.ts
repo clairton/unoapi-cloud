@@ -13,13 +13,13 @@ export const router = (service: Incoming, baseUrl: string, getDataStore: getData
   const messages = messagesController.index.bind(messagesController)
   const mediaController = new MediaController(baseUrl, getDataStore)
   const index = mediaController.index.bind(mediaController)
-  const media = mediaController.media.bind(mediaController)
+  const download = mediaController.download.bind(mediaController)
 
   //Routes
   router.get('/ping', indexController.ping)
   router.post('/:version/:phone/messages', messages)
   router.get('/:version/:phone/:media_id', index)
-  router.get('/:version/:phone/:media_id.{:extension}', media)
+  router.get('/:version/download/:phone/:file', download)
 
   // Webhook for tests
   router.post('/webhooks/whatsapp/:phone', webhookController.whatsapp)
