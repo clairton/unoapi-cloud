@@ -7,7 +7,7 @@ import {
   jidToPhoneNumber,
   phoneNumberToJid,
   fromBaileysMessageContent,
-  toBaileysMessageContent
+  toBaileysMessageContent,
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
@@ -236,7 +236,7 @@ describe('service transformer', () => {
                     audio: {
                       caption: text,
                       mime_type: mimetype,
-                      id,
+                      id: `${phoneNumer}/${id}`,
                       sha256: fileSha256,
                     },
                     type: 'audio',

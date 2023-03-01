@@ -200,7 +200,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       case 'stickerMessage':
       case 'documentMessage':
         const mediaType = messageType.replace('Message', '')
-        const mediaKey = whatsappMessageId
+        const mediaKey = `${phone}/${whatsappMessageId}`
         const mimetype = binMessage.mimetype.split(';')[0]
         message[mediaType] = {
           caption: binMessage.caption,

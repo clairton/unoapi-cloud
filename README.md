@@ -1,6 +1,8 @@
 # Baileys Cloud API [WIP]
 
-An implementation of Baileys(`https://github.com/adiwajshing/Baileys`) as RESTful API service with multi device support with a Whatsapp Cloud API format `https://developers.facebook.com/docs/whatsapp/cloud-api`.
+An implementation of Baileys(`https://github.com/adiwajshing/Baileys`) as
+RESTful API service with multi device support with a Whatsapp Cloud API format
+`https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
 The media files are saved in file system at folder data with the session.
 
@@ -8,7 +10,8 @@ Up service for development `docker compose up`
 
 ## Send a Message
 
-The payload is based on `https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object`
+The payload is based on
+`https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages-object`
 
 To send a message
 
@@ -62,7 +65,6 @@ http://locahost:9876/download/v13/5549988290955/5549988290955@s.whatsapp.net/48e
 
 To send media
 
-
 `https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages#media-messages`
 
 ```sh
@@ -81,11 +83,15 @@ http://localhost:9876/v15.0/5549988290955/messages \
 
 ## Webhook Events
 
-Webhook Events like this https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples
+Webhook Events like this
+https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples
 
-Message status update on this https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#message-status-updates
+Message status update on this
+https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#message-status-updates
 
-To turn possible work with group, we add two fields(group_id, group_subject) in message beside cloud api format.
+To turn possible work with group, we add two fields(group_id, group_subject) in
+message beside cloud api format.
+
 ```json
 {
   "object": "whatsapp_business_account",
@@ -122,25 +128,32 @@ To turn possible work with group, we add two fields(group_id, group_subject) in 
 }
 ```
 
-
 ## Error Messages
 
-Messages failed with this `https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#status--message-failed`
+Messages failed with this
+`https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#status--message-failed`
 
-Custom errors sound append this codes `https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes` with:
+Custom errors sound append this codes
+`https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes`
+with:
 
-* 100 - o numero não tem whatsapp
-* 10 - invalid token
-* 0 - message invalida para conexão
-* 2 - whatsapp web desconectado, precisa ler o qrcode para autorizar
-* 1 - quantidade de geração de qrcode ultrapassou o limite
+- 100 - o numero não tem whatsapp
+- 10 - invalid token
+- 0 - message invalida para conexão
+- 2 - whatsapp web desconectado, precisa ler o qrcode para autorizar
+- 1 - quantidade de geração de qrcode ultrapassou o limite
 
 ## Environment Variables
 
-The ENV Configurations put default value and the format and same name of configs with prefix UNOAPI:
+The ENV Configurations put default value and the format and same name of configs
+with prefix UNOAPI:
 
 ```env
-CONNECTION_TIMEOUT: the timeout baileys whatsapp connection
+CONNECTION_TIMEOUT=the timeout baileys whatsapp connection
+WEBHOOK_URL=the webhook url
+WEBHOOK_TOKEN=the webhook header token
+WEBHOOK_HEADER=the webhook header name
+BASE_URL=current base url to download medias
 ```
 
 ## Recomended Resources
@@ -149,23 +162,29 @@ CONNECTION_TIMEOUT: the timeout baileys whatsapp connection
 
 ## Note
 
-I can't guarantee or can be held responsible if you get blocked or banned by using this software. WhatsApp does not allow bots using unofficial methods on their platform, so this shouldn't be considered totally safe.
+I can't guarantee or can be held responsible if you get blocked or banned by
+using this software. WhatsApp does not allow bots using unofficial methods on
+their platform, so this shouldn't be considered totally safe.
 
 ## Legal
 
--   This code is in no way affiliated, authorized, maintained, sponsored or endorsed by WA (WhatsApp) or any of its affiliates or subsidiaries.
--   The official WhatsApp website can be found at https://whatsapp.com. "WhatsApp" as well as related names, marks, emblems and images are registered trademarks of their respective owners.
--   This is an independent and unofficial software Use at your own risk.
--   Do not spam people with this.
+- This code is in no way affiliated, authorized, maintained, sponsored or
+  endorsed by WA (WhatsApp) or any of its affiliates or subsidiaries.
+- The official WhatsApp website can be found at https://whatsapp.com. "WhatsApp"
+  as well as related names, marks, emblems and images are registered trademarks
+  of their respective owners.
+- This is an independent and unofficial software Use at your own risk.
+- Do not spam people with this.
 
 ## Need More
 
-Comercial version is available: 
-  * read/recepeit
-  * queue and process messages
-  * persist session in database
-  * S3 upload medias
-  * admin dashboard
-  * vpn connect by number
-  
+Comercial version is available:
+
+- queue and process messages
+- persist session in database
+- persist contacts, groups and messages in database
+- S3 upload medias
+- admin dashboard
+- vpn connect by number
+
 More informations in http://wa.me/+5549988290955

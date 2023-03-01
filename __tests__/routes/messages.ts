@@ -2,6 +2,7 @@ import request from 'supertest'
 
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
+import { getFileDataStore } from '../../src/services/get_file_data_store'
 
 class DummyIncoming implements Incoming {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -13,7 +14,7 @@ class DummyIncoming implements Incoming {
 const phone = `${new Date().getTime()}`
 const json = { data: `${new Date().getTime()}` }
 const service: Incoming = new DummyIncoming()
-const app: App = new App(service)
+const app: App = new App(service, '', getFileDataStore)
 
 describe('messages routes', () => {
   test('whatsapp with sucess', async () => {
