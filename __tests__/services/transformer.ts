@@ -7,8 +7,7 @@ import {
   jidToPhoneNumber,
   phoneNumberToJid,
   fromBaileysMessageContent,
-  toBaileysMessageContent,
-  toBaileysMessageKey
+  toBaileysMessageContent
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
@@ -677,17 +676,5 @@ describe('service transformer', () => {
     } catch (e: any) {
       expect(e.message).toBe(`Unknow message type unknown`)
     }
-  })
-
-  test('toBaileysMessageKey valid', async () => {
-    const id = `wa.${new Date().getTime()}`
-    const input = {
-      message_id: id,
-    }
-    const output = {
-      fromMe: false,
-      id,
-    }
-    expect(toBaileysMessageKey(input)).toEqual(output)
   })
 })

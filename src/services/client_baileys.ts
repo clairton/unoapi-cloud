@@ -1,9 +1,10 @@
-import { AnyMessageContent, WAMessageKey, WASocket } from '@adiwajshing/baileys'
+import { AnyMessageContent, WAMessageKey, WASocket, proto } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
-import { store, DataStore } from './store'
+import { store } from './store'
+import { DataStore } from './data_store'
 import { connect } from './socket'
 import { Client } from './client'
-import { toBaileysMessageContent, toBaileysJid, toBaileysMessageKey, isIndividualJid } from './transformer'
+import { toBaileysMessageContent, toBaileysJid, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 
 export class ClientBaileys implements Client {
@@ -74,8 +75,10 @@ export class ClientBaileys implements Client {
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
         if (status == 'read') {
-          const key: WAMessageKey = toBaileysMessageKey(payload)
-          await this.sock?.readMessages([key])
+          const key = this.dataStore?.loadKey(payload?.key?.id)
+          if (key) {
+            await this.sock?.readMessages([key])
+          }
         }
         return { success: true }
       } else {

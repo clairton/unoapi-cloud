@@ -1,7 +1,8 @@
 import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
-import { store, DataStore } from './store'
+import { store } from './store'
+import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
 import { toBaileysJid, isIndividualJid } from './transformer'
 const counts: Map<string, number> = new Map()
@@ -53,8 +54,8 @@ export const connect = async ({ store, client }: { store: store; client: Client 
     shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
   }
   const sock = await makeWASocket(config)
-  sock.ev.on('creds.update', saveCreds)
   dataStore.bind(sock.ev)
+  sock.ev.on('creds.update', saveCreds)
   const listener = (messages: any[]) => client.receive(messages)
   sock.ev.on('messages.upsert', async (payload: any) => {
     const messages = payload.messages.map(async (m: any) => {

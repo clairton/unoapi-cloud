@@ -1,6 +1,5 @@
-import { AuthenticationState, makeInMemoryStore } from '@adiwajshing/baileys'
-
-export declare type DataStore = ReturnType<typeof makeInMemoryStore>
+import { AuthenticationState } from '@adiwajshing/baileys'
+import { DataStore } from './data_store'
 
 export interface store {
   (phone: string): Promise<{
