@@ -49,7 +49,7 @@ describe('media routes', () => {
       .get(`/v15.0/${phone}/${messageId}`)
       .expect(200, {
         messaging_product: 'whatsapp',
-        url: `${url}/v15.0/${phone}/${messageId}.${extension}`,
+        url: `${url}/v15.0/download/${phone}/${messageId}.${extension}`,
         file_name: `${phone}/${messageId}.${extension}`,
         mime_type: mimetype,
         id: `${phone}/${messageId}`,

@@ -51,7 +51,7 @@ To test media
 
 ```sh
 curl -i -X GET \
-http://localhost:9876/v15.0/989bdb10-a56e-11ed-bb2e-ed02e17cf778 \
+http://localhost:9876/v15.0/5549988290955/3EB005A626251D50D4E4 \
 -H 'Content-Type: application/json'
 ```
 

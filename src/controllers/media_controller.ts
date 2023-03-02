@@ -26,7 +26,7 @@ export class MediaController {
           if (message) {
             const fileName = await getFileName(phone, message)
             const mimeType = mime.lookup(fileName)
-            const url = `${this.baseUrl}/v15.0/${fileName}`
+            const url = `${this.baseUrl}/v15.0/download/${fileName}`
             const result = {
               messaging_product: 'whatsapp',
               url,

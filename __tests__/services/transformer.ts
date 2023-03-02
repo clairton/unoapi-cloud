@@ -5,15 +5,19 @@ import {
   isIndividualMessage,
   formatJid,
   jidToPhoneNumber,
-  phoneNumberToJid,
   fromBaileysMessageContent,
   toBaileysMessageContent,
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
-  test('phoneNumberToJid with phone number', async () => {
-    expect(phoneNumberToJid('+5549988290955')).toEqual('+5549988290955@s.whatsapp.net')
+  test('phoneNumberToJid with nine digit', async () => {
+    expect(phoneNumberToJid('+5549988290955')).toEqual('5549988290955@s.whatsapp.net')
   })
+
+  test('phoneNumberToJid', async () => {
+    expect(phoneNumberToJid('+554988290955')).toEqual('5549988290955@s.whatsapp.net')
+  })
+
   test('phoneNumberToJid with group jid', async () => {
     const jid = '123456789-123345@g.us'
     expect(phoneNumberToJid(jid)).toEqual(jid)
@@ -49,10 +53,6 @@ describe('service transformer', () => {
 
   test('jidToPhoneNumber without + and put 9˚ digit', async () => {
     expect(jidToPhoneNumber('+554988290955@s.whatsapp.net', '')).toEqual('5549988290955')
-  })
-
-  test('phoneNumberToJid', async () => {
-    expect(phoneNumberToJid('+554988290955')).toEqual('5549988290955@s.whatsapp.net')
   })
 
   test('fromBaileysMessageContent with messageContextInfo', async () => {
