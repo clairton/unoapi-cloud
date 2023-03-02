@@ -67,9 +67,22 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
   return response
 }
 
-export const toBaileysJid = (phone: string) => (phone.indexOf('@') >= 0 ? phone : `${phone}@s.whatsapp.net`)
+export const phoneNumberToJid = (phoneNumber: string) => {
+  if (phoneNumber.indexOf('@') >= 0) {
+    console.debug('%s already is jid', phoneNumber)
+    return phoneNumber
+  } else {
+    const jid = `${jidToPhoneNumber(phoneNumber, '')}@s.whatsapp.net`
+    console.debug('transform %s to %s', phoneNumber, jid)
+    return jid
+  }
+}
 
-export const isIndividualJid = (jid: any) => jid.indexOf('@s.whatsapp.net') >= 0
+export const isIndividualJid = (jid: string) => {
+  const isIndividual = jid.indexOf('@s.whatsapp.net') >= 0
+  console.debug('jid %s is individual? %s', jid, isIndividual)
+  return isIndividual
+}
 
 export const isIndividualMessage = (payload: any) => {
   const {
@@ -103,10 +116,6 @@ export const jidToPhoneNumber = (id: any, plus = '+'): string => {
   }
 }
 
-export const phoneNumberToJid = (phoneNumber: string) => {
-  return `${jidToPhoneNumber(phoneNumber, '')}@s.whatsapp.net`
-}
-
 /*
 {
   "object": "whatsapp_business_account",
@@ -133,6 +142,7 @@ export const phoneNumberToJid = (phoneNumber: string) => {
 */
 export const fromBaileysMessageContent = (phone: string, payload: any): any => {
   try {
+    console.debug(`fromBaileysMessageContent %s`, JSON.stringify(payload))
     const {
       key: { remoteJid, id: whatsappMessageId, participant, fromMe },
     } = payload

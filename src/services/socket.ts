@@ -4,7 +4,7 @@ import { Client } from './client'
 import { store } from './store'
 import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
-import { toBaileysJid, isIndividualJid } from './transformer'
+import { phoneNumberToJid, isIndividualJid } from './transformer'
 const counts: Map<string, number> = new Map()
 const connectings: Map<string, number> = new Map()
 const max = 6
@@ -17,7 +17,7 @@ const onQrCode = async (client: Client, qrCode: string) => {
   await client.receive([
     {
       key: {
-        remoteJid: toBaileysJid(client.phone),
+        remoteJid: phoneNumberToJid(client.phone),
         id: mediaKey,
       },
       message: {
@@ -58,13 +58,15 @@ export const connect = async ({ store, client }: { store: store; client: Client 
   sock.ev.on('creds.update', saveCreds)
   const listener = (messages: any[]) => client.receive(messages)
   sock.ev.on('messages.upsert', async (payload: any) => {
-    const messages = payload.messages.map(async (m: any) => {
-      const { key: remoteJid } = m
-      if (!isIndividualJid(remoteJid)) {
-        m.groupMetadata = await dataStore.fetchGroupMetadata(remoteJid, sock)
-      }
-      return m
-    })
+    const messages = await Promise.all(
+      payload.messages.map(async (m: any) => {
+        const { key } = m
+        if (!isIndividualJid(key.remoteJid)) {
+          m.groupMetadata = await dataStore.fetchGroupMetadata(key.remoteJid, sock)
+        }
+        return m
+      }),
+    )
     listener(messages)
   })
   sock.ev.on('messages.update', listener)

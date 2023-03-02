@@ -1,5 +1,5 @@
 import {
-  toBaileysJid,
+  phoneNumberToJid,
   getMessageType,
   isIndividualJid,
   isIndividualMessage,
@@ -11,12 +11,12 @@ import {
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
-  test('toBaileysJid with phone number', async () => {
-    expect(toBaileysJid('+5549988290955')).toEqual('+5549988290955@s.whatsapp.net')
+  test('phoneNumberToJid with phone number', async () => {
+    expect(phoneNumberToJid('+5549988290955')).toEqual('+5549988290955@s.whatsapp.net')
   })
-  test('toBaileysJid with group jid', async () => {
+  test('phoneNumberToJid with group jid', async () => {
     const jid = '123456789-123345@g.us'
-    expect(toBaileysJid(jid)).toEqual(jid)
+    expect(phoneNumberToJid(jid)).toEqual(jid)
   })
 
   test('getMessageType with conversation', async () => {
@@ -619,6 +619,31 @@ describe('service transformer', () => {
       ],
     }
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
+  test('getMessageType with viewOnceMessage', async () => {
+    const input = {
+      key: {
+        remoteJid: '554988290955@s.whatsapp.net',
+        fromMe: true,
+        id: '3AB1588C3CED95961092',
+        participant: undefined,
+      },
+      messageTimestamp: 1677774582,
+      pushName: 'Clairton Rodrigo Heinzen',
+      status: 2,
+      message: {
+        protocolMessage: {
+          type: 5,
+          historySyncNotification: [],
+        },
+        messageContextInfo: {
+          deviceListMetadata: [],
+          deviceListMetadataVersion: 2,
+        },
+      },
+    }
+    expect(getMessageType(input)).toEqual('protocolMessage')
   })
 
   test('getMessageType with viewOnceMessage', async () => {

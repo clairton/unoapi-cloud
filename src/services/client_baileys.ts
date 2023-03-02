@@ -4,7 +4,7 @@ import { store } from './store'
 import { DataStore } from './data_store'
 import { connect } from './socket'
 import { Client } from './client'
-import { toBaileysMessageContent, toBaileysJid, isIndividualJid } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 
 export class ClientBaileys implements Client {
@@ -27,7 +27,7 @@ export class ClientBaileys implements Client {
   async sendStatus(text: string) {
     const payload = {
       key: {
-        remoteJid: toBaileysJid(this.phone),
+        remoteJid: phoneNumberToJid(this.phone),
         id: uuid(),
       },
       message: {
@@ -146,7 +146,7 @@ export class ClientBaileys implements Client {
   }
 
   private async toJid(phoneNumber: string) {
-    const bindJid: string = toBaileysJid(phoneNumber)
+    const bindJid: string = phoneNumberToJid(phoneNumber)
     if (isIndividualJid(bindJid)) {
       const results = await this.sock?.onWhatsApp(bindJid)
       const result = results && results[0]

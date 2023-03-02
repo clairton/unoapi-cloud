@@ -10,6 +10,5 @@ ADD ./tsconfig.json ./tsconfig.json
 ADD ./yarn.lock ./yarn.lock
 
 RUN yarn
-RUN yarn build
 
-ENTRYPOINT yarn start
+ENTRYPOINT yarn dev
