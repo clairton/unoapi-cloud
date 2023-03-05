@@ -2,6 +2,7 @@ import { AnyMessageContent } from '@adiwajshing/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
+import template from '../services/template'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
 
@@ -56,13 +57,9 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       response[type] = { url }
       break
 
-    /*
     case 'template':
-      const valuesTemplate = payload?.template
-      const bindTemplate = await getTemplate(phone, valuesTemplate?.name)
-      response.text = bindTemplate?.components[0]?.text
+      response.text = template?.components[0]?.text
       break
-    */
 
     default:
       throw new Error(`Unknow message type ${type}`)

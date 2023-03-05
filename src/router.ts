@@ -2,6 +2,7 @@ import { Router } from 'express'
 
 import { indexController } from './controllers/index_controller'
 import { webhookController } from './controllers/webhook_controller'
+import { templatesController } from './controllers/templates_controller'
 import { MessagesController } from './controllers/messages_controller'
 import { MediaController } from './controllers/media_controller'
 import { Incoming } from './services/incoming'
@@ -17,6 +18,7 @@ export const router = (service: Incoming, baseUrl: string, getDataStore: getData
 
   //Routes
   router.get('/ping', indexController.ping)
+  router.get('/:version/:phone/message_templates', templatesController.index)
   router.post('/:version/:phone/messages', messages)
   router.get('/:version/:phone/:media_id', index)
   router.get('/:version/download/:phone/:file', download)
