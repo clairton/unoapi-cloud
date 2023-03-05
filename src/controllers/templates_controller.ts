@@ -5,7 +5,7 @@ import template from '../services/template'
 
 class TemplatesController {
   public async index(_req: Request, res: Response) {
-    return res.status(200).json([template])
+    return res.status(200).json({ data: [template] })
   }
 }
 
