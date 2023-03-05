@@ -25,6 +25,7 @@
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.1",
     "@types/vcf": "^2.0.3",
+    "@types/ws": "^8.5.4",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
     "eslint": "^8.34.0",
