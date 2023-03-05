@@ -187,7 +187,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
               name: profileName,
             },
             ...groupMetadata,
-            wa_id: senderPhone,
+            wa_id: senderPhone.replace('+', ''),
           },
         ],
         statuses,

@@ -49,7 +49,7 @@ export class ClientBaileys implements Client {
         messaging_product: 'whatsapp',
         contacts: [
           {
-            wa_id: to,
+            wa_id: to.replace('+', ''),
           },
         ],
         messages: [
@@ -94,7 +94,7 @@ export class ClientBaileys implements Client {
             messaging_product: 'whatsapp',
             contacts: [
               {
-                wa_id: to,
+                wa_id: to.replace('+', ''),
               },
             ],
             messages: [
@@ -126,7 +126,7 @@ export class ClientBaileys implements Client {
             messaging_product: 'whatsapp',
             contacts: [
               {
-                wa_id: to,
+                wa_id: to.replace('+', ''),
               },
             ],
             messages: [
