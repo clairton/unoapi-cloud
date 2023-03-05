@@ -137,28 +137,21 @@ Custom errors sound append this codes
 `https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes`
 with:
 
-- 100 - o numero não tem whatsapp
-- 10 - invalid token
-- 0 - message invalida para conexão
-- 2 - whatsapp web desconectado, precisa ler o qrcode para autorizar
-- 1 - quantidade de geração de qrcode ultrapassou o limite
+* 1 - unknown erro, verify logs for error details
+* 2 - the receipt number not has whatsapp account
+* 3 - disconnect number, please read qr code
+* 4 - Unknown baileys status
 
 ## Environment Variables
 
-The ENV Configurations put default value and the format and same name of configs
-with prefix UNOAPI:
+The ENV Configurations put default value and the format and same name of configs:
 
 ```env
-CONNECTION_TIMEOUT=the timeout baileys whatsapp connection
 WEBHOOK_URL=the webhook url
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 BASE_URL=current base url to download medias
 ```
-
-## Recomended Resources
-
-30 mb of memory by whatsapp number connection
 
 ## Note
 
@@ -183,7 +176,8 @@ Comercial version is available:
 - queue and process messages
 - persist session in database
 - persist contacts, groups and messages in database
-- S3 upload medias
+- save medias in S3 compatible
+- manage templates
 - admin dashboard
 - vpn connect by number
 

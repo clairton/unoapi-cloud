@@ -65,7 +65,7 @@ export class ClientBaileys implements Client {
             timestamp: Math.floor(Date.now() / 1000),
             errors: [
               {
-                code: 1,
+                code: 3,
                 title: message,
               },
             ],

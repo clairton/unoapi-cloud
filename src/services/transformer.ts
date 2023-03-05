@@ -349,7 +349,13 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
               // starred in unknown, but if is starred the userd read the message
               cloudApiStatus = 'read'
             } else {
-              throw new Error(`Unknown baileys status type ${baileysStatus}`)
+              cloudApiStatus = 'failed'
+              payload = {
+                update: {
+                  error: 4,
+                  title: `Unknown baileys status type ${baileysStatus}`,
+                },
+              }
             }
         }
         break
@@ -361,7 +367,13 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         return
 
       default:
-        throw new Error(`Unknown baileys status type ${baileysStatus}`)
+        cloudApiStatus = 'failed'
+        payload = {
+          update: {
+            error: 4,
+            title: `Unknown baileys status type ${baileysStatus}`,
+          },
+        }
     }
     // const repository = await getRepository(this.phone, this.config)
     if (cloudApiStatus) {
