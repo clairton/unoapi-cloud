@@ -1,4 +1,4 @@
 export interface Outgoing {
-  sendMany(phone: string, messages: any[]): Promise<any>
-  sendOne(phone: string, message: any): Promise<any>
+  sendMany(phone: string, messages: object[]): Promise<void>
+  sendOne(phone: string, message: object): Promise<void>
 }

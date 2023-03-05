@@ -7,7 +7,8 @@ export interface Client {
 
   sendStatus(text: string): Promise<void>
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any): Promise<any>
 
-  receive(messages: object[]): Promise<object>
+  receive(messages: object[]): Promise<void>
 }

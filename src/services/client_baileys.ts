@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessageKey, WASocket, proto } from '@adiwajshing/baileys'
+import { AnyMessageContent, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { store } from './store'
 import { DataStore } from './data_store'
@@ -38,6 +38,7 @@ export class ClientBaileys implements Client {
     return this.outgoing.sendOne(this.phone, payload)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async send(payload: any) {
     const { status, type, to } = payload
     if (!this.sock) {

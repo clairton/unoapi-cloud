@@ -8,8 +8,8 @@ describe('index routes', () => {
   test('ping', async () => {
     const service: Incoming = {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      send(_phone, _payload) {
-        return true
+      async send(_phone: string, _payload: object) {
+        return {}
       },
     }
     const app: App = new App(service, '', getFileDataStore)

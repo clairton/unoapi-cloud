@@ -2,7 +2,7 @@ import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
 import { fromBaileysMessageContent } from './transformer'
 
-export class CloudApi implements Outgoing {
+export class OutgoingCloudApi implements Outgoing {
   private url: string
   private token: string
   private header: string
@@ -13,11 +13,11 @@ export class CloudApi implements Outgoing {
     this.header = header
   }
 
-  public async sendMany(phone: string, messages: any[]) {
-    return Promise.all(messages.map((m: any) => this.sendOne(phone, m)))
+  public async sendMany(phone: string, messages: object[]) {
+    await Promise.all(messages.map((m: object) => this.sendOne(phone, m)))
   }
 
-  public async sendOne(phone: string, message: any) {
+  public async sendOne(phone: string, message: object) {
     const data = fromBaileysMessageContent(phone, message)
     const body = JSON.stringify(data)
     const headers = {

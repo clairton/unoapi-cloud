@@ -76,7 +76,7 @@ const saveMedia = async (phone: string, waMessage: proto.IWebMessageInfo) => {
   }
 }
 
-export const fileDataStore = (phone: string, config: any) => {
+export const fileDataStore = (phone: string, config: object) => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const store = makeInMemoryStore(config)
   const { bind, toJSON, fromJSON } = store

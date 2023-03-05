@@ -25,6 +25,7 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'messageContextInfo',
 ]
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getMessageType = (payload: any) => {
   if (payload.update) {
     return 'update'
@@ -35,8 +36,10 @@ export const getMessageType = (payload: any) => {
   return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
   const { type } = payload
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response: any = {}
   switch (type) {
     case 'text':
@@ -84,6 +87,7 @@ export const isIndividualJid = (jid: string) => {
   return isIndividual
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isIndividualMessage = (payload: any) => {
   const {
     key: { remoteJid },
@@ -96,6 +100,7 @@ export const formatJid = (jid: string) => {
   return `${jidSplit[0].split(':')[0]}@${jidSplit[1]}`
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (id: any, plus = '+'): string => {
   const number = (id || '').split('@')[0].split(':')[0].replace('+', '')
   const country = number.substring(0, 2)
@@ -140,6 +145,7 @@ export const jidToPhoneNumber = (id: any, plus = '+'): string => {
   }]
 }
 */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fromBaileysMessageContent = (phone: string, payload: any): any => {
   try {
     console.debug(`fromBaileysMessageContent %s`, JSON.stringify(payload))
@@ -160,12 +166,15 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     }
     let cloudApiStatus
     let messageTimestamp = payload.messageTimestamp
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupMetadata: any = {}
     if (payload.groupMetadata) {
       groupMetadata.group_subject = payload.groupMetadata.subject
       groupMetadata.group_id = chatJid
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statuses: any[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messages: any[] = []
     const change = {
       value: {
@@ -198,6 +207,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         },
       ],
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const message: any = {
       from: phone.replace('+', ''),
       id: whatsappMessageId,
@@ -227,6 +237,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       case 'contactMessage':
       case 'contactsArrayMessage':
         // {"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3EB03CDCC2A5D40DEFED"},"messageTimestamp":1676629371,"pushName":"Clairton Rodrigo Heinzen","message":{"contactsArrayMessage":{"contacts":[{"displayName":"Adapta","vcard":"BEGIN:VCARD\nVERSION:3.0\nN:;Adapta;;;\nFN:Adapta\nTEL;type=CELL;waid=554988333030:+55 49 8833-3030\nEND:VCARD"},{"displayName":"Silvia Castagna Heinzen","vcard":"BEGIN:VCARD\nVERSION:3.0\nN:Castagna Heinzen;Silvia;;;\nFN:Silvia Castagna Heinzen\nTEL;type=CELL;waid=554999621461:+55 49 9962-1461\nEND:VCARD"}],"contextInfo":{"disappearingMode":{"initiator":"CHANGED_IN_CHAT"}}},"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"DSu3J5WUK+vicA==","senderTimestamp":"1676571145","recipientKeyHash":"tz8qTGvqyPjOUw==","recipientTimestamp":"1666725555"},"deviceListMetadataVersion":2}}}}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const vcards = messageType == 'contactMessage' ? [binMessage.vcard] : binMessage.contacts.map((c: any) => c.vcard)
         const contacts = []
         for (let i = 0; i < vcards.length; i++) {
@@ -358,6 +369,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     // const repository = await getRepository(this.phone, this.config)
     if (cloudApiStatus) {
       const messageId = whatsappMessageId
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const state: any = {
         id: messageId,
         recipient_id: phone.replace('+', ''),

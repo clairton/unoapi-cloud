@@ -44,9 +44,9 @@ export class MessagesController {
 
   public async index(req: Request, res: Response) {
     const { phone } = req.params
-    const payload: unknown = req.body
+    const payload: object = req.body
     try {
-      const response: unknown = await this.service.send(phone, payload)
+      const response: object = await this.service.send(phone, payload)
       return res.status(200).json(response)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {

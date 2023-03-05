@@ -6,8 +6,8 @@ import { getFileDataStore } from '../../src/services/get_file_data_store'
 
 class DummyIncoming implements Incoming {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async send(_phone: unknown, _payload: unknown) {
-    return true
+  public async send(_phone: unknown, _payload: object) {
+    return {}
   }
 }
 

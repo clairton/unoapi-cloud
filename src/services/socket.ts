@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig, ConnectionState } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
 import { store } from './store'
@@ -56,9 +56,11 @@ export const connect = async ({ store, client }: { store: store; client: Client 
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)
   sock.ev.on('creds.update', saveCreds)
-  const listener = (messages: any[]) => client.receive(messages)
+  const listener = (messages: object[]) => client.receive(messages)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.upsert', async (payload: any) => {
     const messages = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       payload.messages.map(async (m: any) => {
         const { key } = m
         if (!isIndividualJid(key.remoteJid)) {
@@ -71,17 +73,19 @@ export const connect = async ({ store, client }: { store: store; client: Client 
   })
   sock.ev.on('messages.update', listener)
   sock.ev.on('message-receipt.update', listener)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.delete', (update: any) => {
     const keys = update.keys || []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = keys.map((key: any) => {
       return { key, update: { status: 'DELETED' } }
     })
     listener(payload)
   })
   return new Promise<Connection>((resolve, reject) => {
-    return sock.ev.on('connection.update', async (update: any) => {
+    return sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
       const { connection, lastDisconnect } = update
-      if (connection === 'close') {
+      if (connection === 'close' && lastDisconnect) {
         const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
         console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
         // reconnect if not logged out
@@ -99,6 +103,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
       } else if (update.qr) {
         if (!(await onQrCode(client, update.qr))) {
           const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
           await sock?.ws?.close()
           await sock?.logout()
