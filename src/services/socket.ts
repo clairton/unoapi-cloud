@@ -64,7 +64,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
       payload.messages.map(async (m: any) => {
         const { key } = m
         if (!isIndividualJid(key.remoteJid)) {
-          m.groupMetadata = await dataStore.fetchGroupMetadata(key.remoteJid, sock)
+          m.groupMetadata = dataStore.groupMetadata[key.remoteJid] || (await dataStore.fetchGroupMetadata(key.remoteJid, sock))
         }
         return m
       }),
