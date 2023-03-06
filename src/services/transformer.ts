@@ -224,12 +224,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           caption: binMessage.caption,
           mime_type: mimetype,
           sha256: binMessage.fileSha256,
+          url: binMessage.url,
           id: mediaKey,
         }
         message.type = mediaType
-        // const repository = await getRepository(this.phone, this.config)
-        // await setMediaOwner(mediaKey, JSON.stringify({ phoneNumber: this.phone, remoteJid: payload.key.remoteJid }))
-        // await repository.setMediaData(this.phone, payload, messageType)
         break
 
       case 'contactMessage':
