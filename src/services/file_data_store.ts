@@ -37,11 +37,6 @@ export const getFilePath = (fileName: string) => {
   return `${MEDIA_DIR}/${fileName}`
 }
 
-type MessageUpdate = {
-  messages: WAMessage[]
-  type: MessageUpsertType
-}
-
 function getMediaValue(
   message: proto.IMessage,
 ):
@@ -104,8 +99,8 @@ export const fileDataStore = (phone: string, config: object) => {
   }
   store.bind = async (ev: BaileysEventEmitter) => {
     await bind(ev)
-    ev.on('messages.upsert', async (messages: MessageUpdate) => {
-      for (const msg of messages.messages) {
+    ev.on('messages.upsert', async ({ messages }: { messages: WAMessage[]; type: MessageUpsertType }) => {
+      for (const msg of messages) {
         await saveMedia(phone, msg)
         const { key } = msg
         if (key.id) {
