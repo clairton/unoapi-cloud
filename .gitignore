@@ -3,5 +3,6 @@ node_modules/*
 dist/*
 yarn-error.log
 coverage/*
-data/files/*
+data/medias/*
+data/stores/*
 data/sessions/*

@@ -10,7 +10,7 @@ export const fileStore: store = async (phone) => {
   console.debug(`Store session in directory: ${sessionDir}`)
   const { state, saveCreds } = await useMultiFileAuthState(sessionDir)
   const data: DataStore = getFileDataStore(phone, {})
-  const dataFile = `./data/sessions/${phone}/store.json`
+  const dataFile = `./data/stores/${phone}.json`
   console.debug(`Store data in file: ${dataFile}`)
   data.readFromFile(dataFile)
   setInterval(() => {

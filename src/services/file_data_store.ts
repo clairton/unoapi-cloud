@@ -15,7 +15,7 @@ import { existsSync, mkdirSync } from 'fs'
 import { DataStore } from './data_store'
 import mime from 'mime-types'
 
-const MEDIA_DIR = './data/files'
+const MEDIA_DIR = './data/medias'
 
 export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
   const { message, key } = waMessage
