@@ -29,10 +29,6 @@ export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => 
   throw 'Not possible get file name'
 }
 
-const getFilePatByMessage = (phone: string, waMessage: proto.IWebMessageInfo) => {
-  return getFilePath(getFileName(phone, waMessage))
-}
-
 export const getFilePath = (fileName: string) => {
   return `${MEDIA_DIR}/${fileName}`
 }
@@ -57,11 +53,12 @@ function getMediaValue(
   )
 }
 
-const saveMedia = async (phone: string, waMessage: proto.IWebMessageInfo) => {
+const saveMedia = async (phone: string, waMessage: WAMessage) => {
   const messageType = getMessageType(waMessage)
   if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
     const buffer = await downloadMediaMessage(waMessage, 'buffer', {})
-    const filePath = await getFilePatByMessage(phone, waMessage)
+    const fileName = getFileName(phone, waMessage)
+    const filePath = getFilePath(fileName)
     const parts = filePath.split('/')
     const dir: string = parts.splice(0, parts.length - 1).join('/')
     if (!existsSync(dir)) {
@@ -71,7 +68,8 @@ const saveMedia = async (phone: string, waMessage: proto.IWebMessageInfo) => {
   }
 }
 
-export const fileDataStore = (phone: string, config: object) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const fileDataStore = (phone: string, config: any) => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const store = makeInMemoryStore(config)
   const { bind, toJSON, fromJSON } = store
@@ -101,7 +99,6 @@ export const fileDataStore = (phone: string, config: object) => {
     await bind(ev)
     ev.on('messages.upsert', async ({ messages }: { messages: WAMessage[]; type: MessageUpsertType }) => {
       for (const msg of messages) {
-        await saveMedia(phone, msg)
         const { key } = msg
         if (key.id) {
           keys.set(key.id, key)
@@ -110,11 +107,9 @@ export const fileDataStore = (phone: string, config: object) => {
     })
     ev.on('messages.update', (updates: WAMessageUpdate[]) => {
       for (const update of updates) {
-        const {
-          key: { id },
-        } = update
-        if (id) {
-          keys.set(id, update.key)
+        const { key } = update
+        if (key.id) {
+          keys.set(key.id, key)
         }
       }
     })
@@ -122,6 +117,9 @@ export const fileDataStore = (phone: string, config: object) => {
   const dataStore = store as DataStore
   dataStore.loadKey = (id: string) => {
     return keys.get(id)
+  }
+  dataStore.saveMedia = async (waMessage: WAMessage) => {
+    return saveMedia(phone, waMessage)
   }
   return dataStore
 }

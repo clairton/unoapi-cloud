@@ -1,10 +1,10 @@
-import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig, ConnectionState } from '@adiwajshing/baileys'
+import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig, ConnectionState, WAMessage } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
 import { store } from './store'
 import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
-import { phoneNumberToJid, isIndividualJid } from './transformer'
+import { phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 const counts: Map<string, number> = new Map()
 const connectings: Map<string, number> = new Map()
 const max = 6
@@ -66,7 +66,11 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         if (!isIndividualJid(key.remoteJid)) {
           m.groupMetadata = dataStore.groupMetadata[key.remoteJid] || (await dataStore.fetchGroupMetadata(key.remoteJid, sock))
         }
-        // m.contact = dataStore.contacts[key.remoteJid]
+        const messageType = getMessageType(m)
+        if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+          const i: WAMessage = m as WAMessage
+          dataStore.saveMedia(i)
+        }
         return m
       }),
     )

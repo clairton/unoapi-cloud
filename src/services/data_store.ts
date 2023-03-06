@@ -1,5 +1,6 @@
-import { makeInMemoryStore, proto } from '@adiwajshing/baileys'
+import { makeInMemoryStore, WAMessage, WAMessageKey } from '@adiwajshing/baileys'
 
 export type DataStore = ReturnType<typeof makeInMemoryStore> & {
-  loadKey: (id: string) => proto.IMessageKey | undefined
+  loadKey: (id: string) => WAMessageKey | undefined
+  saveMedia: (waMessage: WAMessage) => Promise<void>
 }
