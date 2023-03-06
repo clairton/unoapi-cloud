@@ -59,7 +59,7 @@ function getMediaValue(
 
 const saveMedia = async (phone: string, waMessage: proto.IWebMessageInfo) => {
   const messageType = getMessageType(waMessage)
-  if (TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+  if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
     const buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     const filePath = await getFilePatByMessage(phone, waMessage)
     const parts = filePath.split('/')

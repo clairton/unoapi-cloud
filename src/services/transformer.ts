@@ -32,9 +32,10 @@ export const getMessageType = (payload: any) => {
     return 'update'
   } else if (payload.receipt) {
     return 'receipt'
+  } else if (payload.message) {
+    const { message } = payload
+    return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
   }
-  const { message } = payload
-  return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -154,7 +155,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     const senderJid = formatJid(isIndividual ? chatJid : formatJid(participant))
     const senderPhone = jidToPhoneNumber(senderJid)
     const messageType = getMessageType(payload)
-    const binMessage = payload.update || payload.receipt || payload.message[messageType]
+    const binMessage = payload.update || payload.receipt || (messageType && payload.message[messageType])
     let profileName
     if (fromMe) {
       profileName = senderPhone

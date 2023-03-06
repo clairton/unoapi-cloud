@@ -66,6 +66,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         if (!isIndividualJid(key.remoteJid)) {
           m.groupMetadata = dataStore.groupMetadata[key.remoteJid] || (await dataStore.fetchGroupMetadata(key.remoteJid, sock))
         }
+        // m.contact = dataStore.contacts[key.remoteJid]
         return m
       }),
     )
