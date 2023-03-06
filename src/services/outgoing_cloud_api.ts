@@ -27,8 +27,8 @@ export class OutgoingCloudApi implements Outgoing {
     const url = `${this.url}/${phone}`
     console.debug(`Send url ${url} with headers %s and body %s`, headers, body)
     const response: Response = await fetch(url, { method: 'POST', body, headers })
-    if (response.ok) {
-      return response.json()
+    if (!response.ok) {
+      throw response.text
     }
   }
 }
