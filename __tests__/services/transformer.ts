@@ -80,7 +80,8 @@ describe('service transformer', () => {
 
   test('fromBaileysMessageContent with text', async () => {
     const phoneNumer = '5549998360838'
-    const remoteJid = '554988290955@s.whatsapp.net'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Mary ${new Date().getTime()}`
@@ -109,7 +110,7 @@ describe('service transformer', () => {
                 metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
                 messages: [
                   {
-                    from: phoneNumer,
+                    from: '5549988290955',
                     id,
                     timestamp: messageTimestamp,
                     text: { body },
@@ -131,7 +132,8 @@ describe('service transformer', () => {
 
   test('fromBaileysMessageContent with quoted', async () => {
     const phoneNumer = '5549998360838'
-    const remoteJid = '554988290955@s.whatsapp.net'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Mary ${new Date().getTime()}`
@@ -171,7 +173,7 @@ describe('service transformer', () => {
                     context: {
                       message_id: stanzaId,
                     },
-                    from: phoneNumer,
+                    from: '5549988290955', // with 9 digit
                     id,
                     timestamp: messageTimestamp,
                     text: { body },
@@ -194,7 +196,8 @@ describe('service transformer', () => {
   test('fromBaileysMessageContent with media', async () => {
     const phoneNumer = '5549998093075'
     const text = `${new Date().getTime()}`
-    const remoteJid = '554988290955@s.whatsapp.net'
+    const remotePhoneNumber = `${new Date().getTime()}`
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const link = `${text}.pdf`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Jhon ${new Date().getTime()}`
@@ -230,7 +233,7 @@ describe('service transformer', () => {
                 metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
                 messages: [
                   {
-                    from: phoneNumer,
+                    from: remotePhoneNumber,
                     id,
                     timestamp: messageTimestamp,
                     audio: {
@@ -243,7 +246,7 @@ describe('service transformer', () => {
                     type: 'audio',
                   },
                 ],
-                contacts: [{ profile: { name: pushName }, wa_id: '5549988290955' }],
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber }],
                 statuses: [],
                 errors: [],
               },
@@ -271,6 +274,7 @@ describe('service transformer', () => {
       },
       message: {
         contactMessage: {
+          //vcard['BEGIN:VCARD', 'VERSION:3.0', 'N:;isabelle Ribeiro Dos Santos;;;', 'FN:isabelle Ribeiro Dos Santos', 'TEL;type=CELL;type=VOICE;waid=554999999365:+55 49 99999-9365', 'END:VCARD'].join('\r\n')
           vcard: ['BEGIN:VCARD', 'VERSION:4.0', 'N:Einstein', `FN:${pushName}`, `TEL:${remotePhoneNumber}`, 'END:VCARD'].join('\r\n'),
         },
       },
@@ -290,7 +294,7 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 messages: [
                   {
-                    from: phoneNumer,
+                    from: remotePhoneNumber.replace('+', ''),
                     id,
                     timestamp: messageTimestamp,
                     contacts: [

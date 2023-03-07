@@ -24,6 +24,7 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'protocolMessage',
   'senderKeyDistributionMessage',
   'messageContextInfo',
+  'messageStubType',
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -207,7 +208,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const message: any = {
-      from: phone.replace('+', ''),
+      from: senderPhone.replace('+', ''),
       id: whatsappMessageId,
       timestamp: messageTimestamp,
     }
@@ -362,6 +363,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       case 'protocolMessage':
       case 'senderKeyDistributionMessage':
       case 'messageContextInfo':
+      case 'messageStubType':
         console.debug(`Ignore message type ${messageType}`)
         return
 
@@ -370,7 +372,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         payload = {
           update: {
             error: 4,
-            title: `Unknown baileys status type ${baileysStatus}`,
+            title: `Unknown baileys message type ${messageType}`,
           },
         }
     }

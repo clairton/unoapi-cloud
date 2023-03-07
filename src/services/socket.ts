@@ -27,8 +27,6 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
       imageMessage: {
         url: qrCodeUrl,
         mimetype: 'image/png',
-        // fileName: `qrcode-unoapi-${messageTimestamp}.png`,
-        // mediaKey,
         fileLength: qrCode.length,
         caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(client.phone)} of ${max}`,
       },
