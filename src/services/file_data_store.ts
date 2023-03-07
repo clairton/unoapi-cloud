@@ -8,7 +8,10 @@ import {
   downloadMediaMessage,
   WAMessageUpdate,
   MessageUpsertType,
+  WAMessageKey,
 } from '@adiwajshing/baileys'
+import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-dictionary'
+import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
 import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync } from 'fs'
@@ -82,6 +85,7 @@ const saveMedia = async (phone: string, waMessage: WAMessage) => {
 export const fileDataStore = (phone: string, config: any) => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const store = makeInMemoryStore(config)
+  const dataStore = store as DataStore
   const { bind, toJSON, fromJSON } = store
   store.toJSON = () => {
     return {
@@ -111,7 +115,7 @@ export const fileDataStore = (phone: string, config: any) => {
       for (const msg of messages) {
         const { key } = msg
         if (key.id) {
-          keys.set(key.id, key)
+          dataStore.setKey(key.id, key)
         }
       }
     })
@@ -119,14 +123,23 @@ export const fileDataStore = (phone: string, config: any) => {
       for (const update of updates) {
         const { key } = update
         if (key.id) {
-          keys.set(key.id, key)
+          dataStore.setKey(key.id, key)
         }
       }
     })
   }
-  const dataStore = store as DataStore
   dataStore.loadKey = (id: string) => {
     return keys.get(id)
+  }
+  dataStore.setKey = (id: string, key: WAMessageKey) => {
+    return keys.set(id, key)
+  }
+  dataStore.setMessage = (id: string, message: WAMessage) => {
+    if (!store.messages[id]) {
+      store.messages[id] = makeOrderedDictionary(waMessageID)
+    }
+    console.log(store.messages)
+    return store.messages[id].upsert(message, 'append')
   }
   dataStore.saveMedia = async (waMessage: WAMessage) => {
     return saveMedia(phone, waMessage)

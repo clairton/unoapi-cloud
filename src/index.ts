@@ -20,7 +20,7 @@ const cloudApi: Outgoing = new OutgoingCloudApi(
 const baileys: Incoming = new IncomingBaileys(fileStore, cloudApi, getClientBaileys)
 const app: App = new App(baileys, BASE_URL || `http://localhost:${PORT}`, getFileDataStore)
 
-app.server.listen(PORT, '0.0.0.0.', async () => {
+app.server.listen(PORT, '0.0.0.0', async () => {
   console.info('Baileys Cloud API listening on port:', PORT)
   console.info('Successful started app!')
   const sessionStore: SessionStore = new FileSessionStore(SESSION_DIR)

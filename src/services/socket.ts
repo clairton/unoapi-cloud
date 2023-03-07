@@ -16,11 +16,13 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
   const messageTimestamp = new Date().getTime()
   const mediaKey = uuid()
   const qrCodeUrl = await QRCode.toDataURL(qrCode)
+  const remoteJid = phoneNumberToJid(client.phone)
+  const waMessageKey = {
+    remoteJid,
+    id: mediaKey,
+  }
   const waMessage: WAMessage = {
-    key: {
-      remoteJid: phoneNumberToJid(client.phone),
-      id: mediaKey,
-    },
+    key: waMessageKey,
     message: {
       imageMessage: {
         url: qrCodeUrl,
@@ -33,6 +35,8 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
     },
     messageTimestamp,
   }
+  await dataStore.setMessage(remoteJid, waMessage)
+  await dataStore.setKey(mediaKey, waMessageKey)
   await dataStore.saveMedia(waMessage)
   delete waMessage.message?.imageMessage?.url
   await client.receive([waMessage])
