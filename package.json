@@ -22,6 +22,7 @@
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.14.1",
     "@types/node-fetch": "2",
+    "@types/qrcode": "^1.5.0",
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.1",
     "@types/vcf": "^2.0.3",
@@ -50,6 +51,7 @@
     "mime-types": "^2.1.35",
     "morgan": "^1.10.0",
     "node-fetch": "2",
+    "qrcode": "^1.5.1",
     "qrcode-terminal": "^0.12.0",
     "uuid": "^9.0.0",
     "vcf": "^2.1.1"

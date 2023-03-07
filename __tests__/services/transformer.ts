@@ -238,6 +238,7 @@ describe('service transformer', () => {
                       mime_type: mimetype,
                       id: `${phoneNumer}/${id}`,
                       sha256: fileSha256,
+                      url: link,
                     },
                     type: 'audio',
                   },

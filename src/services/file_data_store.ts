@@ -56,7 +56,17 @@ function getMediaValue(
 const saveMedia = async (phone: string, waMessage: WAMessage) => {
   const messageType = getMessageType(waMessage)
   if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-    const buffer = await downloadMediaMessage(waMessage, 'buffer', {})
+    let buffer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyM: any = waMessage
+    const url = anyM.message[messageType].url
+    if (url.indexOf('base64') >= 0) {
+      const parts = url.split(',')
+      const base64 = parts[1]
+      buffer = Buffer.from(base64, 'base64')
+    } else {
+      buffer = await downloadMediaMessage(waMessage, 'buffer', {})
+    }
     const fileName = getFileName(phone, waMessage)
     const filePath = getFilePath(fileName)
     const parts = filePath.split('/')

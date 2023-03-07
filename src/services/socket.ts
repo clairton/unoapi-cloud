@@ -4,35 +4,38 @@ import { Client } from './client'
 import { store } from './store'
 import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
+import QRCode from 'qrcode'
 import { phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 const counts: Map<string, number> = new Map()
 const connectings: Map<string, number> = new Map()
 const max = 6
 
-const onQrCode = async (client: Client, qrCode: string) => {
+const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) => {
   counts.set(client.phone, (counts.get(client.phone) || 0) + 1)
   console.debug(`Received qrcode ${qrCode}`)
   const messageTimestamp = new Date().getTime()
   const mediaKey = uuid()
-  await client.receive([
-    {
-      key: {
-        remoteJid: phoneNumberToJid(client.phone),
-        id: mediaKey,
-      },
-      message: {
-        imageMessage: {
-          url: qrCode,
-          mimetype: 'image/png',
-          fileName: `qrcode-unoapi-${messageTimestamp}.png`,
-          mediaKey,
-          fileLength: qrCode.length,
-          caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(client.phone)} of ${max}`,
-        },
-      },
-      messageTimestamp,
+  const qrCodeUrl = await QRCode.toDataURL(qrCode)
+  const waMessage: WAMessage = {
+    key: {
+      remoteJid: phoneNumberToJid(client.phone),
+      id: mediaKey,
     },
-  ])
+    message: {
+      imageMessage: {
+        url: qrCodeUrl,
+        mimetype: 'image/png',
+        // fileName: `qrcode-unoapi-${messageTimestamp}.png`,
+        // mediaKey,
+        fileLength: qrCode.length,
+        caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(client.phone)} of ${max}`,
+      },
+    },
+    messageTimestamp,
+  }
+  await dataStore.saveMedia(waMessage)
+  delete waMessage.message?.imageMessage?.url
+  await client.receive([waMessage])
   if ((counts.get(client.phone) || 0) >= max) {
     counts.delete(client.phone)
     connectings.delete(client.phone)
@@ -106,7 +109,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         }
         return resolve(connection)
       } else if (update.qr) {
-        if (!(await onQrCode(client, update.qr))) {
+        if (!(await onQrCode(client, dataStore, update.qr))) {
           const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
