@@ -44,8 +44,8 @@ export class MessagesController {
 
   public async index(req: Request, res: Response) {
     console.debug('messages headers', req.headers)
-    console.debug('messages download params', req.params)
-    console.debug('messages download body', JSON.stringify(req.body, null, ' '))
+    console.debug('messages params', req.params)
+    console.debug('messages body', JSON.stringify(req.body, null, ' '))
     const { phone } = req.params
     const payload: object = req.body
     try {
