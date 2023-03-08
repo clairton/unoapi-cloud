@@ -240,12 +240,16 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         for (let i = 0; i < vcards.length; i++) {
           const vcard = vcards[i]
           if (vcard) {
-            const card: vCard = new vCard().parse(vcard)
+            const card: vCard = new vCard().parse(vcard.replace(/\r?\n/g, '\r\n'))
             contacts.push({
               name: {
                 formatted_name: card.get('fn').valueOf(),
               },
-              phones: card.get('tel').valueOf(),
+              phones: [
+                {
+                  phone: card.get('tel').valueOf(),
+                },
+              ],
             })
           }
         }

@@ -274,8 +274,7 @@ describe('service transformer', () => {
       },
       message: {
         contactMessage: {
-          //vcard['BEGIN:VCARD', 'VERSION:3.0', 'N:;isabelle Ribeiro Dos Santos;;;', 'FN:isabelle Ribeiro Dos Santos', 'TEL;type=CELL;type=VOICE;waid=554999999365:+55 49 99999-9365', 'END:VCARD'].join('\r\n')
-          vcard: ['BEGIN:VCARD', 'VERSION:4.0', 'N:Einstein', `FN:${pushName}`, `TEL:${remotePhoneNumber}`, 'END:VCARD'].join('\r\n'),
+          vcard: `BEGIN:VCARD\nVERSION:4.0\nN:Einstein\nFN:${pushName}\nTEL:${remotePhoneNumber}\nEND:VCARD`,
         },
       },
       pushName,
@@ -302,7 +301,11 @@ describe('service transformer', () => {
                         name: {
                           formatted_name: pushName,
                         },
-                        phones: remotePhoneNumber,
+                        phones: [
+                          {
+                            phone: remotePhoneNumber,
+                          },
+                        ],
                       },
                     ],
                     type: 'contacts',
