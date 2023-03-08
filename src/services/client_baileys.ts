@@ -13,6 +13,7 @@ export class ClientBaileys implements Client {
   private outgoing: Outgoing
   private store: store
   private dataStore: DataStore | undefined
+  private connecting = false
 
   constructor(phone: string, store: store, outgoing: Outgoing) {
     this.phone = phone
@@ -21,9 +22,15 @@ export class ClientBaileys implements Client {
   }
 
   async connect() {
-    const connection = await connect({ store: this.store, client: this })
-    this.sock = connection.sock
-    this.dataStore = connection.dataStore
+    if (!this.connecting) {
+      this.connecting = true
+      const connection = await connect({ store: this.store, client: this })
+      this.connecting = false
+      this.sock = connection.sock
+      this.dataStore = connection.dataStore
+    } else {
+      throw 'Connection process in progress, please read a QRcode and wait'
+    }
   }
 
   async disconnect() {
@@ -49,10 +56,19 @@ export class ClientBaileys implements Client {
   async send(payload: any) {
     const { status, type, to } = payload
     if (!this.sock) {
-      this.connect()
-      const message = 'Please, read the QRCode!'
-      await this.sendStatus(message)
+      let code, title
+      if (this.connecting) {
+        code = 4
+        title = 'Connection process in progress, please read a QRcode and wait'
+        await this.sendStatus(title)
+      } else {
+        code = 3
+        this.connect()
+        title = 'Please, read the QRCode!'
+        await this.sendStatus(title)
+      }
       const id = uuid()
+      // @TODO this.outgoing.sendOne(this.phone, payload) to update message with failed
       return {
         messaging_product: 'whatsapp',
         contacts: [
@@ -73,8 +89,8 @@ export class ClientBaileys implements Client {
             timestamp: Math.floor(Date.now() / 1000),
             errors: [
               {
-                code: 3,
-                title: message,
+                code,
+                title,
               },
             ],
           },

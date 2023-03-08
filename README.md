@@ -141,6 +141,7 @@ with:
 * 2 - the receipt number not has whatsapp account
 * 3 - disconnect number, please read qr code
 * 4 - Unknown baileys status
+* 5 - Wait a moment, connecting process 
 
 ## Environment Variables
 
