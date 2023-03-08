@@ -169,6 +169,8 @@ their platform, so this shouldn't be considered totally safe.
 - This is an independent and unofficial software Use at your own risk.
 - Do not spam people with this.
 
+https://www.buymeacoffee.com/clairton
+
 ## Need More
 
 Comercial version is available:
@@ -182,3 +184,18 @@ Comercial version is available:
 - vpn connect by number
 
 More informations in http://wa.me/+5549988290955
+
+
+## Donate to the project.
+
+#### Pix: 0e42d192-f4d6-4672-810b-41d69eba336e
+
+#### PicPay
+
+<div align="center">
+  <a href="https://app.picpay.com/user/clairton.rodrigo" target="_blank" rel="noopener noreferrer">
+    <img src="./picpay.png" style="width: 50% !important;">
+  </a>
+</div>
+
+</br>
