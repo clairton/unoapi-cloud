@@ -169,8 +169,6 @@ their platform, so this shouldn't be considered totally safe.
 - This is an independent and unofficial software Use at your own risk.
 - Do not spam people with this.
 
-https://www.buymeacoffee.com/clairton
-
 ## Need More
 
 Comercial version is available:
@@ -199,3 +197,6 @@ More informations in http://wa.me/+5549988290955
 </div>
 
 </br>
+
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/clairton)
