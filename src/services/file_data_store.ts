@@ -14,11 +14,12 @@ import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-d
 import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
 import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
+import { SESSION_DIR } from './file_store'
 import mime from 'mime-types'
 
-const MEDIA_DIR = './data/medias'
+export const MEDIA_DIR = './data/medias'
 
 export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
   const { message, key } = waMessage
@@ -138,11 +139,14 @@ export const fileDataStore = (phone: string, config: any) => {
     if (!store.messages[id]) {
       store.messages[id] = makeOrderedDictionary(waMessageID)
     }
-    console.log(store.messages)
     return store.messages[id].upsert(message, 'append')
   }
   dataStore.saveMedia = async (waMessage: WAMessage) => {
     return saveMedia(phone, waMessage)
+  }
+  dataStore.cleanSession = async () => {
+    const sessionDir = `${SESSION_DIR}/${phone}`
+    return rmSync(sessionDir, { recursive: true })
   }
   return dataStore
 }

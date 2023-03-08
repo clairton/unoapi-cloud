@@ -5,4 +5,5 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   setKey: (id: string, key: WAMessageKey) => void
   setMessage: (id: string, message: WAMessage) => void
   saveMedia: (waMessage: WAMessage) => Promise<void>
+  cleanSession: () => Promise<void>
 }

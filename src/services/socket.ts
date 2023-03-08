@@ -1,4 +1,12 @@
-import makeWASocket, { DisconnectReason, WASocket, isJidBroadcast, UserFacingSocketConfig, ConnectionState, WAMessage } from '@adiwajshing/baileys'
+import makeWASocket, {
+  DisconnectReason,
+  WASocket,
+  isJidBroadcast,
+  UserFacingSocketConfig,
+  ConnectionState,
+  WAMessage,
+  fetchLatestBaileysVersion,
+} from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
 import { store } from './store'
@@ -46,6 +54,24 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
   return true
 }
 
+const disconnectSock = async (sock: WASocket) => {
+  if (sock) {
+    const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    events.forEach((key: any) => {
+      try {
+        sock?.ev?.removeAllListeners(key)
+      } catch (error) {}
+    })
+    try {
+      await sock?.ws?.close()
+    } catch (error) {}
+    try {
+      await sock?.logout()
+    } catch (error) {}
+  }
+}
+
 export declare type Connection = {
   sock: WASocket
   dataStore: DataStore
@@ -57,6 +83,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
     printQRInTerminal: true,
     auth: state,
     shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
+    browser: ['Baileys', 'Chrome', 'Cloud API'],
   }
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)
@@ -96,27 +123,26 @@ export const connect = async ({ store, client }: { store: store; client: Client 
     return sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
       const { connection, lastDisconnect } = update
       if (connection === 'close' && lastDisconnect) {
-        const shouldReconnect = (lastDisconnect.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+        const statusCode = (lastDisconnect.error as Boom)?.output?.statusCode
+        const shouldReconnect = statusCode !== DisconnectReason.loggedOut
         console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
         // reconnect if not logged out
         if (shouldReconnect) {
+          await disconnectSock(sock)
           return connect({ store, client })
+        } else if (statusCode === DisconnectReason.loggedOut) {
+          const message = `The session is removed in Whatsapp App`
+          await client.sendStatus(message)
+          await disconnectSock(sock)
+          await dataStore.cleanSession()
         }
       } else if (connection === 'open') {
-        const message = `Connnected!`
+        const { version, isLatest } = await fetchLatestBaileysVersion()
+        const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
         await client.sendStatus(message)
-        const connection: Connection = {
-          sock: sock,
-          dataStore: dataStore,
-        }
-        return resolve(connection)
       } else if (update.qr) {
         if (!(await onQrCode(client, dataStore, update.qr))) {
-          const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          events.forEach((key: any) => sock?.ev?.removeAllListeners(key))
-          await sock?.ws?.close()
-          await sock?.logout()
+          await disconnectSock(sock)
           const message = `The ${max} times of generate qrcode is exceded!`
           await client.sendStatus(message)
           return reject(message)
@@ -124,6 +150,12 @@ export const connect = async ({ store, client }: { store: store; client: Client 
       } else if (connection === 'connecting') {
         const message = `Connnecting...`
         await client.sendStatus(message)
+      } else if (update.isOnline) {
+        const connection: Connection = {
+          sock: sock,
+          dataStore: dataStore,
+        }
+        return resolve(connection)
       } else {
         console.debug('connection.update', update)
       }
