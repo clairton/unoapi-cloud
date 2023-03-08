@@ -6,7 +6,7 @@ import { DataStore } from '../../src/services/data_store'
 import { getDataStore } from '../../src/services/get_data_store'
 import { proto } from '@adiwajshing/baileys'
 import { mock } from 'jest-mock-extended'
-import { getFilePath } from '../../src/services/file_data_store'
+import { getFilePath } from '../../src/services/data_store_file'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
 const phone = `${new Date().getTime()}`
 const remoteJid = `${new Date().getTime()}@s.whatsapp.net`

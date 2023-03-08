@@ -1,6 +1,6 @@
 import { AnyMessageContent, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
-import { store } from './store'
+import { Store } from './store'
 import { DataStore } from './data_store'
 import { connect } from './socket'
 import { Client } from './client'
@@ -11,11 +11,11 @@ export class ClientBaileys implements Client {
   public phone: string
   private sock: WASocket | undefined
   private outgoing: Outgoing
-  private store: store
+  private store: Store
   private dataStore: DataStore | undefined
   private connecting = false
 
-  constructor(phone: string, store: store, outgoing: Outgoing) {
+  constructor(phone: string, store: Store, outgoing: Outgoing) {
     this.phone = phone
     this.store = store
     this.outgoing = outgoing

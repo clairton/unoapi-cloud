@@ -16,7 +16,7 @@ import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
-import { SESSION_DIR } from './file_session_store'
+import { SESSION_DIR } from './session_store_file'
 import mime from 'mime-types'
 
 export const MEDIA_DIR = './data/medias'
@@ -83,7 +83,7 @@ const saveMedia = async (phone: string, waMessage: WAMessage) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const fileDataStore = (phone: string, config: any) => {
+export const dataStoreFile = (phone: string, config: any): DataStore => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const store = makeInMemoryStore(config)
   const dataStore = store as DataStore

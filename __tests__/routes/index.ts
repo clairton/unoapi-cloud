@@ -2,7 +2,7 @@ import request from 'supertest'
 
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
-import { getFileDataStore } from '../../src/services/get_file_data_store'
+import { getDataStoreFile } from '../../src/services/get_data_store_file'
 
 describe('index routes', () => {
   test('ping', async () => {
@@ -12,7 +12,7 @@ describe('index routes', () => {
         return {}
       },
     }
-    const app: App = new App(service, '', getFileDataStore)
+    const app: App = new App(service, '', getDataStoreFile)
     const res = await request(app.server).get('/ping')
     expect(res.text).toEqual('pong!')
   })

@@ -1,9 +1,10 @@
 import { getClient } from './get_client'
 import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
-import { store } from './store'
+import { getStore } from './get_store'
+import { Store } from './store'
 
-export const autoConnect = async (getClient: getClient, sessionStore: SessionStore, outgoing: Outgoing, store: store) => {
+export const autoConnect = async (getClient: getClient, sessionStore: SessionStore, outgoing: Outgoing, getStore: getStore) => {
   try {
     const phones = await sessionStore.getPhones()
     console.info(`${phones.length} phones to verify is auto connect`)
@@ -11,6 +12,7 @@ export const autoConnect = async (getClient: getClient, sessionStore: SessionSto
       const phone = phones[i]
       try {
         console.info(`Auto connecting phone ${phone}...`)
+        const store: Store = await getStore(phone)
         await getClient(phone, store, outgoing)
         console.info(`Auto connected phone ${phone}!`)
       } catch (error) {

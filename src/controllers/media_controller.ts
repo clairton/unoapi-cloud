@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { DataStore } from '../services/data_store'
-import { getFileName, getFilePath } from '../services/file_data_store'
+import { getFileName, getFilePath } from '../services/data_store_file'
 import { proto } from '@adiwajshing/baileys'
 import { getDataStore } from '../services/get_data_store'
 import mime from 'mime-types'

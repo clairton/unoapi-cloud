@@ -2,7 +2,7 @@ import request from 'supertest'
 
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
-import { getFileDataStore } from '../../src/services/get_file_data_store'
+import { getDataStoreFile } from '../../src/services/get_data_store_file'
 
 describe('templates routes', () => {
   test('index', async () => {
@@ -12,7 +12,7 @@ describe('templates routes', () => {
         return {}
       },
     }
-    const app: App = new App(service, '', getFileDataStore)
+    const app: App = new App(service, '', getDataStoreFile)
     const res = await request(app.server).get('/v15.0/123/message_templates')
     expect(res.status).toEqual(200)
   })

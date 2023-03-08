@@ -3,7 +3,7 @@ import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
 import { store } from '../../src/services/store'
 import { ClientBaileys } from '../../src/services/client_baileys'
-import { fileStore } from '../../src/services/file_store'
+import { storeFile } from '../../src/services/store_file'
 jest.mock('../../src/services/client_baileys')
 const mockClient = jest.mocked(ClientBaileys)
 
@@ -23,7 +23,7 @@ describe('service baileys', () => {
     expect(ClientBaileys).not.toHaveBeenCalled()
     const phone = `${new Date().getTime()}`
     const service: Outgoing = new DummyOutgoing()
-    const store: store = fileStore
+    const store: store = storeFile
     const baileys: Incoming = new IncomingBaileys(store, service)
     const payload: object = { humm: new Date().getTime() }
     await baileys.send(phone, payload)

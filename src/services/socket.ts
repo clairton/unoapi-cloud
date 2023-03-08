@@ -11,7 +11,7 @@ import makeWASocket, {
 } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
-import { store } from './store'
+import { Store } from './store'
 import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
 import QRCode from 'qrcode'
@@ -87,9 +87,9 @@ export declare type Connection = {
   firstConnection: boolean
 }
 
-export const connect = async ({ store, client }: { store: store; client: Client }): Promise<Connection> => {
+export const connect = async ({ store, client }: { store: Store; client: Client }): Promise<Connection> => {
   let firstConnection = false
-  const { state, saveCreds, dataStore } = await store(client.phone)
+  const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys', 'Cloud API', release()]
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,

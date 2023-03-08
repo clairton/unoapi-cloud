@@ -4,7 +4,7 @@ import { Dirent } from 'fs'
 
 export const SESSION_DIR = './data/sessions'
 
-export class FileSessionStore implements SessionStore {
+export class SessionStoreFile implements SessionStore {
   private sessionDir: string
 
   constructor(sessionDir: string = SESSION_DIR) {
