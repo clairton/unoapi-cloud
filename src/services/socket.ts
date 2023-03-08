@@ -6,6 +6,7 @@ import makeWASocket, {
   ConnectionState,
   WAMessage,
   fetchLatestBaileysVersion,
+  delay,
 } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
@@ -155,6 +156,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
           sock: sock,
           dataStore: dataStore,
         }
+        delay(5000)
         return resolve(connection)
       } else {
         console.debug('connection.update', update)
