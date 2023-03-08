@@ -1,7 +1,7 @@
-import { getClient } from './get_client'
+import { getClient } from './client'
 import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
-import { getStore } from './get_store'
+import { getStore } from './store'
 import { Store } from './store'
 
 export const autoConnect = async (getClient: getClient, sessionStore: SessionStore, outgoing: Outgoing, getStore: getStore) => {

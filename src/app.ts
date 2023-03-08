@@ -2,7 +2,7 @@ import express, { Application } from 'express'
 import morgan from 'morgan'
 import { router } from './router'
 import { Incoming } from './services/incoming'
-import { getDataStore } from './services/get_data_store'
+import { getDataStore } from './services/data_store'
 
 export class App {
   public server: Application

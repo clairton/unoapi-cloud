@@ -6,6 +6,21 @@ import { connect } from './socket'
 import { Client } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
+import { getClient } from './client'
+
+const clients: Map<string, Client> = new Map()
+
+export const getClientBaileys: getClient = async (phone: string, store: Store, outgoing: Outgoing): Promise<Client> => {
+  if (!clients.has(phone)) {
+    console.debug('Creating client baileys %s', phone)
+    const client = new ClientBaileys(phone, store, outgoing)
+    await client.connect()
+    clients.set(phone, client)
+  } else {
+    console.debug('Retrieving client baileys %s', phone)
+  }
+  return clients.get(phone) as Client
+}
 
 export class ClientBaileys implements Client {
   public phone: string
@@ -14,7 +29,6 @@ export class ClientBaileys implements Client {
   private store: Store
   private dataStore: DataStore | undefined
   private connecting = false
-  private reconnect = false
 
   constructor(phone: string, store: Store, outgoing: Outgoing) {
     this.phone = phone
@@ -38,7 +52,7 @@ export class ClientBaileys implements Client {
     this.sock = undefined
     this.dataStore = undefined
     this.connecting = false
-    this.reconnect = true
+    clients.delete(this.phone)
   }
 
   async sendStatus(text: string) {

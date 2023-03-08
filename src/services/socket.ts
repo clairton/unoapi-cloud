@@ -161,12 +161,15 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
           dataStore: dataStore,
           firstConnection,
         }
+        delay(5_000)
         if (firstConnection) {
+          const message = `Successful connect, restarting socket!`
+          await client.sendStatus(message)
           await disconnectSock(sock)
           await client.disconnect()
+        } else {
+          return reject(connection)
         }
-        delay(5000)
-        return resolve(connection)
       } else if (update.qr) {
         if (!(await onQrCode(client, dataStore, update.qr))) {
           await disconnectSock(sock)

@@ -2,7 +2,7 @@ import request from 'supertest'
 
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
-import { getDataStoreFile } from '../../src/services/get_data_store_file'
+import { getDataStoreFile } from '../../src/services/data_store_file'
 
 describe('webhook routes', () => {
   test('whatsapp', async () => {

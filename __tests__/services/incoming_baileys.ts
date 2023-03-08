@@ -18,7 +18,7 @@ beforeEach(() => {
   mockClient.mockClear()
 })
 
-describe('service baileys', () => {
+describe('service incoming baileys', () => {
   test('send', async () => {
     expect(ClientBaileys).not.toHaveBeenCalled()
     const phone = `${new Date().getTime()}`

@@ -3,12 +3,12 @@ import { IncomingBaileys } from './services/incoming_baileys'
 import { Incoming } from './services/incoming'
 import { Outgoing } from './services/outgoing'
 import { OutgoingCloudApi } from './services/outgoing_cloud_api'
-import { getStoreFile } from './services/get_store_file'
+import { getStoreFile } from './services/store_file'
 import { SessionStoreFile } from './services/session_store_file'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
-import { getDataStoreFile } from './services/get_data_store_file'
-import { getClientBaileys } from './services/get_client_baileys'
+import { getDataStoreFile } from './services/data_store_file'
+import { getClientBaileys } from './services/client_baileys'
 
 const { WEBHOOK_URL, WEBHOOK_TOKEN, WEBHOOK_HEADER, BASE_URL, PORT } = process.env
 const port: number = parseInt(PORT || '9876')

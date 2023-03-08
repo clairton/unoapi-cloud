@@ -1,8 +1,8 @@
 import { Incoming } from './incoming'
-import { getClient } from './get_client'
+import { getClient } from './client'
 import { Client } from './client'
-import { getClientBaileys } from './get_client_baileys'
-import { getStore } from './get_store'
+import { getClientBaileys } from './client_baileys'
+import { getStore } from './store'
 import { Outgoing } from './outgoing'
 import { Store } from './store'
 

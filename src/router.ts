@@ -6,7 +6,7 @@ import { templatesController } from './controllers/templates_controller'
 import { MessagesController } from './controllers/messages_controller'
 import { MediaController } from './controllers/media_controller'
 import { Incoming } from './services/incoming'
-import { getDataStore } from './services/get_data_store'
+import { getDataStore } from './services/data_store'
 
 export const router = (service: Incoming, baseUrl: string, getDataStore: getDataStore) => {
   const router: Router = Router()
