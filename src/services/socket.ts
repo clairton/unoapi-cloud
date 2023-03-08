@@ -7,6 +7,7 @@ import makeWASocket, {
   WAMessage,
   fetchLatestBaileysVersion,
   delay,
+  WABrowserDescription,
 } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
@@ -14,6 +15,7 @@ import { store } from './store'
 import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
 import QRCode from 'qrcode'
+import { release } from 'os'
 import { phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 const counts: Map<string, number> = new Map()
 const connectings: Map<string, number> = new Map()
@@ -82,15 +84,18 @@ const disconnectSock = async (sock: WASocket) => {
 export declare type Connection = {
   sock: WASocket
   dataStore: DataStore
+  firstConnection: boolean
 }
 
 export const connect = async ({ store, client }: { store: store; client: Client }): Promise<Connection> => {
+  let firstConnection = false
   const { state, saveCreds, dataStore } = await store(client.phone)
+  const browser: WABrowserDescription = ['Baileys', 'Cloud API', release()]
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
     shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
-    browser: ['Baileys', 'Chrome', 'Cloud API'],
+    browser,
   }
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)
@@ -151,6 +156,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         const connection: Connection = {
           sock: sock,
           dataStore: dataStore,
+          firstConnection,
         }
         delay(5000)
         return resolve(connection)
@@ -163,6 +169,10 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         }
       } else if (connection === 'connecting') {
         const message = `Connnecting...`
+        await client.sendStatus(message)
+      } else if (update.isNewLogin) {
+        firstConnection = true
+        const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can message you as you!`
         await client.sendStatus(message)
       } else {
         console.debug('connection.update', update)
