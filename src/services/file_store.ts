@@ -4,8 +4,7 @@ import { DataStore } from './data_store'
 import { getFileDataStore } from './get_file_data_store'
 import { MEDIA_DIR } from './file_data_store'
 import { existsSync, readFileSync, rmSync } from 'fs'
-
-export const SESSION_DIR = './data/sessions'
+import { SESSION_DIR } from './file_session_store'
 
 export const fileStore: store = async (phone) => {
   const sessionDir = `${SESSION_DIR}/${phone}`

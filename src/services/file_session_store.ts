@@ -2,10 +2,12 @@ import { SessionStore } from './session_store'
 import { readdir } from 'fs/promises'
 import { Dirent } from 'fs'
 
+export const SESSION_DIR = './data/sessions'
+
 export class FileSessionStore implements SessionStore {
   private sessionDir: string
 
-  constructor(sessionDir: string) {
+  constructor(sessionDir: string = SESSION_DIR) {
     this.sessionDir = sessionDir
   }
 

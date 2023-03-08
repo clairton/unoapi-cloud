@@ -16,7 +16,7 @@ import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
-import { SESSION_DIR } from './file_store'
+import { SESSION_DIR } from './file_session_store'
 import mime from 'mime-types'
 
 export const MEDIA_DIR = './data/medias'

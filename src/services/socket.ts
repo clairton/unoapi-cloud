@@ -96,6 +96,8 @@ export const connect = async ({ store, client }: { store: store; client: Client 
     auth: state,
     shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
     browser,
+    defaultQueryTimeoutMs: 60_000,
+    qrTimeout: 60_000,
   }
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)
