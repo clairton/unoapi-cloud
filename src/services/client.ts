@@ -1,9 +1,7 @@
-import { store } from './store'
-
 export interface Client {
   phone: string
 
-  connect(store: store): Promise<void>
+  connect(): Promise<void>
 
   disconnect(): Promise<void>
 

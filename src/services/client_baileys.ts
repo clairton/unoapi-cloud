@@ -11,17 +11,19 @@ export class ClientBaileys implements Client {
   public phone: string
   private sock: WASocket | undefined
   private outgoing: Outgoing
+  private store: store
   private dataStore: DataStore | undefined
 
-  constructor(phone: string, outgoing: Outgoing) {
+  constructor(phone: string, store: store, outgoing: Outgoing) {
     this.phone = phone
+    this.store = store
     this.outgoing = outgoing
   }
 
-  async connect(store: store) {
-    const { sock, dataStore } = await connect({ store, client: this })
-    this.sock = sock
-    this.dataStore = dataStore
+  async connect() {
+    const connection = await connect({ store: this.store, client: this })
+    this.sock = connection.sock
+    this.dataStore = connection.dataStore
   }
 
   async disconnect() {
@@ -47,6 +49,7 @@ export class ClientBaileys implements Client {
   async send(payload: any) {
     const { status, type, to } = payload
     if (!this.sock) {
+      this.connect()
       const message = 'Please, read the QRCode!'
       await this.sendStatus(message)
       const id = uuid()
