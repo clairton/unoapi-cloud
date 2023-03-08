@@ -62,14 +62,20 @@ const disconnectSock = async (sock: WASocket) => {
     events.forEach((key: any) => {
       try {
         sock?.ev?.removeAllListeners(key)
-      } catch (error) {}
+      } catch (error) {
+        // nothing
+      }
     })
     try {
       await sock?.ws?.close()
-    } catch (error) {}
+    } catch (error) {
+      // nothing
+    }
     try {
       await sock?.logout()
-    } catch (error) {}
+    } catch (error) {
+      // nothing
+    }
   }
 }
 
@@ -136,6 +142,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
           await client.sendStatus(message)
           await disconnectSock(sock)
           await dataStore.cleanSession()
+          await client.disconnect()
         }
       } else if (connection === 'open') {
         const { version, isLatest } = await fetchLatestBaileysVersion()

@@ -24,6 +24,11 @@ export class ClientBaileys implements Client {
     this.dataStore = dataStore
   }
 
+  async disconnect() {
+    this.sock = undefined
+    this.dataStore = undefined
+  }
+
   async sendStatus(text: string) {
     const payload = {
       key: {
