@@ -65,18 +65,13 @@ const disconnectSock = async (sock: WASocket) => {
       try {
         sock?.ev?.removeAllListeners(key)
       } catch (error) {
-        // nothing
+        console.error('Error on %s sock.ev.removeAllListeners %s', key, error)
       }
     })
     try {
       await sock?.ws?.close()
     } catch (error) {
-      // nothing
-    }
-    try {
-      await sock?.logout()
-    } catch (error) {
-      // nothing
+      console.error('Error on sock.ws.close', error)
     }
   }
 }
@@ -143,11 +138,17 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
         // reconnect if not logged out
         if (shouldReconnect) {
           await disconnectSock(sock)
+          await client.disconnect()
           return connect({ store, client })
         } else {
           const message = `The session is removed in Whatsapp App`
           await client.sendStatus(message)
           await disconnectSock(sock)
+          try {
+            await sock?.logout()
+          } catch (error) {
+            console.error('Error on logout', error)
+          }
           await dataStore.cleanSession()
           await client.disconnect()
         }
@@ -159,6 +160,10 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
           sock: sock,
           dataStore: dataStore,
           firstConnection,
+        }
+        if (firstConnection) {
+          await disconnectSock(sock)
+          await client.disconnect()
         }
         delay(5000)
         return resolve(connection)

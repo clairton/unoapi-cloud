@@ -14,6 +14,7 @@ export class ClientBaileys implements Client {
   private store: Store
   private dataStore: DataStore | undefined
   private connecting = false
+  private reconnect = false
 
   constructor(phone: string, store: Store, outgoing: Outgoing) {
     this.phone = phone
@@ -36,6 +37,8 @@ export class ClientBaileys implements Client {
   async disconnect() {
     this.sock = undefined
     this.dataStore = undefined
+    this.connecting = false
+    this.reconnect = true
   }
 
   async sendStatus(text: string) {
@@ -63,9 +66,9 @@ export class ClientBaileys implements Client {
         await this.sendStatus(title)
       } else {
         code = 3
-        this.connect()
         title = 'Please, read the QRCode!'
         await this.sendStatus(title)
+        this.connect()
       }
       const id = uuid()
       // @TODO this.outgoing.sendOne(this.phone, payload) to update message with failed

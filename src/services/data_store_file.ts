@@ -146,7 +146,12 @@ export const dataStoreFile = (phone: string, config: any): DataStore => {
   }
   dataStore.cleanSession = async () => {
     const sessionDir = `${SESSION_DIR}/${phone}`
-    return rmSync(sessionDir, { recursive: true })
+    if (existsSync(sessionDir)) {
+      console.info(`Clean session phone %s dir %s`, phone, sessionDir)
+      return rmSync(sessionDir, { recursive: true })
+    } else {
+      console.info(`Already empty session phone %s dir %s`, phone, sessionDir)
+    }
   }
   return dataStore
 }
