@@ -1,4 +1,3 @@
-import { Client } from './client'
 import { getClient } from './get_client'
 import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
@@ -12,9 +11,8 @@ export const autoConnect = async (getClient: getClient, sessionStore: SessionSto
       const phone = phones[i]
       try {
         console.info(`Auto connecting phone ${phone}...`)
-        const client: Client = await getClient(phone, store, outgoing)
+        await getClient(phone, store, outgoing)
         console.info(`Auto connected phone ${phone}!`)
-        await client.sendStatus(`Whatsapp ${phone} auto connect on start server! ${new Date()}`)
       } catch (error) {
         console.error(`Error on connect phone ${phone}`, error)
       }

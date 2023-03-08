@@ -137,7 +137,7 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         if (shouldReconnect) {
           await disconnectSock(sock)
           return connect({ store, client })
-        } else if (statusCode === DisconnectReason.loggedOut) {
+        } else {
           const message = `The session is removed in Whatsapp App`
           await client.sendStatus(message)
           await disconnectSock(sock)
@@ -148,6 +148,12 @@ export const connect = async ({ store, client }: { store: store; client: Client 
         const { version, isLatest } = await fetchLatestBaileysVersion()
         const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
         await client.sendStatus(message)
+        const connection: Connection = {
+          sock: sock,
+          dataStore: dataStore,
+        }
+        delay(5000)
+        return resolve(connection)
       } else if (update.qr) {
         if (!(await onQrCode(client, dataStore, update.qr))) {
           await disconnectSock(sock)
@@ -158,13 +164,6 @@ export const connect = async ({ store, client }: { store: store; client: Client 
       } else if (connection === 'connecting') {
         const message = `Connnecting...`
         await client.sendStatus(message)
-      } else if (update.isOnline) {
-        const connection: Connection = {
-          sock: sock,
-          dataStore: dataStore,
-        }
-        delay(5000)
-        return resolve(connection)
       } else {
         console.debug('connection.update', update)
       }
