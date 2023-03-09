@@ -5,9 +5,7 @@ import { getDataStoreFile } from './data_store_file'
 import { MEDIA_DIR } from './data_store_file'
 import { existsSync, readFileSync, rmSync } from 'fs'
 import { SESSION_DIR } from './session_store_file'
-import { getStore } from './store'
-
-const stores: Map<string, Store> = new Map()
+import { getStore, stores } from './store'
 
 export const getStoreFile: getStore = async (phone: string): Promise<Store> => {
   if (!stores.has(phone)) {
@@ -20,7 +18,7 @@ export const getStoreFile: getStore = async (phone: string): Promise<Store> => {
   return stores.get(phone) as Store
 }
 
-export const storeFile: store = async (phone: string): Promise<Store> => {
+const storeFile: store = async (phone: string): Promise<Store> => {
   const sessionDir = `${SESSION_DIR}/${phone}`
   const mediaDir = `${MEDIA_DIR}/${phone}`
   console.info(`Store session in directory: ${sessionDir}`)

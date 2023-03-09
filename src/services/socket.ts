@@ -78,7 +78,6 @@ const disconnectSock = async (sock: WASocket) => {
 
 export declare type Connection = {
   sock: WASocket
-  dataStore: DataStore
   firstConnection: boolean
 }
 
@@ -158,7 +157,6 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
         await client.sendStatus(message)
         const connection: Connection = {
           sock: sock,
-          dataStore: dataStore,
           firstConnection,
         }
         delay(5_000)
@@ -167,8 +165,9 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
           await client.sendStatus(message)
           await disconnectSock(sock)
           await client.disconnect()
-        } else {
           return reject(connection)
+        } else {
+          return resolve(connection)
         }
       } else if (update.qr) {
         if (!(await onQrCode(client, dataStore, update.qr))) {

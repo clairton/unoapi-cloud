@@ -1,7 +1,6 @@
 import { AnyMessageContent, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
-import { Store } from './store'
-import { DataStore } from './data_store'
+import { Store, getStore, stores } from './store'
 import { connect } from './socket'
 import { Client } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid } from './transformer'
@@ -10,9 +9,10 @@ import { getClient } from './client'
 
 const clients: Map<string, Client> = new Map()
 
-export const getClientBaileys: getClient = async (phone: string, store: Store, outgoing: Outgoing): Promise<Client> => {
+export const getClientBaileys: getClient = async (phone: string, outgoing: Outgoing, getStore: getStore): Promise<Client> => {
   if (!clients.has(phone)) {
     console.debug('Creating client baileys %s', phone)
+    const store: Store = await getStore(phone)
     const client = new ClientBaileys(phone, store, outgoing)
     await client.connect()
     clients.set(phone, client)
@@ -26,8 +26,7 @@ export class ClientBaileys implements Client {
   public phone: string
   private sock: WASocket | undefined
   private outgoing: Outgoing
-  private store: Store
-  private dataStore: DataStore | undefined
+  private store: Store | undefined
   private connecting = false
 
   constructor(phone: string, store: Store, outgoing: Outgoing) {
@@ -37,12 +36,19 @@ export class ClientBaileys implements Client {
   }
 
   async connect() {
-    if (!this.connecting) {
-      this.connecting = true
-      const connection = await connect({ store: this.store, client: this })
-      this.connecting = false
-      this.sock = connection.sock
-      this.dataStore = connection.dataStore
+    if (!this.connecting && this.store) {
+      try {
+        this.connecting = true
+        const connection = await connect({ store: this.store, client: this })
+        this.connecting = false
+        this.sock = connection?.sock
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error?.firstConnection) {
+          console.info('First connection, reconnecting...')
+          await this.connect()
+        }
+      }
     } else {
       throw 'Connection process in progress, please read a QRcode and wait'
     }
@@ -50,9 +56,10 @@ export class ClientBaileys implements Client {
 
   async disconnect() {
     this.sock = undefined
-    this.dataStore = undefined
+    this.store = undefined
     this.connecting = false
     clients.delete(this.phone)
+    stores.delete(this.phone)
   }
 
   async sendStatus(text: string) {
@@ -117,7 +124,7 @@ export class ClientBaileys implements Client {
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
         if (status == 'read') {
-          const key = this.dataStore?.loadKey(payload?.message_id)
+          const key = this.store?.dataStore?.loadKey(payload?.message_id)
           console.debug('key %s for %s', key, payload?.message_id)
           if (key) {
             await this.sock?.readMessages([key])

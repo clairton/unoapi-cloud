@@ -1,6 +1,8 @@
 import { AuthenticationState } from '@adiwajshing/baileys'
 import { DataStore } from './data_store'
 
+export const stores: Map<string, Store> = new Map()
+
 export interface getStore {
   (phone: string): Promise<Store>
 }

@@ -3,23 +3,22 @@ import { getClient } from './client'
 import { Client } from './client'
 import { getClientBaileys } from './client_baileys'
 import { getStore } from './store'
+import { getStoreFile } from './store_file'
 import { Outgoing } from './outgoing'
-import { Store } from './store'
 
 export class IncomingBaileys implements Incoming {
   private getStore: getStore
   private service: Outgoing
   private getClient: getClient
 
-  constructor(getStore: getStore, service: Outgoing, getClient: getClient = getClientBaileys) {
-    this.getStore = getStore
+  constructor(service: Outgoing, getClient: getClient = getClientBaileys, getStore: getStore = getStoreFile) {
     this.service = service
     this.getClient = getClient
+    this.getStore = getStore
   }
 
   public async send(phone: string, payload: object) {
-    const store: Store = await this.getStore(phone)
-    const client: Client = await this.getClient(phone, store, this.service)
+    const client: Client = await this.getClient(phone, this.service, this.getStore)
     return client.send(payload)
   }
 }

@@ -1,8 +1,8 @@
 import { Outgoing } from './outgoing'
-import { Store } from './store'
+import { getStore } from './store'
 
 export interface getClient {
-  (phone: string, store: Store, outgoing: Outgoing): Promise<Client>
+  (phone: string, outgoing: Outgoing, getStore: getStore): Promise<Client>
 }
 
 export interface Client {
