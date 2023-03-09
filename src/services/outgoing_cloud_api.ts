@@ -18,6 +18,7 @@ export class OutgoingCloudApi implements Outgoing {
   }
 
   public async sendOne(phone: string, message: object) {
+    console.debug(`Receive message %s`, message)
     const data = fromBaileysMessageContent(phone, message)
     const body = JSON.stringify(data)
     const headers = {

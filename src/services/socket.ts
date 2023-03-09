@@ -161,6 +161,7 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
         }
         delay(5_000)
         if (firstConnection) {
+          firstConnection = false
           const message = `Successful connect, restarting socket!`
           await client.sendStatus(message)
           await disconnectSock(sock)
@@ -181,7 +182,7 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
         await client.sendStatus(message)
       } else if (update.isNewLogin) {
         firstConnection = true
-        const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can message you as you!`
+        const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
         await client.sendStatus(message)
       } else {
         console.debug('connection.update', update)

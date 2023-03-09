@@ -153,7 +153,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     } = payload
     const chatJid = formatJid(remoteJid)
     const isIndividual = isIndividualJid(chatJid)
-    const senderJid = formatJid(isIndividual ? chatJid : formatJid(participant))
+    const senderJid = isIndividual ? chatJid : (participant && formatJid(participant)) || chatJid
     const senderPhone = jidToPhoneNumber(senderJid)
     const messageType = getMessageType(payload)
     const binMessage = payload.update || payload.receipt || (messageType && payload.message[messageType])

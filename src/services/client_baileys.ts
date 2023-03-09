@@ -15,6 +15,7 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
     const store: Store = await getStore(phone)
     const client = new ClientBaileys(phone, store, outgoing)
     await client.connect()
+    console.debug('Client baileys created and connected %s', phone)
     clients.set(phone, client)
   } else {
     console.debug('Retrieving client baileys %s', phone)
