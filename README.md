@@ -182,6 +182,7 @@ WEBHOOK_URL=the webhook url
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 BASE_URL=current base url to download medias
+PORT=the http port
 ```
 
 ## Note
