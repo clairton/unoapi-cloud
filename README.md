@@ -189,6 +189,8 @@ More informations in http://wa.me/+5549988290955
 
 #### Pix: 0e42d192-f4d6-4672-810b-41d69eba336e
 
+</br>
+
 #### PicPay
 
 <div align="center">
@@ -199,5 +201,12 @@ More informations in http://wa.me/+5549988290955
 
 </br>
 
+### Buy Me A Coffee
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/clairton)
+<div align="center">
+  <a href="https://www.buymeacoffee.com/clairton" target="_blank" rel="noopener noreferrer">
+    <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" style="width: 50% !important;">
+  </a>
+</div>
+
+</br>
