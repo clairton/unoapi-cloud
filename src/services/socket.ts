@@ -80,7 +80,7 @@ export declare type Connection = {
 export const connect = async ({ store, client }: { store: Store; client: Client }): Promise<Connection> => {
   let firstConnection = false
   const { state, saveCreds, dataStore } = store
-  const browser: WABrowserDescription = [release(), 'Baileys', 'Cloud API']
+  const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
