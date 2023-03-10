@@ -16,6 +16,15 @@ RUN yarn build
 
 FROM node:18-alpine
 
+LABEL \
+  maintainer="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
+  org.opencontainers.image.title="Baileys Cloud API" \
+  org.opencontainers.image.description="Baileys Cloud API" \
+  org.opencontainers.image.authors="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
+  org.opencontainers.image.url="https://github.com/clairton/baileys-cloud-api" \
+  org.opencontainers.image.vendor="https://clairton.eti.br" \
+  org.opencontainers.image.licenses="GPLv3"
+
 ENV NODE_ENV=production
 
 RUN addgroup -S bca && adduser -S bca -G bca

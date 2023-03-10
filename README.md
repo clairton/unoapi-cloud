@@ -143,6 +143,27 @@ with:
 * 4 - Unknown baileys status
 * 5 - Wait a moment, connecting process 
 
+## Up for development
+
+A `docker-compose.yml` file is available:
+
+```
+docker compose up
+```
+
+Visit `http://localhost:9876/ping` wil be render a "pong!"
+
+
+## Up for production
+
+A `docker-compose.yml` example for production:
+
+```
+docker compose up
+```
+
+Visit `http://localhost:9876/ping` wil be render a "pong!"
+
 ## Environment Variables
 
 The ENV Configurations put default value and the format and same name of configs:
@@ -159,6 +180,8 @@ BASE_URL=current base url to download medias
 I can't guarantee or can be held responsible if you get blocked or banned by
 using this software. WhatsApp does not allow bots using unofficial methods on
 their platform, so this shouldn't be considered totally safe.
+
+Released under the GPLv3 License.
 
 ## Legal
 
