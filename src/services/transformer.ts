@@ -1,4 +1,4 @@
-import { AnyMessageContent } from '@adiwajshing/baileys'
+import { AnyMessageContent, isJidUser } from '@adiwajshing/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -81,7 +81,7 @@ export const phoneNumberToJid = (phoneNumber: string) => {
 }
 
 export const isIndividualJid = (jid: string) => {
-  const isIndividual = jid.indexOf('@s.whatsapp.net') >= 0
+  const isIndividual = isJidUser(jid)
   console.debug('jid %s is individual? %s', jid, isIndividual)
   return isIndividual
 }

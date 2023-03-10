@@ -2,33 +2,40 @@ import { AnyMessageContent, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { connect } from './socket'
-import { Client } from './client'
+import { Client, ConnectionInProgress } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { getClient } from './client'
+import { DataStore, dataStores } from './data_store'
 
 const clients: Map<string, Client> = new Map()
+const process: Map<string, boolean> = new Map()
 
 export const getClientBaileys: getClient = async (phone: string, outgoing: Outgoing, getStore: getStore): Promise<Client> => {
   if (!clients.has(phone)) {
-    console.debug('Creating client baileys %s', phone)
-    const store: Store = await getStore(phone)
-    const client = new ClientBaileys(phone, store, outgoing)
-    await client.connect()
-    console.debug('Client baileys created and connected %s', phone)
-    clients.set(phone, client)
+    if (process.has(phone)) {
+      throw new ConnectionInProgress(`Connection with number ${phone} already in progress, please wait!`)
+    } else {
+      process.set(phone, true)
+      console.info('Creating client baileys %s', phone)
+      const store: Store = await getStore(phone)
+      const client = new ClientBaileys(phone, store, outgoing)
+      await client.connect()
+      console.info('Client baileys created and connected %s', phone)
+      clients.set(phone, client)
+      process.delete(phone)
+    }
   } else {
     console.debug('Retrieving client baileys %s', phone)
   }
   return clients.get(phone) as Client
 }
 
-export class ClientBaileys implements Client {
+class ClientBaileys implements Client {
   public phone: string
   private sock: WASocket | undefined
   private outgoing: Outgoing
   private store: Store | undefined
-  private connecting = false
 
   constructor(phone: string, store: Store, outgoing: Outgoing) {
     this.phone = phone
@@ -37,11 +44,11 @@ export class ClientBaileys implements Client {
   }
 
   async connect() {
-    if (!this.connecting && this.store) {
+    if (this.store) {
+      console.info('Client connecting...')
       try {
-        this.connecting = true
         const connection = await connect({ store: this.store, client: this })
-        this.connecting = false
+        console.info('Client connected!')
         this.sock = connection?.sock
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -51,16 +58,20 @@ export class ClientBaileys implements Client {
         }
       }
     } else {
-      throw 'Connection process in progress, please read a QRcode and wait'
+      const error = 'Connection process in progress, please read a QRcode and wait'
+      console.info(error)
+      throw error
     }
   }
 
   async disconnect() {
     this.sock = undefined
     this.store = undefined
-    this.connecting = false
+    // clean cache
     clients.delete(this.phone)
     stores.delete(this.phone)
+    process.delete(this.phone)
+    dataStores.delete(this.phone)
   }
 
   async sendStatus(text: string) {
@@ -77,21 +88,19 @@ export class ClientBaileys implements Client {
     return this.outgoing.sendOne(this.phone, payload)
   }
 
+  getDataStore(): DataStore {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.store!.dataStore!
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async send(payload: any) {
     const { status, type, to } = payload
     if (!this.sock) {
-      let code, title
-      if (this.connecting) {
-        code = 4
-        title = 'Connection process in progress, please read a QRcode and wait'
-        await this.sendStatus(title)
-      } else {
-        code = 3
-        title = 'Please, read the QRCode!'
-        await this.sendStatus(title)
-        this.connect()
-      }
+      const code = 3
+      const title = 'Please, read the QRCode!'
+      await this.sendStatus(title)
+      this.connect()
       const id = uuid()
       // @TODO this.outgoing.sendOne(this.phone, payload) to update message with failed
       return {

@@ -1,5 +1,7 @@
 import { makeInMemoryStore, WAMessage, WAMessageKey } from '@adiwajshing/baileys'
 
+export const dataStores: Map<string, DataStore> = new Map()
+
 export interface getDataStore {
   (phone: string, config: object): DataStore
 }

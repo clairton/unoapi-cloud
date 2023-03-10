@@ -1,7 +1,7 @@
 import makeWASocket, {
   DisconnectReason,
   WASocket,
-  isJidBroadcast,
+  isJidStatusBroadcast,
   UserFacingSocketConfig,
   ConnectionState,
   WAMessage,
@@ -88,7 +88,7 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
-    shouldIgnoreJid: (jid: string) => isJidBroadcast(jid),
+    shouldIgnoreJid: (jid: string) => isJidStatusBroadcast(jid),
     browser,
     defaultQueryTimeoutMs: 60_000,
     qrTimeout: 60_000,

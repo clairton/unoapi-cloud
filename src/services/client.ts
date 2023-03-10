@@ -1,8 +1,15 @@
+import { DataStore } from './data_store'
 import { Outgoing } from './outgoing'
 import { getStore } from './store'
 
 export interface getClient {
   (phone: string, outgoing: Outgoing, getStore: getStore): Promise<Client>
+}
+
+export class ConnectionInProgress extends Error {
+  constructor(message: string) {
+    super(message)
+  }
 }
 
 export interface Client {
@@ -11,6 +18,8 @@ export interface Client {
   connect(): Promise<void>
 
   disconnect(): Promise<void>
+
+  getDataStore(): DataStore
 
   sendStatus(text: string): Promise<void>
 

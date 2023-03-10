@@ -1,4 +1,4 @@
-import { getClient } from './client'
+import { getClient, ConnectionInProgress } from './client'
 import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
 import { getStore } from './store'
@@ -18,7 +18,16 @@ export const autoConnect = async (
       const phone = phones[i]
       try {
         console.info(`Auto connecting phone ${phone}...`)
-        await getClient(phone, outgoing, getStore)
+        try {
+          await getClient(phone, outgoing, getStore)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (e: any) {
+          if (e instanceof ConnectionInProgress) {
+            console.info(`Connection already in progress ${phone}...`)
+          } else {
+            throw e
+          }
+        }
         console.info(`Auto connected phone ${phone}!`)
       } catch (error) {
         console.error(`Error on connect phone ${phone}`, error)

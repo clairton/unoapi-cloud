@@ -18,21 +18,19 @@ import { existsSync, mkdirSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import mime from 'mime-types'
-import { getDataStore } from './data_store'
+import { getDataStore, dataStores } from './data_store'
 
 export const MEDIA_DIR = './data/medias'
 
-const stores: Map<string, DataStore> = new Map()
-
 export const getDataStoreFile: getDataStore = (phone: string, config: object): DataStore => {
-  if (!stores.has(phone)) {
+  if (!dataStores.has(phone)) {
     console.debug('Creating file data store %s', phone)
     const store = dataStoreFile(phone, config)
-    stores.set(phone, store)
+    dataStores.set(phone, store)
   } else {
     console.debug('Retrieving file data store %s', phone)
   }
-  return stores.get(phone) as DataStore
+  return dataStores.get(phone) as DataStore
 }
 
 export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
@@ -97,7 +95,7 @@ const saveMedia = async (phone: string, waMessage: WAMessage) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const dataStoreFile = (phone: string, config: any): DataStore => {
+const dataStoreFile = (phone: string, config: any): DataStore => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const store = makeInMemoryStore(config)
   const dataStore = store as DataStore
