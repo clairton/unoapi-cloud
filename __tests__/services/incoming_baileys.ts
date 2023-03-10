@@ -1,10 +1,7 @@
 import { IncomingBaileys } from '../../src/services/incoming_baileys'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
-import { ClientBaileys } from '../../src/services/client_baileys'
 import { getClient, Client } from '../../src/services/client'
-jest.mock('../../src/services/client_baileys')
-const mockClient = jest.mocked(ClientBaileys)
 
 class DummyOutgoing implements Outgoing {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -21,18 +18,17 @@ class DummyClient implements Client {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async connect(): Promise<void> { }
-  async disconnect(): Promise<void> {
-    throw new Error('Method not implemented.')
-  }
+  async connect(): Promise<void> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async disconnect(): Promise<void> {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  async sendStatus(text: string): Promise<void> { }
+  async sendStatus(text: string): Promise<void> {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   async send(payload: any): Promise<any> {
     return true
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  async receive(messages: object[]): Promise<void> { }
+  async receive(messages: object[], update: boolean): Promise<void> {}
 }
 
 const dummyClient = new DummyClient()
@@ -41,13 +37,9 @@ const dummyClient = new DummyClient()
 const getClientDummy: getClient = async (phone: string, outgoing: Outgoing): Promise<Client> => {
   return dummyClient
 }
-beforeEach(() => {
-  mockClient.mockClear()
-})
 
 describe('service incoming baileys', () => {
   test('send', async () => {
-    expect(ClientBaileys).not.toHaveBeenCalled()
     const phone = `${new Date().getTime()}`
     const service: Outgoing = new DummyOutgoing()
     const baileys: Incoming = new IncomingBaileys(service, getClientDummy)

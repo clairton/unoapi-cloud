@@ -6,7 +6,7 @@ import { Client, ConnectionInProgress } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { getClient } from './client'
-import { DataStore, dataStores } from './data_store'
+import { dataStores } from './data_store'
 
 const clients: Map<string, Client> = new Map()
 const process: Map<string, boolean> = new Map()
@@ -86,11 +86,6 @@ class ClientBaileys implements Client {
       messageTimestamp: new Date().getTime(),
     }
     return this.outgoing.sendOne(this.phone, payload)
-  }
-
-  getDataStore(): DataStore {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.store!.dataStore!
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

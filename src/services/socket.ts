@@ -99,7 +99,7 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
     listener(payload.messages, false)
   })
   sock.ev.on('messages.update', (messages: object[]) => {
-    console.debug('messages.upsert', client.phone, JSON.stringify(messages, null, ' '))
+    console.debug('messages.update', client.phone, JSON.stringify(messages, null, ' '))
     listener(messages)
   })
   sock.ev.on('message-receipt.update', (messages: object[]) => {
