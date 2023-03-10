@@ -16,9 +16,8 @@ import { DataStore } from './data_store'
 import { v1 as uuid } from 'uuid'
 import QRCode from 'qrcode'
 import { release } from 'os'
-import { phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { phoneNumberToJid } from './transformer'
 const counts: Map<string, number> = new Map()
-const connectings: Map<string, number> = new Map()
 const max = 6
 
 const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) => {
@@ -46,12 +45,9 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
   }
   await dataStore.setMessage(remoteJid, waMessage)
   await dataStore.setKey(mediaKey, waMessageKey)
-  await dataStore.saveMedia(waMessage)
-  delete waMessage.message?.imageMessage?.url
-  await client.receive([waMessage])
+  await client.receive([waMessage], false)
   if ((counts.get(client.phone) || 0) >= max) {
     counts.delete(client.phone)
-    connectings.delete(client.phone)
     return false
   }
   return true
@@ -84,7 +80,7 @@ export declare type Connection = {
 export const connect = async ({ store, client }: { store: Store; client: Client }): Promise<Connection> => {
   let firstConnection = false
   const { state, saveCreds, dataStore } = store
-  const browser: WABrowserDescription = ['Baileys', 'Cloud API', release()]
+  const browser: WABrowserDescription = [release(), 'Baileys', 'Cloud API']
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
@@ -96,30 +92,23 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)
   sock.ev.on('creds.update', saveCreds)
-  const listener = (messages: object[]) => client.receive(messages)
+  const listener = (messages: object[], update = true) => client.receive(messages, update)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.upsert', async (payload: any) => {
-    const messages = await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      payload.messages.map(async (m: any) => {
-        const { key } = m
-        if (!isIndividualJid(key.remoteJid)) {
-          m.groupMetadata = dataStore.groupMetadata[key.remoteJid] || (await dataStore.fetchGroupMetadata(key.remoteJid, sock))
-        }
-        const messageType = getMessageType(m)
-        if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-          const i: WAMessage = m as WAMessage
-          dataStore.saveMedia(i)
-        }
-        return m
-      }),
-    )
+    console.debug('messages.upsert', client.phone, JSON.stringify(payload, null, ' '))
+    listener(payload.messages, false)
+  })
+  sock.ev.on('messages.update', (messages: object[]) => {
+    console.debug('messages.upsert', client.phone, JSON.stringify(messages, null, ' '))
     listener(messages)
   })
-  sock.ev.on('messages.update', listener)
-  sock.ev.on('message-receipt.update', listener)
+  sock.ev.on('message-receipt.update', (messages: object[]) => {
+    console.debug('message-receipt.update', client.phone, JSON.stringify(messages, null, ' '))
+    listener(messages)
+  })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.delete', (update: any) => {
+    console.debug('messages.delete', client.phone, JSON.stringify(update, null, ' '))
     const keys = update.keys || []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload = keys.map((key: any) => {

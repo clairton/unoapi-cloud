@@ -1,9 +1,9 @@
-import { AnyMessageContent, WASocket } from '@adiwajshing/baileys'
+import { AnyMessageContent, WASocket, WAMessage } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { connect } from './socket'
 import { Client, ConnectionInProgress } from './client'
-import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { getClient } from './client'
 import { DataStore, dataStores } from './data_store'
@@ -201,8 +201,31 @@ class ClientBaileys implements Client {
     }
   }
 
-  async receive(messages: object[]) {
-    return this.outgoing.sendMany(this.phone, messages)
+  async receive(messages: object[], update = true) {
+    let m
+    if (update) {
+      m = messages
+    } else {
+      m = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        messages.map(async (m: any) => {
+          const { key } = m
+          if (!isIndividualJid(key.remoteJid)) {
+            m.groupMetadata = this.store?.dataStore.groupMetadata[key.remoteJid]
+            if (!m.groupMetadata) {
+              m.groupMetadata = await this.store?.dataStore.fetchGroupMetadata(key.remoteJid, this.sock)
+            }
+          }
+          const messageType = getMessageType(m)
+          if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+            const i: WAMessage = m as WAMessage
+            await this.store?.dataStore.saveMedia(i)
+          }
+          return m
+        }),
+      )
+    }
+    return this.outgoing.sendMany(this.phone, m)
   }
 
   private async toJid(phoneNumber: string) {
