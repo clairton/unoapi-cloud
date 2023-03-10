@@ -2,7 +2,7 @@ import { AnyMessageContent, WASocket, WAMessage } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { connect, Connection } from './socket'
-import { Client, ConnectionInProgress } from './client'
+import { Client, ConnectionInProgress, ClientConfig, defaultClientConfig } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { getClient } from './client'
@@ -11,7 +11,7 @@ import { dataStores } from './data_store'
 const clients: Map<string, Client> = new Map()
 const process: Map<string, boolean> = new Map()
 
-export const getClientBaileys: getClient = async (phone: string, outgoing: Outgoing, getStore: getStore): Promise<Client> => {
+export const getClientBaileys: getClient = async (phone: string, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client> => {
   if (!clients.has(phone)) {
     if (process.has(phone)) {
       throw new ConnectionInProgress(`Connection with number ${phone} already in progress, please wait!`)
@@ -19,7 +19,7 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
       process.set(phone, true)
       console.info('Creating client baileys %s', phone)
       const store: Store = await getStore(phone)
-      const client = new ClientBaileys(phone, store, outgoing)
+      const client = new ClientBaileys(phone, store, outgoing, config)
       await client.connect()
       console.info('Client baileys created and connected %s', phone)
       clients.set(phone, client)
@@ -33,14 +33,16 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
 
 class ClientBaileys implements Client {
   public phone: string
+  public config: ClientConfig
   private sock: WASocket | undefined
   private outgoing: Outgoing
   private store: Store | undefined
 
-  constructor(phone: string, store: Store, outgoing: Outgoing) {
+  constructor(phone: string, store: Store, outgoing: Outgoing, config: ClientConfig = defaultClientConfig) {
     this.phone = phone
     this.store = store
     this.outgoing = outgoing
+    this.config = config
   }
 
   async connect() {
@@ -200,7 +202,7 @@ class ClientBaileys implements Client {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messages.map(async (m: any) => {
           const { key } = m
-          if (!isIndividualJid(key.remoteJid)) {
+          if (!this.config.ignoreGroupMessages && !isIndividualJid(key.remoteJid)) {
             m.groupMetadata = this.store?.dataStore.groupMetadata[key.remoteJid]
             if (!m.groupMetadata) {
               m.groupMetadata = await this.store?.dataStore.fetchGroupMetadata(key.remoteJid, this.sock)

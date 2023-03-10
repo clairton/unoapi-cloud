@@ -90,7 +90,7 @@ Message status update on this
 https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#message-status-updates
 
 To turn possible work with group, we add two fields(group_id, group_subject) in
-message beside cloud api format.
+message beside cloud api format if `IGNORE_GROUP_MESSAGES` is `false`.
 
 ```json
 {
@@ -183,6 +183,7 @@ WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 BASE_URL=current base url to download medias
 PORT=the http port
+IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 ```
 
 ## Note

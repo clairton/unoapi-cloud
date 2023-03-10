@@ -2,7 +2,7 @@ import { Outgoing } from './outgoing'
 import { getStore } from './store'
 
 export interface getClient {
-  (phone: string, outgoing: Outgoing, getStore: getStore): Promise<Client>
+  (phone: string, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client>
 }
 
 export class ConnectionInProgress extends Error {
@@ -11,8 +11,17 @@ export class ConnectionInProgress extends Error {
   }
 }
 
+export type ClientConfig = {
+  ignoreGroupMessages: boolean
+}
+
+export const defaultClientConfig: ClientConfig = {
+  ignoreGroupMessages: true,
+}
+
 export interface Client {
   phone: string
+  config: ClientConfig
 
   connect(): Promise<void>
 

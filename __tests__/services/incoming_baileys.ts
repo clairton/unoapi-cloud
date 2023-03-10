@@ -1,7 +1,7 @@
 import { IncomingBaileys } from '../../src/services/incoming_baileys'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
-import { getClient, Client } from '../../src/services/client'
+import { getClient, Client, ClientConfig, defaultClientConfig } from '../../src/services/client'
 
 class DummyOutgoing implements Outgoing {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -12,9 +12,11 @@ class DummyOutgoing implements Outgoing {
 
 class DummyClient implements Client {
   phone: string
+  config: ClientConfig
 
   constructor() {
     this.phone = `${new Date().getTime()}`
+    this.config = defaultClientConfig
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -42,7 +44,7 @@ describe('service incoming baileys', () => {
   test('send', async () => {
     const phone = `${new Date().getTime()}`
     const service: Outgoing = new DummyOutgoing()
-    const baileys: Incoming = new IncomingBaileys(service, getClientDummy)
+    const baileys: Incoming = new IncomingBaileys(service, defaultClientConfig, getClientDummy)
     const payload: object = { humm: new Date().getTime() }
     const send = jest.spyOn(dummyClient, 'send')
     await baileys.send(phone, payload)

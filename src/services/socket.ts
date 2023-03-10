@@ -2,6 +2,7 @@ import makeWASocket, {
   DisconnectReason,
   WASocket,
   isJidStatusBroadcast,
+  isJidGroup,
   UserFacingSocketConfig,
   ConnectionState,
   WAMessage,
@@ -76,12 +77,18 @@ export declare type Connection<T> = {
 }
 
 export const connect = async <T>({ store, client }: { store: Store; client: Client }): Promise<Connection<T>> => {
+  let shouldIgnoreJid
+  if (client.config.ignoreGroupMessages) {
+    shouldIgnoreJid = (jid: string) => isJidStatusBroadcast(jid) || isJidGroup(jid)
+  } else {
+    shouldIgnoreJid = (jid: string) => isJidStatusBroadcast(jid)
+  }
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
-    shouldIgnoreJid: (jid: string) => isJidStatusBroadcast(jid),
+    shouldIgnoreJid,
     browser,
     defaultQueryTimeoutMs: 60_000,
     qrTimeout: 60_000,
