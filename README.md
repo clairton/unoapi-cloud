@@ -158,8 +158,17 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 
 A `docker-compose.yml` example for production:
 
-```
-docker compose up
+```yml
+version: '3'
+
+services:
+  app:
+    image: clairton/baileys-cloud-api:latest
+    volumes:
+      - ./data:/home/bca/app/data
+    deploy:
+      restart_policy:
+        condition: on-failure
 ```
 
 Visit `http://localhost:9876/ping` wil be render a "pong!"
