@@ -6,7 +6,6 @@ import makeWASocket, {
   ConnectionState,
   WAMessage,
   fetchLatestBaileysVersion,
-  delay,
   WABrowserDescription,
 } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
@@ -72,13 +71,11 @@ const disconnectSock = async (sock: WASocket) => {
   }
 }
 
-export declare type Connection = {
-  sock: WASocket
-  firstConnection: boolean
+export declare type Connection<T> = {
+  sock: T
 }
 
-export const connect = async ({ store, client }: { store: Store; client: Client }): Promise<Connection> => {
-  let firstConnection = false
+export const connect = async <T>({ store, client }: { store: Store; client: Client }): Promise<Connection<T>> => {
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
@@ -116,7 +113,7 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
     })
     listener(payload)
   })
-  return new Promise<Connection>((resolve, reject) => {
+  return new Promise<Connection<T>>((resolve, reject) => {
     return sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
       const { connection, lastDisconnect } = update
       if (connection === 'close' && lastDisconnect) {
@@ -127,7 +124,6 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
         if (shouldReconnect) {
           await disconnectSock(sock)
           await client.disconnect()
-          return connect({ store, client })
         } else {
           const message = `The session is removed in Whatsapp App`
           await client.sendStatus(message)
@@ -140,25 +136,17 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
           await dataStore.cleanSession()
           await client.disconnect()
         }
+        if (statusCode === DisconnectReason.restartRequired) {
+          return connect({ store, client })
+        }
       } else if (connection === 'open') {
         const { version, isLatest } = await fetchLatestBaileysVersion()
         const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
         await client.sendStatus(message)
-        const connection: Connection = {
-          sock: sock,
-          firstConnection,
+        const connection: Connection<T> = {
+          sock: sock as T,
         }
-        delay(5_000)
-        if (firstConnection) {
-          firstConnection = false
-          const message = `Successful connect, restarting socket!`
-          await client.sendStatus(message)
-          await disconnectSock(sock)
-          await client.disconnect()
-          return reject(connection)
-        } else {
-          return resolve(connection)
-        }
+        return resolve(connection)
       } else if (update.qr) {
         if (!(await onQrCode(client, dataStore, update.qr))) {
           await disconnectSock(sock)
@@ -170,7 +158,6 @@ export const connect = async ({ store, client }: { store: Store; client: Client 
         const message = `Connnecting...`
         await client.sendStatus(message)
       } else if (update.isNewLogin) {
-        firstConnection = true
         const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
         await client.sendStatus(message)
       } else {

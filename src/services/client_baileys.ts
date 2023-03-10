@@ -1,7 +1,7 @@
 import { AnyMessageContent, WASocket, WAMessage } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
-import { connect } from './socket'
+import { connect, Connection } from './socket'
 import { Client, ConnectionInProgress } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { v1 as uuid } from 'uuid'
@@ -44,23 +44,18 @@ class ClientBaileys implements Client {
   }
 
   async connect() {
-    if (this.store) {
-      console.info('Client connecting...')
-      try {
-        const connection = await connect({ store: this.store, client: this })
-        console.info('Client connected!')
-        this.sock = connection?.sock
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        if (error?.firstConnection) {
-          console.info('First connection, reconnecting...')
-          await this.connect()
-        }
+    console.info('Client connecting...')
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const connection: Connection<WASocket> = await connect({ store: this.store!, client: this })
+      console.info('Client connected!')
+      this.sock = connection?.sock
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error?.firstConnection) {
+        console.info('First connection, reconnecting...')
+        await this.connect()
       }
-    } else {
-      const error = 'Connection process in progress, please read a QRcode and wait'
-      console.info(error)
-      throw error
     }
   }
 
