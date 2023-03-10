@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 import { App } from './app'
 import { IncomingBaileys } from './services/incoming_baileys'
 import { Incoming } from './services/incoming'
@@ -11,7 +14,7 @@ const { WEBHOOK_URL, WEBHOOK_TOKEN, WEBHOOK_HEADER, BASE_URL, PORT } = process.e
 const port: number = parseInt(PORT || '9876')
 
 const cloudApi: Outgoing = new OutgoingCloudApi(
-  WEBHOOK_URL || `http://localhost:${PORT}/webhooks/whatsapp`,
+  WEBHOOK_URL || `http://localhost:${port}/webhooks/whatsapp`,
   WEBHOOK_TOKEN || 'abc123',
   WEBHOOK_HEADER || 'Authorization',
 )
