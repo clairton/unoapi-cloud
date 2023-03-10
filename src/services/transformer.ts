@@ -147,7 +147,6 @@ export const jidToPhoneNumber = (id: any, plus = '+'): string => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fromBaileysMessageContent = (phone: string, payload: any): any => {
   try {
-    console.debug(`fromBaileysMessageContent %s`, JSON.stringify(payload))
     const {
       key: { remoteJid, id: whatsappMessageId, participant, fromMe },
     } = payload
@@ -318,8 +317,8 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           case 1:
           case '1':
           case 'PENDING':
-            cloudApiStatus = 'progress'
-            return
+            cloudApiStatus = 'sent'
+            break
 
           case 2:
           case '2':
@@ -411,6 +410,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       }
       change.value.messages.push(message)
     }
+    console.debug('fromBaileysMessageContent', phone, JSON.stringify(data, null, ' '))
     return data
   } catch (e) {
     console.error('Error on convert baileys to cloud-api', e)
