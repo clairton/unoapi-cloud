@@ -7,5 +7,6 @@ docker-compose.yml
 Dockerfile
 prod.Dockerfile
 README.md
+.env
 node_modules
 yarn-error.log

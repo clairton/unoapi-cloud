@@ -21,8 +21,8 @@ const cloudApi: Outgoing = new OutgoingCloudApi(
 )
 
 const config: ClientConfig = defaultClientConfig
-config.ignoreGroupMessages = !!IGNORE_GROUP_MESSAGES
-config.ignoreBroadcastStatus = !!IGNORE_BROADCAST_STATUS
+config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES === undefined ? true : !!IGNORE_GROUP_MESSAGES
+config.ignoreBroadcastStatus = IGNORE_BROADCAST_STATUS === undefined ? true : !!IGNORE_BROADCAST_STATUS
 
 console.debug('ClientConfig', config)
 

@@ -143,6 +143,8 @@ with:
 
 ## Up for development
 
+Copy .env.example to .env an set your config
+
 A `docker-compose.yml` file is available:
 
 ```sh
