@@ -6,12 +6,14 @@ RUN apk --update --no-cache add git
 
 WORKDIR /app
 
-ADD ./src ./src
 ADD ./package.json ./package.json
-ADD ./tsconfig.json ./tsconfig.json
 ADD ./yarn.lock ./yarn.lock
-
 RUN yarn
+
+
+ADD ./.env ./.env
+ADD ./src ./src
+ADD ./tsconfig.json ./tsconfig.json
 RUN yarn build
 
 FROM node:18-alpine
@@ -33,6 +35,7 @@ WORKDIR /home/bca/app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/yarn.lock ./yarn.lock
+COPY --from=builder /app/.env ./.env
 
 RUN apk --update --no-cache add git
 RUN yarn

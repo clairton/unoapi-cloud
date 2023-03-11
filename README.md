@@ -1,12 +1,10 @@
-# Baileys Cloud API [WIP]
+# Baileys Cloud API
 
 An implementation of Baileys(`https://github.com/adiwajshing/Baileys`) as
 RESTful API service with multi device support with a Whatsapp Cloud API format
 `https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
 The media files are saved in file system at folder data with the session.
-
-Up service for development `docker compose up`
 
 ## Send a Message
 
@@ -147,7 +145,7 @@ with:
 
 A `docker-compose.yml` file is available:
 
-```
+```sh
 docker compose up
 ```
 
@@ -184,6 +182,7 @@ WEBHOOK_HEADER=the webhook header name
 BASE_URL=current base url to download medias
 PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
+IGNORE_BROADCAST_STATUS=false to send stories in socket to webhook, default true
 ```
 
 ## Note

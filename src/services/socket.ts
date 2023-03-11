@@ -76,13 +76,19 @@ export declare type Connection<T> = {
   sock: T
 }
 
+interface IgnoreMessage {
+  (jid: string): boolean
+}
+
 export const connect = async <T>({ store, client }: { store: Store; client: Client }): Promise<Connection<T>> => {
-  let shouldIgnoreJid
+  const ignores: IgnoreMessage[] = []
   if (client.config.ignoreGroupMessages) {
-    shouldIgnoreJid = (jid: string) => isJidStatusBroadcast(jid) || isJidGroup(jid)
-  } else {
-    shouldIgnoreJid = (jid: string) => isJidStatusBroadcast(jid)
+    ignores.push(isJidGroup as IgnoreMessage)
   }
+  if (client.config.ignoreBroadcastStatus) {
+    ignores.push(isJidStatusBroadcast)
+  }
+  const shouldIgnoreJid = (jid: string) => ignores.reduce((acc, f) => (f(jid) ? 0 : acc + 1), 0) > 0
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
