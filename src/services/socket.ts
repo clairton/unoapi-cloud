@@ -77,25 +77,41 @@ export declare type Connection<T> = {
   sock: T
 }
 
-interface IgnoreMessage {
+interface IgnoreJid {
   (jid: string): boolean
 }
 
+interface IgnoreMessage {
+  (message: WAMessage): boolean
+}
+
+const IgnoreOwnMessage: IgnoreMessage = (message: WAMessage) => {
+  const filter = !message.key.fromMe
+  console.debug('IgnoreOwnMessage: %s => %s', message.key, filter)
+  return filter
+}
+
 export const connect = async <T>({ store, client }: { store: Store; client: Client }): Promise<Connection<T>> => {
-  const ignores: IgnoreMessage[] = []
+  const ignoresJid: IgnoreJid[] = []
+  const ignoresMessage: IgnoreMessage[] = []
   if (client.config.ignoreGroupMessages) {
     console.debug('Config to ignore group messages')
-    ignores.push(isJidGroup as IgnoreMessage)
+    ignoresJid.push(isJidGroup as IgnoreJid)
   }
   if (client.config.ignoreBroadcastStatuses) {
     console.debug('Config to ignore broadcast statuses')
-    ignores.push(isJidStatusBroadcast as IgnoreMessage)
+    ignoresJid.push(isJidStatusBroadcast as IgnoreJid)
   }
   if (client.config.ignoreBroadcastMessages) {
     console.debug('Config to ignore broadcast messages')
-    ignores.push(isJidBroadcast as IgnoreMessage)
+    ignoresJid.push(isJidBroadcast as IgnoreJid)
   }
-  const shouldIgnoreJid = (jid: string) => ignores.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
+  if (client.config.ignoreOwnMessages) {
+    console.debug('Config to ignore own messages')
+    ignoresMessage.push(IgnoreOwnMessage)
+  }
+  const shouldIgnoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
+  const shouldIgnoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
@@ -113,7 +129,8 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.upsert', async (payload: any) => {
     console.debug('messages.upsert', client.phone, JSON.stringify(payload, null, ' '))
-    listener(payload.messages, false)
+    const ms = payload.messages.filter(shouldIgnoreMessage)
+    listener(ms, false)
   })
   sock.ev.on('messages.update', (messages: object[]) => {
     console.debug('messages.update', client.phone, JSON.stringify(messages, null, ' '))

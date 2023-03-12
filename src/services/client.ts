@@ -15,12 +15,14 @@ export type ClientConfig = {
   ignoreGroupMessages: boolean
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
+  ignoreOwnMessages: boolean
 }
 
 export const defaultClientConfig: ClientConfig = {
   ignoreGroupMessages: true,
   ignoreBroadcastStatuses: true,
   ignoreBroadcastMessages: true,
+  ignoreOwnMessages: true,
 }
 
 export interface Client {

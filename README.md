@@ -186,6 +186,7 @@ PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
 IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
+IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
 ```
 
 ## Note
