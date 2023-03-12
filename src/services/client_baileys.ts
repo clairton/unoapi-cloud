@@ -9,21 +9,21 @@ import { getClient } from './client'
 import { dataStores } from './data_store'
 
 const clients: Map<string, Client> = new Map()
-const process: Map<string, boolean> = new Map()
+const connecting: Map<string, boolean> = new Map()
 
 export const getClientBaileys: getClient = async (phone: string, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client> => {
   if (!clients.has(phone)) {
-    if (process.has(phone)) {
+    if (connecting.has(phone)) {
       throw new ConnectionInProgress(`Connection with number ${phone} already in progress, please wait!`)
     } else {
-      process.set(phone, true)
+      connecting.set(phone, true)
       console.info('Creating client baileys %s', phone)
       const store: Store = await getStore(phone)
       const client = new ClientBaileys(phone, store, outgoing, config)
       await client.connect()
       console.info('Client baileys created and connected %s', phone)
       clients.set(phone, client)
-      process.delete(phone)
+      connecting.delete(phone)
     }
   } else {
     console.debug('Retrieving client baileys %s', phone)
@@ -47,18 +47,10 @@ class ClientBaileys implements Client {
 
   async connect() {
     console.info('Client connecting...')
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const connection: Connection<WASocket> = await connect({ store: this.store!, client: this })
-      console.info('Client connected!')
-      this.sock = connection?.sock
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      if (error?.firstConnection) {
-        console.info('First connection, reconnecting...')
-        await this.connect()
-      }
-    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const connection: Connection<WASocket> = await connect({ store: this.store!, client: this })
+    console.info('Client connected!')
+    this.sock = connection?.sock
   }
 
   async disconnect() {
@@ -67,7 +59,7 @@ class ClientBaileys implements Client {
     // clean cache
     clients.delete(this.phone)
     stores.delete(this.phone)
-    process.delete(this.phone)
+    connecting.delete(this.phone)
     dataStores.delete(this.phone)
   }
 

@@ -10,8 +10,8 @@ import { SessionStoreFile } from './services/session_store_file'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { ClientConfig, defaultClientConfig } from './services/client'
-
-const { WEBHOOK_URL, WEBHOOK_TOKEN, WEBHOOK_HEADER, BASE_URL, IGNORE_GROUP_MESSAGES, IGNORE_BROADCAST_STATUSES, IGNORE_BROADCAST_MESSAGES, PORT } = process.env
+const { WEBHOOK_URL, WEBHOOK_TOKEN, WEBHOOK_HEADER, BASE_URL, IGNORE_GROUP_MESSAGES, IGNORE_BROADCAST_STATUSES, IGNORE_BROADCAST_MESSAGES, PORT } =
+  process.env
 const port: number = parseInt(PORT || '9876')
 
 const cloudApi: Outgoing = new OutgoingCloudApi(

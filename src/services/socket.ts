@@ -133,56 +133,56 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
     })
     listener(payload)
   })
-  return new Promise<Connection<T>>((resolve, reject) => {
-    return sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
-      const { connection, lastDisconnect } = update
-      if (connection === 'close' && lastDisconnect) {
-        const statusCode = (lastDisconnect.error as Boom)?.output?.statusCode
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-        console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
-        // reconnect if not logged out
-        if (shouldReconnect) {
-          await disconnectSock(sock)
-          await client.disconnect()
-        } else {
-          const message = `The session is removed in Whatsapp App`
-          await client.sendStatus(message)
-          await disconnectSock(sock)
-          try {
-            await sock?.logout()
-          } catch (error) {
-            console.error('Error on logout', error)
-          }
-          await dataStore.cleanSession()
-          await client.disconnect()
-        }
-        if (statusCode === DisconnectReason.restartRequired) {
-          return connect({ store, client })
-        }
-      } else if (connection === 'open') {
-        const { version, isLatest } = await fetchLatestBaileysVersion()
-        const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
-        await client.sendStatus(message)
-        const connection: Connection<T> = {
-          sock: sock as T,
-        }
-        return resolve(connection)
-      } else if (update.qr) {
-        if (!(await onQrCode(client, dataStore, update.qr))) {
-          await disconnectSock(sock)
-          const message = `The ${max} times of generate qrcode is exceded!`
-          await client.sendStatus(message)
-          return reject(message)
-        }
-      } else if (connection === 'connecting') {
-        const message = `Connnecting...`
-        await client.sendStatus(message)
-      } else if (update.isNewLogin) {
-        const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
-        await client.sendStatus(message)
+
+  sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
+    const { connection, lastDisconnect } = update
+    if (connection === 'close' && lastDisconnect) {
+      const statusCode = (lastDisconnect.error as Boom)?.output?.statusCode
+      const shouldReconnect = statusCode !== DisconnectReason.loggedOut
+      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
+      // reconnect if not logged out
+      if (shouldReconnect) {
+        await disconnectSock(sock)
+        try {
+          setTimeout(() => {
+            client.connect()
+          }, 1_000)
+        } catch (error) {}
       } else {
-        console.debug('connection.update', update)
+        const message = `The session is removed in Whatsapp App`
+        await client.sendStatus(message)
+        await disconnectSock(sock)
+        try {
+          await sock?.logout()
+        } catch (error) {
+          console.error('Error on logout', error)
+        }
+        await dataStore.cleanSession()
+        await client.disconnect()
       }
-    })
+    } else if (connection === 'open') {
+      const { version, isLatest } = await fetchLatestBaileysVersion()
+      const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
+      await client.sendStatus(message)
+    } else if (update.qr) {
+      if (!(await onQrCode(client, dataStore, update.qr))) {
+        await disconnectSock(sock)
+        const message = `The ${max} times of generate qrcode is exceded!`
+        await client.sendStatus(message)
+        throw message
+      }
+    } else if (connection === 'connecting') {
+      const message = `Connnecting...`
+      await client.sendStatus(message)
+    } else if (update.isNewLogin) {
+      const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
+      await client.sendStatus(message)
+    } else {
+      console.debug('connection.update', update)
+    }
   })
+  const connection: Connection<T> = {
+    sock: sock as T,
+  }
+  return connection
 }
