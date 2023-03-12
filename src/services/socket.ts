@@ -88,7 +88,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   if (client.config.ignoreBroadcastStatus) {
     ignores.push(isJidStatusBroadcast)
   }
-  const shouldIgnoreJid = (jid: string) => ignores.reduce((acc, f) => (f(jid) ? 0 : acc + 1), 0) > 0
+  const shouldIgnoreJid = (jid: string) => ignores.reduce((acc, f) => (f(jid) ? 0 : acc + 1), 0) === 0
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
