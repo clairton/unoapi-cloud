@@ -184,7 +184,8 @@ WEBHOOK_HEADER=the webhook header name
 BASE_URL=current base url to download medias
 PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
-IGNORE_BROADCAST_STATUS=false to send stories in socket to webhook, default true
+IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
+IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
 ```
 
 ## Note

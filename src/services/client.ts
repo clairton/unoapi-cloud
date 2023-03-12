@@ -13,12 +13,14 @@ export class ConnectionInProgress extends Error {
 
 export type ClientConfig = {
   ignoreGroupMessages: boolean
-  ignoreBroadcastStatus: boolean
+  ignoreBroadcastMessages: boolean
+  ignoreBroadcastStatuses: boolean
 }
 
 export const defaultClientConfig: ClientConfig = {
   ignoreGroupMessages: true,
-  ignoreBroadcastStatus: true,
+  ignoreBroadcastStatuses: true,
+  ignoreBroadcastMessages: true,
 }
 
 export interface Client {

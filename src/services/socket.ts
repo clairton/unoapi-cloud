@@ -3,6 +3,7 @@ import makeWASocket, {
   WASocket,
   isJidStatusBroadcast,
   isJidGroup,
+  isJidBroadcast,
   UserFacingSocketConfig,
   ConnectionState,
   WAMessage,
@@ -83,12 +84,18 @@ interface IgnoreMessage {
 export const connect = async <T>({ store, client }: { store: Store; client: Client }): Promise<Connection<T>> => {
   const ignores: IgnoreMessage[] = []
   if (client.config.ignoreGroupMessages) {
+    console.debug('Config to ignore group messages')
     ignores.push(isJidGroup as IgnoreMessage)
   }
-  if (client.config.ignoreBroadcastStatus) {
-    ignores.push(isJidStatusBroadcast)
+  if (client.config.ignoreBroadcastStatuses) {
+    console.debug('Config to ignore broadcast statuses')
+    ignores.push(isJidStatusBroadcast as IgnoreMessage)
   }
-  const shouldIgnoreJid = (jid: string) => ignores.reduce((acc, f) => (f(jid) ? 0 : acc + 1), 0) === 0
+  if (client.config.ignoreBroadcastMessages) {
+    console.debug('Config to ignore broadcast messages')
+    ignores.push(isJidBroadcast as IgnoreMessage)
+  }
+  const shouldIgnoreJid = (jid: string) => ignores.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
