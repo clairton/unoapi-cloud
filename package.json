@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "repository": "github.com/clairton/unoapi-cloud",
   "author": "Clairton Rodrig Heinzen<clairton.rodrigo@gmail.com>",
-  "license": "MIT",
+  "license": "GPLv3",
   "private": false,
   "scripts": {
     "dev": "./node_modules/nodemon/bin/nodemon.js",
