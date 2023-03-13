@@ -216,12 +216,12 @@ class ClientBaileys implements Client {
     const bindJid: string = phoneNumberToJid(phoneNumber)
     if (isIndividualJid(bindJid)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const jid = await this.store?.dataStore?.getJid(bindJid, this.sock!)
+      const jid = await this.store?.dataStore?.getJid(phoneNumber, this.sock!)
       if (jid) {
-        console.debug(`${bindJid} exists on WhatsApp, as jid: ${jid}`)
+        console.debug(`${phoneNumber} exists on WhatsApp, as jid: ${jid}`)
         return jid
       } else {
-        console.warn(`${bindJid} not exists on WhatsApp`)
+        console.warn(`${phoneNumber} not exists on WhatsApp`)
         return ''
       }
     }
