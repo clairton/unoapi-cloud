@@ -4,7 +4,7 @@ services:
   app:
     build:
       dockerfile: Dockerfile
-      args:
+    environment:
         NODE_ENV: 'development'
     volumes:
       - ./:/app

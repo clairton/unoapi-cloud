@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "nodemon",
+    "dev": "./node_modules/nodemon/bin/nodemon.js",
     "start": "node dist/index.js",
     "lint": "eslint src",
     "test": "ENV_FILE=./.env.test jest --coverage",
