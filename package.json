@@ -1,6 +1,6 @@
 {
   "name": "baileys-cloud-api",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Baileys Cloud API",
   "main": "src/index.ts",
   "repository": "github.com/clairton/baileys-cloud-api",
