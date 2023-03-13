@@ -1,10 +1,10 @@
-# Baileys Cloud API with Chatwoot
+# Unoapi Cloud with Chatwoot
 
 Get the chatwoot source or image and change the env `WHATSAPP_CLOUD_BASE_URL=http://localhost:9876` and up.
 
 Copy the token ![image](prints/copy_token.png)
 
-Clone de Baileys Cloud API project and run `yarn`.
+Clone de Unoapi Cloud project and run `yarn`.
 
 Now up him with and `WEBHOOK_URL=http://localhost:3000/webhooks/whatsapp WEBHOOK_TOKEN=the_chatwoot_token WEBHOOK_HEADER=api_access_token yarn dev`(for production `yarn build` and after `yarn start`). Change the_chatwoot_token for your token,
 

@@ -508,7 +508,7 @@ describe('service transformer', () => {
                     errors: [
                       {
                         code: 1,
-                        title: 'The Baileys CLOUD API has a error, verify the logs',
+                        title: 'The Unoapi Cloud has a error, verify the logs',
                       },
                     ],
                     id,

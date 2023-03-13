@@ -393,7 +393,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         // https://github.com/tawn33y/whatsapp-cloud-api/issues/40#issuecomment-1290036629
         const error = {
           code: payload?.update?.code || 1,
-          title: payload?.update?.title || 'The Baileys CLOUD API has a error, verify the logs',
+          title: payload?.update?.title || 'The Unoapi Cloud has a error, verify the logs',
         }
         state.errors = [error]
       }

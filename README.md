@@ -1,4 +1,4 @@
-# Baileys Cloud API
+# Unoapi Cloud
 
 An implementation of Baileys(`https://github.com/adiwajshing/Baileys`) as
 RESTful API service with multi device support with a Whatsapp Cloud API format
@@ -163,7 +163,7 @@ version: '3'
 
 services:
   app:
-    image: clairton/baileys-cloud-api:latest
+    image: clairton/unoapi-cloud:latest
     volumes:
       - ./data:/home/bca/app/data
     deploy:

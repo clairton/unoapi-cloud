@@ -113,7 +113,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   const shouldIgnoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
   const shouldIgnoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
   const { state, saveCreds, dataStore } = store
-  const browser: WABrowserDescription = ['Baileys Cloud API', 'Chrome', release()]
+  const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,

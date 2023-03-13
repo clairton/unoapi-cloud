@@ -41,7 +41,7 @@ const baileys: Incoming = new IncomingBaileys(cloudApi, config)
 const app: App = new App(baileys, BASE_URL || `http://localhost:${port}`)
 
 app.server.listen(port, '0.0.0.0', async () => {
-  console.info('Baileys Cloud API listening on port:', port)
+  console.info('Unoapi Cloud listening on port:', port)
   console.info('Successful started app!')
   const sessionStore: SessionStore = new SessionStoreFile()
   autoConnect(sessionStore, cloudApi)
