@@ -9,6 +9,7 @@ import {
   WAMessageUpdate,
   MessageUpsertType,
   WAMessageKey,
+  WASocket,
 } from '@adiwajshing/baileys'
 import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
@@ -97,6 +98,7 @@ const saveMedia = async (phone: string, waMessage: WAMessage) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const dataStoreFile = (phone: string, config: any): DataStore => {
   const keys: Map<string, proto.IMessageKey> = new Map()
+  const jids: Map<string, string> = new Map()
   const store = makeInMemoryStore(config)
   const dataStore = store as DataStore
   const { bind, toJSON, fromJSON } = store
@@ -104,12 +106,14 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     return {
       ...toJSON(),
       keys: keys.values(),
+      jids,
     }
   }
   store.fromJSON = (json) => {
     fromJSON(json)
     const jsonData = json as {
       keys: proto.IMessageKey[]
+      jids: Map<string, string>
       chats: Chat[]
       contacts: { [id: string]: Contact }
       messages: { [id: string]: WAMessage[] }
@@ -146,6 +150,20 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   }
   dataStore.setKey = (id: string, key: WAMessageKey) => {
     return keys.set(id, key)
+  }
+  dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
+    if (!jids.has(phoneOrJid)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const results = await sock.onWhatsApp!(phoneOrJid)
+      const result = results && results[0]
+      if (result && result.exists) {
+        console.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
+        jids.set(phoneOrJid, result.jid)
+      } else {
+        console.warn(`${phoneOrJid} not exists on WhatsApp`)
+      }
+    }
+    return jids.get(phoneOrJid) || ''
   }
   dataStore.setMessage = (id: string, message: WAMessage) => {
     if (!store.messages[id]) {
