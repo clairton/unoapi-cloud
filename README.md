@@ -189,13 +189,10 @@ IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook,
 IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
 ```
 
-## Note
+## Examples
 
-I can't guarantee or can be held responsible if you get blocked or banned by
-using this software. WhatsApp does not allow bots using unofficial methods on
-their platform, so this shouldn't be considered totally safe.
+[Integration with Chatwoot](examples/chatwoot/README.md)
 
-Released under the GPLv3 License.
 
 ## Legal
 
@@ -206,6 +203,14 @@ Released under the GPLv3 License.
   of their respective owners.
 - This is an independent and unofficial software Use at your own risk.
 - Do not spam people with this.
+
+## Note
+
+I can't guarantee or can be held responsible if you get blocked or banned by
+using this software. WhatsApp does not allow bots using unofficial methods on
+their platform, so this shouldn't be considered totally safe.
+
+Released under the GPLv3 License.
 
 ## Need More
 
