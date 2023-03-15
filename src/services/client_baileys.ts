@@ -149,7 +149,7 @@ class ClientBaileys implements Client {
               {
                 conversation: {
                   id: jid,
-                  expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                  // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
                 },
                 id,
                 recipient_id: to,

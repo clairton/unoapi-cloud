@@ -386,7 +386,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       const state: any = {
         conversation: {
           id: chatJid,
-          expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+          // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
         },
         id: messageId,
         recipient_id: phone.replace('+', ''),

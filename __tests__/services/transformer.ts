@@ -355,6 +355,10 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 statuses: [
                   {
+                    conversation: {
+                      // expiration_timestamp: 1681504976647,
+                      id: remoteJid,
+                    },
                     id,
                     recipient_id: phoneNumer,
                     status: 'sent',
@@ -405,6 +409,10 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 statuses: [
                   {
+                    conversation: {
+                      id: remoteJid,
+                      // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                    },
                     id,
                     recipient_id: phoneNumer,
                     status: 'deleted',
@@ -455,6 +463,10 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 statuses: [
                   {
+                    conversation: {
+                      id: remoteJid,
+                      // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                    },
                     id,
                     recipient_id: phoneNumer,
                     status: 'read',
@@ -505,6 +517,10 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 statuses: [
                   {
+                    conversation: {
+                      id: remoteJid,
+                      // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                    },
                     errors: [
                       {
                         code: 1,
@@ -561,6 +577,10 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 statuses: [
                   {
+                    conversation: {
+                      id: remoteJid,
+                      // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                    },
                     id,
                     recipient_id: phoneNumer,
                     status: 'read',
@@ -611,6 +631,10 @@ describe('service transformer', () => {
                 contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
                 statuses: [
                   {
+                    conversation: {
+                      id: remoteJid,
+                      // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                    },
                     id,
                     recipient_id: phoneNumer,
                     status: 'delivered',
