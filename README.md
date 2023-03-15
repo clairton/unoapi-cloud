@@ -165,7 +165,7 @@ services:
   app:
     image: clairton/unoapi-cloud:latest
     volumes:
-      - ./data:/home/bca/app/data
+      - ./data:/home/u/app/data
     deploy:
       restart_policy:
         condition: on-failure
