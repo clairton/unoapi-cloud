@@ -147,6 +147,10 @@ class ClientBaileys implements Client {
             ],
             statuses: [
               {
+                conversation: {
+                  id: jid,
+                  expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+                },
                 id,
                 recipient_id: to,
                 status: 'failed',

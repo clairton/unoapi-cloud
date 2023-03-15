@@ -384,6 +384,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       const messageId = whatsappMessageId
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const state: any = {
+        conversation: {
+          id: chatJid,
+          expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
+        },
         id: messageId,
         recipient_id: phone.replace('+', ''),
         status: cloudApiStatus,
