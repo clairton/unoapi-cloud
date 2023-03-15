@@ -30,11 +30,6 @@ ENV NODE_ENV=production
 RUN addgroup -S u && adduser -S u -G u
 WORKDIR /home/u/app
 
-RUN mkdir /home/u/app/data
-RUN mkdir /home/u/app/data/sessions
-RUN mkdir /home/u/app/data/stores
-RUN mkdir /home/u/app/data/medias
-
 VOLUME /home/u/app/data
 
 COPY --from=builder /app/dist ./dist
