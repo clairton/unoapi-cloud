@@ -1,4 +1,6 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
+
+ENV NODE_ENV=development
 
 RUN apk --update --no-cache add git
 
@@ -8,8 +10,39 @@ ADD ./package.json ./package.json
 ADD ./yarn.lock ./yarn.lock
 RUN yarn
 
-ADD ./tsconfig.json ./tsconfig.json
 ADD ./src ./src
+ADD ./tsconfig.json ./tsconfig.json
 RUN yarn build
 
-ENTRYPOINT yarn dev
+FROM node:18-alpine
+
+LABEL \
+  maintainer="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
+  org.opencontainers.image.title="Unoapi Cloud" \
+  org.opencontainers.image.description="Unoapi Cloud" \
+  org.opencontainers.image.authors="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
+  org.opencontainers.image.url="https://github.com/clairton/unoapi-cloud" \
+  org.opencontainers.image.vendor="https://clairton.eti.br" \
+  org.opencontainers.image.licenses="GPLv3"
+
+ENV NODE_ENV=production
+
+RUN addgroup -S u && adduser -S u -G u
+WORKDIR /home/u/app
+
+RUN mkdir /home/u/app/data
+RUN mkdir /home/u/app/data/sessions
+RUN mkdir /home/u/app/data/stores
+RUN mkdir /home/u/app/data/medias
+
+VOLUME /home/u/app/data
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
+
+RUN apk --update --no-cache add git
+RUN yarn
+RUN apk del git
+
+ENTRYPOINT yarn start

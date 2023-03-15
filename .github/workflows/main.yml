@@ -54,7 +54,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
           context: .
-          file: ./prod.Dockerfile
+          file: ./Dockerfile
           push: true
           tags: |
             ${{ github.repository }}:${{ env.TAG_NAME }}

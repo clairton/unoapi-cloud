@@ -3,7 +3,7 @@ version: '3'
 services:
   app:
     build:
-      dockerfile: Dockerfile
+      dockerfile: develop.Dockerfile
     environment:
         NODE_ENV: 'development'
     volumes:
