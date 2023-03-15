@@ -30,8 +30,6 @@ ENV NODE_ENV=production
 RUN addgroup -S u && adduser -S u -G u
 WORKDIR /home/u/app
 
-VOLUME /home/u/app/data
-
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/yarn.lock ./yarn.lock
