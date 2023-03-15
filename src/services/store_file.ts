@@ -7,6 +7,8 @@ import { existsSync, readFileSync, rmSync, mkdirSync } from 'fs'
 import { SESSION_DIR } from './session_store_file'
 import { getStore, stores } from './store'
 
+const STORE_DIR = `./data/stores`
+
 export const getStoreFile: getStore = async (phone: string): Promise<Store> => {
   if (!stores.has(phone)) {
     console.debug('Creating file store %s', phone)
@@ -19,22 +21,23 @@ export const getStoreFile: getStore = async (phone: string): Promise<Store> => {
 }
 
 const storeFile: store = async (phone: string): Promise<Store> => {
+  const dirs = [SESSION_DIR, MEDIA_DIR, STORE_DIR]
+  dirs.forEach((dir) => {
+    if (!existsSync(dir)) {
+      console.debug(`Creating dir: ${dir}`)
+      mkdirSync(dir, { recursive: true })
+    } else {
+      console.debug(`Using dir: ${dir}`)
+    }
+  })
   const sessionDir = `${SESSION_DIR}/${phone}`
   const mediaDir = `${MEDIA_DIR}/${phone}`
-  const storeDir = `./data/stores`
   console.info(`Store session in directory: ${sessionDir}`)
   console.info(`Store medias in directory: ${mediaDir}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await useMultiFileAuthState(sessionDir)
   const dataStore: DataStore = getDataStoreFile(phone, {}) as DataStore
-  const dataFile = `${storeDir}/${phone}.json`
+  const dataFile = `${STORE_DIR}/${phone}.json`
   console.info(`Store data in file: ${dataFile}`)
-  const dirs = [sessionDir, mediaDir, storeDir]
-  dirs.forEach((dir) => {
-    if (!existsSync(dir)) {
-      console.debug(`Creating dir: ${sessionDir}`)
-      mkdirSync(sessionDir)
-    }
-  })
   if (existsSync(dataFile)) {
     console.debug(`Store data in file already exist: ${dataFile}`)
     const content = readFileSync(dataFile)
