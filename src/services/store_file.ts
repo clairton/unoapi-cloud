@@ -41,7 +41,14 @@ const storeFile: store = async (phone: string): Promise<Store> => {
   if (existsSync(dataFile)) {
     console.debug(`Store data in file already exist: ${dataFile}`)
     const content = readFileSync(dataFile)
-    if (!content.toString()) {
+    if (content.toString()) {
+      try {
+        JSON.parse(content.toString())
+      } catch (e) {
+        console.warn(`Store data in file content is corrupted and was removed: ${dataFile}`)
+        rmSync(dataFile)
+      }
+    } else {
       console.debug(`Store data in file content is empty and was removed: ${dataFile}`)
       rmSync(dataFile)
     }

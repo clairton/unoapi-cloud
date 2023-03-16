@@ -133,24 +133,6 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   const listener = (messages: object[], update = true) => client.receive(messages, update)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.upsert', async (payload: any) => {
-    // {
-    //   "messages": [
-    //    {
-    //     "key": {
-    //      "remoteJid": "554999621461@s.whatsapp.net",
-    //      "fromMe": false,
-    //      "id": "3A417132A47ED89C7AB1"
-    //     },
-    //     "messageTimestamp": 1678983053,
-    //     "pushName": "Silvia Castagna Heinzen",
-    //     "messageStubType": 2,
-    //     "messageStubParameters": [
-    //      "Invalid PreKey ID"
-    //     ]
-    //    }
-    //   ],
-    //   "type": "notify"
-    //  }
     console.debug('messages.upsert', client.phone, JSON.stringify(payload, null, ' '))
     const ms = payload.messages.filter(shouldIgnoreMessage)
     listener(ms, false)
@@ -187,7 +169,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
           setTimeout(() => {
             client.connect()
           }, 1_000)
-        } catch (error) { }
+        } catch (error) {}
       } else {
         const message = `The session is removed in Whatsapp App`
         await client.sendStatus(message)
