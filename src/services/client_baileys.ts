@@ -166,7 +166,7 @@ class ClientBaileys implements Client {
           }
         }
         const content: AnyMessageContent = toBaileysMessageContent(payload)
-        console.debug('Send to baileys', jid, connect)
+        console.debug('Send to baileys', jid, content)
         const response = await this.sock?.sendMessage(jid, content)
         if (response) {
           const key = response.key
