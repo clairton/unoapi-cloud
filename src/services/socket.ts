@@ -9,6 +9,7 @@ import makeWASocket, {
   WAMessage,
   fetchLatestBaileysVersion,
   WABrowserDescription,
+  MessageRetryMap,
 } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
@@ -114,6 +115,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   const shouldIgnoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
+  const msgRetryCounterMap: MessageRetryMap = {}
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
@@ -121,6 +123,9 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
     browser,
     defaultQueryTimeoutMs: 60_000,
     qrTimeout: 60_000,
+    msgRetryCounterMap,
+    connectTimeoutMs: 5 * 60 * 1000,
+    keepAliveIntervalMs: 10_000,
   }
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)
@@ -128,6 +133,24 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   const listener = (messages: object[], update = true) => client.receive(messages, update)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.upsert', async (payload: any) => {
+    // {
+    //   "messages": [
+    //    {
+    //     "key": {
+    //      "remoteJid": "554999621461@s.whatsapp.net",
+    //      "fromMe": false,
+    //      "id": "3A417132A47ED89C7AB1"
+    //     },
+    //     "messageTimestamp": 1678983053,
+    //     "pushName": "Silvia Castagna Heinzen",
+    //     "messageStubType": 2,
+    //     "messageStubParameters": [
+    //      "Invalid PreKey ID"
+    //     ]
+    //    }
+    //   ],
+    //   "type": "notify"
+    //  }
     console.debug('messages.upsert', client.phone, JSON.stringify(payload, null, ' '))
     const ms = payload.messages.filter(shouldIgnoreMessage)
     listener(ms, false)
@@ -164,7 +187,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
           setTimeout(() => {
             client.connect()
           }, 1_000)
-        } catch (error) {}
+        } catch (error) { }
       } else {
         const message = `The session is removed in Whatsapp App`
         await client.sendStatus(message)
