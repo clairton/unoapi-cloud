@@ -36,6 +36,8 @@ export const getMessageType = (payload: any) => {
   } else if (payload.message) {
     const { message } = payload
     return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
+  } else if (payload.messageStubType) {
+    return 'messageStubType'
   }
 }
 
@@ -155,7 +157,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     const senderJid = isIndividual ? chatJid : (participant && formatJid(participant)) || chatJid
     const senderPhone = jidToPhoneNumber(senderJid)
     const messageType = getMessageType(payload)
-    const binMessage = payload.update || payload.receipt || (messageType && payload.message[messageType])
+    const binMessage = payload.update || payload.receipt || (messageType && payload.message && payload.message[messageType])
     let profileName
     if (fromMe) {
       profileName = senderPhone
@@ -302,6 +304,16 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         } else if (receiptTimestamp) {
           cloudApiStatus = 'delivered'
           messageTimestamp = receiptTimestamp
+        }
+        break
+
+      case 'messageStubType':
+        const errors = ['Message absent from node', 'Invalid PreKey ID']
+        if (payload.messageStubType == 2 && payload.messageStubParameters && errors.includes(payload.messageStubParameters[0])) {
+          message.text = {
+            body: 'Error on decrypt the message!',
+          }
+          message.type = 'text'
         }
         break
 

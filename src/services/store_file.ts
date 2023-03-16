@@ -61,7 +61,7 @@ const storeFile: store = async (phone: string): Promise<Store> => {
     try {
       dataStore.readFromFile(dataFile)
     } catch (error) {
-      console.error(`erro on read message stores`, error)
+      console.error(`Error on read data store`, error)
     }
   }
   setInterval(() => {

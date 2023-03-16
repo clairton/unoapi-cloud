@@ -734,4 +734,55 @@ describe('service transformer', () => {
       expect(e.message).toBe(`Unknow message type unknown`)
     }
   })
+
+  test('fromBaileysMessageContent Invalid PreKey ID', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Fernanda ${new Date().getTime()}`
+    const messageTimestamp = new Date().getTime()
+    const input = {
+      key: {
+        remoteJid: remoteJid,
+        fromMe: false,
+        id: id,
+      },
+      messageTimestamp,
+      pushName,
+      messageStubType: 2,
+      messageStubParameters: ['Invalid PreKey ID'],
+    }
+    const body = 'Error on decrypt the message!'
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
+                statuses: [],
+                messages: [
+                  {
+                    from: remotePhoneNumber.replace('+', ''),
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body },
+                    type: 'text',
+                  },
+                ],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
 })
