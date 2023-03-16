@@ -54,7 +54,16 @@ const storeFile: store = async (phone: string): Promise<Store> => {
       rmSync(dataFile)
     }
   }
-  dataStore.readFromFile(dataFile)
+  try {
+    dataStore.readFromFile(dataFile)
+  } catch (error) {
+    console.debug(`Try read ${dataFile} again....`)
+    try {
+      dataStore.readFromFile(dataFile)
+    } catch (error) {
+      console.error(`erro on read message stores`, error)
+    }
+  }
   setInterval(() => {
     dataStore.writeToFile(dataFile), 10_0000
   })
