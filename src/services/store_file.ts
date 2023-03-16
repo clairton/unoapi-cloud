@@ -3,7 +3,7 @@ import { store, Store } from './store'
 import { DataStore } from './data_store'
 import { getDataStoreFile } from './data_store_file'
 import { MEDIA_DIR } from './data_store_file'
-import { existsSync, readFileSync, rmSync, mkdirSync } from 'fs'
+import { existsSync, readFileSync, rmSync, mkdirSync, renameSync } from 'fs'
 import { SESSION_DIR } from './session_store_file'
 import { getStore, stores } from './store'
 
@@ -45,8 +45,9 @@ const storeFile: store = async (phone: string): Promise<Store> => {
       try {
         JSON.parse(content.toString())
       } catch (e) {
-        console.warn(`Store data in file content is corrupted and was removed: ${dataFile}`)
-        rmSync(dataFile)
+        const dest = `${dataFile}.old${new Date().getTime()}`
+        console.warn(`Store data in file: ${dataFile}, content is corrupted and was moved to ${dest}`)
+        renameSync(dataFile, dest)
       }
     } else {
       console.debug(`Store data in file content is empty and was removed: ${dataFile}`)
