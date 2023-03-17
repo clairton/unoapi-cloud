@@ -128,6 +128,15 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   }
   store.bind = async (ev: BaileysEventEmitter) => {
     await bind(ev)
+    // to prevent Value not found at KeyedDB.deleteById
+    ev.removeAllListeners('chats.delete')
+    ev.on('chats.delete', (deletions) => {
+      for (const item of deletions) {
+        if (store.chats.get(item)) {
+          store.chats.deleteById(item)
+        }
+      }
+    })
     ev.on('messages.upsert', async ({ messages }: { messages: WAMessage[]; type: MessageUpsertType }) => {
       for (const msg of messages) {
         const { key } = msg
