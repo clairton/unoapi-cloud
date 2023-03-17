@@ -753,7 +753,7 @@ describe('service transformer', () => {
       messageStubType: 2,
       messageStubParameters: ['Invalid PreKey ID'],
     }
-    const body = 'Error on decrypt the message!'
+    const body = '🕒 Aguardando mensagem. Abra o Whatsapp o celular. https://faq.whatsapp.com/835452491239734/?locale=pt_BR'
     const output = {
       object: 'whatsapp_business_account',
       entry: [
