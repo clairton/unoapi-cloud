@@ -29,11 +29,12 @@ const cloudApi: Outgoing = new OutgoingCloudApi(
   WEBHOOK_HEADER || 'Authorization',
 )
 
+const _undefined = undefined
 const config: ClientConfig = defaultClientConfig
-config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES === undefined ? true : !!IGNORE_GROUP_MESSAGES
-config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === undefined ? true : !!IGNORE_BROADCAST_STATUSES
-config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === undefined ? false : !!IGNORE_OWN_MESSAGES
-config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === undefined ? true : !!IGNORE_OWN_MESSAGES
+config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE_GROUP_MESSAGES === 'true'
+config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES === 'true'
+config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES === 'true'
+config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES === 'true'
 
 console.debug('ClientConfig', config)
 
