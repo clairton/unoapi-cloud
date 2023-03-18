@@ -1,4 +1,4 @@
-import { AnyMessageContent, WASocket, WAMessage } from '@adiwajshing/baileys'
+import { AnyMessageContent, WASocket, WAMessage, isJidStatusBroadcast, isJidGroup, isJidBroadcast, GroupMetadata } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { connect, Connection } from './socket'
@@ -32,18 +32,91 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
   return clients.get(phone) as Client
 }
 
+interface IgnoreJid {
+  (jid: string): boolean
+}
+
+interface IgnoreMessage {
+  (message: WAMessage): boolean
+}
+
+const IgnoreOwnMessage: IgnoreMessage = (message: WAMessage) => {
+  const filter = !message.key.fromMe
+  console.debug('IgnoreOwnMessage: %s => %s', message.key, filter)
+  return filter
+}
+
+interface GetGroupMetadata {
+  (message: WAMessage, store: Store, sock: WASocket): Promise<GroupMetadata | undefined>
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _store: Store, _sock: WASocket) => undefined
+
+const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store, sock: WASocket) => {
+  const { key } = message
+  if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
+    let groupMetadata = store?.dataStore.groupMetadata[key.remoteJid]
+    if (groupMetadata) {
+      groupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, sock)
+    }
+    return groupMetadata
+  }
+  return undefined
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const notIgnoreJid = (_jid: string) => {
+  console.info('Config to not ignore any jid')
+  return false
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const notIgnoreMessage = (_m: WAMessage) => {
+  console.info('Config to not ignore any message/update')
+  return false
+}
+
 class ClientBaileys implements Client {
   public phone: string
   public config: ClientConfig
   private sock: WASocket | undefined
   private outgoing: Outgoing
   private store: Store | undefined
+  private ignoreJid: IgnoreJid
+  private ignoreMessage: IgnoreMessage
+  private getGroupMetadata: GetGroupMetadata
 
   constructor(phone: string, store: Store, outgoing: Outgoing, config: ClientConfig = defaultClientConfig) {
     this.phone = phone
     this.store = store
     this.outgoing = outgoing
     this.config = config
+
+    const ignoresJid: IgnoreJid[] = []
+    const ignoresMessage: IgnoreMessage[] = []
+
+    if (config.ignoreGroupMessages) {
+      console.info('Config to ignore group messages')
+      ignoresJid.push(isJidGroup as IgnoreJid)
+    }
+    if (config.ignoreBroadcastStatuses) {
+      console.info('Config to ignore broadcast statuses')
+      ignoresJid.push(isJidStatusBroadcast as IgnoreJid)
+    }
+    if (config.ignoreBroadcastMessages) {
+      console.info('Config to ignore broadcast messages')
+      ignoresJid.push(isJidBroadcast as IgnoreJid)
+    }
+    if (config.ignoreOwnMessages) {
+      console.info('Config to ignore own messages')
+      ignoresMessage.push(IgnoreOwnMessage)
+    }
+
+    const ignoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
+    this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
+    const ignoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
+    this.ignoreMessage = ignoresMessage.length > 0 ? ignoreMessage : notIgnoreMessage
+    this.getGroupMetadata = config.ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
   }
 
   async connect() {
@@ -234,21 +307,15 @@ class ClientBaileys implements Client {
     throw new Error(`Unknow message type ${JSON.stringify(payload)}`)
   }
 
-  async receive(messages: object[], update = true) {
-    let m
-    if (update) {
-      m = messages
-    } else {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async receive(messages: any[], update = true) {
+    let m = messages.filter((m) => !this.ignoreJid(m?.key?.jid) && !this.ignoreMessage(m))
+    if (!update) {
       m = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messages.map(async (m: any) => {
-          const { key } = m
-          if (!this.config.ignoreGroupMessages && !isIndividualJid(key.remoteJid)) {
-            m.groupMetadata = this.store?.dataStore.groupMetadata[key.remoteJid]
-            if (!m.groupMetadata) {
-              m.groupMetadata = await this.store?.dataStore.fetchGroupMetadata(key.remoteJid, this.sock)
-            }
-          }
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          m.groupMetadata = await this.getGroupMetadata(m, this.store!, this.sock!)
           const messageType = getMessageType(m)
           if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
             const i: WAMessage = m as WAMessage

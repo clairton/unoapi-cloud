@@ -39,5 +39,6 @@ export interface Client {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any): Promise<Response>
 
-  receive(messages: object[], update: boolean): Promise<void>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  receive(messages: any[], update: boolean): Promise<void>
 }
