@@ -1,5 +1,6 @@
 import { Outgoing } from './outgoing'
 import { getStore } from './store'
+import { Response } from './response'
 
 export interface getClient {
   (phone: string, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client>
@@ -36,7 +37,7 @@ export interface Client {
   sendStatus(text: string): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  send(payload: any): Promise<any>
+  send(payload: any): Promise<Response>
 
   receive(messages: object[], update: boolean): Promise<void>
 }

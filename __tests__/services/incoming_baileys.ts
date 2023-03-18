@@ -4,10 +4,12 @@ import { Outgoing } from '../../src/services/outgoing'
 import { getClient, Client, ClientConfig, defaultClientConfig } from '../../src/services/client'
 
 class DummyOutgoing implements Outgoing {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  async sendMany(_phone: string, _messages: []) { }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  async sendOne(_phone: string, _message: object) { }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  async sendMany(phone: string, messages: object[]) {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  async sendOne(phone: string, message: object) {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  async send(phone: string, message: object) {}
 }
 
 class DummyClient implements Client {

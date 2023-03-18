@@ -38,7 +38,7 @@ config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === undefined ? true : !!IGNORE_O
 console.debug('ClientConfig', config)
 
 const baileys: Incoming = new IncomingBaileys(cloudApi, config)
-const app: App = new App(baileys, BASE_URL || `http://localhost:${port}`)
+const app: App = new App(baileys, cloudApi, BASE_URL || `http://localhost:${port}`)
 
 app.server.listen(port, '0.0.0.0', async () => {
   console.info('Unoapi Cloud listening on port:', port)

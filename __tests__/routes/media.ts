@@ -8,6 +8,7 @@ import { proto } from '@adiwajshing/baileys'
 import { mock } from 'jest-mock-extended'
 import { getFilePath } from '../../src/services/data_store_file'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
+import { Outgoing } from '../../src/services/outgoing'
 const phone = `${new Date().getTime()}`
 const remoteJid = `${new Date().getTime()}@s.whatsapp.net`
 const messageId = `wa.${new Date().getTime()}`
@@ -43,8 +44,9 @@ describe('media routes', () => {
   test('index', async () => {
     dataStore.loadKey.mockReturnValue(messageKey)
     dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
-    const service = mock<Incoming>()
-    const app: App = new App(service, url, getTestDataStore)
+    const incoming = mock<Incoming>()
+    const outgoing = mock<Outgoing>()
+    const app: App = new App(incoming, outgoing, url, getTestDataStore)
     await request(app.server)
       .get(`/v15.0/${phone}/${messageId}`)
       .expect(200, {
@@ -59,8 +61,9 @@ describe('media routes', () => {
   test('download', async () => {
     dataStore.loadKey.mockReturnValue(messageKey)
     dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
-    const service = mock<Incoming>()
-    const app: App = new App(service, url, getTestDataStore)
+    const incoming = mock<Incoming>()
+    const outgoing = mock<Outgoing>()
+    const app: App = new App(incoming, outgoing, url, getTestDataStore)
     const name = `${phone}/${messageId}.${extension}`
     const fileName = getFilePath(name)
     const parts = fileName.split('/')

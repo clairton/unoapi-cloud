@@ -6,6 +6,7 @@ import { Client, ConnectionInProgress, ClientConfig, defaultClientConfig } from 
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { getClient } from './client'
+import { Response } from './response'
 import { dataStores } from './data_store'
 
 const clients: Map<string, Client> = new Map()
@@ -86,8 +87,7 @@ class ClientBaileys implements Client {
       await this.sendStatus(title)
       this.connect()
       const id = uuid()
-      // @TODO this.outgoing.sendOne(this.phone, payload) to update message with failed
-      return {
+      const ok = {
         messaging_product: 'whatsapp',
         contacts: [
           {
@@ -99,21 +99,43 @@ class ClientBaileys implements Client {
             id,
           },
         ],
-        statuses: [
+      }
+      const error = {
+        object: 'whatsapp_business_account',
+        entry: [
           {
-            id,
-            recipient_id: to,
-            status: 'failed',
-            timestamp: Math.floor(Date.now() / 1000),
-            errors: [
+            id: this.phone,
+            changes: [
               {
-                code,
-                title,
+                value: {
+                  messaging_product: 'whatsapp',
+                  metadata: {
+                    display_phone_number: this.phone,
+                    phone_number_id: this.phone,
+                  },
+                  statuses: [
+                    {
+                      id,
+                      recipient_id: to,
+                      status: 'failed',
+                      timestamp: Math.floor(Date.now() / 1000),
+                      errors: [
+                        {
+                          code,
+                          title,
+                        },
+                      ],
+                    },
+                  ],
+                },
+                field: 'messages',
               },
             ],
           },
         ],
       }
+      const r: Response = { ok, error, to }
+      return r
     }
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
@@ -124,7 +146,8 @@ class ClientBaileys implements Client {
             await this.sock?.readMessages([key])
           }
         }
-        return { success: true }
+        const r: Response = { ok: { success: true }, to }
+        return r
       } else {
         throw new Error(`Unknow message status ${status}`)
       }
@@ -133,7 +156,7 @@ class ClientBaileys implements Client {
         const jid: string = await this.toJid(to)
         if (!jid) {
           const id = uuid()
-          return {
+          const ok = {
             messaging_product: 'whatsapp',
             contacts: [
               {
@@ -145,32 +168,50 @@ class ClientBaileys implements Client {
                 id,
               },
             ],
-            statuses: [
+          }
+          const error = {
+            object: 'whatsapp_business_account',
+            entry: [
               {
-                conversation: {
-                  id: jid,
-                  // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
-                },
-                id,
-                recipient_id: to,
-                status: 'failed',
-                timestamp: Math.floor(Date.now() / 1000),
-                errors: [
+                id: this.phone,
+                changes: [
                   {
-                    code: 2,
-                    title: `The number ${to} does not have Whatsapp Account`,
+                    value: {
+                      messaging_product: 'whatsapp',
+                      metadata: {
+                        display_phone_number: this.phone,
+                        phone_number_id: this.phone,
+                      },
+                      statuses: [
+                        {
+                          id,
+                          recipient_id: to,
+                          status: 'failed',
+                          timestamp: Math.floor(Date.now() / 1000),
+                          errors: [
+                            {
+                              code: 2,
+                              title: `The number ${to} does not have Whatsapp Account`,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    field: 'messages',
                   },
                 ],
               },
             ],
           }
+          const r: Response = { ok, error, to }
+          return r
         }
         const content: AnyMessageContent = toBaileysMessageContent(payload)
         console.debug('Send to baileys', jid, content)
         const response = await this.sock?.sendMessage(jid, content)
         if (response) {
           const key = response.key
-          return {
+          const ok = {
             messaging_product: 'whatsapp',
             contacts: [
               {
@@ -183,11 +224,14 @@ class ClientBaileys implements Client {
               },
             ],
           }
+          const r: Response = { ok, to: to.replace('+', '') }
+          return r
+        } else {
+          throw new Error(`Unknow message type ${type}`)
         }
-      } else {
-        throw new Error(`Unknow message type ${type}`)
       }
     }
+    throw new Error(`Unknow message type ${JSON.stringify(payload)}`)
   }
 
   async receive(messages: object[], update = true) {

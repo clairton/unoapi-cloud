@@ -33,13 +33,17 @@ curl -X  POST \
 // https://developers.facebook.com/docs/whatsapp/cloud-api/guides/mark-message-as-read
 
 import { Request, Response } from 'express'
+import { Response as ResponseUno } from '../services/response'
 import { Incoming } from '../services/incoming'
+import { Outgoing } from '../services/outgoing'
 
 export class MessagesController {
-  private service: Incoming
+  private incoming: Incoming
+  private outgoing: Outgoing
 
-  constructor(service: Incoming) {
-    this.service = service
+  constructor(incoming: Incoming, outgoing: Outgoing) {
+    this.incoming = incoming
+    this.outgoing = outgoing
   }
 
   public async index(req: Request, res: Response) {
@@ -49,8 +53,13 @@ export class MessagesController {
     const { phone } = req.params
     const payload: object = req.body
     try {
-      const response: object = await this.service.send(phone, payload)
-      return res.status(200).json(response)
+      const response: ResponseUno = await this.incoming.send(phone, payload)
+      console.debug('messages response', JSON.stringify(response.ok, null, ' '))
+      await res.status(200).json(response.ok)
+      if (response.error) {
+        console.debug('messages return status', JSON.stringify(response.ok, null, ' '))
+        await this.outgoing.send(response.to, response.error)
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       return res.status(400).json({ status: 'error', message: e.message })

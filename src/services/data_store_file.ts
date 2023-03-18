@@ -130,9 +130,12 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     await bind(ev)
     // to prevent Value not found at KeyedDB.deleteById
     ev.removeAllListeners('chats.delete')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ev.on('chats.delete', (deletions) => {
       for (const item of deletions) {
+        console.debug('chats.delete verify id: ', item)
         if (store.chats.get(item)) {
+          console.debug('chats.delete delete id: ', item)
           store.chats.deleteById(item)
         }
       }

@@ -20,7 +20,11 @@ export class OutgoingCloudApi implements Outgoing {
   public async sendOne(phone: string, message: object) {
     console.debug(`Receive message %s`, message)
     const data = fromBaileysMessageContent(phone, message)
-    const body = JSON.stringify(data)
+    return this.send(phone, data)
+  }
+
+  public async send(phone: string, message: object) {
+    const body = JSON.stringify(message)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
       [this.header]: this.token,
