@@ -10,6 +10,7 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   WABrowserDescription,
   MessageRetryMap,
+  proto,
 } from '@adiwajshing/baileys'
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
@@ -96,23 +97,35 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   const ignoresJid: IgnoreJid[] = []
   const ignoresMessage: IgnoreMessage[] = []
   if (client.config.ignoreGroupMessages) {
-    console.debug('Config to ignore group messages')
+    console.info('Config to ignore group messages')
     ignoresJid.push(isJidGroup as IgnoreJid)
   }
   if (client.config.ignoreBroadcastStatuses) {
-    console.debug('Config to ignore broadcast statuses')
+    console.info('Config to ignore broadcast statuses')
     ignoresJid.push(isJidStatusBroadcast as IgnoreJid)
   }
   if (client.config.ignoreBroadcastMessages) {
-    console.debug('Config to ignore broadcast messages')
+    console.info('Config to ignore broadcast messages')
     ignoresJid.push(isJidBroadcast as IgnoreJid)
   }
   if (client.config.ignoreOwnMessages) {
-    console.debug('Config to ignore own messages')
+    console.info('Config to ignore own messages')
     ignoresMessage.push(IgnoreOwnMessage)
   }
-  const shouldIgnoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
-  const shouldIgnoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
+  const ignoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const notIgnoreJid = (_jid: string) => {
+    console.info('Config to not ignore any jid')
+    return false
+  }
+  const shouldIgnoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
+  const ignoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const notIgnoreMessage = (_m: WAMessage) => {
+    console.info('Config to not ignore any message/update')
+    return false
+  }
+  const shouldIgnoreMessage = ignoresMessage.length > 0 ? ignoreMessage : notIgnoreMessage
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
   const msgRetryCounterMap: MessageRetryMap = {}
@@ -134,7 +147,8 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sock.ev.on('messages.upsert', async (payload: any) => {
     console.debug('messages.upsert', client.phone, JSON.stringify(payload, null, ' '))
-    const ms = payload.messages.filter(shouldIgnoreMessage)
+    const ms = payload.messages.filter((m: proto.IWebMessageInfo) => !shouldIgnoreMessage(m))
+    console.log('Sending %s messages', ms.length)
     listener(ms, false)
   })
   sock.ev.on('messages.update', (messages: object[]) => {
@@ -169,7 +183,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
           setTimeout(() => {
             client.connect()
           }, 1_000)
-        } catch (error) {}
+        } catch (error) { }
       } else {
         const message = `The session is removed in Whatsapp App`
         await client.sendStatus(message)
