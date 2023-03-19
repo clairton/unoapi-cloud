@@ -162,7 +162,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     if (fromMe) {
       profileName = senderPhone
     } else {
-      profileName = payload.verifiedBizName || payload.pushName
+      profileName = payload.verifiedBizName || payload.pushName || senderPhone
     }
     let cloudApiStatus
     let messageTimestamp = payload.messageTimestamp
