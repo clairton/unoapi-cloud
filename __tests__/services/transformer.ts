@@ -204,6 +204,7 @@ describe('service transformer', () => {
     const messageTimestamp = new Date().getTime()
     const mimetype = 'application/pdf'
     const fileSha256 = `fileSha256 ${new Date().getTime()}`
+    const filename = `${id}.pdf`
     const input = {
       key: {
         remoteJid,
@@ -242,6 +243,7 @@ describe('service transformer', () => {
                       id: `${phoneNumer}/${id}`,
                       sha256: fileSha256,
                       url: link,
+                      filename,
                     },
                     type: 'audio',
                   },

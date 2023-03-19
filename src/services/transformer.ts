@@ -222,7 +222,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         const mediaType = messageType.replace('Message', '')
         const mediaKey = `${phone}/${whatsappMessageId}`
         const mimetype = binMessage.mimetype.split(';')[0]
-        const extension = mime.extension(mediaType)
+        const extension = mime.extension(mimetype)
         const filename = binMessage.fileName || `${payload.key.id}.${extension}`
         message[mediaType] = {
           caption: binMessage.caption,
