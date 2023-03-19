@@ -29,7 +29,8 @@ const cloudApi: Outgoing = new OutgoingCloudApi(
   WEBHOOK_HEADER || 'Authorization',
 )
 
-const _undefined = undefined
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _undefined: any = undefined
 const config: ClientConfig = defaultClientConfig
 config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE_GROUP_MESSAGES === 'true'
 config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES === 'true'

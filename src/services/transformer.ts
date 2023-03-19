@@ -176,6 +176,8 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     const statuses: any[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messages: any[] = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errors: any[] = []
     const change = {
       value: {
         messaging_product: 'whatsapp',
@@ -194,7 +196,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           },
         ],
         statuses,
-        errors: [],
+        errors,
       },
       field: 'messages',
     }

@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Unoapi Cloud",
   "main": "src/index.ts",
   "repository": "github.com/clairton/unoapi-cloud",
@@ -8,7 +8,7 @@
   "license": "GPL-3.0",
   "private": false,
   "scripts": {
-    "dev": "./node_modules/nodemon/bin/nodemon.js",
+    "dev": "ts-node ./src/index.ts",
     "start": "node dist/index.js",
     "lint": "eslint src",
     "test": "ENV_FILE=./.env.test jest --coverage",
