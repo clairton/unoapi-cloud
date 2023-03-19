@@ -56,11 +56,7 @@ const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _st
 const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store, sock: WASocket) => {
   const { key } = message
   if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
-    let groupMetadata = store?.dataStore.groupMetadata[key.remoteJid]
-    if (groupMetadata) {
-      groupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, sock)
-    }
-    return groupMetadata
+    return store?.dataStore.fetchGroupMetadata(key.remoteJid, sock)
   }
   return undefined
 }
