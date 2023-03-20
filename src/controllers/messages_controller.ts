@@ -57,7 +57,7 @@ export class MessagesController {
       console.debug('messages response', JSON.stringify(response.ok, null, ' '))
       await res.status(200).json(response.ok)
       if (response.error) {
-        console.debug('messages return status', JSON.stringify(response.ok, null, ' '))
+        console.debug('messages return status', JSON.stringify(response.error, null, ' '))
         await this.outgoing.send(response.to, response.error)
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
