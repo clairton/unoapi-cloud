@@ -1,20 +1,26 @@
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
 import { fromBaileysMessageContent } from './transformer'
+import { MessageFilter } from './message_filter'
 
 export class OutgoingCloudApi implements Outgoing {
   private url: string
   private token: string
   private header: string
+  private filter: MessageFilter
 
-  constructor(url: string, token: string, header = 'Authorization') {
+  constructor(filter: MessageFilter, url: string, token: string, header = 'Authorization') {
+    this.filter = filter
     this.url = url
     this.token = token
     this.header = header
   }
 
   public async sendMany(phone: string, messages: object[]) {
-    await Promise.all(messages.map((m: object) => this.sendOne(phone, m)))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filteredMessages = messages.filter((m: any) => m.key && !this.filter.isIgnore({ key: m.key }))
+    console.debug('%s filtereds messages/update of %', messages.length - filteredMessages.length, messages.length)
+    await Promise.all(filteredMessages.map((m: object) => this.sendOne(phone, m)))
   }
 
   public async sendOne(phone: string, message: object) {

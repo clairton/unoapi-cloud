@@ -1,11 +1,10 @@
-import { AnyMessageContent, WASocket, WAMessage, isJidStatusBroadcast, isJidGroup, isJidBroadcast, GroupMetadata } from '@adiwajshing/baileys'
+import { AnyMessageContent, WASocket, WAMessage, GroupMetadata } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { connect, Connection } from './socket'
-import { Client, ConnectionInProgress, ClientConfig, defaultClientConfig } from './client'
+import { Client, getClient, ConnectionInProgress, ClientConfig, defaultClientConfig } from './client'
 import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { v1 as uuid } from 'uuid'
-import { getClient } from './client'
 import { Response } from './response'
 import { dataStores } from './data_store'
 
@@ -32,20 +31,6 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
   return clients.get(phone) as Client
 }
 
-interface IgnoreJid {
-  (jid: string): boolean
-}
-
-interface IgnoreMessage {
-  (message: WAMessage): boolean
-}
-
-const IgnoreOwnMessage: IgnoreMessage = (message: WAMessage) => {
-  const filter = !message.key.fromMe
-  console.debug('IgnoreOwnMessage: %s => %s', message.key, filter)
-  return filter
-}
-
 interface GetGroupMetadata {
   (message: WAMessage, store: Store, sock: WASocket): Promise<GroupMetadata | undefined>
 }
@@ -61,25 +46,12 @@ const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Sto
   return undefined
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreJid = (_jid: string) => {
-  console.info('Config to not ignore any jid')
-  return false
-}
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreMessage = (_m: WAMessage) => {
-  console.info('Config to not ignore any message/update')
-  return false
-}
-
 class ClientBaileys implements Client {
   public phone: string
   public config: ClientConfig
   private sock: WASocket | undefined
   private outgoing: Outgoing
   private store: Store | undefined
-  private ignoreJid: IgnoreJid
-  private ignoreMessage: IgnoreMessage
   private getGroupMetadata: GetGroupMetadata
 
   constructor(phone: string, store: Store, outgoing: Outgoing, config: ClientConfig = defaultClientConfig) {
@@ -88,30 +60,6 @@ class ClientBaileys implements Client {
     this.outgoing = outgoing
     this.config = config
 
-    const ignoresJid: IgnoreJid[] = []
-    const ignoresMessage: IgnoreMessage[] = []
-
-    if (config.ignoreGroupMessages) {
-      console.info('Config to ignore group messages')
-      ignoresJid.push(isJidGroup as IgnoreJid)
-    }
-    if (config.ignoreBroadcastStatuses) {
-      console.info('Config to ignore broadcast statuses')
-      ignoresJid.push(isJidStatusBroadcast as IgnoreJid)
-    }
-    if (config.ignoreBroadcastMessages) {
-      console.info('Config to ignore broadcast messages')
-      ignoresJid.push(isJidBroadcast as IgnoreJid)
-    }
-    if (config.ignoreOwnMessages) {
-      console.info('Config to ignore own messages')
-      ignoresMessage.push(IgnoreOwnMessage)
-    }
-
-    const ignoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
-    this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
-    const ignoreMessage = (m: WAMessage) => ignoresMessage.reduce((acc, f) => (f(m) ? ++acc : acc), 0) > 0
-    this.ignoreMessage = ignoresMessage.length > 0 ? ignoreMessage : notIgnoreMessage
     this.getGroupMetadata = config.ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
   }
 
@@ -305,9 +253,9 @@ class ClientBaileys implements Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async receive(messages: any[], update = true) {
-    let m = messages.filter((m) => !this.ignoreJid(m?.key?.jid) && !this.ignoreMessage(m))
+    console.debug(`Receives %s message(s)/update(s)`, messages.length)
     if (!update) {
-      m = await Promise.all(
+      messages = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messages.map(async (m: any) => {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -321,7 +269,7 @@ class ClientBaileys implements Client {
         }),
       )
     }
-    return this.outgoing.sendMany(this.phone, m)
+    return this.outgoing.sendMany(this.phone, messages)
   }
 
   private async toJid(phoneNumber: string) {

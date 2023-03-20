@@ -10,6 +10,7 @@ import { SessionStoreFile } from './services/session_store_file'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { ClientConfig, defaultClientConfig } from './services/client'
+import { MessageFilter } from './services/message_filter'
 const {
   WEBHOOK_URL,
   WEBHOOK_TOKEN,
@@ -23,12 +24,6 @@ const {
 } = process.env
 const port: number = parseInt(PORT || '9876')
 
-const cloudApi: Outgoing = new OutgoingCloudApi(
-  WEBHOOK_URL || `http://localhost:${port}/webhooks/whatsapp`,
-  WEBHOOK_TOKEN || 'abc123',
-  WEBHOOK_HEADER || 'Authorization',
-)
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const _undefined: any = undefined
 const config: ClientConfig = defaultClientConfig
@@ -36,6 +31,15 @@ config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE
 config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES === 'true'
 config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES === 'true'
 config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES === 'true'
+
+const filter: MessageFilter = new MessageFilter(config)
+
+const cloudApi: Outgoing = new OutgoingCloudApi(
+  filter,
+  WEBHOOK_URL || `http://localhost:${port}/webhooks/whatsapp`,
+  WEBHOOK_TOKEN || 'abc123',
+  WEBHOOK_HEADER || 'Authorization',
+)
 
 console.debug('ClientConfig', config)
 
