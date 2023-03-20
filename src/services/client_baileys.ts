@@ -46,7 +46,7 @@ const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Sto
   return undefined
 }
 
-class ClientBaileys implements Client {
+export class ClientBaileys implements Client {
   public phone: string
   public config: ClientConfig
   private sock: WASocket | undefined
@@ -243,9 +243,9 @@ class ClientBaileys implements Client {
           }
           const r: Response = { ok, to: to.replace('+', '') }
           return r
-        } else {
-          throw new Error(`Unknow message type ${type}`)
         }
+      } else {
+        throw new Error(`Unknow message type ${type}`)
       }
     }
     throw new Error(`Unknow message type ${JSON.stringify(payload)}`)

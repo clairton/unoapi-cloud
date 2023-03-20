@@ -27,12 +27,12 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
   counts.set(client.phone, (counts.get(client.phone) || 0) + 1)
   console.debug(`Received qrcode ${qrCode}`)
   const messageTimestamp = new Date().getTime()
-  const mediaKey = uuid()
+  const id = uuid()
   const qrCodeUrl = await QRCode.toDataURL(qrCode)
   const remoteJid = phoneNumberToJid(client.phone)
   const waMessageKey = {
     remoteJid,
-    id: mediaKey,
+    id,
   }
   const waMessage: WAMessage = {
     key: waMessageKey,
@@ -47,7 +47,7 @@ const onQrCode = async (client: Client, dataStore: DataStore, qrCode: string) =>
     messageTimestamp,
   }
   await dataStore.setMessage(remoteJid, waMessage)
-  await dataStore.setKey(mediaKey, waMessageKey)
+  await dataStore.setKey(id, waMessageKey)
   await client.receive([waMessage], false)
   if ((counts.get(client.phone) || 0) >= max) {
     counts.delete(client.phone)
