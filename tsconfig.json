@@ -4,11 +4,14 @@
     "module": "commonjs",
     "target": "ESNext",
     "lib": ["ESNext"],
+    "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "esModuleInterop": true,
-    "noImplicitAny": false,
+    "noImplicitAny": false
   },
+  "include": [
+    "src/**/*"
+  ],
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"
