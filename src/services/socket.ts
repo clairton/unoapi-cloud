@@ -8,6 +8,10 @@ import makeWASocket, {
   WABrowserDescription,
   MessageRetryMap,
 } from '@adiwajshing/baileys'
+
+import logger from '@adiwajshing/baileys/lib/Utils/logger'
+logger.level = process.env.LOG_LEVEL || (process.env.NODE_ENV === 'development' ? 'debug' : 'error')
+
 import { Boom } from '@hapi/boom'
 import { Client } from './client'
 import { Store } from './store'
@@ -88,6 +92,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
     msgRetryCounterMap,
     connectTimeoutMs: 5 * 60 * 1000,
     keepAliveIntervalMs: 10_000,
+    logger,
   }
   const sock = await makeWASocket(config)
   dataStore.bind(sock.ev)

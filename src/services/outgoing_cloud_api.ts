@@ -19,7 +19,7 @@ export class OutgoingCloudApi implements Outgoing {
   public async sendMany(phone: string, messages: object[]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => m.key && !this.filter.isIgnore({ key: m.key }))
-    console.debug('%s filtereds messages/update of %', messages.length - filteredMessages.length, messages.length)
+    console.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map((m: object) => this.sendOne(phone, m)))
   }
 
