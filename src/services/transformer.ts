@@ -29,7 +29,7 @@ const TYPE_MESSAGES_TO_PROCESS = [
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getMessageType = (payload: any) => {
-  if (payload.update) {
+  if (payload.update || payload.status) {
     return 'update'
   } else if (payload.receipt) {
     return 'receipt'

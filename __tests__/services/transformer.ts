@@ -379,6 +379,64 @@ describe('service transformer', () => {
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
   })
 
+  test('fromBaileysMessageContent with status pending', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Forrest Gump ${new Date().getTime()}`
+    const messageTimestamp = new Date().getTime()
+    const body = `${new Date().getTime()}`
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      message: {
+        extendedTextMessage: {
+          text: body,
+        },
+      },
+      messageTimestamp,
+      pushName,
+      status: 'PENDING',
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
+                statuses: [
+                  {
+                    conversation: {
+                      // expiration_timestamp: 1681504976647,
+                      id: remoteJid,
+                    },
+                    id,
+                    recipient_id: phoneNumer,
+                    status: 'sent',
+                    timestamp: messageTimestamp,
+                  },
+                ],
+                messages: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
   test('fromBaileysMessageContent with deleted', async () => {
     const phoneNumer = '5549998093075'
     const remotePhoneNumber = '+11115551212'
@@ -665,7 +723,6 @@ describe('service transformer', () => {
       },
       messageTimestamp: 1677774582,
       pushName: 'Clairton Rodrigo Heinzen',
-      status: 2,
       message: {
         protocolMessage: {
           type: 5,
