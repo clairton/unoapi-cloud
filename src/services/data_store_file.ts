@@ -170,8 +170,13 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   dataStore.setUnoId = (id: string, unoId: string) => ids.set(id, unoId)
   dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
     if (!jids.has(phoneOrJid)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const results = await sock.onWhatsApp!(phoneOrJid)
+      let results = []
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        results = await sock.onWhatsApp!(phoneOrJid)
+      } catch (_e) {
+        console.error(`Erro on check if ${phoneOrJid} has whatsapp`)
+      }
       const result = results && results[0]
       if (result && result.exists) {
         console.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
