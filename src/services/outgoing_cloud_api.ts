@@ -1,6 +1,6 @@
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
-import { fromBaileysMessageContent } from './transformer'
+import { fromBaileysMessageContent, getMessageType } from './transformer'
 import { MessageFilter } from './message_filter'
 
 export class OutgoingCloudApi implements Outgoing {
@@ -18,7 +18,10 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async sendMany(phone: string, messages: object[]) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filteredMessages = messages.filter((m: any) => m.key && !this.filter.isIgnore({ key: m.key }))
+    const filteredMessages = messages.filter((m: any) => {
+      const messageType = getMessageType(m)
+      return m.key && !this.filter.isIgnore({ key: m.key, messageType })
+    })
     console.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map((m: object) => this.sendOne(phone, m)))
   }

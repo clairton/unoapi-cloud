@@ -6,7 +6,7 @@ interface IgnoreJid {
 }
 
 interface IgnoreKey {
-  ({ key }: { key: WAMessageKey }): boolean
+  ({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }): boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,10 +20,15 @@ const notIgnoreKey = ({ key: _key }: { key: WAMessageKey }) => {
   return false
 }
 
-const IgnoreOwnKey: IgnoreKey = ({ key }: { key: WAMessageKey }) => {
-  const filter = key && !!key.fromMe
-  console.debug('IgnoreOwnKey: %s => %s', key, filter)
-  return filter
+const IgnoreOwnKey: IgnoreKey = ({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) => {
+  if (['update', 'receipt'].includes(messageType)) {
+    // update need process always
+    return false
+  } else {
+    const filter = key && !!key.fromMe
+    console.debug('IgnoreOwnKey: %s => %s', key, filter)
+    return filter
+  }
 }
 
 export class MessageFilter {
@@ -55,11 +60,13 @@ export class MessageFilter {
     console.info('%s Configs to ignore by jid', ignoresJid.length)
     console.info('%s Configs to ignore by key', ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
-    const ignoreKey = ({ key }: { key: WAMessageKey }) => ignoresKey.reduce((acc, f) => (f({ key }) ? ++acc : acc), 0) > 0
+    const ignoreKey = ({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) => {
+      return ignoresKey.reduce((acc, f) => (f({ key, messageType }) ? ++acc : acc), 0) > 0
+    }
     this.ignoreKey = ignoresKey.length > 0 ? ignoreKey : notIgnoreKey
   }
 
-  isIgnore({ key }: { key: WAMessageKey }) {
-    return !key || !key.remoteJid || this.ignoreJid(key.remoteJid) || this.ignoreKey({ key })
+  isIgnore({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) {
+    return !key || !key.remoteJid || this.ignoreJid(key.remoteJid) || this.ignoreKey({ key, messageType })
   }
 }
