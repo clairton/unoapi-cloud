@@ -99,6 +99,7 @@ const saveMedia = async (phone: string, waMessage: WAMessage) => {
 const dataStoreFile = (phone: string, config: any): DataStore => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const jids: Map<string, string> = new Map()
+  const ids: Map<string, string> = new Map()
   const store = makeInMemoryStore(config)
   const dataStore = store as DataStore
   const { bind, toJSON, fromJSON } = store
@@ -107,6 +108,7 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
       ...toJSON(),
       keys: keys.values(),
       jids,
+      ids,
     }
   }
   store.fromJSON = (json) => {
@@ -114,6 +116,7 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     const jsonData = json as {
       keys: proto.IMessageKey[]
       jids: Map<string, string>
+      ids: Map<string, string>
       chats: Chat[]
       contacts: { [id: string]: Contact }
       messages: { [id: string]: WAMessage[] }
@@ -163,6 +166,8 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   dataStore.setKey = (id: string, key: WAMessageKey) => {
     return keys.set(id, key)
   }
+  dataStore.loadUnoId = (id: string) => ids.get(id)
+  dataStore.setUnoId = (id: string, unoId: string) => ids.set(id, unoId)
   dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
     if (!jids.has(phoneOrJid)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
