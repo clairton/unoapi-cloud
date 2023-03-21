@@ -25,7 +25,7 @@ describe('messages routes', () => {
 
   test('whatsapp with sucess', async () => {
     const sendSpy = jest.spyOn(incoming, 'send')
-    const r: Response = { ok: { any: '1' }, to: 'dknfsdkf' }
+    const r: Response = { ok: { any: '1' } }
     const p: Promise<Response> = new Promise((resolve) => resolve(r))
     jest.spyOn(incoming, 'send').mockReturnValue(p)
     const res = await request(app.server).post(`/v15.0/${phone}/messages`).send(json)

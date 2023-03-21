@@ -151,7 +151,7 @@ export class ClientBaileys implements Client {
           },
         ],
       }
-      const r: Response = { ok, error, to }
+      const r: Response = { ok, error }
       return r
     }
     if (status) {
@@ -163,7 +163,7 @@ export class ClientBaileys implements Client {
             await this.sock?.readMessages([key])
           }
         }
-        const r: Response = { ok: { success: true }, to }
+        const r: Response = { ok: { success: true } }
         return r
       } else {
         throw new Error(`Unknow message status ${status}`)
@@ -220,7 +220,7 @@ export class ClientBaileys implements Client {
               },
             ],
           }
-          const r: Response = { ok, error, to }
+          const r: Response = { ok, error }
           return r
         }
         const content: AnyMessageContent = toBaileysMessageContent(payload)
@@ -241,7 +241,7 @@ export class ClientBaileys implements Client {
               },
             ],
           }
-          const r: Response = { ok, to: to.replace('+', '') }
+          const r: Response = { ok }
           return r
         }
       } else {
