@@ -17,6 +17,7 @@ export type ClientConfig = {
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
   ignoreOwnMessages: boolean
+  ignoreCalls: string
 }
 
 export const defaultClientConfig: ClientConfig = {
@@ -24,6 +25,7 @@ export const defaultClientConfig: ClientConfig = {
   ignoreBroadcastStatuses: true,
   ignoreBroadcastMessages: true,
   ignoreOwnMessages: true,
+  ignoreCalls: '',
 }
 
 export interface Client {

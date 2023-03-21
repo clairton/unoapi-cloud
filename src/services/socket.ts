@@ -83,6 +83,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   const { state, saveCreds, dataStore } = store
   const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
   const msgRetryCounterMap: MessageRetryMap = {}
+  const calls: Map<string, boolean> = new Map()
   const config: UserFacingSocketConfig = {
     printQRInTerminal: true,
     auth: state,
@@ -121,6 +122,22 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
     })
     listener(payload)
   })
+
+  if (client.config.ignoreCalls) {
+    console.info('Config to ignore calls')
+    sock.ev.on('call', async (events) => {
+      for (let i = 0; i < events.length; i++) {
+        const { from, status } = events[i]
+        // @TODO reject calls
+        if (status == 'ringing' && !calls.has(from)) {
+          calls.set(from, true)
+          await sock.sendMessage(from, { text: client.config.ignoreCalls }) // create on webhook
+        } else if (['timeout', 'reject', 'accept'].includes(status)) {
+          calls.delete(from)
+        }
+      }
+    })
+  }
 
   sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
     const { connection, lastDisconnect } = update
