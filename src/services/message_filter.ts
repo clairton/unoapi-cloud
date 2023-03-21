@@ -21,7 +21,7 @@ const notIgnoreKey = ({ key: _key }: { key: WAMessageKey }) => {
 }
 
 const IgnoreOwnKey: IgnoreKey = ({ key }: { key: WAMessageKey }) => {
-  const filter = key.fromMe
+  const filter = key && !!key.fromMe
   console.debug('IgnoreOwnKey: %s => %s', key, filter)
   return filter
 }
