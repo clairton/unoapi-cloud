@@ -154,7 +154,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
           }, 1_000)
         } catch (error) {}
       } else {
-        const message = `The session is removed in Whatsapp App`
+        const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
         await client.sendStatus(message, true)
         await disconnectSock(sock)
         try {
