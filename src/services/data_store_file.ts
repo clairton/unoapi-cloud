@@ -13,7 +13,7 @@ import {
 } from '@adiwajshing/baileys'
 import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
-import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { getMessageType, jidToPhoneNumber, phoneNumberToJid, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
@@ -172,9 +172,13 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     if (!jids.has(phoneOrJid)) {
       let results = []
       try {
+        console.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         results = await sock.onWhatsApp!(phoneOrJid)
       } catch (_e) {
+        if (phone === phoneOrJid) {
+          return phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
+        }
         console.error(`Erro on check if ${phoneOrJid} has whatsapp`)
       }
       const result = results && results[0]
