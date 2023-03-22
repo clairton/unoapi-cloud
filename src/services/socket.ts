@@ -126,12 +126,22 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
   if (client.config.ignoreCalls) {
     console.info('Config to ignore calls')
     sock.ev.on('call', async (events) => {
+      console.debug('call', client.phone, JSON.stringify(events, null, ' '))
       for (let i = 0; i < events.length; i++) {
-        const { from, status } = events[i]
-        // @TODO reject calls
+        const { from, id, status } = events[i]
         if (status == 'ringing' && !calls.has(from)) {
           calls.set(from, true)
-          await sock.sendMessage(from, { text: client.config.ignoreCalls }) // create on webhook
+          const message = await sock.sendMessage(from, { text: client.config.ignoreCalls })
+          await sock.rejectCall(id, from)
+          if (client.config.webhookCallsMessage) {
+            delete message.status
+            message.key.fromMe = false
+            message.key.id = uuid()
+            message.key.remoteJid = from
+            message.message.extendedTextMessage.text = client.config.webhookCallsMessage
+            await dataStore.setMessage(message.key.id, message)
+            await client.receive([message], false)
+          }
         } else if (['timeout', 'reject', 'accept'].includes(status)) {
           calls.delete(from)
         }
