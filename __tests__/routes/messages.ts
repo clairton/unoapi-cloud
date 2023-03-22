@@ -42,7 +42,6 @@ describe('messages routes', () => {
   test('whatsapp with error', async () => {
     const response: Response = {
       error: { code: 1, title: 'humm' },
-      to: phone,
       ok: { o: 'skjdh' },
     }
     const p: Promise<Response> = new Promise((resolve) => resolve(response))

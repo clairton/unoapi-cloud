@@ -112,7 +112,6 @@ describe('service client baileys', () => {
     const to = `${new Date().getMilliseconds()}`
     const payload = { to }
     const response = await client.send(payload)
-    expect(response.to).toBe(to)
     expect(response.error.entry.length).toBe(1)
   })
 })
