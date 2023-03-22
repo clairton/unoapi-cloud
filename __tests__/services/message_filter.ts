@@ -35,6 +35,7 @@ describe('service message filter', () => {
 
   test('ignore own message', async () => {
     const config: ClientConfig = {
+      ...defaultClientConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -51,6 +52,7 @@ describe('service message filter', () => {
 
   test('not ignore own message when is update', async () => {
     const config: ClientConfig = {
+      ...defaultClientConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -84,6 +86,7 @@ describe('service message filter', () => {
 
   test('ignore broadcast status', async () => {
     const config: ClientConfig = {
+      ...defaultClientConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: true,
       ignoreBroadcastMessages: false,
@@ -114,6 +117,7 @@ describe('service message filter', () => {
 
   test('ignore broadcast message', async () => {
     const config: ClientConfig = {
+      ...defaultClientConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: true,

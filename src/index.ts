@@ -21,6 +21,7 @@ const {
   IGNORE_BROADCAST_STATUSES,
   IGNORE_BROADCAST_MESSAGES,
   IGNORE_CALLS,
+  SEND_CONNECTION_STATUS,
   PORT,
 } = process.env
 const port: number = parseInt(PORT || '9876')
@@ -32,6 +33,7 @@ config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE
 config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES == 'true'
 config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES == 'true'
 config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
+config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
 config.ignoreCalls = IGNORE_CALLS || ''
 
 const filter: MessageFilter = new MessageFilter(config)

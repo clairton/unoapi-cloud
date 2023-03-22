@@ -23,9 +23,15 @@ describe('service client baileys', () => {
     client = new ClientBaileys(phone, store, outgoing, config)
   })
 
-  test('call sendStatus', async () => {
+  test('call sendStatus important', async () => {
     const send = jest.spyOn(outgoing, 'sendOne')
-    client.sendStatus(`${new Date().getMilliseconds()}`)
+    client.sendStatus(`${new Date().getMilliseconds()}`, false)
+    expect(send).toHaveBeenCalledTimes(1)
+  })
+
+  test('call sendStatus important', async () => {
+    const send = jest.spyOn(outgoing, 'sendOne')
+    client.sendStatus(`${new Date().getMilliseconds()}`, true)
     expect(send).toHaveBeenCalledTimes(1)
   })
 

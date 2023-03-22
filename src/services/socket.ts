@@ -155,7 +155,7 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
         } catch (error) {}
       } else {
         const message = `The session is removed in Whatsapp App`
-        await client.sendStatus(message)
+        await client.sendStatus(message, true)
         await disconnectSock(sock)
         try {
           await sock?.logout()
@@ -168,20 +168,20 @@ export const connect = async <T>({ store, client }: { store: Store; client: Clie
     } else if (connection === 'open') {
       const { version, isLatest } = await fetchLatestBaileysVersion()
       const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
-      await client.sendStatus(message)
+      await client.sendStatus(message, false)
     } else if (update.qr) {
       if (!(await onQrCode(client, dataStore, update.qr))) {
         await disconnectSock(sock)
         const message = `The ${max} times of generate qrcode is exceded!`
-        await client.sendStatus(message)
+        await client.sendStatus(message, true)
         throw message
       }
     } else if (connection === 'connecting') {
       const message = `Connnecting...`
-      await client.sendStatus(message)
+      await client.sendStatus(message, false)
     } else if (update.isNewLogin) {
       const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
-      await client.sendStatus(message)
+      await client.sendStatus(message, true)
     } else {
       console.debug('connection.update', update)
     }

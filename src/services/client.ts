@@ -17,6 +17,7 @@ export type ClientConfig = {
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
   ignoreOwnMessages: boolean
+  sendConnectionStatus: boolean
   ignoreCalls: string
 }
 
@@ -25,6 +26,7 @@ export const defaultClientConfig: ClientConfig = {
   ignoreBroadcastStatuses: true,
   ignoreBroadcastMessages: true,
   ignoreOwnMessages: true,
+  sendConnectionStatus: true,
   ignoreCalls: '',
 }
 
@@ -36,7 +38,7 @@ export interface Client {
 
   disconnect(): Promise<void>
 
-  sendStatus(text: string): Promise<void>
+  sendStatus(text: string, important: boolean): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any): Promise<Response>

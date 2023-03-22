@@ -81,18 +81,20 @@ export class ClientBaileys implements Client {
     dataStores.delete(this.phone)
   }
 
-  async sendStatus(text: string) {
-    const payload = {
-      key: {
-        remoteJid: phoneNumberToJid(this.phone),
-        id: uuid(),
-      },
-      message: {
-        conversation: text,
-      },
-      messageTimestamp: new Date().getTime(),
+  async sendStatus(text: string, important: boolean) {
+    if (this.config.sendConnectionStatus || important) {
+      const payload = {
+        key: {
+          remoteJid: phoneNumberToJid(this.phone),
+          id: uuid(),
+        },
+        message: {
+          conversation: text,
+        },
+        messageTimestamp: new Date().getTime(),
+      }
+      return this.outgoing.sendOne(this.phone, payload)
     }
-    return this.outgoing.sendOne(this.phone, payload)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,7 +103,7 @@ export class ClientBaileys implements Client {
     if (!this.sock) {
       const code = 3
       const title = 'Please, read the QRCode!'
-      await this.sendStatus(title)
+      await this.sendStatus(title, true)
       this.connect()
       const id = uuid()
       const ok = {
@@ -208,7 +210,7 @@ export class ClientBaileys implements Client {
                           errors: [
                             {
                               code: 2,
-                              title: `The number ${to} does not have Whatsapp Account`,
+                              title: `The number ${to} does not have Whatsapp Account or was a error verify this!`,
                             },
                           ],
                         },
@@ -226,6 +228,7 @@ export class ClientBaileys implements Client {
         const content: AnyMessageContent = toBaileysMessageContent(payload)
         console.debug('Send to baileys', jid, content)
         const response = await this.sock?.sendMessage(jid, content)
+        console.debug('Sent to baileys', response)
         if (response) {
           const key = response.key
           const ok = {
