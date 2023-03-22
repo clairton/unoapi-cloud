@@ -176,10 +176,12 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         results = await sock.onWhatsApp!(phoneOrJid)
       } catch (_e) {
+        console.error(`Error on check if ${phoneOrJid} has whatsapp`)
         if (phone === phoneOrJid) {
-          return phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
+          const jid = phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
+          console.info(`${phoneOrJid} is the phone connection ${phone} returning ${jid}`)
+          return jid
         }
-        console.error(`Erro on check if ${phoneOrJid} has whatsapp`)
       }
       const result = results && results[0]
       if (result && result.exists) {
