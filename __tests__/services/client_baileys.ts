@@ -5,7 +5,6 @@ import { Store } from '../../src/services/store'
 import { mock } from 'jest-mock-extended'
 import { WASocket, proto } from '@adiwajshing/baileys'
 import { DataStore } from '../../src/services/data_store'
-import { Connection } from '../../src/services/socket'
 
 describe('service client baileys', () => {
   let client: Client
@@ -57,7 +56,7 @@ describe('service client baileys', () => {
     const sock = mock<WASocket>()
     Reflect.set(client, 'sock', sock)
     const loadKey = jest.spyOn(store?.dataStore, 'loadKey')
-    loadKey.mockReturnValue({ id: `${new Date().getMilliseconds()}` })
+    loadKey.mockReturnValue(new Promise((resolve) => resolve({ id: `${new Date().getMilliseconds()}` })))
     const readMessages = jest.spyOn(sock, 'readMessages')
     await client.send({ status: 'read' })
     expect(readMessages).toHaveBeenCalledTimes(1)

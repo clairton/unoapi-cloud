@@ -157,7 +157,7 @@ export class ClientBaileys implements Client {
     if (status) {
       if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
         if (status == 'read') {
-          const key = this.store?.dataStore?.loadKey(payload?.message_id)
+          const key = await this.store?.dataStore?.loadKey(payload?.message_id)
           console.debug('key %s for %s', key, payload?.message_id)
           if (key) {
             await this.sock?.readMessages([key])

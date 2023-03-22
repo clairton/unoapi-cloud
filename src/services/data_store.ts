@@ -7,12 +7,12 @@ export interface getDataStore {
 }
 
 export type DataStore = ReturnType<typeof makeInMemoryStore> & {
-  loadKey: (id: string) => WAMessageKey | undefined
-  setKey: (id: string, key: WAMessageKey) => void
-  setUnoId: (id: string, unoId: string) => void
-  loadUnoId: (id: string) => string | undefined
+  loadKey: (id: string) => Promise<WAMessageKey | undefined>
+  setKey: (id: string, key: WAMessageKey) => Promise<void>
+  setUnoId: (id: string, unoId: string) => Promise<void>
+  loadUnoId: (id: string) => Promise<string | undefined>
   getJid: (phone: string, sock: Partial<WASocket>) => Promise<string>
-  setMessage: (id: string, message: WAMessage) => void
+  setMessage: (id: string, message: WAMessage) => Promise<void>
   saveMedia: (waMessage: WAMessage) => Promise<void>
   cleanSession: () => Promise<void>
 }

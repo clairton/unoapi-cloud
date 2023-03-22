@@ -147,27 +147,27 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
       for (const msg of messages) {
         const { key } = msg
         if (key.id) {
-          dataStore.setKey(key.id, key)
+          await dataStore.setKey(key.id, key)
         }
       }
     })
-    ev.on('messages.update', (updates: WAMessageUpdate[]) => {
+    ev.on('messages.update', async (updates: WAMessageUpdate[]) => {
       for (const update of updates) {
         const { key } = update
         if (key.id) {
-          dataStore.setKey(key.id, key)
+          await dataStore.setKey(key.id, key)
         }
       }
     })
   }
-  dataStore.loadKey = (id: string) => {
+  dataStore.loadKey = async (id: string) => {
     return keys.get(id)
   }
-  dataStore.setKey = (id: string, key: WAMessageKey) => {
-    return keys.set(id, key)
+  dataStore.setKey = async (id: string, key: WAMessageKey) => {
+    return new Promise((resolve) => keys.set(id, key) && resolve())
   }
-  dataStore.loadUnoId = (id: string) => ids.get(id)
-  dataStore.setUnoId = (id: string, unoId: string) => ids.set(id, unoId)
+  dataStore.loadUnoId = async (id: string) => ids.get(id)
+  dataStore.setUnoId = async (id: string, unoId: string) => new Promise((resolve) => ids.set(id, unoId) && resolve())
   dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
     if (!jids.has(phoneOrJid)) {
       let results = []
@@ -187,11 +187,11 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     }
     return jids.get(phoneOrJid) || ''
   }
-  dataStore.setMessage = (id: string, message: WAMessage) => {
+  dataStore.setMessage = async (id: string, message: WAMessage) => {
     if (!store.messages[id]) {
       store.messages[id] = makeOrderedDictionary(waMessageID)
     }
-    return store.messages[id].upsert(message, 'append')
+    store.messages[id].upsert(message, 'append')
   }
   dataStore.saveMedia = async (waMessage: WAMessage) => {
     return saveMedia(phone, waMessage)

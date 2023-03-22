@@ -42,7 +42,7 @@ const getTestDataStore: getDataStore = (_phone: string, _config: unknown): DataS
 
 describe('media routes', () => {
   test('index', async () => {
-    dataStore.loadKey.mockReturnValue(messageKey)
+    dataStore.loadKey.mockReturnValue(new Promise((resolve) => resolve(messageKey)))
     dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
@@ -59,7 +59,7 @@ describe('media routes', () => {
   })
 
   test('download', async () => {
-    dataStore.loadKey.mockReturnValue(messageKey)
+    dataStore.loadKey.mockReturnValue(new Promise((resolve) => resolve(messageKey)))
     dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
