@@ -13,6 +13,7 @@ interface GetGroupMetadata {
 const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _store: Store) => undefined
 
 const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store) => {
+  console.debug(`Retrieving group metadata...`)
   const { key } = message
   if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
     return store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
@@ -51,7 +52,7 @@ export class OutgoingCloudApi implements Outgoing {
       return m.key && !this.filter.isIgnore({ key: m.key, messageType })
     })
     console.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
-    await Promise.all(filteredMessages.map((m: object) => this.sendOne(phone, m)))
+    await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))
   }
 
   public async sendOne(phone: string, message: object) {
@@ -60,7 +61,6 @@ export class OutgoingCloudApi implements Outgoing {
     const messageType = getMessageType(message)
     console.debug(`messageType %s...`, messageType)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
-      console.debug(`Retrieving group metadata...`)
       const store = await this.getStore(phone)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       Reflect.set(message, 'groupMetadata', await this.getGroupMetadata(i, store!))
