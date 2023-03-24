@@ -22,7 +22,7 @@ export const autoConnect = async (
       try {
         console.info(`Auto connecting phone ${phone}...`)
         try {
-          await getClient(phone, incoming, outgoing, getStore, config)
+          getClient(phone, incoming, outgoing, getStore, config)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {
