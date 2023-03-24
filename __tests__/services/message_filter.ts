@@ -40,7 +40,7 @@ describe('service message filter', () => {
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: true,
-      ignoreCalls: '',
+      rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(config)
     const key: WAMessageKey = {
@@ -57,7 +57,7 @@ describe('service message filter', () => {
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: true,
-      ignoreCalls: '',
+      rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(config)
     const key: WAMessageKey = {
@@ -91,7 +91,7 @@ describe('service message filter', () => {
       ignoreBroadcastStatuses: true,
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
-      ignoreCalls: '',
+      rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(config)
     const key: WAMessageKey = {
@@ -122,7 +122,7 @@ describe('service message filter', () => {
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: true,
       ignoreOwnMessages: false,
-      ignoreCalls: '',
+      rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(config)
     const key: WAMessageKey = {

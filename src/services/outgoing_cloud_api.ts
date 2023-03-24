@@ -1,19 +1,47 @@
+import { WAMessage, GroupMetadata } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
-import { fromBaileysMessageContent, getMessageType } from './transformer'
+import { fromBaileysMessageContent, getMessageType, isIndividualJid, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { MessageFilter } from './message_filter'
+import { Store, getStore } from './store'
+
+interface GetGroupMetadata {
+  (message: WAMessage, store: Store): Promise<GroupMetadata | undefined>
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _store: Store) => undefined
+
+const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store) => {
+  const { key } = message
+  if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
+    return store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
+  }
+  return undefined
+}
 
 export class OutgoingCloudApi implements Outgoing {
   private url: string
   private token: string
   private header: string
   private filter: MessageFilter
+  private getGroupMetadata: GetGroupMetadata
+  private getStore: getStore
 
-  constructor(filter: MessageFilter, url: string, token: string, header = 'Authorization') {
+  constructor(
+    filter: MessageFilter,
+    { ignoreGroupMessages }: { ignoreGroupMessages: boolean },
+    getStore: getStore,
+    url: string,
+    token: string,
+    header = 'Authorization',
+  ) {
     this.filter = filter
     this.url = url
     this.token = token
     this.header = header
+    this.getStore = getStore
+    this.getGroupMetadata = ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
   }
 
   public async sendMany(phone: string, messages: object[]) {
@@ -28,6 +56,18 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async sendOne(phone: string, message: object) {
     console.debug(`Receive message %s`, message)
+    const i: WAMessage = message as WAMessage
+    const messageType = getMessageType(message)
+    if (messageType && !['update', 'receipt'].includes(messageType)) {
+      const store = await this.getStore(phone)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      Reflect.set(message, 'groupMetadata', await this.getGroupMetadata(i, store!))
+    }
+    console.log('messageType', messageType)
+    if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+      const store = await this.getStore(phone)
+      await store?.dataStore.saveMedia(i)
+    }
     const data = fromBaileysMessageContent(phone, message)
     return this.send(phone, data)
   }

@@ -1,9 +1,10 @@
 import { Outgoing } from './outgoing'
 import { getStore } from './store'
 import { Response } from './response'
+import { Incoming } from './incoming'
 
 export interface getClient {
-  (phone: string, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client>
+  (phone: string, incoming: Incoming, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client>
 }
 
 export class ConnectionInProgress extends Error {
@@ -18,7 +19,7 @@ export type ClientConfig = {
   ignoreBroadcastStatuses: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
-  ignoreCalls: string
+  rejectCalls: string
   webhookCallsMessage: string
 }
 
@@ -28,7 +29,7 @@ export const defaultClientConfig: ClientConfig = {
   ignoreBroadcastMessages: true,
   ignoreOwnMessages: true,
   sendConnectionStatus: true,
-  ignoreCalls: '',
+  rejectCalls: '',
   webhookCallsMessage: '',
 }
 
@@ -40,11 +41,6 @@ export interface Client {
 
   disconnect(): Promise<void>
 
-  sendStatus(text: string, important: boolean): Promise<void>
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any): Promise<Response>
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  receive(messages: any[], update: boolean): Promise<void>
 }

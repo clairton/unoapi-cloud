@@ -1,15 +1,22 @@
 import { ClientBaileys } from '../../src/services/client_baileys'
+jest.mock('../../src/services/socket')
 import { Client, ClientConfig, defaultClientConfig } from '../../src/services/client'
 import { Outgoing } from '../../src/services/outgoing'
 import { Store } from '../../src/services/store'
+import { connect, Connection } from '../../src/services/socket'
 import { mock } from 'jest-mock-extended'
 import { WASocket, proto } from '@adiwajshing/baileys'
 import { DataStore } from '../../src/services/data_store'
+import { Incoming } from '../../src/services/incoming'
+import { dataStores } from '../../src/services/data_store'
+
+const mockConnect = connect as jest.MockedFunction<typeof connect>
 
 describe('service client baileys', () => {
   let client: Client
   let phone: string
   let outgoing: Outgoing
+  let incoming: Incoming
   let store: Store
   let dataStore: DataStore
   const config: ClientConfig = defaultClientConfig
@@ -17,30 +24,11 @@ describe('service client baileys', () => {
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
     outgoing = mock<Outgoing>()
+    incoming = mock<Incoming>()
     dataStore = mock<DataStore>()
     store = mock<Store>()
     store.dataStore = dataStore
-    client = new ClientBaileys(phone, store, outgoing, config)
-  })
-
-  test('call sendStatus important', async () => {
-    const send = jest.spyOn(outgoing, 'sendOne')
-    client.sendStatus(`${new Date().getMilliseconds()}`, false)
-    expect(send).toHaveBeenCalledTimes(1)
-  })
-
-  test('call sendStatus important', async () => {
-    const send = jest.spyOn(outgoing, 'sendOne')
-    client.sendStatus(`${new Date().getMilliseconds()}`, true)
-    expect(send).toHaveBeenCalledTimes(1)
-  })
-
-  test('call receive', async () => {
-    const send = jest.spyOn(outgoing, 'sendMany')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const messages: any[] = []
-    await client.receive(messages, false)
-    expect(send).toHaveBeenCalledTimes(1)
+    client = new ClientBaileys(phone, store, incoming, outgoing, config)
   })
 
   test('call send with unknown status', async () => {
@@ -118,5 +106,19 @@ describe('service client baileys', () => {
     const payload = { to }
     const response = await client.send(payload)
     expect(response.error.entry.length).toBe(1)
+  })
+
+  test('call connect', async () => {
+    const sock = mock<WASocket>()
+    const connection: Connection<WASocket> = { sock }
+    mockConnect.mockResolvedValue(connection)
+    await client.connect()
+    expect(mockConnect).toHaveBeenCalledTimes(1)
+    expect(Reflect.get(client, 'sock')).toBe(sock)
+  })
+
+  test('call connect', async () => {
+    await client.disconnect()
+    expect(dataStores.size).toBe(0)
   })
 })

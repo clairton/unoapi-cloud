@@ -1,17 +1,24 @@
-import { AnyMessageContent, WASocket, WAMessage, GroupMetadata } from '@adiwajshing/baileys'
+import { AnyMessageContent, WASocket } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { connect, Connection } from './socket'
 import { Client, getClient, ConnectionInProgress, ClientConfig, defaultClientConfig } from './client'
-import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { dataStores } from './data_store'
+import { Incoming } from './incoming'
 
 const clients: Map<string, Client> = new Map()
 const connecting: Map<string, boolean> = new Map()
 
-export const getClientBaileys: getClient = async (phone: string, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client> => {
+export const getClientBaileys: getClient = async (
+  phone: string,
+  incoming: Incoming,
+  outgoing: Outgoing,
+  getStore: getStore,
+  config: ClientConfig,
+): Promise<Client> => {
   if (!clients.has(phone)) {
     if (connecting.has(phone)) {
       throw new ConnectionInProgress(`Connection with number ${phone} already in progress, please wait!`)
@@ -19,7 +26,7 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
       connecting.set(phone, true)
       console.info('Creating client baileys %s', phone)
       const store: Store = await getStore(phone)
-      const client = new ClientBaileys(phone, store, outgoing, config)
+      const client = new ClientBaileys(phone, store, incoming, outgoing, config)
       await client.connect()
       console.info('Client baileys created and connected %s', phone)
       clients.set(phone, client)
@@ -31,42 +38,33 @@ export const getClientBaileys: getClient = async (phone: string, outgoing: Outgo
   return clients.get(phone) as Client
 }
 
-interface GetGroupMetadata {
-  (message: WAMessage, store: Store, sock: WASocket): Promise<GroupMetadata | undefined>
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _store: Store, _sock: WASocket) => undefined
-
-const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store, sock: WASocket) => {
-  const { key } = message
-  if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
-    return store?.dataStore.fetchGroupMetadata(key.remoteJid, sock)
-  }
-  return undefined
-}
-
 export class ClientBaileys implements Client {
   public phone: string
   public config: ClientConfig
   private sock: WASocket | undefined
   private outgoing: Outgoing
+  private incoming: Incoming
   private store: Store | undefined
-  private getGroupMetadata: GetGroupMetadata
 
-  constructor(phone: string, store: Store, outgoing: Outgoing, config: ClientConfig = defaultClientConfig) {
+  constructor(phone: string, store: Store, incoming: Incoming, outgoing: Outgoing, config: ClientConfig = defaultClientConfig) {
     this.phone = phone
     this.store = store
     this.outgoing = outgoing
+    this.incoming = incoming
     this.config = config
-
-    this.getGroupMetadata = config.ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
   }
 
   async connect() {
     console.info('Client connecting...')
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const connection: Connection<WASocket> = await connect({ store: this.store!, client: this })
+    const connection: Connection<WASocket> = await connect({
+      phone: this.phone,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      store: this.store!,
+      incoming: this.incoming,
+      outgoing: this.outgoing,
+      client: this,
+      config: this.config,
+    })
     console.info('Client connected!')
     this.sock = connection?.sock
   }
@@ -81,29 +79,13 @@ export class ClientBaileys implements Client {
     dataStores.delete(this.phone)
   }
 
-  async sendStatus(text: string, important: boolean) {
-    if (this.config.sendConnectionStatus || important) {
-      const payload = {
-        key: {
-          remoteJid: phoneNumberToJid(this.phone),
-          id: uuid(),
-        },
-        message: {
-          conversation: text,
-        },
-        messageTimestamp: new Date().getTime(),
-      }
-      return this.outgoing.sendOne(this.phone, payload)
-    }
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async send(payload: any) {
     const { status, type, to } = payload
     if (!this.sock) {
       const code = 3
       const title = 'Please, read the QRCode!'
-      await this.sendStatus(title, true)
+      await this.sendStatus(title)
       this.connect()
       const id = uuid()
       const ok = {
@@ -254,27 +236,6 @@ export class ClientBaileys implements Client {
     throw new Error(`Unknow message type ${JSON.stringify(payload)}`)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async receive(messages: any[], update = true) {
-    console.debug(`Receives %s message(s)/update(s)`, messages.length)
-    if (!update) {
-      messages = await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        messages.map(async (m: any) => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          m.groupMetadata = await this.getGroupMetadata(m, this.store!, this.sock!)
-          const messageType = getMessageType(m)
-          if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-            const i: WAMessage = m as WAMessage
-            await this.store?.dataStore.saveMedia(i)
-          }
-          return m
-        }),
-      )
-    }
-    return this.outgoing.sendMany(this.phone, messages)
-  }
-
   private async toJid(phoneNumber: string) {
     const bindJid: string = phoneNumberToJid(phoneNumber)
     if (isIndividualJid(bindJid)) {
@@ -289,5 +250,19 @@ export class ClientBaileys implements Client {
       }
     }
     return bindJid
+  }
+
+  private async sendStatus(text: string) {
+    const payload = {
+      key: {
+        remoteJid: phoneNumberToJid(this.phone),
+        id: uuid(),
+      },
+      message: {
+        conversation: text,
+      },
+      messageTimestamp: new Date().getTime(),
+    }
+    return this.outgoing.sendOne(this.phone, payload)
   }
 }

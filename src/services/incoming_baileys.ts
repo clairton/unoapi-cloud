@@ -25,7 +25,7 @@ export class IncomingBaileys implements Incoming {
   }
 
   public async send(phone: string, payload: object) {
-    const client: Client = await this.getClient(phone, this.service, this.getStore, this.config)
+    const client: Client = await this.getClient(phone, this, this.service, this.getStore, this.config)
     return client.send(payload)
   }
 }

@@ -38,7 +38,7 @@ class DummyClient implements Client {
 const dummyClient = new DummyClient()
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getClientDummy: getClient = async (phone: string, outgoing: Outgoing): Promise<Client> => {
+const getClientDummy: getClient = async (phone: string, incoming: Incoming, outgoing: Outgoing): Promise<Client> => {
   return dummyClient
 }
 
