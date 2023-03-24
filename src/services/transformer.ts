@@ -58,6 +58,13 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       const url = payload[type].link
       response.caption = payload[type].caption
       response.mimeType = mime.lookup(url)
+      if (payload[type].filename) {
+        response.fileName = payload[type].filename
+      }
+      if (payload[type].caption) {
+        response.caption = payload[type].caption
+      }
+      response.fileName = payload[type].filename
       response[type] = { url }
       break
 
