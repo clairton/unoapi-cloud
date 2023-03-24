@@ -167,7 +167,7 @@ export const connect = async <T>({
         const { from, id, status } = events[i]
         if (status == 'ringing' && !calls.has(from)) {
           await incoming.send(from, { text: config.rejectCalls })
-          if (config.webhookCallsMessage) {
+          if (config.rejectCallsWebhook) {
             const message = {
               key: {
                 fromMe: false,
@@ -175,7 +175,7 @@ export const connect = async <T>({
                 remoteJid: from,
               },
               message: {
-                conversation: config.webhookCallsMessage,
+                conversation: config.rejectCallsWebhook,
               },
             }
             await dataStore.setMessage(message.key.id, message)

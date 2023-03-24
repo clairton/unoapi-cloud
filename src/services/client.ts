@@ -20,7 +20,7 @@ export type ClientConfig = {
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
   rejectCalls: string
-  webhookCallsMessage: string
+  rejectCallsWebhook: string
 }
 
 export const defaultClientConfig: ClientConfig = {
@@ -30,7 +30,7 @@ export const defaultClientConfig: ClientConfig = {
   ignoreOwnMessages: true,
   sendConnectionStatus: true,
   rejectCalls: '',
-  webhookCallsMessage: '',
+  rejectCallsWebhook: '',
 }
 
 export interface Client {

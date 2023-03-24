@@ -24,7 +24,7 @@ const {
   IGNORE_CALLS,
   SEND_CONNECTION_STATUS,
   PORT,
-  WEBHOOK_CALLS_MESSAGE,
+  REJECT_CALLS_WEBHOOK,
   REJECT_CALLS,
 } = process.env
 const port: number = parseInt(PORT || '9876')
@@ -38,7 +38,7 @@ config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? fals
 config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
 config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
 config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
-config.webhookCallsMessage = WEBHOOK_CALLS_MESSAGE || ''
+config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
 
 const filter: MessageFilter = new MessageFilter(config)
 

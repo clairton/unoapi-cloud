@@ -188,7 +188,7 @@ IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default tr
 IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
 IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
 REJECT_CALLS=message to send when receive a call, default is empty and not reject
-WEBHOOK_CALLS_MESSAGE=message to send webook when receive a call, default is empty and not send
+REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
 SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
 ```
 
