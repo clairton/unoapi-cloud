@@ -202,6 +202,10 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   dataStore.saveMedia = async (waMessage: WAMessage) => {
     return saveMedia(phone, waMessage)
   }
+  dataStore.removeMedia = async (fileName: string) => {
+    const filePath = `${phone}/${fileName}`
+    return rmSync(filePath)
+  }
   dataStore.cleanSession = async () => {
     const sessionDir = `${SESSION_DIR}/${phone}`
     if (existsSync(sessionDir)) {
