@@ -144,8 +144,14 @@ export class ClientBaileys implements Client {
           const key = await this.store?.dataStore?.loadKey(payload?.message_id)
           console.debug('key %s for %s', key, payload?.message_id)
           if (key) {
-            console.debug('Baileys read message key %s', key)
-            await this.sock?.readMessages([key])
+            try {
+              console.debug('Baileys read message key %s...', key)
+              await this.sock?.readMessages([key])
+              console.debug('Baileys read message key %s!', key)
+            } catch (error) {
+              console.error('Error on read message key %s', key)
+              console.error(error)
+            }
           }
         }
         const r: Response = { ok: { success: true } }
@@ -209,9 +215,15 @@ export class ClientBaileys implements Client {
           return r
         }
         const content: AnyMessageContent = toBaileysMessageContent(payload)
-        console.debug('Send to baileys', jid, content)
-        const response = await this.sock?.sendMessage(jid, content)
-        console.debug('Sent to baileys', response)
+        let response
+        try {
+          console.debug('Send to baileys', jid, content)
+          response = await this.sock?.sendMessage(jid, content)
+          console.debug('Sent to baileys', response)
+        } catch (error) {
+          console.error('Error on send message %s => %s', jid, content)
+          console.error(error)
+        }
         if (response) {
           const key = response.key
           const ok = {
