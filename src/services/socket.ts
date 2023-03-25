@@ -98,7 +98,7 @@ const sendStatus = (phone: string, outgoing: Outgoing, text: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const receive = async (phone: string, outgoing: Outgoing, dataStore: DataStore, messages: any[], update = true) => {
-  console.debug('Receives %s %s', update ? 'update(s)' : 'message(s)', messages.length)
+  console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length)
   return outgoing.sendMany(phone, messages)
 }
 
