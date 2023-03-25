@@ -98,7 +98,7 @@ const sendStatus = (phone: string, outgoing: Outgoing, text: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const receive = async (phone: string, outgoing: Outgoing, dataStore: DataStore, messages: any[], update = true) => {
-  console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length)
+  console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, phone)
   return outgoing.sendMany(phone, messages)
 }
 
@@ -130,6 +130,7 @@ export const connect = async <T>({
     connectTimeoutMs: 5 * 60 * 1000,
     keepAliveIntervalMs: 10_000,
     logger,
+    syncFullHistory: !config.ignoreHistoryMessages,
   }
   const sock = await makeWASocket(socketConfig)
   dataStore.bind(sock.ev)
@@ -160,8 +161,16 @@ export const connect = async <T>({
     listener(payload)
   })
 
+  if (!config.ignoreHistoryMessages) {
+    console.info('Config import history messages', phone)
+    sock.ev.on('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
+      console.info('Importing history messages, is latest', isLatest, phone)
+      listener(messages, false)
+    })
+  }
+
   if (config.rejectCalls) {
-    console.info('Config to reject calls')
+    console.info('Config to reject calls', phone)
     sock.ev.on('call', async (events) => {
       for (let i = 0; i < events.length; i++) {
         const { from, id, status } = events[i]
@@ -195,7 +204,7 @@ export const connect = async <T>({
     if (connection === 'close' && lastDisconnect) {
       const statusCode = (lastDisconnect.error as Boom)?.output?.statusCode
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
+      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect, phone)
       // reconnect if not logged out
       if (shouldReconnect) {
         await disconnectSock(sock)
@@ -211,7 +220,7 @@ export const connect = async <T>({
         try {
           await sock?.logout()
         } catch (error) {
-          console.error('Error on logout', error)
+          console.error('Error on logout', phone, error)
         }
         await dataStore.cleanSession()
         await client.disconnect()

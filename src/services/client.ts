@@ -17,6 +17,7 @@ export type ClientConfig = {
   ignoreGroupMessages: boolean
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
+  ignoreHistoryMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
   rejectCalls: string
@@ -26,7 +27,8 @@ export type ClientConfig = {
 export const defaultClientConfig: ClientConfig = {
   ignoreGroupMessages: true,
   ignoreBroadcastStatuses: true,
-  ignoreBroadcastMessages: true,
+  ignoreBroadcastMessages: false,
+  ignoreHistoryMessages: true,
   ignoreOwnMessages: true,
   sendConnectionStatus: true,
   rejectCalls: '',

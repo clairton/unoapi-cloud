@@ -171,6 +171,8 @@ services:
         condition: on-failure
 ```
 
+Run `docker compose up`
+
 Visit `http://localhost:9876/ping` wil be render a "pong!"
 
 ## Environment Variables
@@ -186,6 +188,7 @@ PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
 IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
+IGNORE_HISTORY_MESSAGES=true to import messages when connect, default is false
 IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
 REJECT_CALLS=message to send when receive a call, default is empty and not reject
 REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send

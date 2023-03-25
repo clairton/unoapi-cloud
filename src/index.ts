@@ -22,6 +22,7 @@ const {
   IGNORE_BROADCAST_STATUSES,
   IGNORE_BROADCAST_MESSAGES,
   IGNORE_CALLS,
+  IGNORE_HISTORY_MESSAGES,
   SEND_CONNECTION_STATUS,
   PORT,
   REJECT_CALLS_WEBHOOK,
@@ -35,6 +36,7 @@ const config: ClientConfig = defaultClientConfig
 config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE_GROUP_MESSAGES == 'true'
 config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES == 'true'
 config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES == 'true'
+config.ignoreHistoryMessages = IGNORE_HISTORY_MESSAGES === _undefined ? false : IGNORE_HISTORY_MESSAGES == 'true'
 config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
 config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
 config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
@@ -64,3 +66,10 @@ app.server.listen(port, '0.0.0.0', async () => {
 })
 
 export default app
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+process.on('unhandledRejection', (reason: any, promise) => {
+  console.error('unhandledRejection:', reason.stack)
+  console.error('promise:', promise)
+  throw reason
+})
