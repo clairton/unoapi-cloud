@@ -1,253 +1,228 @@
-import makeWASocket, {
-  DisconnectReason,
-  WASocket,
-  UserFacingSocketConfig,
-  ConnectionState,
-  WAMessage,
-  fetchLatestBaileysVersion,
-  WABrowserDescription,
-  MessageRetryMap,
-} from '@adiwajshing/baileys'
-
+import makeWASocket, { DisconnectReason, WABrowserDescription, MessageRetryMap, fetchLatestBaileysVersion, WAMessageKey } from '@adiwajshing/baileys'
+import { release } from 'os'
 import logger from '@adiwajshing/baileys/lib/Utils/logger'
 logger.level = process.env.LOG_LEVEL || (process.env.NODE_ENV === 'development' ? 'debug' : 'error')
 
-import { Boom } from '@hapi/boom'
-import { Client, ClientConfig } from './client'
-import { Store } from './store'
-import { DataStore } from './data_store'
-import { v1 as uuid } from 'uuid'
-import QRCode from 'qrcode'
-import { release } from 'os'
-import { phoneNumberToJid } from './transformer'
-import { Outgoing } from './outgoing'
-import { Incoming } from './incoming'
-const counts: Map<string, number> = new Map()
-const calls = new Map<string, boolean>()
-const max = 6
-
-const onQrCode = async (phone: string, outgoing: Outgoing, dataStore: DataStore, qrCode: string) => {
-  counts.set(phone, (counts.get(phone) || 0) + 1)
-  console.debug(`Received qrcode ${qrCode}`)
-  const messageTimestamp = new Date().getTime()
-  const id = uuid()
-  const qrCodeUrl = await QRCode.toDataURL(qrCode)
-  const remoteJid = phoneNumberToJid(phone)
-  const waMessageKey = {
-    remoteJid,
-    id,
-  }
-  const waMessage: WAMessage = {
-    key: waMessageKey,
-    message: {
-      imageMessage: {
-        url: qrCodeUrl,
-        mimetype: 'image/png',
-        fileLength: qrCode.length,
-        caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${counts.get(phone)} of ${max}`,
-      },
-    },
-    messageTimestamp,
-  }
-  await dataStore.setMessage(remoteJid, waMessage)
-  await dataStore.setKey(id, waMessageKey)
-  await outgoing.sendOne(phone, waMessage)
-  if ((counts.get(phone) || 0) >= max) {
-    counts.delete(phone)
-    return false
-  }
-  return true
-}
-
-const disconnectSock = async (sock: WASocket) => {
-  if (sock) {
-    const events = ['messages.delete', 'message-receipt.update', 'messages.update', 'messages.upsert', 'creds.update', 'connection.update']
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    events.forEach((key: any) => {
-      try {
-        sock?.ev?.removeAllListeners(key)
-      } catch (error) {
-        console.error('Error on %s sock.ev.removeAllListeners %s', key, error)
-      }
-    })
-    try {
-      await sock?.ws?.close()
-    } catch (error) {
-      console.error('Error on sock.ws.close', error)
-    }
+export class SendError extends Error {
+  readonly code: number
+  readonly title: string
+  constructor(code: number, title: string) {
+    super(`${code}: ${title}`)
   }
 }
 
-export declare type Connection<T> = {
-  sock: T
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+export interface sendMessage {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (_phone: string, _message: object): Promise<any>
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface readMessages {
+  (_keys: WAMessageKey[]): Promise<void>
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface rejectCall {
+  (_callId: string, _callFrom: string): Promise<void>
 }
 
-const sendStatus = (phone: string, outgoing: Outgoing, text: string) => {
-  const payload = {
-    key: {
-      remoteJid: phoneNumberToJid(phone),
-      id: uuid(),
-    },
-    message: {
-      conversation: text,
-    },
-    messageTimestamp: new Date().getTime(),
-  }
-  return outgoing.sendOne(phone, payload)
+export type Status = {
+  attempt: number
+  connected: boolean
+  disconnected: boolean
+  reconnecting: boolean
+  connecting: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const receive = async (phone: string, outgoing: Outgoing, dataStore: DataStore, messages: any[], update = true) => {
-  console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, phone)
-  return outgoing.sendMany(phone, messages)
-}
-
-export const connect = async <T>({
-  phone,
-  incoming,
-  outgoing,
-  client,
+export const connect = async ({
+  number,
   store,
-  config,
-}: {
-  phone: string
-  incoming: Incoming
-  outgoing: Outgoing
-  client: Client
-  store: Store
-  config: ClientConfig
-}): Promise<Connection<T>> => {
-  const { state, saveCreds, dataStore } = store
-  const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
+  onQrCode,
+  onStatus,
+  onDisconnect,
+  timeout = 1e3,
+  attempts = Infinity,
+  config = { ignoreHistoryMessages: true },
+}) => {
+  let sock = null
   const msgRetryCounterMap: MessageRetryMap = {}
-  const socketConfig: UserFacingSocketConfig = {
-    printQRInTerminal: true,
-    auth: state,
-    browser,
-    defaultQueryTimeoutMs: 60_000,
-    qrTimeout: 60_000,
-    msgRetryCounterMap,
-    connectTimeoutMs: 5 * 60 * 1000,
-    keepAliveIntervalMs: 10_000,
-    logger,
-    syncFullHistory: !config.ignoreHistoryMessages,
-  }
-  const sock = await makeWASocket(socketConfig)
-  dataStore.bind(sock.ev)
+  const { dataStore, state, saveCreds } = store
 
-  sock.ev.on('creds.update', saveCreds)
-  const listener = (messages: object[], update = true) => receive(phone, outgoing, store.dataStore, messages, update)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sock.ev.on('messages.upsert', async (payload: any) => {
-    console.debug('messages.upsert', phone, JSON.stringify(payload, null, ' '))
-    listener(payload.messages, false)
-  })
-  sock.ev.on('messages.update', (messages: object[]) => {
-    console.debug('messages.update', phone, JSON.stringify(messages, null, ' '))
-    listener(messages)
-  })
-  sock.ev.on('message-receipt.update', (messages: object[]) => {
-    console.debug('message-receipt.update', phone, JSON.stringify(messages, null, ' '))
-    listener(messages)
-  })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sock.ev.on('messages.delete', (update: any) => {
-    console.debug('messages.delete', phone, JSON.stringify(update, null, ' '))
-    const keys = update.keys || []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payload = keys.map((key: any) => {
-      return { key, update: { status: 'DELETED' } }
-    })
-    listener(payload)
-  })
-
-  if (!config.ignoreHistoryMessages) {
-    console.info('Config import history messages', phone)
-    sock.ev.on('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
-      console.info('Importing history messages, is latest', isLatest, phone)
-      listener(messages, false)
-    })
+  const status: Status = {
+    attempt: 0,
+    connected: false,
+    disconnected: false,
+    reconnecting: false,
+    connecting: null,
   }
 
-  if (config.rejectCalls) {
-    console.info('Config to reject calls', phone)
-    sock.ev.on('call', async (events) => {
-      for (let i = 0; i < events.length; i++) {
-        const { from, id, status } = events[i]
-        if (status == 'ringing' && !calls.has(from)) {
-          await incoming.send(from, { text: config.rejectCalls })
-          if (config.rejectCallsWebhook) {
-            const message = {
-              key: {
-                fromMe: false,
-                id: uuid(),
-                remoteJid: from,
-              },
-              message: {
-                conversation: config.rejectCallsWebhook,
-              },
-            }
-            await dataStore.setMessage(message.key.id, message)
-            await outgoing.sendOne(phone, message)
-          }
-          await sock.rejectCall(id, from)
-          calls.set(from, true)
-        } else if (['timeout', 'reject', 'accept'].includes(status)) {
-          calls.delete(from)
-        }
-      }
-    })
-  }
+  const messages = []
+  const reads = []
 
-  sock.ev.on('connection.update', async (update: Partial<ConnectionState>) => {
-    const { connection, lastDisconnect } = update
-    if (connection === 'close' && lastDisconnect) {
-      const statusCode = (lastDisconnect.error as Boom)?.output?.statusCode
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-      console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect, phone)
-      // reconnect if not logged out
-      if (shouldReconnect) {
-        await disconnectSock(sock)
-        try {
-          setTimeout(() => {
-            client.connect()
-          }, 1_000)
-        } catch (error) {}
+  const onConnectionUpdate = (event) => {
+    console.log('onConnectionUpdate ==>', event)
+    if (event.qr) {
+      if (status.attempt++ > attempts || status.disconnected) {
+        const message = `The ${attempts} times of generate qrcode is exceded!`
+        onStatus(message, true)
+        status.reconnecting = false
+        status.disconnected = true
+        throw new SendError(6, message)
       } else {
-        const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-        await sendStatus(phone, outgoing, message)
-        await disconnectSock(sock)
-        try {
-          await sock?.logout()
-        } catch (error) {
-          console.error('Error on logout', phone, error)
-        }
-        await dataStore.cleanSession()
-        await client.disconnect()
+        onQrCode(event.qr, status.attempt, attempts)
       }
-    } else if (connection === 'open' && config.sendConnectionStatus) {
-      const { version, isLatest } = await fetchLatestBaileysVersion()
-      const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
-      await sendStatus(phone, outgoing, message)
-    } else if (update.qr) {
-      if (!(await onQrCode(phone, outgoing, dataStore, update.qr))) {
-        await disconnectSock(sock)
-        const message = `The ${max} times of generate qrcode is exceded!`
-        await sendStatus(phone, outgoing, message)
-        throw message
-      }
-    } else if (connection === 'connecting' && config.sendConnectionStatus) {
-      const message = `Connnecting...`
-      await sendStatus(phone, outgoing, message)
-    } else if (update.isNewLogin) {
-      const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
-      await sendStatus(phone, outgoing, message)
-    } else {
-      console.debug('connection.update', update)
     }
-  })
-  const connection: Connection<T> = {
-    sock: sock as T,
+    if (event.connection === 'open') onConnected()
+    else if (event.connection === 'close') onDisconnected(event)
+    else if (event.connection === 'connecting') onStatus(`Connnecting...`, false)
+    else if (event.isNewLogin) {
+      const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
+      onStatus(message, true)
+    }
   }
-  return connection
+
+  const onConnected = () => {
+    status.attempt = 0
+    status.connected = true
+    status.disconnected = false
+    status.reconnecting = false
+
+    console.log(`${number} connected`)
+
+    fetchLatestBaileysVersion().then(( { version, isLatest }) => {
+      const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
+      onStatus(message, false)
+    })
+
+    while (messages.length) {
+      // eslint-disable-next-line prefer-spread
+      send.apply(null, messages.pop())
+    }
+
+    while (reads.length) {
+      // eslint-disable-next-line prefer-spread
+      read.apply(null, reads.pop())
+    }
+  }
+
+  const onDisconnected = async ({ lastDisconnect }) => {
+    status.connected = false
+    const statusCode = lastDisconnect?.error?.output?.statusCode
+    const shouldReconnect = statusCode !== DisconnectReason.loggedOut
+
+    console.log(`${number} disconnected with status: ${statusCode}`)
+    onDisconnect()
+    if (statusCode === DisconnectReason.loggedOut) {
+      status.reconnecting = false
+      status.disconnected = true
+      console.log(`${number} destroyed`)
+      dataStore.cleanSession()
+      return
+    }
+    if (shouldReconnect) {
+      reconnect()
+    } else {
+      const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
+      onStatus(message, true)
+    }
+  }
+
+  const connect = async () => {
+    if (status.connected) return
+
+    const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
+    sock = makeWASocket({
+      auth: state,
+      printQRInTerminal: true,
+      browser,
+      msgRetryCounterMap,
+      syncFullHistory: !config.ignoreHistoryMessages,
+      logger,
+    })
+    dataStore.bind(sock.ev)
+    sock.ev.on('creds.update', saveCreds)
+    sock.ev.on('connection.update', onConnectionUpdate)
+  }
+
+  const reconnect = () => {
+    console.log(`${number} reconnecting`, status.attempt)
+    setTimeout(connect, timeout)
+  }
+
+  const disconnect = (reconnect) => {
+    if (status.disconnected) return
+
+    status.connected = false
+    status.disconnected = !reconnect
+    status.reconnecting = !!reconnect
+    console.log(`${number} disconnecting`)
+    return sock.end()
+  }
+
+  const restart = async () => {
+    return disconnect(true).then(connect)
+  }
+
+  const exists = async (phone) => {
+    if (!status.connected) {
+      throw new Error('Client is disconnected')
+    }
+    return dataStore.getJid(phone, sock)
+  }
+
+  const send: sendMessage = async (phone, message) => {
+    if (status.disconnected) {
+      if (status.connecting) {
+        throw new SendError(5, 'Wait a moment, connecting process')
+      } else {
+        throw new SendError(3, 'disconnect number, please read qr code')
+      }
+    }
+
+    if (!status.connected) {
+      messages.unshift([phone, message])
+      return
+    }
+
+    const id = await exists(phone)
+
+    if (id) {
+      console.log(`${number} is sending message ==>`, id, message)
+      return sock.sendMessage(id, message)
+    }
+
+    throw new SendError(2, `The number ${phone} does not have Whatsapp Account or was a error verify this!`)
+  }
+
+  const read: readMessages = async (keys) => {
+    if (status.disconnected) {
+      if (status.connecting) {
+        throw new SendError(5, 'Wait a moment, connecting process')
+      } else {
+        throw new SendError(3, 'disconnect number, please read qr code')
+      }
+    }
+
+    if (!status.connected) {
+      reads.unshift(keys)
+      return
+    }
+
+    return sock.readMessages(keys)
+  }
+
+  const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
+    if (status.disconnected) {
+      if (status.connecting) {
+        throw new SendError(5, 'Wait a moment, connecting process')
+      } else {
+        throw new SendError(3, 'disconnect number, please read qr code')
+      }
+    }
+
+    return sock.rejectCall(callId, callFrom)
+  }
+
+  connect()
+
+  return { ev: sock.ev, status, send, read, rejectCall }
 }

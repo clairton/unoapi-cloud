@@ -2,6 +2,8 @@ import { IncomingBaileys } from '../../src/services/incoming_baileys'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
 import { getClient, Client, ClientConfig, defaultClientConfig } from '../../src/services/client'
+import { Status } from '../../src/services/socket'
+import { mock } from 'jest-mock-extended'
 
 class DummyOutgoing implements Outgoing {
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
@@ -25,14 +27,13 @@ class DummyClient implements Client {
   async connect(): Promise<void> {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async disconnect(): Promise<void> {}
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  async sendStatus(text: string): Promise<void> {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   async send(payload: any): Promise<any> {
     return true
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  async receive(messages: object[], update: boolean): Promise<void> {}
+  getStatus(): Status {
+    return mock<Status>()
+  }
 }
 
 const dummyClient = new DummyClient()

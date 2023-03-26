@@ -60,15 +60,17 @@ export class OutgoingCloudApi implements Outgoing {
     const i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
     console.debug(`messageType %s...`, messageType)
+    const store = await this.getStore(phone)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
-      const store = await this.getStore(phone)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       Reflect.set(message, 'groupMetadata', await this.getGroupMetadata(i, store!))
     }
     if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
       console.debug(`Saving media...`)
-      const store = await this.getStore(phone)
       await store?.dataStore.saveMedia(i)
+    }
+    if (i.key && i.key.id) {
+      await store?.dataStore.setKey(i.key.id, i.key)
     }
     const data = fromBaileysMessageContent(phone, message)
     return this.send(phone, data)

@@ -2,6 +2,7 @@ import { Outgoing } from './outgoing'
 import { getStore } from './store'
 import { Response } from './response'
 import { Incoming } from './incoming'
+import { Status } from './socket'
 
 export interface getClient {
   (phone: string, incoming: Incoming, outgoing: Outgoing, getStore: getStore, config: ClientConfig): Promise<Client>
@@ -45,4 +46,6 @@ export interface Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any): Promise<Response>
+
+  getStatus(): Status
 }

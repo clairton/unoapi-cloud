@@ -140,6 +140,7 @@ with:
 * 3 - disconnect number, please read qr code
 * 4 - Unknown baileys status
 * 5 - Wait a moment, connecting process 
+* 6 - max qrcode generate 
 
 ## Up for development
 

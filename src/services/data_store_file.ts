@@ -6,14 +6,12 @@ import {
   Contact,
   WAMessage,
   downloadMediaMessage,
-  WAMessageUpdate,
-  MessageUpsertType,
   WAMessageKey,
   WASocket,
 } from '@adiwajshing/baileys'
 import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
-import { getMessageType, jidToPhoneNumber, phoneNumberToJid, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { getMessageType, isIndividualJid, jidToPhoneNumber, phoneNumberToJid, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
@@ -143,22 +141,6 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
         }
       }
     })
-    ev.on('messages.upsert', async ({ messages }: { messages: WAMessage[]; type: MessageUpsertType }) => {
-      for (const msg of messages) {
-        const { key } = msg
-        if (key.id) {
-          await dataStore.setKey(key.id, key)
-        }
-      }
-    })
-    ev.on('messages.update', async (updates: WAMessageUpdate[]) => {
-      for (const update of updates) {
-        const { key } = update
-        if (key.id) {
-          await dataStore.setKey(key.id, key)
-        }
-      }
-    })
   }
   dataStore.loadKey = async (id: string) => {
     return keys.get(id)
@@ -168,8 +150,12 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   }
   dataStore.loadUnoId = async (id: string) => ids.get(id)
   dataStore.setUnoId = async (id: string, unoId: string) => new Promise((resolve) => ids.set(id, unoId) && resolve())
-  dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
-    if (!jids.has(phoneOrJid)) {
+  dataStore.getJid = async (phone: string, sock: Partial<WASocket>) => {
+    const phoneOrJid = phoneNumberToJid(phone)
+    if (!isIndividualJid(phoneOrJid)) {
+      return phoneOrJid
+    }
+    if (!jids.has(phone)) {
       let results = []
       try {
         console.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
