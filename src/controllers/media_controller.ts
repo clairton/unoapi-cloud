@@ -3,6 +3,7 @@ import { DataStore } from '../services/data_store'
 import { getFileName, getFilePath } from '../services/data_store_file'
 import { proto } from '@adiwajshing/baileys'
 import { getDataStore } from '../services/data_store'
+import { getMessageType } from '../services/transformer'
 import mime from 'mime-types'
 
 export class MediaController {
@@ -29,16 +30,17 @@ export class MediaController {
           const message = await store.loadMessage(remoteJid, id)
           console.debug('message %s for %s', message, key)
           if (message) {
-            const fileName = await getFileName(phone, message)
-            const mimeType = mime.lookup(fileName)
-            const url = `${this.baseUrl}/v15.0/download/${fileName}`
+            const messageType = getMessageType(message)
+            const binMessage = message.message[messageType]
+            const filePath = await getFileName(phone, message)
+            const mimeType = mime.lookup(filePath)
+            const url = `${this.baseUrl}/v15.0/download/${filePath}`
             const result = {
               messaging_product: 'whatsapp',
               url,
-              file_name: fileName,
               mime_type: mimeType,
-              // sha256: binMessage.fileSha256,
-              // file_size: binMessage.fileLength,
+              sha256: binMessage.fileSha256,
+              file_size: binMessage.fileLength,
               id: `${phone}/${id}`,
             }
             return res.status(200).json(result)
@@ -53,8 +55,27 @@ export class MediaController {
     console.debug('media download params', req.params)
     console.debug('media download body', JSON.stringify(req.body, null, ' '))
     const { file, phone } = req.params
-    const fileName = getFilePath(`${phone}/${file}`)
-    res.contentType(mime.lookup(fileName) || '')
-    res.download(fileName)
+    const mediaId = file.split('.')[0]
+    const store: DataStore = this.getDataStore(phone, {})
+    let fileName = ''
+    if (mediaId) {
+      const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
+      console.debug('key %s for %s', key, mediaId)
+      if (key) {
+        const { remoteJid, id } = key
+        if (remoteJid && id) {
+          const message = await store.loadMessage(remoteJid, id)
+          console.debug('message %s for %s', message, key)
+          if (message) {
+            const messageType = getMessageType(message)
+            const binMessage = message.message[messageType]
+            fileName = binMessage.fileName
+          }
+        }
+      }
+    }
+    const filePath = getFilePath(`${phone}/${file}`)
+    res.contentType(mime.lookup(filePath) || '')
+    res.download(filePath, fileName)
   }
 }

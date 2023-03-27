@@ -41,29 +41,31 @@ const getTestDataStore: getDataStore = (_phone: string, _config: unknown): DataS
 }
 
 describe('media routes', () => {
-  test('index', async () => {
+  let incoming: Incoming
+  let outgoing: Outgoing
+  let app: App
+
+  beforeEach(() => {
     dataStore.loadKey.mockReturnValue(new Promise((resolve) => resolve(messageKey)))
     dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
-    const incoming = mock<Incoming>()
-    const outgoing = mock<Outgoing>()
-    const app: App = new App(incoming, outgoing, url, getTestDataStore)
+    incoming = mock<Incoming>()
+    outgoing = mock<Outgoing>()
+    app = new App(incoming, outgoing, url, getTestDataStore)
+  })
+
+  test('index', async () => {
     await request(app.server)
       .get(`/v15.0/${phone}/${messageId}`)
       .expect(200, {
         messaging_product: 'whatsapp',
         url: `${url}/v15.0/download/${phone}/${messageId}.${extension}`,
-        file_name: `${phone}/${messageId}.${extension}`,
+        // file_name: `${phone}/${messageId}.${extension}`,
         mime_type: mimetype,
         id: `${phone}/${messageId}`,
       })
   })
 
   test('download', async () => {
-    dataStore.loadKey.mockReturnValue(new Promise((resolve) => resolve(messageKey)))
-    dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
-    const incoming = mock<Incoming>()
-    const outgoing = mock<Outgoing>()
-    const app: App = new App(incoming, outgoing, url, getTestDataStore)
     const name = `${phone}/${messageId}.${extension}`
     const fileName = getFilePath(name)
     const parts = fileName.split('/')
