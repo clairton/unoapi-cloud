@@ -1,4 +1,11 @@
-import makeWASocket, { DisconnectReason, WABrowserDescription, MessageRetryMap, fetchLatestBaileysVersion, WAMessageKey } from '@adiwajshing/baileys'
+import makeWASocket, {
+  DisconnectReason,
+  WABrowserDescription,
+  MessageRetryMap,
+  fetchLatestBaileysVersion,
+  WAMessageKey,
+  proto,
+} from '@adiwajshing/baileys'
 import { release } from 'os'
 import logger from '@adiwajshing/baileys/lib/Utils/logger'
 logger.level = process.env.LOG_LEVEL || (process.env.NODE_ENV === 'development' ? 'debug' : 'error')
@@ -126,6 +133,12 @@ export const connect = async ({
     }
   }
 
+  const getMessage = async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
+    const { remoteJid, id } = key
+    console.debug('load message for jid %s id %s', remoteJid, id)
+    return dataStore.loadMessage(remoteJid, id)
+  }
+
   const connect = async () => {
     if (status.connected) return
 
@@ -137,6 +150,7 @@ export const connect = async ({
       msgRetryCounterMap,
       syncFullHistory: !config.ignoreHistoryMessages,
       logger,
+      getMessage,
     })
     dataStore.bind(sock.ev)
     sock.ev.on('creds.update', saveCreds)
