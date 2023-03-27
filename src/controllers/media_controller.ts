@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { DataStore } from '../services/data_store'
-import { getFileName, getFilePath } from '../services/data_store_file'
+import { getFileName } from '../services/data_store_file'
 import { proto } from '@adiwajshing/baileys'
 import { getDataStore } from '../services/data_store'
 import { getMessageType } from '../services/transformer'
@@ -55,27 +55,28 @@ export class MediaController {
     console.debug('media download params', req.params)
     console.debug('media download body', JSON.stringify(req.body, null, ' '))
     const { file, phone } = req.params
-    const mediaId = file.split('.')[0]
+    // const mediaId = file.split('.')[0]
     const store: DataStore = this.getDataStore(phone, {})
-    let fileName = ''
-    if (mediaId) {
-      const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
-      console.debug('key %s for %s', key, mediaId)
-      if (key) {
-        const { remoteJid, id } = key
-        if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id)
-          console.debug('message %s for %s', message, key)
-          if (message) {
-            const messageType = getMessageType(message)
-            const binMessage = message.message[messageType]
-            fileName = binMessage.fileName
-          }
-        }
-      }
-    }
-    const filePath = getFilePath(`${phone}/${file}`)
-    res.contentType(mime.lookup(filePath) || '')
-    res.download(filePath, fileName)
+    store.downloadMedia(res, file)
+    // let fileName = ''
+    // if (mediaId) {
+    //   const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
+    //   console.debug('key %s for %s', key, mediaId)
+    //   if (key) {
+    //     const { remoteJid, id } = key
+    //     if (remoteJid && id) {
+    //       const message = await store.loadMessage(remoteJid, id)
+    //       console.debug('message %s for %s', message, key)
+    //       if (message) {
+    //         const messageType = getMessageType(message)
+    //         const binMessage = message.message[messageType]
+    //         fileName = binMessage.fileName
+    //       }
+    //     }
+    //   }
+    // }
+    // const filePath = getFilePath(`${phone}/${file}`)
+    // res.contentType(mime.lookup(filePath) || '')
+    // res.download(filePath, fileName)
   }
 }

@@ -21,13 +21,15 @@ const text = `${new Date().getTime()}`
 const mimetype = 'text/plain'
 const extension = 'txt'
 const link = `${text}.${extension}`
-const audio: proto.Message.IAudioMessage = {
+const fileName = `${text}.${extension}`
+const doc: proto.Message.IDocumentMessage = {
   // fileSha256,
   url: link,
   mimetype,
+  fileName,
 }
 const m: proto.IMessage = {
-  audioMessage: audio,
+  documentMessage: doc,
 }
 const message: proto.IWebMessageInfo = {
   key: messageKey,
@@ -75,6 +77,9 @@ describe('media routes', () => {
     }
     writeFileSync(fileName, `${new Date().getTime()}`)
     const endpoint = `/v15.0/download/${name}`
+    dataStore.downloadMedia.mockImplementation(async (r) => {
+      return r.download(fileName, name)
+    })
     const response = await request(app.server)
       .get(endpoint)
       .expect(200)
@@ -91,7 +96,7 @@ describe('media routes', () => {
           })
         }
       })
-    expect(response.headers['content-disposition']).toEqual(`attachment; filename="${messageId}.${extension}"`)
+    expect(response.headers['content-disposition']).toEqual(`attachment; filename="${name.split('/')[1]}"`)
     expect(response.headers['content-type']).toContain(mimetype)
   })
 })

@@ -18,6 +18,7 @@ import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import mime from 'mime-types'
 import { getDataStore, dataStores } from './data_store'
+import { Response } from 'express'
 
 export const MEDIA_DIR = './data/medias'
 
@@ -142,9 +143,10 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
       }
     })
   }
-  dataStore.loadKey = async (id: string) => {
+  const loadKey = async (id: string) => {
     return keys.get(id)
   }
+  dataStore.loadKey = loadKey
   dataStore.setKey = async (id: string, key: WAMessageKey) => {
     return new Promise((resolve) => keys.set(id, key) && resolve())
   }
@@ -191,6 +193,29 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
   dataStore.removeMedia = async (fileName: string) => {
     const filePath = `${phone}/${fileName}`
     return rmSync(filePath)
+  }
+  dataStore.downloadMedia = async (res: Response, file: string) => {
+    const mediaId = file.split('.')[0]
+    let fileName = ''
+    if (mediaId) {
+      const key: proto.IMessageKey | undefined = await loadKey(mediaId)
+      console.debug('key %s for %s', key, mediaId)
+      if (key) {
+        const { remoteJid, id } = key
+        if (remoteJid && id) {
+          const message = await store.loadMessage(remoteJid, id)
+          console.debug('message %s for %s', message, key)
+          if (message) {
+            const messageType = getMessageType(message)
+            const binMessage = message.message[messageType]
+            fileName = binMessage.fileName
+          }
+        }
+      }
+    }
+    const filePath = getFilePath(`${phone}/${file}`)
+    res.contentType(mime.lookup(filePath) || '')
+    res.download(filePath, fileName)
   }
   dataStore.cleanSession = async () => {
     const sessionDir = `${SESSION_DIR}/${phone}`
