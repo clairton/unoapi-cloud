@@ -7,6 +7,7 @@ import { Store, getStore } from '../../src/services/store'
 import fetch, { Response } from 'node-fetch'
 import { DataStore } from '../../src/services/data_store'
 import { GroupMetadata } from '@adiwajshing/baileys'
+import { MediaStore } from '../../src/services/media_store'
 
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>
 
@@ -55,6 +56,7 @@ describe('service incoming baileys', () => {
     token = `${new Date().getMinutes()}`
     store = mock<Store>()
     store.dataStore = mock<DataStore>()
+    store.mediaStore = mock<MediaStore>()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getStore = async (_phone: string): Promise<Store> => store
     phone = `${new Date().getMilliseconds()}`
@@ -79,7 +81,7 @@ describe('service incoming baileys', () => {
   })
 
   test('sendOne with media', async () => {
-    const saveMedia = jest.spyOn(store.dataStore, 'saveMedia')
+    const saveMedia = jest.spyOn(store.mediaStore, 'saveMedia')
     const send = jest.spyOn(service, 'send')
     send.mockResolvedValue()
     saveMedia.mockResolvedValue()

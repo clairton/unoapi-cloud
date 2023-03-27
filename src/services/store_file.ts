@@ -6,6 +6,8 @@ import { MEDIA_DIR } from './data_store_file'
 import { existsSync, readFileSync, rmSync, mkdirSync, renameSync } from 'fs'
 import { SESSION_DIR } from './session_store_file'
 import { getStore, stores } from './store'
+import { MediaStore } from './media_store'
+import { getMediaStoreFile } from './media_store_file'
 
 const STORE_DIR = `./data/stores`
 
@@ -36,6 +38,7 @@ const storeFile: store = async (phone: string): Promise<Store> => {
   console.info(`Store medias in directory: ${mediaDir}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await useMultiFileAuthState(sessionDir)
   const dataStore: DataStore = getDataStoreFile(phone, {}) as DataStore
+  const mediaStore: MediaStore = getMediaStoreFile(phone, {}, getDataStoreFile) as MediaStore
   const dataFile = `${STORE_DIR}/${phone}.json`
   console.info(`Store data in file: ${dataFile}`)
   if (existsSync(dataFile)) {
@@ -67,5 +70,5 @@ const storeFile: store = async (phone: string): Promise<Store> => {
   setInterval(() => {
     dataStore.writeToFile(dataFile), 10_0000
   })
-  return { state, saveCreds, dataStore }
+  return { state, saveCreds, dataStore, mediaStore }
 }

@@ -21,6 +21,7 @@ export type ClientConfig = {
   ignoreHistoryMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
+  autoRestart: boolean
   rejectCalls: string
   rejectCallsWebhook: string
 }
@@ -34,6 +35,7 @@ export const defaultClientConfig: ClientConfig = {
   sendConnectionStatus: true,
   rejectCalls: '',
   rejectCallsWebhook: '',
+  autoRestart: false,
 }
 
 export interface Client {

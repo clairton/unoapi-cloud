@@ -67,7 +67,7 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
       console.debug(`Saving media...`)
-      await store?.dataStore.saveMedia(i)
+      await store?.mediaStore.saveMedia(i)
     }
     if (i.key && i.key.id) {
       await store?.dataStore.setKey(i.key.id, i.key)

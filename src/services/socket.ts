@@ -41,7 +41,7 @@ export const connect = async ({
   onDisconnect,
   timeout = 1e3,
   attempts = Infinity,
-  config = { ignoreHistoryMessages: true },
+  config = { ignoreHistoryMessages: true, autoRestart: false },
 }) => {
   let sock = null
   const msgRetryCounterMap: MessageRetryMap = {}
@@ -88,7 +88,7 @@ export const connect = async ({
 
     console.log(`${number} connected`)
 
-    fetchLatestBaileysVersion().then(( { version, isLatest }) => {
+    fetchLatestBaileysVersion().then(({ version, isLatest }) => {
       const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
       onStatus(message, false)
     })
@@ -220,6 +220,12 @@ export const connect = async ({
     }
 
     return sock.rejectCall(callId, callFrom)
+  }
+
+  // Refresh connection every 1 hour
+  if (config.autoRestart) {
+    const everyHourTime = 3600000
+    setInterval(() => restart(), everyHourTime)
   }
 
   connect()

@@ -1,5 +1,4 @@
 import { makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from '@adiwajshing/baileys'
-import { Response } from 'express'
 
 export const dataStores: Map<string, DataStore> = new Map()
 
@@ -14,8 +13,5 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   loadUnoId: (id: string) => Promise<string | undefined>
   getJid: (phone: string, sock: Partial<WASocket>) => Promise<string>
   setMessage: (id: string, message: WAMessage) => Promise<void>
-  saveMedia: (waMessage: WAMessage) => Promise<void>
-  removeMedia: (fileName: string) => Promise<void>
-  downloadMedia: (resp: Response, fileName: string) => Promise<void>
   cleanSession: () => Promise<void>
 }

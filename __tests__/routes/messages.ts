@@ -4,7 +4,8 @@ import { mock } from 'jest-mock-extended'
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
-import { getDataStoreFile } from '../../src/services/data_store_file'
+import { getDataStore } from '../../src/services/data_store'
+import { getMediaStore } from '../../src/services/media_store'
 import { Response } from '../../src/services/response'
 
 let phone: string
@@ -20,7 +21,9 @@ describe('messages routes', () => {
     outgoing = mock<Outgoing>()
     json = { data: `${new Date().getTime()}` }
     incoming = mock<Incoming>()
-    app = new App(incoming, outgoing, '', getDataStoreFile)
+    const getDataStore = mock<getDataStore>()
+    const getMediaStore = mock<getMediaStore>()
+    app = new App(incoming, outgoing, '', getMediaStore, getDataStore)
   })
 
   test('whatsapp with sucess', async () => {

@@ -2,6 +2,7 @@ import { AnyMessageContent, WAMessage } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, getStore, stores } from './store'
 import { dataStores } from './data_store'
+import { mediaStores } from './media_store'
 import { connect, Status, SendError, sendMessage, readMessages, rejectCall } from './socket'
 import { Client, getClient, ClientConfig, defaultClientConfig } from './client'
 import { toBaileysMessageContent, phoneNumberToJid } from './transformer'
@@ -203,6 +204,7 @@ export class ClientBaileys implements Client {
     clients.delete(this.phone)
     stores.delete(this.phone)
     dataStores.delete(this.phone)
+    mediaStores.delete(this.phone)
     this.status = statusDefault
     this.sendMessage = sendMessageDefault
     this.readMessages = readMessagesDefault

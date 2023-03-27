@@ -7,13 +7,14 @@ import { MessagesController } from './controllers/messages_controller'
 import { MediaController } from './controllers/media_controller'
 import { Incoming } from './services/incoming'
 import { getDataStore } from './services/data_store'
+import { getMediaStore } from './services/media_store'
 import { Outgoing } from './services/outgoing'
 
-export const router = (incoming: Incoming, outgoing: Outgoing, baseUrl: string, getDataStore: getDataStore) => {
+export const router = (incoming: Incoming, outgoing: Outgoing, baseUrl: string, getMediaStore: getMediaStore, getDataStore: getDataStore) => {
   const router: Router = Router()
   const messagesController = new MessagesController(incoming, outgoing)
   const messages = messagesController.index.bind(messagesController)
-  const mediaController = new MediaController(baseUrl, getDataStore)
+  const mediaController = new MediaController(baseUrl, getMediaStore, getDataStore)
   const index = mediaController.index.bind(mediaController)
   const download = mediaController.download.bind(mediaController)
 

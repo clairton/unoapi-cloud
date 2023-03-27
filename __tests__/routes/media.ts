@@ -6,40 +6,24 @@ import { DataStore } from '../../src/services/data_store'
 import { getDataStore } from '../../src/services/data_store'
 import { proto } from '@adiwajshing/baileys'
 import { mock } from 'jest-mock-extended'
-import { getFilePath } from '../../src/services/data_store_file'
+import { getFilePath } from '../../src/services/media_store_file'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
 import { Outgoing } from '../../src/services/outgoing'
+import { getMediaStore, MediaStore } from '../../src/services/media_store'
 const phone = `${new Date().getTime()}`
-const remoteJid = `${new Date().getTime()}@s.whatsapp.net`
 const messageId = `wa.${new Date().getTime()}`
 const url = `http://somehost`
-const messageKey = {
-  id: messageId,
-  remoteJid,
-}
-const text = `${new Date().getTime()}`
 const mimetype = 'text/plain'
 const extension = 'txt'
-const link = `${text}.${extension}`
-const fileName = `${text}.${extension}`
-const doc: proto.Message.IDocumentMessage = {
-  // fileSha256,
-  url: link,
-  mimetype,
-  fileName,
-}
-const m: proto.IMessage = {
-  documentMessage: doc,
-}
-const message: proto.IWebMessageInfo = {
-  key: messageKey,
-  // caption: text,
-  message: m,
-}
 const dataStore = mock<DataStore>()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTestDataStore: getDataStore = (_phone: string, _config: unknown): DataStore => {
   return dataStore
+}
+const mediaStore = mock<MediaStore>()
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getTestMediaStore: getMediaStore = (_phone: string, _config: unknown, getDataStore: getDataStore): MediaStore => {
+  return mediaStore
 }
 
 describe('media routes', () => {
@@ -48,23 +32,21 @@ describe('media routes', () => {
   let app: App
 
   beforeEach(() => {
-    dataStore.loadKey.mockReturnValue(new Promise((resolve) => resolve(messageKey)))
-    dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
     incoming = mock<Incoming>()
     outgoing = mock<Outgoing>()
-    app = new App(incoming, outgoing, url, getTestDataStore)
+    app = new App(incoming, outgoing, url, getTestMediaStore, getTestDataStore)
   })
 
   test('index', async () => {
-    await request(app.server)
-      .get(`/v15.0/${phone}/${messageId}`)
-      .expect(200, {
-        messaging_product: 'whatsapp',
-        url: `${url}/v15.0/download/${phone}/${messageId}.${extension}`,
-        // file_name: `${phone}/${messageId}.${extension}`,
-        mime_type: mimetype,
-        id: `${phone}/${messageId}`,
-      })
+    const mediaData = {
+      messaging_product: 'whatsapp',
+      url: `${url}/v15.0/download/${phone}/${messageId}.${extension}`,
+      // file_name: `${phone}/${messageId}.${extension}`,
+      mime_type: mimetype,
+      id: `${phone}/${messageId}`,
+    }
+    mediaStore.getMedia.mockReturnValue(new Promise((resolve) => resolve(mediaData)))
+    await request(app.server).get(`/v15.0/${phone}/${messageId}`).expect(200, mediaData)
   })
 
   test('download', async () => {
@@ -77,7 +59,7 @@ describe('media routes', () => {
     }
     writeFileSync(fileName, `${new Date().getTime()}`)
     const endpoint = `/v15.0/download/${name}`
-    dataStore.downloadMedia.mockImplementation(async (r) => {
+    mediaStore.downloadMedia.mockImplementation(async (r) => {
       return r.download(fileName, name)
     })
     const response = await request(app.server)

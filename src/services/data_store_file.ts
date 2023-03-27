@@ -1,24 +1,11 @@
-import {
-  makeInMemoryStore,
-  BaileysEventEmitter,
-  proto,
-  Chat,
-  Contact,
-  WAMessage,
-  downloadMediaMessage,
-  WAMessageKey,
-  WASocket,
-} from '@adiwajshing/baileys'
+import { makeInMemoryStore, BaileysEventEmitter, proto, Chat, Contact, WAMessage, WAMessageKey, WASocket } from '@adiwajshing/baileys'
 import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
-import { getMessageType, isIndividualJid, jidToPhoneNumber, phoneNumberToJid, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
-import { writeFile } from 'fs/promises'
-import { existsSync, mkdirSync, rmSync } from 'fs'
+import { isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
+import { existsSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
-import mime from 'mime-types'
 import { getDataStore, dataStores } from './data_store'
-import { Response } from 'express'
 
 export const MEDIA_DIR = './data/medias'
 
@@ -31,67 +18,6 @@ export const getDataStoreFile: getDataStore = (phone: string, config: object): D
     console.debug('Retrieving file data store %s', phone)
   }
   return dataStores.get(phone) as DataStore
-}
-
-export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
-  const { message, key } = waMessage
-  if (message) {
-    const mediaMessage = getMediaValue(message)
-    if (mediaMessage?.mimetype) {
-      const extension = mime.extension(mediaMessage?.mimetype)
-      return `${phone}/${key.id}.${extension}`
-    }
-  }
-  throw 'Not possible get file name'
-}
-
-export const getFilePath = (fileName: string) => {
-  return `${MEDIA_DIR}/${fileName}`
-}
-
-function getMediaValue(
-  message: proto.IMessage,
-):
-  | proto.Message.IImageMessage
-  | proto.Message.IVideoMessage
-  | proto.Message.IAudioMessage
-  | proto.Message.IDocumentMessage
-  | proto.Message.IStickerMessage
-  | undefined {
-  return (
-    message?.stickerMessage ||
-    message?.imageMessage ||
-    message?.videoMessage ||
-    message?.audioMessage ||
-    message?.documentMessage ||
-    message?.stickerMessage ||
-    undefined
-  )
-}
-
-const saveMedia = async (phone: string, waMessage: WAMessage) => {
-  const messageType = getMessageType(waMessage)
-  if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-    let buffer
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyM: any = waMessage
-    const url = anyM.message[messageType].url
-    if (url.indexOf('base64') >= 0) {
-      const parts = url.split(',')
-      const base64 = parts[1]
-      buffer = Buffer.from(base64, 'base64')
-    } else {
-      buffer = await downloadMediaMessage(waMessage, 'buffer', {})
-    }
-    const fileName = getFileName(phone, waMessage)
-    const filePath = getFilePath(fileName)
-    const parts = filePath.split('/')
-    const dir: string = parts.splice(0, parts.length - 1).join('/')
-    if (!existsSync(dir)) {
-      mkdirSync(dir)
-    }
-    await writeFile(filePath, buffer)
-  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -186,36 +112,6 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
       store.messages[id] = makeOrderedDictionary(waMessageID)
     }
     store.messages[id].upsert(message, 'append')
-  }
-  dataStore.saveMedia = async (waMessage: WAMessage) => {
-    return saveMedia(phone, waMessage)
-  }
-  dataStore.removeMedia = async (fileName: string) => {
-    const filePath = `${phone}/${fileName}`
-    return rmSync(filePath)
-  }
-  dataStore.downloadMedia = async (res: Response, file: string) => {
-    const mediaId = file.split('.')[0]
-    let fileName = ''
-    if (mediaId) {
-      const key: proto.IMessageKey | undefined = await loadKey(mediaId)
-      console.debug('key %s for %s', key, mediaId)
-      if (key) {
-        const { remoteJid, id } = key
-        if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id)
-          console.debug('message %s for %s', message, key)
-          if (message) {
-            const messageType = getMessageType(message)
-            const binMessage = message.message[messageType]
-            fileName = binMessage.fileName
-          }
-        }
-      }
-    }
-    const filePath = getFilePath(`${phone}/${file}`)
-    res.contentType(mime.lookup(filePath) || '')
-    res.download(filePath, fileName)
   }
   dataStore.cleanSession = async () => {
     const sessionDir = `${SESSION_DIR}/${phone}`
