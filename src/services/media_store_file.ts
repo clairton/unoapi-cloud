@@ -79,10 +79,12 @@ export const mediaStoreFile = (phone: string, config: object, getDataStore: getD
         mkdirSync(dir)
       }
       await writeFile(filePath, buffer)
+      return true
     }
+    return false
   }
   const removeMedia = async (fileName: string) => {
-    const filePath = `${phone}/${fileName}`
+    const filePath = getFilePath(fileName)
     return rmSync(filePath)
   }
   const downloadMedia = async (res: Response, file: string) => {
