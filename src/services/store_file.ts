@@ -1,7 +1,8 @@
-import { useMultiFileAuthState, AuthenticationState } from '@adiwajshing/baileys'
+import { AuthenticationState } from '@adiwajshing/baileys'
 import { store, Store } from './store'
 import { DataStore } from './data_store'
 import { getDataStoreFile } from './data_store_file'
+import { useFileAuthState } from './use_file_auth_state'
 import { MEDIA_DIR } from './data_store_file'
 import { existsSync, readFileSync, rmSync, mkdirSync, renameSync } from 'fs'
 import { SESSION_DIR } from './session_store_file'
@@ -36,7 +37,7 @@ const storeFile: store = async (phone: string): Promise<Store> => {
   const mediaDir = `${MEDIA_DIR}/${phone}`
   console.info(`Store session in directory: ${sessionDir}`)
   console.info(`Store medias in directory: ${mediaDir}`)
-  const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await useMultiFileAuthState(sessionDir)
+  const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await useFileAuthState(sessionDir)
   const dataStore: DataStore = getDataStoreFile(phone, {}) as DataStore
   const mediaStore: MediaStore = getMediaStoreFile(phone, {}, getDataStoreFile) as MediaStore
   const dataFile = `${STORE_DIR}/${phone}.json`
