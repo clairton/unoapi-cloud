@@ -48,7 +48,8 @@ export const connect = async ({
   onDisconnect,
   timeout = 1e3,
   attempts = Infinity,
-  config = { ignoreHistoryMessages: true, autoRestart: false },
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  config = { ignoreHistoryMessages: true, autoRestart: false, shouldIgnoreJid: (_jid: string) => false },
 }) => {
   let sock = null
   const msgRetryCounterMap: MessageRetryMap = {}
@@ -151,6 +152,7 @@ export const connect = async ({
       syncFullHistory: !config.ignoreHistoryMessages,
       logger,
       getMessage,
+      shouldIgnoreJid: config.shouldIgnoreJid,
     })
     dataStore.bind(sock.ev)
     sock.ev.on('creds.update', saveCreds)

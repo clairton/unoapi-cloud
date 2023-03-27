@@ -66,7 +66,11 @@ export class MessageFilter {
     this.ignoreKey = ignoresKey.length > 0 ? ignoreKey : notIgnoreKey
   }
 
-  isIgnore({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) {
-    return !key || !key.remoteJid || this.ignoreJid(key.remoteJid) || this.ignoreKey({ key, messageType })
+  isIgnoreJid(jid) {
+    return this.ignoreJid(jid)
+  }
+
+  isIgnoreKey({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) {
+    return this.ignoreKey({ key, messageType })
   }
 }

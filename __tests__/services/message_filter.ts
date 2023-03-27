@@ -12,10 +12,8 @@ describe('service message filter', () => {
       ignoreOwnMessages: false,
     }
     const filter: MessageFilter = new MessageFilter(config)
-    const key: WAMessageKey = {
-      remoteJid: 'akjshdkasdsadhk@g.us',
-    }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(true)
+    const remoteJid = 'akjshdkasdsadhk@g.us'
+    expect(filter.isIgnoreJid(remoteJid)).toBe(true)
   })
 
   test('not ignore group message', async () => {
@@ -27,10 +25,8 @@ describe('service message filter', () => {
       ignoreOwnMessages: false,
     }
     const filter: MessageFilter = new MessageFilter(config)
-    const key: WAMessageKey = {
-      remoteJid: 'akjshdkasdsadhk@g.us',
-    }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(false)
+    const remoteJid = 'akjshdkasdsadhk@g.us'
+    expect(filter.isIgnoreJid(remoteJid)).toBe(false)
   })
 
   test('ignore own message', async () => {
@@ -47,7 +43,7 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: '456',
     }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(true)
+    expect(filter.isIgnoreKey({ key, messageType: '' })).toBe(true)
   })
 
   test('not ignore own message when is update', async () => {
@@ -65,7 +61,7 @@ describe('service message filter', () => {
       fromMe: true,
       id: 'BAE5CEC6F8514837',
     }
-    expect(filter.isIgnore({ key, messageType: 'update' })).toBe(false)
+    expect(filter.isIgnoreKey({ key, messageType: 'update' })).toBe(false)
   })
 
   test('not ignore own message', async () => {
@@ -81,7 +77,7 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: '123',
     }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(false)
+    expect(filter.isIgnoreKey({ key, messageType: '' })).toBe(false)
   })
 
   test('ignore broadcast status', async () => {
@@ -94,10 +90,8 @@ describe('service message filter', () => {
       rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(config)
-    const key: WAMessageKey = {
-      remoteJid: 'status@broadcast',
-    }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(true)
+    const remoteJid = 'status@broadcast'
+    expect(filter.isIgnoreJid(remoteJid)).toBe(true)
   })
 
   test('not broadcast status', async () => {
@@ -109,10 +103,8 @@ describe('service message filter', () => {
       ignoreOwnMessages: false,
     }
     const filter: MessageFilter = new MessageFilter(config)
-    const key: WAMessageKey = {
-      remoteJid: 'status@broadcast',
-    }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(false)
+    const remoteJid = 'status@broadcast'
+    expect(filter.isIgnoreJid(remoteJid)).toBe(false)
   })
 
   test('ignore broadcast message', async () => {
@@ -125,10 +117,8 @@ describe('service message filter', () => {
       rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(config)
-    const key: WAMessageKey = {
-      remoteJid: '456@broadcast',
-    }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(true)
+    const remoteJid = '456@broadcast'
+    expect(filter.isIgnoreJid(remoteJid)).toBe(true)
   })
 
   test('not broadcast message', async () => {
@@ -140,9 +130,7 @@ describe('service message filter', () => {
       ignoreOwnMessages: false,
     }
     const filter: MessageFilter = new MessageFilter(config)
-    const key: WAMessageKey = {
-      remoteJid: '789@broadcast',
-    }
-    expect(filter.isIgnore({ key, messageType: '' })).toBe(false)
+    const remoteJid = '789@broadcast'
+    expect(filter.isIgnoreJid(remoteJid)).toBe(false)
   })
 })

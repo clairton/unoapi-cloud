@@ -44,6 +44,8 @@ config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
 
 const filter: MessageFilter = new MessageFilter(config)
 
+config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
+
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(
   filter,
   config,

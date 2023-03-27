@@ -24,6 +24,7 @@ export type ClientConfig = {
   autoRestart: boolean
   rejectCalls: string
   rejectCallsWebhook: string
+  shouldIgnoreJid: (jid: string) => boolean | undefined
 }
 
 export const defaultClientConfig: ClientConfig = {
@@ -36,6 +37,8 @@ export const defaultClientConfig: ClientConfig = {
   rejectCalls: '',
   rejectCallsWebhook: '',
   autoRestart: false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  shouldIgnoreJid: (_jid: string) => false,
 }
 
 export interface Client {
