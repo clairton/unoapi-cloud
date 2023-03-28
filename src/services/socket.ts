@@ -142,18 +142,32 @@ export const connect = async ({
 
   const connect = async () => {
     if (status.connected) return
+    console.debug('Connecting %s', number)
 
     const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
-    sock = makeWASocket({
-      auth: state,
-      printQRInTerminal: true,
-      browser,
-      msgRetryCounterMap,
-      syncFullHistory: !config.ignoreHistoryMessages,
-      logger,
-      getMessage,
-      shouldIgnoreJid: config.shouldIgnoreJid,
-    })
+    try {
+      sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true,
+        browser,
+        msgRetryCounterMap,
+        syncFullHistory: !config.ignoreHistoryMessages,
+        logger,
+        getMessage,
+        shouldIgnoreJid: config.shouldIgnoreJid,
+      })
+    } catch (error) {
+      if (error.isBoom && !error.isServer) {
+        const statusCode = error?.output?.statusCode
+        const shouldReconnect = statusCode !== DisconnectReason.loggedOut
+        if (shouldReconnect) {
+          disconnect(true)
+          connect()
+        }
+      } else {
+        throw error
+      }
+    }
     dataStore.bind(sock.ev)
     sock.ev.on('creds.update', saveCreds)
     sock.ev.on('connection.update', onConnectionUpdate)
