@@ -57,31 +57,27 @@ function getMediaValue(
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mediaStoreFile = (phone: string, config: object, getDataStore: getDataStore): MediaStore => {
-  const saveMedia = async (waMessage: WAMessage) => {
-    const messageType = getMessageType(waMessage)
-    if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-      let buffer
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const anyM: any = waMessage
-      const url = anyM.message[messageType].url
-      if (url.indexOf('base64') >= 0) {
-        const parts = url.split(',')
-        const base64 = parts[1]
-        buffer = Buffer.from(base64, 'base64')
-      } else {
-        buffer = await downloadMediaMessage(waMessage, 'buffer', {})
-      }
-      const fileName = getFileName(phone, waMessage)
-      const filePath = getFilePath(fileName)
-      const parts = filePath.split('/')
-      const dir: string = parts.splice(0, parts.length - 1).join('/')
-      if (!existsSync(dir)) {
-        mkdirSync(dir)
-      }
-      await writeFile(filePath, buffer)
-      return true
+  const saveMedia = async (messageType: string, waMessage: WAMessage) => {
+    let buffer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyM: any = waMessage
+    const url = anyM.message[messageType].url
+    if (url.indexOf('base64') >= 0) {
+      const parts = url.split(',')
+      const base64 = parts[1]
+      buffer = Buffer.from(base64, 'base64')
+    } else {
+      buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
-    return false
+    const fileName = getFileName(phone, waMessage)
+    const filePath = getFilePath(fileName)
+    const parts = filePath.split('/')
+    const dir: string = parts.splice(0, parts.length - 1).join('/')
+    if (!existsSync(dir)) {
+      mkdirSync(dir)
+    }
+    await writeFile(filePath, buffer)
+    return true
   }
   const removeMedia = async (fileName: string) => {
     const filePath = getFilePath(fileName)

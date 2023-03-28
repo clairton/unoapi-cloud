@@ -10,7 +10,7 @@ export interface getMediaStore {
 
 export type MediaStore = {
   getMedia: (baseUrl: string, mediaId: string) => Promise<object | void>
-  saveMedia: (waMessage: WAMessage) => Promise<boolean>
+  saveMedia: (messageType: string, waMessage: WAMessage) => Promise<boolean>
   removeMedia: (fileName: string) => Promise<void>
   downloadMedia: (resp: Response, fileName: string) => Promise<void>
 }
