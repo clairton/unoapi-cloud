@@ -255,6 +255,8 @@ export class ClientBaileys implements Client {
             }
             const r: Response = { ok }
             return r
+          } else {
+            throw new SendError(1, 'unknown erro, verify logs for error details')
           }
         } else {
           throw new Error(`Unknow message type ${type}`)
