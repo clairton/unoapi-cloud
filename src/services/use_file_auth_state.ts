@@ -2,7 +2,7 @@ import { BufferJSON, initAuthCreds, proto, AuthenticationState } from '@adiwajsh
 import { rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 
 export const useFileAuthState = async (phone: string) => {
-  const getKey = (key: string) => `${phone}${key ? key : '/main.json'}`.replace('/.', '')
+  const getKey = (key: string) => `${phone}${key ? key : '/creds.json'}`.replace('/.', '')
 
   if (!existsSync(phone)) {
     mkdirSync(phone, { recursive: true })
@@ -10,7 +10,7 @@ export const useFileAuthState = async (phone: string) => {
 
   const fileGet = (key) => {
     if (existsSync(key)) {
-      return readFileSync(key)
+      return readFileSync(key, { encoding: 'utf-8' })
     }
     return ''
   }
@@ -19,7 +19,7 @@ export const useFileAuthState = async (phone: string) => {
     if (existsSync(key)) {
       fileDel(key)
     }
-    writeFileSync(key, value)
+    writeFileSync(key, value, { encoding: 'utf-8' })
   }
 
   const fileDel = (key) => {
@@ -124,7 +124,7 @@ export const useFileAuthState = async (phone: string) => {
 
   const saveCreds: () => Promise<void> = async () => {
     console.debug('save creds')
-    await writeData('/main.json', creds)
+    await writeData('/creds.json', creds)
   }
 
   return {
