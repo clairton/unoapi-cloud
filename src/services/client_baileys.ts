@@ -267,7 +267,7 @@ export class ClientBaileys implements Client {
         const code = e.code
         const title = e.title
         await this.onStatus(title, true)
-        if ([].includes(code)) {
+        if ([3].includes(code)) {
           this.connect()
         }
         const id = uuid()
