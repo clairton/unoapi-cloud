@@ -71,6 +71,7 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (i.key && i.key.id) {
       await store?.dataStore.setKey(i.key.id, i.key)
+      await store.dataStore.setMessage(i.key.id, i)
     }
     const data = fromBaileysMessageContent(phone, message)
     return this.send(phone, data)
@@ -85,7 +86,7 @@ export class OutgoingCloudApi implements Outgoing {
     const url = `${this.url}/${phone}`
     console.debug(`Send url ${url} with headers %s and body %s`, headers, body)
     const response: Response = await fetch(url, { method: 'POST', body, headers })
-    console.debug('Response: ', response.status, await response.text())
+    console.debug('Response: ', response.status)
     if (!response.ok) {
       throw await response.text()
     }

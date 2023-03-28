@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage } from '@adiwajshing/baileys'
-import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { getMessageType } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'

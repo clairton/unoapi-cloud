@@ -185,7 +185,6 @@ export class ClientBaileys implements Client {
                   conversation: this.config.rejectCallsWebhook,
                 },
               }
-              await this.store.dataStore.setMessage(message.key.id, message)
               await this.outgoing.sendOne(this.phone, message)
             }
             await this.rejectCall(id, from)
