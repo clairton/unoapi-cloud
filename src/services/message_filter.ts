@@ -40,23 +40,42 @@ export class MessageFilter {
     const ignoresKey: IgnoreKey[] = []
 
     if (config.ignoreGroupMessages) {
-      console.info('Config to ignore group messages')
-      ignoresJid.push(isJidGroup as IgnoreJid)
+      console.info('Config to ignore jid group messages')
+      ignoresJid.push((jid) => {
+        const is = isJidGroup(jid)
+        console.debug(`${jid} is group ${is}`)
+        return is
+      })
     }
     if (config.ignoreBroadcastStatuses) {
-      console.info('Config to ignore broadcast statuses')
-      ignoresJid.push(isJidStatusBroadcast as IgnoreJid)
+      console.info('Config to ignore jid broadcast statuses')
+      ignoresJid.push((jid) => {
+        const is = isJidStatusBroadcast(jid)
+        console.debug(`${jid} is status broadcast ${is}`)
+        return is
+      })
     }
     if (config.ignoreBroadcastMessages) {
-      console.info('Config to ignore broadcast messages')
-      ignoresJid.push(isJidBroadcast as IgnoreJid)
+      console.info('Config to ignore jid broadcast messages')
+      ignoresJid.push((jid) => {
+        const is = isJidBroadcast(jid)
+        console.debug(`${jid} is message broadcast ${is}`)
+        return is
+      })
     }
     if (config.ignoreOwnMessages) {
-      console.info('Config to ignore own messages')
+      console.info('Config to ignore key own messages')
       ignoresKey.push(IgnoreOwnKey)
     }
 
-    const ignoreJid = (jid: string) => ignoresJid.reduce((acc, f) => (f(jid) ? ++acc : acc), 0) > 0
+    const ignoreJid = (jid: string) => {
+      const fn = (acc, f) => {
+        return f(jid) ? ++acc : acc
+      }
+      const sum = ignoresJid.reduce(fn, 0)
+      console.debug(`${jid} ignore sum is ${sum}`)
+      return sum > 0
+    }
     console.info('%s Configs to ignore by jid', ignoresJid.length)
     console.info('%s Configs to ignore by key', ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
