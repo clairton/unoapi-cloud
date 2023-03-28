@@ -107,11 +107,11 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     }
     return jids.get(phoneOrJid) || ''
   }
-  dataStore.setMessage = async (id: string, message: WAMessage) => {
-    if (!store.messages[id]) {
-      store.messages[id] = makeOrderedDictionary(waMessageID)
+  dataStore.setMessage = async (jid: string, message: WAMessage) => {
+    if (!store.messages[jid]) {
+      store.messages[jid] = makeOrderedDictionary(waMessageID)
     }
-    store.messages[id].upsert(message, 'append')
+    store.messages[jid].upsert(message, 'append')
   }
   dataStore.cleanSession = async () => {
     const sessionDir = `${SESSION_DIR}/${phone}`

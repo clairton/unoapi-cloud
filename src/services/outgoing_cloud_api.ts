@@ -71,7 +71,7 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (i.key && i.key.id) {
       await store?.dataStore.setKey(i.key.id, i.key)
-      await store.dataStore.setMessage(i.key.id, i)
+      await store.dataStore.setMessage(i.key.remoteJid, i)
     }
     const data = fromBaileysMessageContent(phone, message)
     return this.send(phone, data)
