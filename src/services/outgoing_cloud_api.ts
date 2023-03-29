@@ -32,14 +32,14 @@ export class OutgoingCloudApi implements Outgoing {
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       Reflect.set(message, 'groupMetadata', await config.getGroupMetadata(i, store!))
+      if (i.key && i.key.id) {
+        await store?.dataStore.setKey(i.key.id, i.key)
+        await store.dataStore.setMessage(i.key.remoteJid, i)
+      }
     }
     if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
       console.debug(`Saving media...`)
       await store?.mediaStore.saveMedia(messageType, i)
-    }
-    if (i.key && i.key.id) {
-      await store?.dataStore.setKey(i.key.id, i.key)
-      await store.dataStore.setMessage(i.key.remoteJid, i)
     }
     const data = fromBaileysMessageContent(phone, message)
     return this.send(phone, data)
