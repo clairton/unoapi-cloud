@@ -1,11 +1,11 @@
 import { WAMessageKey } from '@adiwajshing/baileys'
-import { ClientConfig, defaultClientConfig } from '../../src/services/client'
+import { Config, defaultConfig } from '../../src/services/config'
 import { MessageFilter } from '../../src/services/message_filter'
 
 describe('service message filter', () => {
   test('ignore group message', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: true,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -17,8 +17,8 @@ describe('service message filter', () => {
   })
 
   test('not ignore group message', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -30,8 +30,8 @@ describe('service message filter', () => {
   })
 
   test('ignore own message', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -43,12 +43,12 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: '456',
     }
-    expect(filter.isIgnoreKey({ key, messageType: '' })).toBe(true)
+    expect(filter.isIgnoreKey(key, '')).toBe(true)
   })
 
   test('not ignore own message when is update', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -61,12 +61,12 @@ describe('service message filter', () => {
       fromMe: true,
       id: 'BAE5CEC6F8514837',
     }
-    expect(filter.isIgnoreKey({ key, messageType: 'update' })).toBe(false)
+    expect(filter.isIgnoreKey(key, 'update')).toBe(false)
   })
 
   test('not ignore own message', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -77,12 +77,12 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: '123',
     }
-    expect(filter.isIgnoreKey({ key, messageType: '' })).toBe(false)
+    expect(filter.isIgnoreKey(key, '')).toBe(false)
   })
 
   test('ignore broadcast status', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: true,
       ignoreBroadcastMessages: false,
@@ -95,8 +95,8 @@ describe('service message filter', () => {
   })
 
   test('not broadcast status', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
@@ -108,8 +108,8 @@ describe('service message filter', () => {
   })
 
   test('ignore broadcast message', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: true,
@@ -122,8 +122,8 @@ describe('service message filter', () => {
   })
 
   test('not broadcast message', async () => {
-    const config: ClientConfig = {
-      ...defaultClientConfig,
+    const config: Config = {
+      ...defaultConfig,
       ignoreGroupMessages: false,
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,

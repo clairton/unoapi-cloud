@@ -1,7 +1,8 @@
 import { IncomingBaileys } from '../../src/services/incoming_baileys'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
-import { getClient, Client, ClientConfig, defaultClientConfig } from '../../src/services/client'
+import { getClient, Client } from '../../src/services/client'
+import { Config, defaultConfig, getConfig, getConfigDefault } from '../../src/services/config'
 import { Status } from '../../src/services/socket'
 import { mock } from 'jest-mock-extended'
 
@@ -16,11 +17,11 @@ class DummyOutgoing implements Outgoing {
 
 class DummyClient implements Client {
   phone: string
-  config: ClientConfig
+  config: Config
 
   constructor() {
     this.phone = `${new Date().getTime()}`
-    this.config = defaultClientConfig
+    this.config = defaultConfig
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -39,7 +40,21 @@ class DummyClient implements Client {
 const dummyClient = new DummyClient()
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getClientDummy: getClient = async (phone: string, incoming: Incoming, outgoing: Outgoing): Promise<Client> => {
+const getClientDummy: getClient = async ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  phone,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  incoming,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  outgoing,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getConfig,
+}: {
+  phone: string
+  incoming: Incoming
+  outgoing: Outgoing
+  getConfig: getConfig
+}): Promise<Client> => {
   return dummyClient
 }
 
@@ -47,7 +62,7 @@ describe('service incoming baileys', () => {
   test('send', async () => {
     const phone = `${new Date().getTime()}`
     const service: Outgoing = new DummyOutgoing()
-    const baileys: Incoming = new IncomingBaileys(service, defaultClientConfig, getClientDummy)
+    const baileys: Incoming = new IncomingBaileys(service, getConfigDefault, getClientDummy)
     const payload: object = { humm: new Date().getTime() }
     const send = jest.spyOn(dummyClient, 'send')
     await baileys.send(phone, payload)

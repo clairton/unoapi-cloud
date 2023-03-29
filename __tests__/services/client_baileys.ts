@@ -1,6 +1,7 @@
 import { ClientBaileys } from '../../src/services/client_baileys'
 jest.mock('../../src/services/socket')
-import { Client, ClientConfig, defaultClientConfig } from '../../src/services/client'
+import { Client } from '../../src/services/client'
+import { Config, getConfig, defaultConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
 import { Outgoing } from '../../src/services/outgoing'
 import { Store } from '../../src/services/store'
@@ -16,6 +17,7 @@ const mockConnect = connect as jest.MockedFunction<typeof connect>
 type Event = BaileysEventEmitter & {
   process(handler: (events: Partial<BaileysEventMap>) => void | Promise<void>): () => void
   buffer(): void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createBufferedFunction<A extends any[], T_1>(work: (...args: A) => Promise<T_1>): (...args: A) => Promise<T_1>
   flush(force?: boolean | undefined): boolean
   isBuffering(): boolean
@@ -31,8 +33,9 @@ describe('service client baileys', () => {
   let send
   let read
   let rejectCall
+  let getConfig: getConfig
+  let config: Config
 
-  const config: ClientConfig = defaultClientConfig
   const status: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
   const ev = mock<Event>()
 
@@ -43,7 +46,17 @@ describe('service client baileys', () => {
     dataStore = mock<DataStore>()
     store = mock<Store>()
     store.dataStore = dataStore
-    client = new ClientBaileys(phone, store, incoming, outgoing, config)
+    config = defaultConfig
+    config.ignoreGroupMessages = true
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getConfig = async (_phone: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      config.getStore = async (_phone: string) => {
+        return store
+      }
+      return config
+    }
+    client = new ClientBaileys(phone, incoming, outgoing, getConfig)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
     rejectCall = mockFn<rejectCall>()

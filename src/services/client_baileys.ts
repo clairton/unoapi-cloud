@@ -1,10 +1,11 @@
 import { AnyMessageContent, WAMessage } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
-import { Store, getStore, stores } from './store'
+import { Store, stores } from './store'
 import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
 import { connect, Status, SendError, sendMessage, readMessages, rejectCall } from './socket'
-import { Client, getClient, ClientConfig, defaultClientConfig } from './client'
+import { Client, getClient } from './client'
+import { Config, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
@@ -15,17 +16,20 @@ const timeout = 1e3
 
 const clients: Map<string, Client> = new Map()
 
-export const getClientBaileys: getClient = async (
-  phone: string,
-  incoming: Incoming,
-  outgoing: Outgoing,
-  getStore: getStore,
-  config: ClientConfig,
-): Promise<Client> => {
+export const getClientBaileys: getClient = async ({
+  phone,
+  incoming,
+  outgoing,
+  getConfig,
+}: {
+  phone: string
+  incoming: Incoming
+  outgoing: Outgoing
+  getConfig: getConfig
+}): Promise<Client> => {
   if (!clients.has(phone)) {
     console.info('Creating client baileys %s', phone)
-    const store: Store = await getStore(phone)
-    const client = new ClientBaileys(phone, store, incoming, outgoing, config)
+    const client = new ClientBaileys(phone, incoming, outgoing, getConfig)
     await client.connect()
     console.info('Client baileys created and connected %s', phone)
     clients.set(phone, client)
@@ -53,8 +57,8 @@ const rejectCallDefault: rejectCall = async (_keys) => {
 }
 
 export class ClientBaileys implements Client {
-  public phone: string
-  public config: ClientConfig
+  private phone: string
+  private config: Config
   private status: Status = statusDefault
   private sendMessage = sendMessageDefault
   private readMessages = readMessagesDefault
@@ -63,6 +67,7 @@ export class ClientBaileys implements Client {
   private incoming: Incoming
   private store: Store | undefined
   private calls = new Map<string, boolean>()
+  private getConfig: getConfig
 
   private onStatus = (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
@@ -112,17 +117,18 @@ export class ClientBaileys implements Client {
     return this.outgoing.sendMany(this.phone, messages)
   }
 
-  constructor(phone: string, store: Store, incoming: Incoming, outgoing: Outgoing, config: ClientConfig = defaultClientConfig) {
+  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig) {
     this.phone = phone
-    this.store = store
     this.outgoing = outgoing
     this.incoming = incoming
-    this.config = config
+    this.getConfig = getConfig
   }
 
   async connect() {
+    this.config = await this.getConfig(this.phone)
+    this.store = await this.config.getStore(this.phone)
     const { status, send, read, ev, rejectCall } = await connect({
-      number: this.phone,
+      phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
       attempts,

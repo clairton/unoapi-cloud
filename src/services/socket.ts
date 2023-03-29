@@ -41,7 +41,7 @@ export type Status = {
 }
 
 export const connect = async ({
-  number,
+  phone,
   store,
   onQrCode,
   onStatus,
@@ -94,7 +94,7 @@ export const connect = async ({
     status.disconnected = false
     status.reconnecting = false
 
-    console.log(`${number} connected`)
+    console.log(`${phone} connected`)
 
     fetchLatestBaileysVersion().then(({ version, isLatest }) => {
       const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
@@ -117,12 +117,12 @@ export const connect = async ({
     const statusCode = lastDisconnect?.error?.output?.statusCode
     const shouldReconnect = statusCode !== DisconnectReason.loggedOut
 
-    console.log(`${number} disconnected with status: ${statusCode}`)
+    console.log(`${phone} disconnected with status: ${statusCode}`)
     onDisconnect()
     if (statusCode === DisconnectReason.loggedOut) {
       status.reconnecting = false
       status.disconnected = true
-      console.log(`${number} destroyed`)
+      console.log(`${phone} destroyed`)
       dataStore.cleanSession()
       return
     }
@@ -142,7 +142,7 @@ export const connect = async ({
 
   const connect = async () => {
     if (status.connected) return
-    console.debug('Connecting %s', number)
+    console.debug('Connecting %s', phone)
 
     const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
     try {
@@ -174,7 +174,7 @@ export const connect = async ({
   }
 
   const reconnect = () => {
-    console.log(`${number} reconnecting`, status.attempt)
+    console.log(`${phone} reconnecting`, status.attempt)
     setTimeout(connect, timeout)
   }
 
@@ -184,7 +184,7 @@ export const connect = async ({
     status.connected = false
     status.disconnected = !reconnect
     status.reconnecting = !!reconnect
-    console.log(`${number} disconnecting`)
+    console.log(`${phone} disconnecting`)
     return sock.end()
   }
 
@@ -199,7 +199,7 @@ export const connect = async ({
     return dataStore.getJid(phone, sock)
   }
 
-  const send: sendMessage = async (phone, message) => {
+  const send: sendMessage = async (to, message) => {
     if (status.disconnected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
@@ -209,18 +209,18 @@ export const connect = async ({
     }
 
     if (!status.connected) {
-      messages.unshift([phone, message])
+      messages.unshift([to, message])
       return
     }
 
-    const id = await exists(phone)
+    const id = await exists(to)
 
     if (id) {
-      console.log(`${number} is sending message ==>`, id, message)
+      console.log(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message)
     }
 
-    throw new SendError(2, `The number ${phone} does not have Whatsapp Account or was a error verify this!`)
+    throw new SendError(2, `The number ${to} does not have Whatsapp Account or was a error verify this!`)
   }
 
   const read: readMessages = async (keys) => {

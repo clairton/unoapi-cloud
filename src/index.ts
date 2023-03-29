@@ -7,64 +7,23 @@ import { Incoming } from './services/incoming'
 import { Outgoing } from './services/outgoing'
 import { OutgoingCloudApi } from './services/outgoing_cloud_api'
 import { SessionStoreFile } from './services/session_store_file'
-import { getStoreFile } from './services/store_file'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
-import { ClientConfig, defaultClientConfig } from './services/client'
-import { MessageFilter } from './services/message_filter'
-const {
-  WEBHOOK_URL,
-  WEBHOOK_TOKEN,
-  WEBHOOK_HEADER,
-  BASE_URL,
-  IGNORE_GROUP_MESSAGES,
-  IGNORE_OWN_MESSAGES,
-  IGNORE_BROADCAST_STATUSES,
-  IGNORE_BROADCAST_MESSAGES,
-  IGNORE_CALLS,
-  IGNORE_HISTORY_MESSAGES,
-  SEND_CONNECTION_STATUS,
-  PORT,
-  REJECT_CALLS_WEBHOOK,
-  REJECT_CALLS,
-} = process.env
+import { getConfigByEnv } from './services/config_by_env'
+import { getClientBaileys } from './services/client_baileys'
+const { PORT, BASE_URL } = process.env
 const port: number = parseInt(PORT || '9876')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const _undefined: any = undefined
-const config: ClientConfig = defaultClientConfig
-config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE_GROUP_MESSAGES == 'true'
-config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES == 'true'
-config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES == 'true'
-config.ignoreHistoryMessages = IGNORE_HISTORY_MESSAGES === _undefined ? false : IGNORE_HISTORY_MESSAGES == 'true'
-config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
-config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
-config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
-config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
 
-const filter: MessageFilter = new MessageFilter(config)
-
-config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
-
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(
-  filter,
-  config,
-  getStoreFile,
-  WEBHOOK_URL || `http://localhost:${port}/webhooks/whatsapp`,
-  WEBHOOK_TOKEN || 'abc123',
-  WEBHOOK_HEADER || 'Authorization',
-)
-
-console.debug('ClientConfig', config)
-
-const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, config)
+const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys)
 const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`)
 
 app.server.listen(port, '0.0.0.0', async () => {
   console.info('Unoapi Cloud listening on port:', port)
   console.info('Successful started app!')
   const sessionStore: SessionStore = new SessionStoreFile()
-  autoConnect(sessionStore, incomingBaileys, outgoingCloudApi)
+  autoConnect(sessionStore, incomingBaileys, outgoingCloudApi, getConfigByEnv, getClientBaileys)
 })
 
 export default app

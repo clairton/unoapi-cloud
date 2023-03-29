@@ -167,6 +167,8 @@ services:
     image: clairton/unoapi-cloud:latest
     volumes:
       - ./data:/home/u/app/data
+    ports:
+      - 9876:9876
     deploy:
       restart_policy:
         condition: on-failure

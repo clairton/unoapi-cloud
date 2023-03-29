@@ -1,19 +1,10 @@
-import { getClient, ConnectionInProgress, ClientConfig, defaultClientConfig } from './client'
+import { getClient, ConnectionInProgress } from './client'
+import { getConfig } from './config'
 import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
-import { getStore } from './store'
-import { getStoreFile } from './store_file'
-import { getClientBaileys } from './client_baileys'
 import { Incoming } from './incoming'
 
-export const autoConnect = async (
-  sessionStore: SessionStore,
-  incoming: Incoming,
-  outgoing: Outgoing,
-  config: ClientConfig = defaultClientConfig,
-  getClient: getClient = getClientBaileys,
-  getStore: getStore = getStoreFile,
-) => {
+export const autoConnect = async (sessionStore: SessionStore, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, getClient: getClient) => {
   try {
     const phones = await sessionStore.getPhones()
     console.info(`${phones.length} phones to verify is auto connect`)
@@ -22,7 +13,7 @@ export const autoConnect = async (
       try {
         console.info(`Auto connecting phone ${phone}...`)
         try {
-          getClient(phone, incoming, outgoing, getStore, config)
+          getClient({ phone, incoming, outgoing, getConfig })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {

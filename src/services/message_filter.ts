@@ -1,12 +1,12 @@
 import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast } from '@adiwajshing/baileys'
-import { ClientConfig, defaultClientConfig } from './client'
+import { Config, defaultConfig } from './config'
 
 interface IgnoreJid {
   (jid: string): boolean
 }
 
 interface IgnoreKey {
-  ({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }): boolean
+  (key: WAMessageKey, messageType: string): boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,12 +15,12 @@ const notIgnoreJid = (_jid: string) => {
   return false
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreKey = ({ key: _key }: { key: WAMessageKey }) => {
+const notIgnoreKey = (key: WAMessageKey, messageType: string) => {
   console.info('Config to not ignore any key')
   return false
 }
 
-const IgnoreOwnKey: IgnoreKey = ({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) => {
+const IgnoreOwnKey: IgnoreKey = (key: WAMessageKey, messageType: string) => {
   if (['update', 'receipt'].includes(messageType)) {
     // update need process always
     return false
@@ -35,7 +35,7 @@ export class MessageFilter {
   private ignoreJid: IgnoreJid
   private ignoreKey: IgnoreKey
 
-  constructor(config: ClientConfig = defaultClientConfig) {
+  constructor(config: Config = defaultConfig) {
     const ignoresJid: IgnoreJid[] = []
     const ignoresKey: IgnoreKey[] = []
 
@@ -79,8 +79,8 @@ export class MessageFilter {
     console.info('%s Configs to ignore by jid', ignoresJid.length)
     console.info('%s Configs to ignore by key', ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
-    const ignoreKey = ({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) => {
-      return ignoresKey.reduce((acc, f) => (f({ key, messageType }) ? ++acc : acc), 0) > 0
+    const ignoreKey = (key: WAMessageKey, messageType: string) => {
+      return ignoresKey.reduce((acc, f) => (f(key, messageType) ? ++acc : acc), 0) > 0
     }
     this.ignoreKey = ignoresKey.length > 0 ? ignoreKey : notIgnoreKey
   }
@@ -89,7 +89,7 @@ export class MessageFilter {
     return this.ignoreJid(jid)
   }
 
-  isIgnoreKey({ key, messageType = '' }: { key: WAMessageKey; messageType: string | undefined }) {
-    return this.ignoreKey({ key, messageType })
+  isIgnoreKey(key: WAMessageKey, messageType: string | undefined) {
+    return this.ignoreKey(key, messageType)
   }
 }

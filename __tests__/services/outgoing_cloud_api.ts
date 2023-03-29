@@ -2,20 +2,21 @@ import { mock } from 'jest-mock-extended'
 jest.mock('node-fetch')
 import { OutgoingCloudApi } from '../../src/services/outgoing_cloud_api'
 import { Outgoing } from '../../src/services/outgoing'
-import { MessageFilter } from '../../src/services/message_filter'
 import { Store, getStore } from '../../src/services/store'
 import fetch, { Response } from 'node-fetch'
 import { DataStore } from '../../src/services/data_store'
 import { GroupMetadata } from '@adiwajshing/baileys'
 import { MediaStore } from '../../src/services/media_store'
+import { Config, getConfig, defaultConfig } from '../../src/services/config'
 
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>
 
-const filter: MessageFilter = new MessageFilter()
 let store: Store
+let getConfig: getConfig
+let config: Config
 let getStore: getStore
 const url = 'http://example.com'
-let token, phone
+let phone
 let service: Outgoing
 
 const textPayload = {
@@ -53,14 +54,20 @@ const groupPayload = {
 
 describe('service incoming baileys', () => {
   beforeEach(() => {
-    token = `${new Date().getMinutes()}`
+    config = defaultConfig
+    config.ignoreGroupMessages = true
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getStore = async (_phone: string): Promise<Store> => store
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getConfig = async (_phone: string) => {
+      config.getStore = getStore
+      return config
+    }
     store = mock<Store>()
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getStore = async (_phone: string): Promise<Store> => store
     phone = `${new Date().getMilliseconds()}`
-    service = new OutgoingCloudApi(filter, { ignoreGroupMessages: true }, getStore, url, token)
+    service = new OutgoingCloudApi(getConfig)
   })
 
   test('send text with success', async () => {
@@ -91,8 +98,9 @@ describe('service incoming baileys', () => {
   })
 
   test('sendOne with group', async () => {
-    service = new OutgoingCloudApi(filter, { ignoreGroupMessages: false }, getStore, url, token)
-    const fetchGroupMetadata = jest.spyOn(store.dataStore, 'fetchGroupMetadata')
+    config.ignoreGroupMessages = false
+    service = new OutgoingCloudApi(getConfig)
+    const fetchGroupMetadata = jest.spyOn(config, 'getGroupMetadata')
     fetchGroupMetadata.mockResolvedValue(mock<GroupMetadata>())
     await service.sendOne(phone, groupPayload)
     expect(fetchGroupMetadata).toHaveBeenCalledTimes(1)

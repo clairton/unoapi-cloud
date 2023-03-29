@@ -14,7 +14,7 @@ const mockMakeWASocket = makeWASocket as jest.MockedFunction<typeof makeWASocket
 // }
 
 describe('service socket', () => {
-  let number: string
+  let phone: string
   let store: Store
   let mockWaSocket
   let mockBaileysEventEmitter
@@ -24,7 +24,7 @@ describe('service socket', () => {
   let onDisconnect
 
   beforeEach(async () => {
-    number = `${new Date().getMilliseconds()}`
+    phone = `${new Date().getMilliseconds()}`
     store = mock<Store>()
     mockWaSocket = mock<WASocket>()
     mockBaileysEventEmitter = mock<typeof mockWaSocket.ev>()
@@ -37,12 +37,12 @@ describe('service socket', () => {
   })
 
   test('call connect status connected false', async () => {
-    const response = await connect({ number, onQrCode, onStatus, onDisconnect, store })
+    const response = await connect({ phone, onQrCode, onStatus, onDisconnect, store })
     expect(response.status.connected).toBe(false)
   })
 
   test('call connect and subscribe 2 events', async () => {
-    await connect({ number, onQrCode, onStatus, onDisconnect, store })
+    await connect({ phone, onQrCode, onStatus, onDisconnect, store })
     expect(mockOn).toBeCalledTimes(2)
   })
 })
