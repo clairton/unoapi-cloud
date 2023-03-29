@@ -126,7 +126,7 @@ export class ClientBaileys implements Client {
 
   async connect() {
     this.config = await this.getConfig(this.phone)
-    this.store = await this.config.getStore(this.phone)
+    this.store = await this.config.getStore(this.phone, this.config)
     const { status, send, read, ev, rejectCall } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

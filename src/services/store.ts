@@ -5,7 +5,7 @@ import { MediaStore } from './media_store'
 export const stores: Map<string, Store> = new Map()
 
 export interface getStore {
-  (phone: string): Promise<Store>
+  (phone: string, config: object): Promise<Store>
 }
 
 export type Store = {
@@ -16,5 +16,5 @@ export type Store = {
 }
 
 export interface store {
-  (phone: string): Promise<Store>
+  (phone: string, config: object): Promise<Store>
 }

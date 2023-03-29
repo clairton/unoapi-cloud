@@ -12,10 +12,10 @@ import { getMediaStoreFile } from './media_store_file'
 
 const STORE_DIR = `./data/stores`
 
-export const getStoreFile: getStore = async (phone: string): Promise<Store> => {
+export const getStoreFile: getStore = async (phone: string, config: object): Promise<Store> => {
   if (!stores.has(phone)) {
     console.debug('Creating file store %s', phone)
-    const fstore: Store = await storeFile(phone)
+    const fstore: Store = await storeFile(phone, config)
     stores.set(phone, fstore)
   } else {
     console.debug('Retrieving file store %s', phone)
@@ -23,7 +23,7 @@ export const getStoreFile: getStore = async (phone: string): Promise<Store> => {
   return stores.get(phone) as Store
 }
 
-const storeFile: store = async (phone: string): Promise<Store> => {
+const storeFile: store = async (phone: string, config: object): Promise<Store> => {
   const dirs = [SESSION_DIR, MEDIA_DIR, STORE_DIR]
   dirs.forEach((dir) => {
     if (!existsSync(dir)) {
@@ -38,8 +38,8 @@ const storeFile: store = async (phone: string): Promise<Store> => {
   console.info(`Store session in directory: ${sessionDir}`)
   console.info(`Store medias in directory: ${mediaDir}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await useFileAuthState(sessionDir)
-  const dataStore: DataStore = getDataStoreFile(phone, {}) as DataStore
-  const mediaStore: MediaStore = getMediaStoreFile(phone, {}, getDataStoreFile) as MediaStore
+  const dataStore: DataStore = getDataStoreFile(phone, config) as DataStore
+  const mediaStore: MediaStore = getMediaStoreFile(phone, config, getDataStoreFile) as MediaStore
   const dataFile = `${STORE_DIR}/${phone}.json`
   console.info(`Store data in file: ${dataFile}`)
   if (existsSync(dataFile)) {
