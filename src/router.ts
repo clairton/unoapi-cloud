@@ -1,5 +1,3 @@
-import { Router } from 'express'
-
 import { indexController } from './controllers/index_controller'
 import { webhookController } from './controllers/webhook_controller'
 import { templatesController } from './controllers/templates_controller'
@@ -9,8 +7,20 @@ import { Incoming } from './services/incoming'
 import { getDataStore } from './services/data_store'
 import { getMediaStore } from './services/media_store'
 import { Outgoing } from './services/outgoing'
+import middleware from './services/middleware'
+import injectRoute from './services/inject_route'
+import { Request, Response, NextFunction, Router } from 'express'
 
-export const router = (incoming: Incoming, outgoing: Outgoing, baseUrl: string, getMediaStore: getMediaStore, getDataStore: getDataStore) => {
+export const router = async (
+  incoming: Incoming,
+  outgoing: Outgoing,
+  baseUrl: string,
+  getMediaStore: getMediaStore,
+  getDataStore: getDataStore,
+  middleware: middleware = async (req: Request, res: Response, next: NextFunction) => next(),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  injectRoute: injectRoute = async (router: Router) => {},
+) => {
   const router: Router = Router()
   const messagesController = new MessagesController(incoming, outgoing)
   const messages = messagesController.index.bind(messagesController)
@@ -20,10 +30,12 @@ export const router = (incoming: Incoming, outgoing: Outgoing, baseUrl: string, 
 
   //Routes
   router.get('/ping', indexController.ping)
-  router.get('/:version/:phone/message_templates', templatesController.index)
-  router.post('/:version/:phone/messages', messages)
-  router.get('/:version/:phone/:media_id', index)
-  router.get('/:version/download/:phone/:file', download)
+  router.get('/:version/:phone/message_templates', middleware, templatesController.index)
+  router.post('/:version/:phone/messages', middleware, messages)
+  router.get('/:version/:phone/:media_id', middleware, index)
+  router.get('/:version/download/:phone/:file', middleware, download)
+
+  await injectRoute(router)
 
   // Webhook for tests
   router.post('/webhooks/whatsapp/:phone', webhookController.whatsapp)
