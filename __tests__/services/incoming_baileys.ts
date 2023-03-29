@@ -6,15 +6,6 @@ import { Config, defaultConfig, getConfig, getConfigDefault } from '../../src/se
 import { Status } from '../../src/services/socket'
 import { mock } from 'jest-mock-extended'
 
-class DummyOutgoing implements Outgoing {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-  async sendMany(phone: string, messages: object[]) {}
-  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-  async sendOne(phone: string, message: object) {}
-  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-  async send(phone: string, message: object) {}
-}
-
 class DummyClient implements Client {
   phone: string
   config: Config
@@ -61,7 +52,7 @@ const getClientDummy: getClient = async ({
 describe('service incoming baileys', () => {
   test('send', async () => {
     const phone = `${new Date().getTime()}`
-    const service: Outgoing = new DummyOutgoing()
+    const service: Outgoing = mock<Outgoing>()
     const baileys: Incoming = new IncomingBaileys(service, getConfigDefault, getClientDummy)
     const payload: object = { humm: new Date().getTime() }
     const send = jest.spyOn(dummyClient, 'send')
