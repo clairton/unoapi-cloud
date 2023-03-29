@@ -47,14 +47,18 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async send(phone: string, message: object) {
     const config = await this.getConfig(phone)
+    return this.sendHttp(phone, config.webhooks[0].url, config.webhooks[0].header, config.webhooks[0].token, message)
+  }
+
+  public async sendHttp(phone: string, url: string, header: string, token: string, message: object) {
     const body = JSON.stringify(message)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
-      [config.webhookHeader]: config.webhookToken,
+      [header]: token,
     }
-    const url = `${config.webhookUrl}/${phone}`
+    const uri = `${url}/${phone}`
     console.debug(`Send url ${url} with headers %s and body %s`, headers, body)
-    const response: Response = await fetch(url, { method: 'POST', body, headers })
+    const response: Response = await fetch(uri, { method: 'POST', body, headers })
     console.debug('Response: ', response.status)
     if (!response.ok) {
       throw await response.text()

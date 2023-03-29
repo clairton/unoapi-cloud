@@ -32,10 +32,10 @@ export const getConfigByEnv: getConfig = async (_phone: string): Promise<Config>
     config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
     config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
-    config.webhookUrl = WEBHOOK_URL
-    config.webhookToken = WEBHOOK_TOKEN
+    config.webhooks[0].url = WEBHOOK_URL
+    config.webhooks[0].token = WEBHOOK_TOKEN
     if (WEBHOOK_HEADER) {
-      config.webhookHeader = WEBHOOK_HEADER
+      config.webhooks[0].header = WEBHOOK_HEADER
     }
     const filter: MessageFilter = new MessageFilter(config)
 

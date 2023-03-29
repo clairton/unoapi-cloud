@@ -18,6 +18,11 @@ export const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, sto
   }
   return undefined
 }
+export type Webhook = {
+  url: string
+  token: string
+  header: string
+}
 
 export type Config = {
   ignoreGroupMessages: boolean
@@ -32,9 +37,7 @@ export type Config = {
   shouldIgnoreJid: (jid: string) => boolean | undefined
   shouldIgnoreKey: (key: WAMessageKey, messageType: string) => boolean | undefined
   getStore: getStore
-  webhookUrl: string
-  webhookToken: string
-  webhookHeader: string
+  webhooks: Webhook[]
   getGroupMetadata: GetGroupMetadata
 }
 
@@ -53,9 +56,13 @@ export const defaultConfig: Config = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldIgnoreKey: (_key: WAMessageKey, _messageType: string) => false,
   getStore: getStoreFile,
-  webhookUrl: '',
-  webhookToken: '',
-  webhookHeader: 'Authorization',
+  webhooks: [
+    {
+      url: '',
+      token: '',
+      header: 'Authorization',
+    },
+  ],
   getGroupMetadata: ignoreGetGroupMetadata,
 }
 
