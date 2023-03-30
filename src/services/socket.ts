@@ -131,6 +131,9 @@ export const connect = async ({
       dataStore.cleanSession()
       return
     }
+    if (statusCode === DisconnectReason.connectionReplaced) {
+      disconnect(false)
+    }
     if (shouldReconnect) {
       reconnect()
     } else {
