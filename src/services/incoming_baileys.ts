@@ -7,15 +7,23 @@ export class IncomingBaileys implements Incoming {
   private service: Outgoing
   private getClient: getClient
   private getConfig: getConfig
+  private onNewLogin: (_phone: string) => void
 
-  constructor(service: Outgoing, getConfig: getConfig, getClient: getClient) {
+  constructor(service: Outgoing, getConfig: getConfig, getClient: getClient, onNewLogin: (_phone: string) => void) {
     this.service = service
     this.getConfig = getConfig
     this.getClient = getClient
+    this.onNewLogin = onNewLogin
   }
 
   public async send(phone: string, payload: object) {
-    const client: Client = await this.getClient({ phone, incoming: this, outgoing: this.service, getConfig: this.getConfig })
+    const client: Client = await this.getClient({
+      phone,
+      incoming: this,
+      outgoing: this.service,
+      getConfig: this.getConfig,
+      onNewLogin: this.onNewLogin,
+    })
     return client.send(payload)
   }
 }

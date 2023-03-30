@@ -4,7 +4,14 @@ import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
 import { Incoming } from './incoming'
 
-export const autoConnect = async (sessionStore: SessionStore, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, getClient: getClient) => {
+export const autoConnect = async (
+  sessionStore: SessionStore,
+  incoming: Incoming,
+  outgoing: Outgoing,
+  getConfig: getConfig,
+  getClient: getClient,
+  onNewLogin: (_phone: string) => void,
+) => {
   try {
     const phones = await sessionStore.getPhones()
     console.info(`${phones.length} phones to verify is auto connect`)
@@ -13,7 +20,7 @@ export const autoConnect = async (sessionStore: SessionStore, incoming: Incoming
       try {
         console.info(`Auto connecting phone ${phone}...`)
         try {
-          getClient({ phone, incoming, outgoing, getConfig })
+          getClient({ phone, incoming, outgoing, getConfig, onNewLogin })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {

@@ -46,10 +46,16 @@ export const connect = async ({
   onQrCode,
   onStatus,
   onDisconnect,
+  onNewLogin,
   timeout = 1e3,
   attempts = Infinity,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  config = { ignoreHistoryMessages: true, autoRestart: false, shouldIgnoreJid: (_jid: string) => false },
+  config = {
+    ignoreHistoryMessages: true,
+    autoRestart: false,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    shouldIgnoreJid: (_jid: string) => false,
+  },
 }) => {
   let sock = null
   const msgRetryCounterMap: MessageRetryMap = {}
@@ -66,7 +72,7 @@ export const connect = async ({
   const messages = []
   const reads = []
 
-  const onConnectionUpdate = (event) => {
+  const onConnectionUpdate = async (event) => {
     console.log('onConnectionUpdate ==>', event)
     if (event.qr) {
       if (status.attempt++ > attempts || status.disconnected) {
@@ -83,8 +89,7 @@ export const connect = async ({
     else if (event.connection === 'close') onDisconnected(event)
     else if (event.connection === 'connecting') onStatus(`Connnecting...`, false)
     else if (event.isNewLogin) {
-      const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
-      onStatus(message, true)
+      onNewLogin(phone)
     }
   }
 

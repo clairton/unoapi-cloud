@@ -23,6 +23,10 @@ type Event = BaileysEventEmitter & {
   isBuffering(): boolean
 }
 
+const onNewLogin = async (phone: string) => {
+  console.log('New login', phone)
+}
+
 describe('service client baileys', () => {
   let client: Client
   let phone: string
@@ -56,7 +60,7 @@ describe('service client baileys', () => {
       }
       return config
     }
-    client = new ClientBaileys(phone, incoming, outgoing, getConfig)
+    client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
     rejectCall = mockFn<rejectCall>()

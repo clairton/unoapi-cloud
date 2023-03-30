@@ -5,14 +5,6 @@ import { mock } from 'jest-mock-extended'
 import { Store } from '../../src/services/store'
 const mockMakeWASocket = makeWASocket as jest.MockedFunction<typeof makeWASocket>
 
-// let EvWASocket: BaileysEventEmitter & {
-//   process(handler: (events: Partial<BaileysEventMap>) => void | Promise<void>): () => void
-//   buffer(): void
-//   createBufferedFunction<A extends any[], T_1>(work: (...args: A) => Promise<T_1>): (...args: A) => Promise<T_1>
-//   flush(force?: boolean | undefined): boolean
-//   isBuffering(): boolean
-// }
-
 describe('service socket', () => {
   let phone: string
   let store: Store
@@ -22,6 +14,9 @@ describe('service socket', () => {
   let onQrCode
   let onStatus
   let onDisconnect
+  const onNewLogin = async (phone: string) => {
+    console.log('New login', phone)
+  }
 
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
@@ -37,12 +32,12 @@ describe('service socket', () => {
   })
 
   test('call connect status connected false', async () => {
-    const response = await connect({ phone, onQrCode, onStatus, onDisconnect, store })
+    const response = await connect({ phone, onQrCode, onStatus, onDisconnect, store, onNewLogin })
     expect(response.status.connected).toBe(false)
   })
 
   test('call connect and subscribe 2 events', async () => {
-    await connect({ phone, onQrCode, onStatus, onDisconnect, store })
+    await connect({ phone, onQrCode, onStatus, onDisconnect, store, onNewLogin })
     expect(mockOn).toBeCalledTimes(2)
   })
 })

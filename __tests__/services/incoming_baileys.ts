@@ -49,11 +49,15 @@ const getClientDummy: getClient = async ({
   return dummyClient
 }
 
+const onNewLogin = async (phone: string) => {
+  console.log('New login', phone)
+}
+
 describe('service incoming baileys', () => {
   test('send', async () => {
     const phone = `${new Date().getTime()}`
     const service: Outgoing = mock<Outgoing>()
-    const baileys: Incoming = new IncomingBaileys(service, getConfigDefault, getClientDummy)
+    const baileys: Incoming = new IncomingBaileys(service, getConfigDefault, getClientDummy, onNewLogin)
     const payload: object = { humm: new Date().getTime() }
     const send = jest.spyOn(dummyClient, 'send')
     await baileys.send(phone, payload)

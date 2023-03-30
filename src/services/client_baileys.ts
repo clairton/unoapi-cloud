@@ -21,15 +21,17 @@ export const getClientBaileys: getClient = async ({
   incoming,
   outgoing,
   getConfig,
+  onNewLogin,
 }: {
   phone: string
   incoming: Incoming
   outgoing: Outgoing
   getConfig: getConfig
+  onNewLogin: (_phone: string) => void
 }): Promise<Client> => {
   if (!clients.has(phone)) {
     console.info('Creating client baileys %s', phone)
-    const client = new ClientBaileys(phone, incoming, outgoing, getConfig)
+    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
     await client.connect()
     console.info('Client baileys created and connected %s', phone)
     clients.set(phone, client)
@@ -68,6 +70,7 @@ export class ClientBaileys implements Client {
   private store: Store | undefined
   private calls = new Map<string, boolean>()
   private getConfig: getConfig
+  private onNewLogin
 
   private onStatus = (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
@@ -116,11 +119,12 @@ export class ClientBaileys implements Client {
     return this.outgoing.sendMany(this.phone, messages)
   }
 
-  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig) {
+  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin) {
     this.phone = phone
     this.outgoing = outgoing
     this.incoming = incoming
     this.getConfig = getConfig
+    this.onNewLogin = onNewLogin
   }
 
   async connect() {
@@ -134,6 +138,7 @@ export class ClientBaileys implements Client {
       timeout,
       onQrCode: this.onQrCode,
       onStatus: this.onStatus,
+      onNewLogin: this.onNewLogin,
       config: this.config,
       onDisconnect: async () => this.disconnect(),
     })
