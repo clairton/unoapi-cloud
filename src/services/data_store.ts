@@ -14,4 +14,5 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   getJid: (phone: string, sock: Partial<WASocket>) => Promise<string>
   setMessage: (jid: string, message: WAMessage) => Promise<void>
   cleanSession: () => Promise<void>
+  loadTemplates(): Promise<object[]>
 }

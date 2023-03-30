@@ -34,7 +34,7 @@ const onNewLogin = async (phone: string) => {
 }
 
 const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin)
-const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`)
+const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv)
 
 app.server.listen(port, '0.0.0.0', async () => {
   console.info('Unoapi Cloud listening on port:', port)

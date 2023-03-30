@@ -1,8 +1,9 @@
 import { WAMessage } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
-import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BinTemplate } from './transformer'
 import { getConfig } from './config'
+import { Template } from './template'
 
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
@@ -41,7 +42,17 @@ export class OutgoingCloudApi implements Outgoing {
       console.debug(`Saving media...`)
       await store?.mediaStore.saveMedia(messageType, i)
     }
-    const data = fromBaileysMessageContent(phone, message)
+    let data
+    try {
+      data = fromBaileysMessageContent(phone, message)
+    } catch (error) {
+      if (error instanceof BinTemplate) {
+        const template = new Template(this.getConfig)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const i: any = message
+        data = await template.bind(phone, i.template.name, i.template.components)
+      }
+    }
     return this.send(phone, data)
   }
 

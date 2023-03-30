@@ -2,9 +2,14 @@ import { AnyMessageContent, isJidUser } from '@adiwajshing/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
-import template from '../services/template'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
+
+export class BinTemplate extends Error {
+  constructor() {
+    super('')
+  }
+}
 
 const TYPE_MESSAGES_TO_PROCESS = [
   'viewOnceMessage',
@@ -69,8 +74,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       break
 
     case 'template':
-      response.text = template?.components[0]?.text
-      break
+      throw new BinTemplate()
 
     default:
       throw new Error(`Unknow message type ${type}`)

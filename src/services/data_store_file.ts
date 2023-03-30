@@ -2,7 +2,7 @@ import { makeInMemoryStore, BaileysEventEmitter, proto, Chat, Contact, WAMessage
 import makeOrderedDictionary from '@adiwajshing/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@adiwajshing/baileys/lib/Store/make-in-memory-store'
 import { isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
-import { existsSync, rmSync } from 'fs'
+import { existsSync, readFileSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
@@ -121,6 +121,29 @@ const dataStoreFile = (phone: string, config: any): DataStore => {
     } else {
       console.info(`Already empty session phone %s dir %s`, phone, sessionDir)
     }
+  }
+  dataStore.loadTemplates = async () => {
+    const templateFile = `${SESSION_DIR}/${phone}/templates.json`
+    if (existsSync(templateFile)) {
+      const string = readFileSync(templateFile)
+      if (string) {
+        return JSON.parse(string.toString())
+      }
+    }
+    const template = {
+      id: 1,
+      name: 'hello',
+      status: 'APPROVED',
+      category: 'UTILITY',
+      language: 'pt_BR',
+      components: [
+        {
+          text: 'Olá!',
+          type: 'BODY',
+        },
+      ],
+    }
+    return [template]
   }
   return dataStore
 }

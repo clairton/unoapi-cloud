@@ -1,16 +1,13 @@
 import { Request, Response } from 'express'
-import { getDataStore } from '../services/data_store'
-import { getMediaStore, MediaStore } from '../services/media_store'
+import { getConfig } from '../services/config'
 
 export class MediaController {
   private baseUrl: string
-  private getDataStore: getDataStore
-  private getMediaStore: getMediaStore
+  private getConfig: getConfig
 
-  constructor(baseUrl: string, getMediaStore: getMediaStore, getDataStore: getDataStore) {
+  constructor(baseUrl: string, getConfig: getConfig) {
     this.baseUrl = baseUrl
-    this.getDataStore = getDataStore
-    this.getMediaStore = getMediaStore
+    this.getConfig = getConfig
   }
 
   public async index(req: Request, res: Response) {
@@ -19,8 +16,9 @@ export class MediaController {
     console.debug('media index body', JSON.stringify(req.body, null, ' '))
     const { media_id: mediaId, phone } = req.params
     if (mediaId) {
-      const mediaStore: MediaStore = this.getMediaStore(phone, {}, this.getDataStore)
-      const mediaResult = await mediaStore.getMedia(this.baseUrl, mediaId)
+      const config = await this.getConfig(phone)
+      const store = await config.getStore(phone, config)
+      const mediaResult = await store.mediaStore.getMedia(this.baseUrl, mediaId)
       return res.status(200).json(mediaResult)
     }
   }
@@ -30,7 +28,8 @@ export class MediaController {
     console.debug('media download params', req.params)
     console.debug('media download body', JSON.stringify(req.body, null, ' '))
     const { file, phone } = req.params
-    const store: MediaStore = this.getMediaStore(phone, {}, this.getDataStore)
-    store.downloadMedia(res, file)
+    const config = await this.getConfig(phone)
+    const store = await config.getStore(phone, config)
+    store.mediaStore.downloadMedia(res, file)
   }
 }

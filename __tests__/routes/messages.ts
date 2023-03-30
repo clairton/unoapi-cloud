@@ -4,9 +4,20 @@ import { mock } from 'jest-mock-extended'
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
-import { getDataStore } from '../../src/services/data_store'
-import { getMediaStore } from '../../src/services/media_store'
+import { defaultConfig, getConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
+import { getStore, Store } from '../../src/services/store'
+
+const store = mock<Store>()
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getConfigTest: getConfig = async (_phone: string) => {
+  defaultConfig.getStore = getTestStore
+  return defaultConfig
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getTestStore: getStore = async (_phone: string, _config: object) => {
+  return store
+}
 
 let phone: string
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,9 +32,7 @@ describe('messages routes', () => {
     outgoing = mock<Outgoing>()
     json = { data: `${new Date().getTime()}` }
     incoming = mock<Incoming>()
-    const getDataStore = mock<getDataStore>()
-    const getMediaStore = mock<getMediaStore>()
-    app = new App(incoming, outgoing, '', getMediaStore, getDataStore)
+    app = new App(incoming, outgoing, '', getConfigTest)
   })
 
   test('whatsapp with sucess', async () => {

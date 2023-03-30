@@ -1,15 +1,24 @@
 // https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates/
 
 import { Request, Response } from 'express'
-import template from '../services/template'
+import { getConfig } from '../services/config'
 
-class TemplatesController {
+export class TemplatesController {
+  private getConfig: getConfig
+
+  constructor(getConfig: getConfig) {
+    this.getConfig = getConfig
+  }
+
   public async index(req: Request, res: Response) {
+    console.debug(`1`)
     console.debug('templates headers', req.headers)
     console.debug('templates params', req.params)
     console.debug('templates body', JSON.stringify(req.body, null, ' '))
-    return res.status(200).json({ data: [template] })
+    const { phone } = req.params
+    const config = await this.getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const templates = await store.dataStore.loadTemplates()
+    return res.status(200).json({ data: templates })
   }
 }
-
-export const templatesController = new TemplatesController()
