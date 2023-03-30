@@ -120,27 +120,20 @@ export const connect = async ({
   const onDisconnected = async ({ lastDisconnect }) => {
     status.connected = false
     const statusCode = lastDisconnect?.error?.output?.statusCode
-    const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-
     console.log(`${phone} disconnected with status: ${statusCode}`)
     onDisconnect()
     if (statusCode === DisconnectReason.loggedOut) {
-      status.reconnecting = false
-      status.disconnected = true
+      disconnect(false)
       console.log(`${phone} destroyed`)
       dataStore.cleanSession()
-      return
-    }
-    if (statusCode === DisconnectReason.connectionReplaced) {
+      const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
+      onStatus(message, true)
+    } else if (statusCode === DisconnectReason.connectionReplaced) {
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
       onStatus(message, true)
       return disconnect(false)
-    }
-    if (shouldReconnect) {
-      reconnect()
     } else {
-      const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      onStatus(message, true)
+      return reconnect()
     }
   }
 
