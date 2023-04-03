@@ -34,7 +34,9 @@ const TYPE_MESSAGES_TO_PROCESS = [
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getMessageType = (payload: any) => {
-  if (payload.update || payload.status) {
+  if (payload.update) {
+    return 'update'
+  } else if (payload.status && ![2, '2', 'SERVER_ACK'].includes(payload.status) && !payload.key.fromMe) {
     return 'update'
   } else if (payload.receipt) {
     return 'receipt'
@@ -222,7 +224,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const message: any = {
-      from: senderPhone.replace('+', ''),
+      from: (fromMe ? phone : senderPhone).replace('+', ''),
       id: whatsappMessageId,
       timestamp: messageTimestamp,
     }

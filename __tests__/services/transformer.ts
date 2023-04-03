@@ -31,6 +31,49 @@ describe('service transformer', () => {
     expect(getMessageType({ message: { imageMessage: {} } })).toEqual('imageMessage')
   })
 
+  test('getMessageType with status 3 and fromMe false', async () => {
+    const input = {
+      key: {
+        remoteJid: '554988290955@s.whatsapp.net',
+        fromMe: false,
+        id: '3AB4BB2F72F2D4692924',
+      },
+      status: 3,
+      message: {
+        conversation: 'Iiiiiiiiiiiiii',
+      },
+    }
+    expect(getMessageType(input)).toEqual('update')
+  })
+
+  test('getMessageType with status 2 and fromMe false', async () => {
+    const input = {
+      key: {
+        remoteJid: '554988290955@s.whatsapp.net',
+        fromMe: false,
+        id: '3AB4BB2F72F2D4692924',
+      },
+      status: 2,
+      message: {
+        conversation: 'Iiiiiiiiiiiiii',
+      },
+    }
+    expect(getMessageType(input)).toEqual('conversation')
+  })
+
+  test('getMessageType with update', async () => {
+    const input = {
+      key: {
+        fromMe: false,
+      },
+      status: 3,
+      message: {
+        conversation: 'si9fuwerhwrklk',
+      },
+    }
+    expect(getMessageType(input)).toEqual('update')
+  })
+
   test('isIndividualJid is true', async () => {
     expect(isIndividualJid('12345678901@s.whatsapp.net')).toEqual(true)
   })

@@ -14,7 +14,19 @@ export const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, sto
   console.debug(`Retrieving group metadata...`)
   const { key } = message
   if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
-    return store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
+    let groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
+    if (groupMetadata) {
+      console.debug('Retrieved group metadata %s!', groupMetadata)
+    } else {
+      groupMetadata = {
+        id: key.remoteJid,
+        owner: '',
+        subject: key.remoteJid,
+        participants: [],
+      }
+      console.debug('Return group metadata %s!', groupMetadata)
+    }
+    return groupMetadata
   }
   return undefined
 }

@@ -28,14 +28,7 @@ export class App {
     this.server.use(express.json())
   }
 
-  private router(
-    incoming: Incoming,
-    outgoing: Outgoing,
-    baseUrl: string,
-    getConfig: getConfig,
-    middleware: middleware,
-    injectRoute: injectRoute,
-  ) {
+  private router(incoming: Incoming, outgoing: Outgoing, baseUrl: string, getConfig: getConfig, middleware: middleware, injectRoute: injectRoute) {
     const roter = router(incoming, outgoing, baseUrl, getConfig, middleware, injectRoute)
     this.server.use(roter)
   }

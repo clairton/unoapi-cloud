@@ -76,6 +76,7 @@ export class ClientBaileys implements Client {
     if (this.config.sendConnectionStatus || important) {
       const payload = {
         key: {
+          fromMe: true,
           remoteJid: phoneNumberToJid(this.phone),
           id: uuid(),
         },
@@ -95,6 +96,7 @@ export class ClientBaileys implements Client {
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
     const remoteJid = phoneNumberToJid(this.phone)
     const waMessageKey = {
+      fromMe: true,
       remoteJid,
       id,
     }
