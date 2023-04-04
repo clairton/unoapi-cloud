@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage } from '@adiwajshing/baileys'
+import { AnyMessageContent, WAMessage, delay } from '@adiwajshing/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
@@ -15,6 +15,17 @@ const attempts = 6
 const timeout = 1e3
 
 const clients: Map<string, Client> = new Map()
+interface Delay {
+  (phone: string, to: string): Promise<void>
+}
+const delayOnSecondMessage: Delay = async (phone, to) => {
+  const time = 2000
+  console.debug(`Sleep for ${time} on second message ${phone} => ${to}`)
+  return delay(time)
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+const continueAfterSecondMessage: Delay = async (phone, to) => {}
+const delays: Map<string, Map<string, Delay>> = new Map()
 
 export const getClientBaileys: getClient = async ({
   phone,
@@ -243,11 +254,25 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message status ${status}`)
         }
       } else if (type) {
-        console.log('type', type)
         if (['text', 'image', 'audio', 'document', 'video', 'template'].includes(type)) {
           const content: AnyMessageContent = toBaileysMessageContent(payload)
           console.debug('Send to baileys', to, content)
           const response = await this.sendMessage(to, content)
+          let sockDelays = delays.get(this.phone)
+          let toDelay
+          try {
+            toDelay = sockDelays.get(to)
+            try {
+              await toDelay(this.phone, to)
+              sockDelays.set(to, continueAfterSecondMessage)
+            } catch (error) {
+              sockDelays.set(to, delayOnSecondMessage)
+            }
+          } catch (error) {
+            sockDelays = new Map<string, Delay>()
+            delays.set(this.phone, sockDelays)
+            sockDelays.set(to, delayOnSecondMessage)
+          }
           console.debug('Sent to baileys', response)
           if (response) {
             const key = response.key
