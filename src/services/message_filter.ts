@@ -10,10 +10,7 @@ interface IgnoreKey {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreJid = (_jid: string) => {
-  console.info('Config to not ignore any jid')
-  return false
-}
+const notIgnoreJid = (_jid: string) => false
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const notIgnoreKey = (key: WAMessageKey, messageType: string) => {
   console.info('Config to not ignore any key')

@@ -43,7 +43,7 @@ export const useFileAuthState = async (phone: string) => {
     }
   }
 
-  const writeData = (key: string, data: object) => {
+  const writeData = async (key: string, data: object) => {
     const file = getKey(key)
     console.debug('write data', file)
     try {
