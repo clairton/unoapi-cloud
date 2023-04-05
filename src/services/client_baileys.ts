@@ -200,7 +200,7 @@ export class ClientBaileys implements Client {
         for (let i = 0; i < events.length; i++) {
           const { from, id, status } = events[i]
           if (status == 'ringing' && !this.calls.has(from)) {
-            await this.incoming.send(from, { text: this.config.rejectCalls })
+            await this.incoming.send(this.phone, { to: from, type: 'text', text: this.config.rejectCalls })
             if (this.config.rejectCallsWebhook) {
               const message = {
                 key: {
