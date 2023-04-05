@@ -195,12 +195,14 @@ export class ClientBaileys implements Client {
       })
     }
     if (this.config.rejectCalls) {
-      console.info('Config to reject calls', this.phone)
+      console.info('Config to reject calls', this.phone, this.config.rejectCalls)
       ev.on('call', async (events) => {
         for (let i = 0; i < events.length; i++) {
           const { from, id, status } = events[i]
           if (status == 'ringing' && !this.calls.has(from)) {
-            await this.incoming.send(this.phone, { to: from, type: 'text', text: this.config.rejectCalls })
+            this.calls.set(from, true)
+            await this.rejectCall(id, from)
+            await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } })
             if (this.config.rejectCallsWebhook) {
               const message = {
                 key: {
@@ -214,10 +216,10 @@ export class ClientBaileys implements Client {
               }
               await this.outgoing.sendOne(this.phone, message)
             }
-            await this.rejectCall(id, from)
-            this.calls.set(from, true)
-          } else if (['timeout', 'reject', 'accept'].includes(status)) {
-            this.calls.delete(from)
+            setTimeout(() => {
+              console.debug('Clean call rejecteds', from)
+              this.calls.delete(from)
+            }, 10_000)
           }
         }
       })
