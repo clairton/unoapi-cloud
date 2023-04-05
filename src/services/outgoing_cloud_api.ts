@@ -69,12 +69,16 @@ export class OutgoingCloudApi implements Outgoing {
       'Content-Type': 'application/json; charset=utf-8',
       [header]: token,
     }
-    const uri = `${url}/${phone}`
+    const uri = this.uri(url, phone)
     console.debug(`Send url ${url} with headers %s and body %s`, headers, body)
     const response: Response = await fetch(uri, { method: 'POST', body, headers })
     console.debug('Response: ', response.status)
     if (!response.ok) {
       throw await response.text()
     }
+  }
+
+  private uri(url: string, phone: string) {
+    return `${url}/${phone}`
   }
 }
