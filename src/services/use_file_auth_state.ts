@@ -90,14 +90,15 @@ export const useFileAuthState = async (phone: string) => {
 
   const keys = {
     get: async (type: string, ids: string[]) => {
-      const data = {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = {}
       await Promise.all(
         ids.map(async (id) => {
           let value = await readData(`/${type}-${id}.json`)
           if (type === 'app-state-sync-key' && value) {
             value = proto.Message.AppStateSyncKeyData.fromObject(value)
           }
-          Reflect.set(data, id, value)
+          data[id] = value
         }),
       )
 

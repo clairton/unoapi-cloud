@@ -7,8 +7,10 @@ import makeWASocket, {
   proto,
 } from '@adiwajshing/baileys'
 import { release } from 'os'
-import logger from '@adiwajshing/baileys/lib/Utils/logger'
-logger.level = process.env.LOG_LEVEL || (process.env.NODE_ENV === 'development' ? 'debug' : 'error')
+import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
+const logger = MAIN_LOGGER.child({})
+const level = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
+logger.level = level
 
 export class SendError extends Error {
   readonly code: number
