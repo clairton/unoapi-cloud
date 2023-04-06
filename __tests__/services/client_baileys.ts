@@ -14,13 +14,9 @@ import { dataStores } from '../../src/services/data_store'
 
 const mockConnect = connect as jest.MockedFunction<typeof connect>
 
-type Event = BaileysEventEmitter & {
-  process(handler: (events: Partial<BaileysEventMap>) => void | Promise<void>): () => void
-  buffer(): void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createBufferedFunction<A extends any[], T_1>(work: (...args: A) => Promise<T_1>): (...args: A) => Promise<T_1>
-  flush(force?: boolean | undefined): boolean
-  isBuffering(): boolean
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const event = (event, _callback) => {
+  console.info('subscribe event: ', event)
 }
 
 const onNewLogin = async (phone: string) => {
@@ -41,7 +37,6 @@ describe('service client baileys', () => {
   let config: Config
 
   const status: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
-  const ev = mock<Event>()
 
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
@@ -64,7 +59,7 @@ describe('service client baileys', () => {
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
     rejectCall = mockFn<rejectCall>()
-    mockConnect.mockResolvedValue({ ev, status, send, read, rejectCall })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall })
   })
 
   test('call send with unknown status', async () => {
@@ -116,7 +111,7 @@ describe('service client baileys', () => {
     send = async () => {
       throw new SendError(1, '')
     }
-    mockConnect.mockResolvedValue({ ev, status, send, read, rejectCall })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall })
     await client.connect()
     const response = await client.send(payload)
     expect(response.error.entry.length).toBe(1)

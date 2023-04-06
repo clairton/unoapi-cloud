@@ -143,7 +143,7 @@ export class ClientBaileys implements Client {
   async connect() {
     this.config = await this.getConfig(this.phone)
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, ev, rejectCall } = await connect({
+    const { status, send, read, event, rejectCall } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -160,7 +160,7 @@ export class ClientBaileys implements Client {
     this.readMessages = read
     this.rejectCall = rejectCall
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ev.on('messages.upsert', async (payload: any) => {
+    event('messages.upsert', async (payload: any) => {
       if (payload.type === 'notify') {
         console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
         this.listener(payload.messages, false)
@@ -168,16 +168,16 @@ export class ClientBaileys implements Client {
         console.debug('ignore messages.upsert type append', this.phone, JSON.stringify(payload, null, ' '))
       }
     })
-    ev.on('messages.update', (messages: object[]) => {
+    event('messages.update', (messages: object[]) => {
       console.debug('messages.update', this.phone, JSON.stringify(messages, null, ' '))
       this.listener(messages)
     })
-    ev.on('message-receipt.update', (messages: object[]) => {
+    event('message-receipt.update', (messages: object[]) => {
       console.debug('message-receipt.update', this.phone, JSON.stringify(messages, null, ' '))
       this.listener(messages)
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ev.on('messages.delete', (update: any) => {
+    event('messages.delete', (update: any) => {
       console.debug('messages.delete', this.phone, JSON.stringify(update, null, ' '))
       const keys = update.keys || []
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -189,14 +189,14 @@ export class ClientBaileys implements Client {
 
     if (!this.config.ignoreHistoryMessages) {
       console.info('Config import history messages', this.phone)
-      ev.on('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
+      event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
         console.info('Importing history messages, is latest', isLatest, this.phone)
         this.listener(messages, false)
       })
     }
     if (this.config.rejectCalls) {
       console.info('Config to reject calls', this.phone, this.config.rejectCalls)
-      ev.on('call', async (events) => {
+      event('call', async (events) => {
         for (let i = 0; i < events.length; i++) {
           const { from, id, status } = events[i]
           if (status == 'ringing' && !this.calls.has(from)) {

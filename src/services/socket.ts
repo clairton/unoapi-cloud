@@ -263,7 +263,12 @@ export const connect = async ({
     setInterval(() => restart(), everyHourTime)
   }
 
+  const event = (event, callback) => {
+    console.info('subscribe event: ', event)
+    sock.ev.on(event, callback)
+  }
+
   connect()
 
-  return { ev: sock.ev, status, send, read, rejectCall }
+  return { event, status, send, read, rejectCall }
 }
