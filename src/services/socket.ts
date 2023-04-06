@@ -204,15 +204,18 @@ export const connect = async ({
     return dataStore.getJid(phone, sock)
   }
 
-  const send: sendMessage = async (to, message) => {
+  const validateStatus = () => {
     if (status.disconnected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
       } else {
-        throw new SendError(3, 'disconnect number, please read qr code')
+        throw new SendError(3, 'Disconnected number, please read qr code')
       }
     }
+  }
 
+  const send: sendMessage = async (to, message) => {
+    validateStatus()
     if (!status.connected) {
       messages.unshift([to, message])
       return
@@ -229,14 +232,7 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys) => {
-    if (status.disconnected) {
-      if (status.connecting) {
-        throw new SendError(5, 'Wait a moment, connecting process')
-      } else {
-        throw new SendError(3, 'disconnect number, please read qr code')
-      }
-    }
-
+    validateStatus()
     if (!status.connected) {
       reads.unshift(keys)
       return
@@ -246,14 +242,7 @@ export const connect = async ({
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
-    if (status.disconnected) {
-      if (status.connecting) {
-        throw new SendError(5, 'Wait a moment, connecting process')
-      } else {
-        throw new SendError(3, 'disconnect number, please read qr code')
-      }
-    }
-
+    validateStatus()
     return sock.rejectCall(callId, callFrom)
   }
 
@@ -264,7 +253,7 @@ export const connect = async ({
   }
 
   const event = (event, callback) => {
-    console.info('subscribe event: ', event)
+    console.info('Subscribe %s event:', phone, event)
     sock.ev.on(event, callback)
   }
 

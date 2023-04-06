@@ -161,11 +161,11 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCall
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
+      console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
       if (payload.type === 'notify') {
-        console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
         this.listener(payload.messages, false)
       } else {
-        console.debug('ignore messages.upsert type append', this.phone, JSON.stringify(payload, null, ' '))
+        console.debug('ignore messages.upsert type append')
       }
     })
     event('messages.update', (messages: object[]) => {
