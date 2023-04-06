@@ -13,6 +13,12 @@ export class Template {
     const store = await config.getStore(phone, config)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const template: any = (await store.dataStore.loadTemplates()).find((t: any) => t.name == name)
-    return template && template?.components[0]?.text
+    if (template) {
+      return {
+        text: template?.components[0]?.text,
+      }
+    } else {
+      throw `Template name ${name} not found`
+    }
   }
 }

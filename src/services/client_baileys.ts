@@ -11,6 +11,7 @@ import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { Incoming } from './incoming'
 import QRCode from 'qrcode'
+import { Template } from './template'
 const attempts = 6
 const timeout = 1e3
 
@@ -43,8 +44,9 @@ export const getClientBaileys: getClient = async ({
   if (!clients.has(phone)) {
     console.info('Creating client baileys %s', phone)
     const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    console.info('Connecting client baileys %s', phone)
     await client.connect()
-    console.info('Client baileys created and connected %s', phone)
+    console.info('Created and connected client baileys %s', phone)
     clients.set(phone, client)
   } else {
     console.debug('Retrieving client baileys %s', phone)
@@ -261,7 +263,13 @@ export class ClientBaileys implements Client {
         }
       } else if (type) {
         if (['text', 'image', 'audio', 'document', 'video', 'template'].includes(type)) {
-          const content: AnyMessageContent = toBaileysMessageContent(payload)
+          let content: AnyMessageContent
+          if ('template' === type) {
+            const template = new Template(this.getConfig)
+            content = await template.bind(this.phone, payload.template.name, payload.components)
+          } else {
+            content = toBaileysMessageContent(payload)
+          }
           console.debug('Send to baileys', to, content)
           const response = await this.sendMessage(to, content)
           let sockDelays = delays.get(this.phone)

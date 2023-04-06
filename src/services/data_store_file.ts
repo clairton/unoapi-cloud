@@ -11,11 +11,11 @@ export const MEDIA_DIR = './data/medias'
 
 export const getDataStoreFile: getDataStore = (phone: string, config: object): DataStore => {
   if (!dataStores.has(phone)) {
-    console.debug('Creating file data store %s', phone)
+    console.debug('Creating data store file %s', phone)
     const store = dataStoreFile(phone, config)
     dataStores.set(phone, store)
   } else {
-    console.debug('Retrieving file data store %s', phone)
+    console.debug('Retrieving data store file %s', phone)
   }
   return dataStores.get(phone) as DataStore
 }

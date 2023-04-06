@@ -24,6 +24,7 @@ export class IncomingBaileys implements Incoming {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
+    console.debug('Retrieved client baileys %s', phone)
     return client.send(payload)
   }
 }
