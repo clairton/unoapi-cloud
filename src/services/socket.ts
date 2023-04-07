@@ -71,9 +71,6 @@ export const connect = async ({
     connecting: null,
   }
 
-  const messages = []
-  const reads = []
-
   const onConnectionUpdate = async (event) => {
     console.log('onConnectionUpdate ==>', event)
     if (event.qr) {
@@ -107,16 +104,6 @@ export const connect = async ({
       const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
       onStatus(message, false)
     })
-
-    while (messages.length) {
-      // eslint-disable-next-line prefer-spread
-      send.apply(null, messages.pop())
-    }
-
-    while (reads.length) {
-      // eslint-disable-next-line prefer-spread
-      read.apply(null, reads.pop())
-    }
   }
 
   const onDisconnected = async ({ lastDisconnect }) => {
@@ -216,28 +203,16 @@ export const connect = async ({
 
   const send: sendMessage = async (to, message) => {
     validateStatus()
-    if (!status.connected) {
-      messages.unshift([to, message])
-      return
-    }
-
     const id = await exists(to)
-
     if (id) {
       console.log(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message)
     }
-
     throw new SendError(2, `The number ${to} does not have Whatsapp Account or was a error verify this!`)
   }
 
   const read: readMessages = async (keys) => {
     validateStatus()
-    if (!status.connected) {
-      reads.unshift(keys)
-      return
-    }
-
     return sock.readMessages(keys)
   }
 

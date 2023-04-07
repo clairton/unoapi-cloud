@@ -98,6 +98,7 @@ export class ClientBaileys implements Client {
         },
         messageTimestamp: new Date().getTime(),
       }
+      console.debug('onStatus', JSON.stringify(payload))
       return this.outgoing.sendOne(this.phone, payload)
     }
   }
@@ -155,7 +156,7 @@ export class ClientBaileys implements Client {
       onStatus: this.onStatus,
       onNewLogin: this.onNewLogin,
       config: this.config,
-      onDisconnect: async () => this.disconnect(),
+      onDisconnect: this.disconnect.bind(this),
     })
     this.status = status
     this.sendMessage = send
@@ -287,8 +288,8 @@ export class ClientBaileys implements Client {
             delays.set(this.phone, sockDelays)
             sockDelays.set(to, delayOnSecondMessage)
           }
-          console.debug('Sent to baileys', response)
           if (response) {
+            console.debug('Sent to baileys', response)
             const key = response.key
             const ok = {
               messaging_product: 'whatsapp',
@@ -306,7 +307,8 @@ export class ClientBaileys implements Client {
             const r: Response = { ok }
             return r
           } else {
-            throw new SendError(1, 'unknown erro, verify logs for error details')
+            console.error('Response on sent to baileys is empty.....')
+            throw new SendError(5, 'Wait a moment, connecting process')
           }
         } else {
           throw new Error(`Unknow message type ${type}`)
