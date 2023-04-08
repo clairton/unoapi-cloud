@@ -16,7 +16,7 @@ export class IncomingBaileys implements Incoming {
     this.onNewLogin = onNewLogin
   }
 
-  public async send(phone: string, payload: object) {
+  public async send(phone: string, payload: object, options: object) {
     const client: Client = await this.getClient({
       phone,
       incoming: this,
@@ -25,6 +25,6 @@ export class IncomingBaileys implements Incoming {
       onNewLogin: this.onNewLogin,
     })
     console.debug('Retrieved client baileys %s', phone)
-    return client.send(payload)
+    return client.send(payload, options)
   }
 }

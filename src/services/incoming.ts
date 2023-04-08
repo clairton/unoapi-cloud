@@ -1,5 +1,5 @@
 import { Response } from './response'
 
 export interface Incoming {
-  send(phone: string, payload: object): Promise<Response>
+  send(phone: string, payload: object, options: object): Promise<Response>
 }

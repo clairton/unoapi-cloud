@@ -7,7 +7,7 @@ import { Outgoing } from '../../src/services/outgoing'
 import { Store } from '../../src/services/store'
 import { connect, Status, SendError, sendMessage, readMessages, rejectCall } from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
-import { BaileysEventEmitter, BaileysEventMap, proto } from '@adiwajshing/baileys'
+import { proto } from '@adiwajshing/baileys'
 import { DataStore } from '../../src/services/data_store'
 import { Incoming } from '../../src/services/incoming'
 import { dataStores } from '../../src/services/data_store'
@@ -65,7 +65,7 @@ describe('service client baileys', () => {
   test('call send with unknown status', async () => {
     const status = `${new Date().getMilliseconds()}`
     try {
-      await client.send({ status })
+      await client.send({ status }, {})
       expect(true).toBe(false)
     } catch (e) {
       expect(e.message).toBe(`Unknow message status ${status}`)
@@ -76,7 +76,7 @@ describe('service client baileys', () => {
     const loadKey = jest.spyOn(store?.dataStore, 'loadKey')
     loadKey.mockReturnValue(new Promise((resolve) => resolve({ id: `${new Date().getMilliseconds()}` })))
     await client.connect()
-    const response: Response = await client.send({ status: 'read', to: `${new Date().getMilliseconds()}` })
+    const response: Response = await client.send({ status: 'read', to: `${new Date().getMilliseconds()}` }, {})
     expect(loadKey).toHaveBeenCalledTimes(1)
     expect(read).toHaveBeenCalledTimes(1)
     expect(response.ok).toStrictEqual({ success: true })
@@ -90,7 +90,7 @@ describe('service client baileys', () => {
     send.mockResolvedValue({ key: { id } })
     const payload = { to, type: 'text', text: { body: `${new Date().getMilliseconds()}` } }
     await client.connect()
-    const response: Response = await client.send(payload)
+    const response: Response = await client.send(payload, {})
     expect(send).toHaveBeenCalledTimes(1)
     expect(response.ok.messages[0].id).toBe(id)
   })
@@ -99,7 +99,7 @@ describe('service client baileys', () => {
     const type = `${new Date().getMilliseconds()}`
     try {
       await client.connect()
-      await client.send({ type })
+      await client.send({ type }, {})
       expect(true).toBe(false)
     } catch (e) {
       expect(e.message).toBe(`Unknow message type ${type}`)
@@ -113,7 +113,7 @@ describe('service client baileys', () => {
     }
     mockConnect.mockResolvedValue({ event, status, send, read, rejectCall })
     await client.connect()
-    const response = await client.send(payload)
+    const response = await client.send(payload, {})
     expect(response.error.entry.length).toBe(1)
   })
 

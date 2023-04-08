@@ -53,7 +53,7 @@ export class MessagesController {
     const { phone } = req.params
     const payload: object = req.body
     try {
-      const response: ResponseUno = await this.incoming.send(phone, payload)
+      const response: ResponseUno = await this.incoming.send(phone, payload, {})
       console.debug('messages response', JSON.stringify(response.ok, null, ' '))
       await res.status(200).json(response.ok)
       if (response.error) {

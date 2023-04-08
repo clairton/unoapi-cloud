@@ -32,7 +32,7 @@ export interface Client {
   disconnect(): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  send(payload: any): Promise<Response>
+  send(payload: any, options: any): Promise<Response>
 
   getStatus(): Status
 }

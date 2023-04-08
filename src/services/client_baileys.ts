@@ -215,7 +215,7 @@ export class ClientBaileys implements Client {
           if (status == 'ringing' && !this.calls.has(from)) {
             this.calls.set(from, true)
             await this.rejectCall(id, from)
-            await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } })
+            await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } }, {})
             if (this.config.rejectCallsWebhook) {
               const message = {
                 key: {
@@ -254,7 +254,7 @@ export class ClientBaileys implements Client {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async send(payload: any) {
+  async send(payload: any, options: any = {}) {
     const { status, type, to } = payload
     try {
       if (status) {
@@ -283,7 +283,7 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           console.debug('Send to baileys', to, content)
-          const response = await this.sendMessage(to, content)
+          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
           let sockDelays = delays.get(this.phone)
           let toDelay
           try {

@@ -60,8 +60,8 @@ describe('service incoming baileys', () => {
     const baileys: Incoming = new IncomingBaileys(service, getConfigDefault, getClientDummy, onNewLogin)
     const payload: object = { humm: new Date().getTime() }
     const send = jest.spyOn(dummyClient, 'send')
-    await baileys.send(phone, payload)
+    await baileys.send(phone, payload, {})
     expect(send).toHaveBeenCalledTimes(1)
-    expect(send).toHaveBeenCalledWith(payload)
+    expect(send).toHaveBeenCalledWith(payload, {})
   })
 })

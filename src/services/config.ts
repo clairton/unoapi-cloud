@@ -43,6 +43,7 @@ export type Config = {
   ignoreHistoryMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
+  composingMessage: boolean
   autoRestart: boolean
   rejectCalls: string
   rejectCallsWebhook: string
@@ -60,6 +61,7 @@ export const defaultConfig: Config = {
   ignoreHistoryMessages: true,
   ignoreOwnMessages: true,
   sendConnectionStatus: true,
+  composingMessage: false,
   rejectCalls: '',
   rejectCallsWebhook: '',
   autoRestart: false,

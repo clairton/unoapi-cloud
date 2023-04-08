@@ -14,6 +14,7 @@ const {
   WEBHOOK_URL,
   WEBHOOK_TOKEN,
   WEBHOOK_HEADER,
+  COMPOSING_MESSAGE,
 } = process.env
 
 let config: Config
@@ -30,6 +31,7 @@ export const getConfigByEnv: getConfig = async (_phone: string): Promise<Config>
     config.ignoreHistoryMessages = IGNORE_HISTORY_MESSAGES === _undefined ? false : IGNORE_HISTORY_MESSAGES == 'true'
     config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
     config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
+    config.composingMessage = COMPOSING_MESSAGE === _undefined ? false : COMPOSING_MESSAGE == 'true'
     config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
     config.webhooks[0].url = WEBHOOK_URL

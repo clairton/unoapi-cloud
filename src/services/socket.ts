@@ -4,6 +4,7 @@ import makeWASocket, {
   MessageRetryMap,
   fetchLatestBaileysVersion,
   WAMessageKey,
+  delay,
   proto,
 } from '@adiwajshing/baileys'
 import { release } from 'os'
@@ -25,7 +26,7 @@ export class SendError extends Error {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export interface sendMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (_phone: string, _message: object): Promise<any>
+  (_phone: string, _message: object, _options: any): Promise<any>
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface readMessages {
@@ -200,10 +201,20 @@ export const connect = async ({
     }
   }
 
-  const send: sendMessage = async (to, message) => {
+  const send: sendMessage = async (to, message, options = { composing: false }) => {
     validateStatus()
     const id = await exists(to)
     if (id) {
+      if (options.composing) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const i: any = message
+        const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 10)
+        await sock.presenceSubscribe(id)
+        await delay(Math.floor(Math.random() * time) + 100)
+        await sock.sendPresenceUpdate('composing', id)
+        await delay(Math.floor(Math.random() * time) + 200)
+        await sock.sendPresenceUpdate('paused', id)
+      }
       console.log(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message)
     }
