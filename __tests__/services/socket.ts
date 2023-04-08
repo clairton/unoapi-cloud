@@ -14,6 +14,7 @@ describe('service socket', () => {
   let onQrCode
   let onStatus
   let onDisconnect
+  let onReconnect
   const onNewLogin = async (phone: string) => {
     console.log('New login', phone)
   }
@@ -29,15 +30,16 @@ describe('service socket', () => {
     onQrCode = jest.fn()
     onStatus = jest.fn()
     onDisconnect = jest.fn()
+    onReconnect = jest.fn()
   })
 
   test('call connect status connected false', async () => {
-    const response = await connect({ phone, onQrCode, onStatus, onDisconnect, store, onNewLogin })
+    const response = await connect({ phone, onQrCode, onStatus, onDisconnect, onReconnect, store, onNewLogin })
     expect(response.status.connected).toBe(false)
   })
 
   test('call connect and subscribe 2 events', async () => {
-    await connect({ phone, onQrCode, onStatus, onDisconnect, store, onNewLogin })
+    await connect({ phone, onQrCode, onStatus, onDisconnect, onReconnect, store, onNewLogin })
     expect(mockOn).toBeCalledTimes(2)
   })
 })
