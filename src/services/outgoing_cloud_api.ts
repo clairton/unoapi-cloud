@@ -53,7 +53,11 @@ export class OutgoingCloudApi implements Outgoing {
         data = await template.bind(phone, i.template.name, i.template.components)
       }
     }
-    return this.send(phone, data)
+    if (data) {
+      return this.send(phone, data)
+    } else {
+      console.debug(`Not send message type ${messageType} to http phone %s message id %s`, phone, i?.key?.id)
+    }
   }
 
   public async send(phone: string, message: object) {
