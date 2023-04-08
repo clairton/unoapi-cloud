@@ -50,8 +50,8 @@ export const connect = async ({
   onQrCode,
   onStatus,
   onDisconnect,
+  onReconnect,
   onNewLogin,
-  timeout = 1e3,
   attempts = Infinity,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   config = {
@@ -120,9 +120,9 @@ export const connect = async ({
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
       onStatus(message, true)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
+      disconnect(false)
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
-      onStatus(message, true)
-      return disconnect(false)
+      return onStatus(message, true)
     } else {
       return reconnect()
     }
@@ -167,9 +167,10 @@ export const connect = async ({
     sock.ev.on('connection.update', onConnectionUpdate)
   }
 
-  const reconnect = () => {
+  const reconnect = async () => {
     console.log(`${phone} reconnecting`, status.attempt)
-    setTimeout(connect, timeout)
+    await disconnect(true)
+    onReconnect()
   }
 
   const disconnect = (reconnect) => {
@@ -180,10 +181,6 @@ export const connect = async ({
     status.reconnecting = !!reconnect
     console.log(`${phone} disconnecting`)
     return sock.end()
-  }
-
-  const restart = async () => {
-    return disconnect(true).then(connect)
   }
 
   const exists = async (phone) => {
@@ -226,7 +223,7 @@ export const connect = async ({
   // Refresh connection every 1 hour
   if (config.autoRestart) {
     const everyHourTime = 3600000
-    setInterval(() => restart(), everyHourTime)
+    setInterval(reconnect, everyHourTime)
   }
 
   const event = (event, callback) => {

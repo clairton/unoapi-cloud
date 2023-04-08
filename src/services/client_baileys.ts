@@ -13,7 +13,6 @@ import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
 const attempts = 6
-const timeout = 1e3
 
 const clients: Map<string, Client> = new Map()
 interface Delay {
@@ -130,6 +129,17 @@ export class ClientBaileys implements Client {
     await this.outgoing.sendOne(this.phone, waMessage)
   }
 
+  private onReconnect = async () => {
+    await this.disconnect()
+    await getClientBaileys({
+      phone: this.phone,
+      incoming: this.incoming,
+      outgoing: this.outgoing,
+      getConfig: this.getConfig,
+      onNewLogin: this.onNewLogin,
+    })
+  }
+
   private listener = (messages: object[], update = true) => {
     console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, this.phone)
     return this.outgoing.sendMany(this.phone, messages)
@@ -151,12 +161,12 @@ export class ClientBaileys implements Client {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
       attempts,
-      timeout,
       onQrCode: this.onQrCode,
       onStatus: this.onStatus,
       onNewLogin: this.onNewLogin,
       config: this.config,
       onDisconnect: this.disconnect.bind(this),
+      onReconnect: this.onReconnect,
     })
     this.status = status
     this.sendMessage = send
