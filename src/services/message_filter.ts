@@ -70,14 +70,16 @@ export class MessageFilter {
         return f(jid) ? ++acc : acc
       }
       const sum = ignoresJid.reduce(fn, 0)
-      console.debug(`${jid} ignore sum is ${sum}`)
+      console.debug(`${jid} ignore by jid sum is ${sum}`)
       return sum > 0
     }
     console.info('%s Configs to ignore by jid', ignoresJid.length)
     console.info('%s Configs to ignore by key', ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
     const ignoreKey = (key: WAMessageKey, messageType: string) => {
-      return ignoresKey.reduce((acc, f) => (f(key, messageType) ? ++acc : acc), 0) > 0
+      const sum = ignoresKey.reduce((acc, f) => (f(key, messageType) ? ++acc : acc), 0)
+      console.debug(`key: ${JSON.stringify(key)} type: ${messageType} ignore sum is ${sum}`)
+      return sum > 0
     }
     this.ignoreKey = ignoresKey.length > 0 ? ignoreKey : notIgnoreKey
   }
