@@ -64,7 +64,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'video':
       const url = payload[type].link
       response.caption = payload[type].caption
-      response.mimeType = mime.lookup(url)
+      response.mimetype = mime.lookup(url)
       if (payload[type].filename) {
         response.fileName = payload[type].filename
       }
@@ -236,7 +236,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       case 'documentMessage':
         const mediaType = messageType.replace('Message', '')
         const mediaKey = `${phone}/${whatsappMessageId}`
-        const mimetype = binMessage.mimetype.split(';')[0]
+        const mimetype = (binMessage.fileName && mime.lookup(binMessage.fileName)) || binMessage.mimetype.split(';')[0]
         const extension = mime.extension(mimetype)
         const filename = binMessage.fileName || `${payload.key.id}.${extension}`
         message[mediaType] = {

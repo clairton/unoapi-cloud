@@ -817,7 +817,7 @@ describe('service transformer', () => {
     }
     const output = {
       caption: body,
-      mimeType: mimetype,
+      mimetype,
       video: {
         url: link,
       },
