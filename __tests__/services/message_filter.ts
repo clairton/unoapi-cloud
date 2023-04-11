@@ -3,6 +3,12 @@ import { Config, defaultConfig } from '../../src/services/config'
 import { MessageFilter } from '../../src/services/message_filter'
 
 describe('service message filter', () => {
+  let phone
+
+  beforeEach(() => {
+    phone = `${new Date().getTime()}`
+  })
+
   test('ignore group message', async () => {
     const config: Config = {
       ...defaultConfig,
@@ -11,7 +17,7 @@ describe('service message filter', () => {
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const remoteJid = 'akjshdkasdsadhk@g.us'
     expect(filter.isIgnoreJid(remoteJid)).toBe(true)
   })
@@ -24,9 +30,46 @@ describe('service message filter', () => {
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const remoteJid = 'akjshdkasdsadhk@g.us'
     expect(filter.isIgnoreJid(remoteJid)).toBe(false)
+  })
+
+  test('ignore yourself message', async () => {
+    const config: Config = {
+      ...defaultConfig,
+      ignoreGroupMessages: false,
+      ignoreBroadcastStatuses: false,
+      ignoreBroadcastMessages: false,
+      ignoreOwnMessages: false,
+      ignoreYourSelfMessages: true,
+      rejectCalls: '',
+    }
+    phone = '5549988290955'
+    const filter: MessageFilter = new MessageFilter(phone, config)
+    const key: WAMessageKey = {
+      fromMe: true,
+      remoteJid: phone,
+    }
+    expect(filter.isIgnoreKey(key, '')).toBe(true)
+  })
+
+  test('not ignore yourself message', async () => {
+    const config: Config = {
+      ...defaultConfig,
+      ignoreGroupMessages: false,
+      ignoreBroadcastStatuses: false,
+      ignoreBroadcastMessages: false,
+      ignoreOwnMessages: false,
+      ignoreYourSelfMessages: false,
+      rejectCalls: '',
+    }
+    const filter: MessageFilter = new MessageFilter(phone, config)
+    const key: WAMessageKey = {
+      fromMe: true,
+      remoteJid: phone,
+    }
+    expect(filter.isIgnoreKey(key, '')).toBe(false)
   })
 
   test('ignore own message', async () => {
@@ -38,7 +81,7 @@ describe('service message filter', () => {
       ignoreOwnMessages: true,
       rejectCalls: '',
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const key: WAMessageKey = {
       fromMe: true,
       remoteJid: '456',
@@ -55,7 +98,7 @@ describe('service message filter', () => {
       ignoreOwnMessages: true,
       rejectCalls: '',
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const key: WAMessageKey = {
       remoteJid: '554998093075@s.whatsapp.net',
       fromMe: true,
@@ -72,7 +115,7 @@ describe('service message filter', () => {
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const key: WAMessageKey = {
       fromMe: true,
       remoteJid: '123',
@@ -89,7 +132,7 @@ describe('service message filter', () => {
       ignoreOwnMessages: false,
       rejectCalls: '',
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const remoteJid = 'status@broadcast'
     expect(filter.isIgnoreJid(remoteJid)).toBe(true)
   })
@@ -102,7 +145,7 @@ describe('service message filter', () => {
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const remoteJid = 'status@broadcast'
     expect(filter.isIgnoreJid(remoteJid)).toBe(false)
   })
@@ -116,7 +159,7 @@ describe('service message filter', () => {
       ignoreOwnMessages: false,
       rejectCalls: '',
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const remoteJid = '456@broadcast'
     expect(filter.isIgnoreJid(remoteJid)).toBe(true)
   })
@@ -129,7 +172,7 @@ describe('service message filter', () => {
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
     const remoteJid = '789@broadcast'
     expect(filter.isIgnoreJid(remoteJid)).toBe(false)
   })

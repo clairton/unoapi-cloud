@@ -8,6 +8,7 @@ const {
   IGNORE_BROADCAST_MESSAGES,
   IGNORE_CALLS,
   IGNORE_HISTORY_MESSAGES,
+  IGNORE_YOURSELF_MESSAGES,
   SEND_CONNECTION_STATUS,
   REJECT_CALLS_WEBHOOK,
   REJECT_CALLS,
@@ -20,7 +21,7 @@ const {
 let config: Config
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getConfigByEnv: getConfig = async (_phone: string): Promise<Config> => {
+export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
   if (!config) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _undefined: any = undefined
@@ -29,6 +30,7 @@ export const getConfigByEnv: getConfig = async (_phone: string): Promise<Config>
     config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES == 'true'
     config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES == 'true'
     config.ignoreHistoryMessages = IGNORE_HISTORY_MESSAGES === _undefined ? false : IGNORE_HISTORY_MESSAGES == 'true'
+    config.ignoreYourSelfMessages = IGNORE_YOURSELF_MESSAGES === _undefined ? false : IGNORE_YOURSELF_MESSAGES == 'true'
     config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
     config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
     config.composingMessage = COMPOSING_MESSAGE === _undefined ? false : COMPOSING_MESSAGE == 'true'
@@ -39,7 +41,7 @@ export const getConfigByEnv: getConfig = async (_phone: string): Promise<Config>
     if (WEBHOOK_HEADER) {
       config.webhooks[0].header = WEBHOOK_HEADER
     }
-    const filter: MessageFilter = new MessageFilter(config)
+    const filter: MessageFilter = new MessageFilter(phone, config)
 
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)

@@ -62,9 +62,8 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async send(phone: string, message: object) {
     const config = await this.getConfig(phone)
-    config.webhooks.map(async (w) => {
-      this.sendHttp(phone, w.url, w.header, w.token, message)
-    })
+    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.url, w.header, w.token, message))
+    await Promise.all(promises)
   }
 
   public async sendHttp(phone: string, url: string, header: string, token: string, message: object) {

@@ -12,6 +12,7 @@ import { Response } from './response'
 import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
+import { FetchError } from 'node-fetch'
 const attempts = 6
 
 const clients: Map<string, Client> = new Map()
@@ -25,6 +26,7 @@ const delayOnSecondMessage: Delay = async (phone, to) => {
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
 const continueAfterSecondMessage: Delay = async (phone, to) => {}
+
 const delays: Map<string, Map<string, Delay>> = new Map()
 
 export const getClientBaileys: getClient = async ({
@@ -84,7 +86,20 @@ export class ClientBaileys implements Client {
   private getConfig: getConfig
   private onNewLogin
 
-  private onStatus = (text: string, important) => {
+  private onWebhookError = async (error) => {
+    if (!this.config.throwWebhookError && error instanceof FetchError && this.status.connected) {
+      return this.incoming.send(
+        this.phone,
+        { to: this.phone, type: 'text', text: { body: `Error on send message to webhook: ${error.message}` } },
+        {},
+      )
+    }
+    if (this.config.throwWebhookError) {
+      throw error
+    }
+  }
+
+  private onStatus = async (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
       const payload = {
         key: {
@@ -98,7 +113,13 @@ export class ClientBaileys implements Client {
         messageTimestamp: new Date().getTime(),
       }
       console.debug('onStatus', JSON.stringify(payload))
-      return this.outgoing.sendOne(this.phone, payload)
+
+      try {
+        const response = await this.outgoing.sendOne(this.phone, payload)
+        return response
+      } catch (error) {
+        await this.onWebhookError(error)
+      }
     }
   }
 
@@ -126,7 +147,11 @@ export class ClientBaileys implements Client {
       messageTimestamp,
     }
     await this.store.dataStore.setKey(id, waMessageKey)
-    await this.outgoing.sendOne(this.phone, waMessage)
+    try {
+      await this.outgoing.sendOne(this.phone, waMessage)
+    } catch (error) {
+      await this.onWebhookError(error)
+    }
   }
 
   private onReconnect = async () => {
@@ -140,9 +165,14 @@ export class ClientBaileys implements Client {
     })
   }
 
-  private listener = (messages: object[], update = true) => {
+  private listener = async (messages: object[], update = true) => {
     console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, this.phone)
-    return this.outgoing.sendMany(this.phone, messages)
+    try {
+      const resp = await this.outgoing.sendMany(this.phone, messages)
+      return resp
+    } catch (error) {
+      await this.onWebhookError(error)
+    }
   }
 
   constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin) {
@@ -227,7 +257,11 @@ export class ClientBaileys implements Client {
                   conversation: this.config.rejectCallsWebhook,
                 },
               }
-              await this.outgoing.sendOne(this.phone, message)
+              try {
+                await this.outgoing.sendOne(this.phone, message)
+              } catch (error) {
+                await this.onWebhookError(error)
+              }
             }
             setTimeout(() => {
               console.debug('Clean call rejecteds', from)

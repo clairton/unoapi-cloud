@@ -41,11 +41,13 @@ export type Config = {
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
   ignoreHistoryMessages: boolean
+  ignoreYourSelfMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
   composingMessage: boolean
   autoRestart: boolean
   rejectCalls: string
+  throwWebhookError: false
   rejectCallsWebhook: string
   shouldIgnoreJid: (jid: string) => boolean | undefined
   shouldIgnoreKey: (key: WAMessageKey, messageType: string) => boolean | undefined
@@ -60,6 +62,7 @@ export const defaultConfig: Config = {
   ignoreBroadcastMessages: false,
   ignoreHistoryMessages: true,
   ignoreOwnMessages: true,
+  ignoreYourSelfMessages: true,
   sendConnectionStatus: true,
   composingMessage: false,
   rejectCalls: '',
@@ -70,6 +73,7 @@ export const defaultConfig: Config = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldIgnoreKey: (_key: WAMessageKey, _messageType: string) => false,
   getStore: getStoreFile,
+  throwWebhookError: false,
   webhooks: [
     {
       url: '',

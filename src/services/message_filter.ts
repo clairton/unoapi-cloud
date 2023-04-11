@@ -1,5 +1,6 @@
 import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast } from '@adiwajshing/baileys'
 import { Config, defaultConfig } from './config'
+import { jidToPhoneNumber } from './transformer'
 
 interface IgnoreJid {
   (jid: string): boolean
@@ -32,7 +33,7 @@ export class MessageFilter {
   private ignoreJid: IgnoreJid
   private ignoreKey: IgnoreKey
 
-  constructor(config: Config = defaultConfig) {
+  constructor(phone: string, config: Config = defaultConfig) {
     const ignoresJid: IgnoreJid[] = []
     const ignoresKey: IgnoreKey[] = []
 
@@ -63,6 +64,21 @@ export class MessageFilter {
     if (config.ignoreOwnMessages) {
       console.info('Config to ignore key own messages')
       ignoresKey.push(IgnoreOwnKey)
+    }
+    if (config.ignoreYourSelfMessages) {
+      console.info('Config to ignore key yourself messages')
+      const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string) => {
+        if (['update', 'receipt'].includes(messageType)) {
+          // update need process always
+          return false
+        } else {
+          const senderPhone = jidToPhoneNumber(key.remoteJid, '')
+          const filter = phone == senderPhone
+          console.debug('IgnoreYourSelfKey: %s === %s => %s', phone, senderPhone, filter)
+          return filter
+        }
+      }
+      ignoresKey.push(IgnoreYourSelfKey)
     }
 
     const ignoreJid = (jid: string) => {
