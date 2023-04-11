@@ -329,7 +329,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         const errors = ['Message absent from node', 'Invalid PreKey ID', 'Key used already or never filled']
         if (payload.messageStubType == 2 && payload.messageStubParameters && errors.includes(payload.messageStubParameters[0])) {
           message.text = {
-            body: '🕒 Aguardando mensagem. Abra o Whatsapp o celular.',
+            body: '🕒 Aguardando mensagem. Abra o Whatsapp no celular.',
           }
           message.type = 'text'
         }

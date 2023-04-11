@@ -855,7 +855,7 @@ describe('service transformer', () => {
       messageStubType: 2,
       messageStubParameters: ['Invalid PreKey ID'],
     }
-    const body = '🕒 Aguardando mensagem. Abra o Whatsapp o celular.'
+    const body = '🕒 Aguardando mensagem. Abra o Whatsapp no celular.'
     const output = {
       object: 'whatsapp_business_account',
       entry: [
