@@ -11,6 +11,7 @@ export class MediaController {
   }
 
   public async index(req: Request, res: Response) {
+    console.debug('media index method', req.method)
     console.debug('media index headers', req.headers)
     console.debug('media index params', req.params)
     console.debug('media index body', JSON.stringify(req.body, null, ' '))
@@ -24,6 +25,7 @@ export class MediaController {
   }
 
   public async download(req: Request, res: Response) {
+    console.debug('media download method', req.method)
     console.debug('media download headers', req.headers)
     console.debug('media download params', req.params)
     console.debug('media download body', JSON.stringify(req.body, null, ' '))

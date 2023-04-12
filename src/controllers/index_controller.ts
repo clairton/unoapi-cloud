@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 
 class IndexController {
   public ping(req: Request, res: Response) {
+    console.debug('ping method', req.method)
     console.debug('ping headers', req.headers)
     console.debug('ping params', req.params)
     console.debug('ping body', JSON.stringify(req.body, null, ' '))

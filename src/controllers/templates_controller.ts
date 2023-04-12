@@ -11,7 +11,7 @@ export class TemplatesController {
   }
 
   public async index(req: Request, res: Response) {
-    console.debug(`1`)
+    console.debug('templates method', req.method)
     console.debug('templates headers', req.headers)
     console.debug('templates params', req.params)
     console.debug('templates body', JSON.stringify(req.body, null, ' '))
