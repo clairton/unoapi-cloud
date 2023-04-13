@@ -1,11 +1,12 @@
 import { WAMessage } from '@adiwajshing/baileys'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
+import { Config } from './config'
 
 export const mediaStores: Map<string, MediaStore> = new Map()
 
 export interface getMediaStore {
-  (phone: string, config: object, getDataStore: getDataStore): MediaStore
+  (phone: string, config: Config, getDataStore: getDataStore): MediaStore
 }
 
 export type MediaStore = {
