@@ -52,6 +52,7 @@ export type Config = {
   shouldIgnoreJid: (jid: string) => boolean | undefined
   shouldIgnoreKey: (key: WAMessageKey, messageType: string) => boolean | undefined
   getStore: getStore
+  baseStore: string
   webhooks: Webhook[]
   getGroupMetadata: GetGroupMetadata
 }
@@ -74,6 +75,7 @@ export const defaultConfig: Config = {
   shouldIgnoreKey: (_key: WAMessageKey, _messageType: string) => false,
   getStore: getStoreFile,
   throwWebhookError: false,
+  baseStore: './data',
   webhooks: [
     {
       url: '',

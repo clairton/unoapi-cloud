@@ -4,9 +4,8 @@ import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
 import { DataStore } from '../../src/services/data_store'
 import { getDataStore } from '../../src/services/data_store'
-import { Config, defaultConfig, getConfig } from '../../src/services/config'
+import { defaultConfig, getConfig } from '../../src/services/config'
 import { mock } from 'jest-mock-extended'
-import { getFilePath } from '../../src/services/media_store_file'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
 import { Outgoing } from '../../src/services/outgoing'
 import { getMediaStore, MediaStore } from '../../src/services/media_store'
@@ -64,7 +63,7 @@ describe('media routes', () => {
 
   test('download', async () => {
     const name = `${phone}/${messageId}.${extension}`
-    const fileName = getFilePath(name)
+    const fileName = `./data/medias/${name}`
     const parts = fileName.split('/')
     const dir: string = parts.splice(0, parts.length - 1).join('/')
     if (!existsSync(dir)) {

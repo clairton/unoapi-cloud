@@ -9,6 +9,7 @@ import { SESSION_DIR } from './session_store_file'
 import { getStore, stores } from './store'
 import { MediaStore } from './media_store'
 import { getMediaStoreFile } from './media_store_file'
+import { Config } from './config'
 
 const STORE_DIR = `./data/stores`
 
@@ -23,7 +24,7 @@ export const getStoreFile: getStore = async (phone: string, config: object): Pro
   return stores.get(phone) as Store
 }
 
-const storeFile: store = async (phone: string, config: object): Promise<Store> => {
+const storeFile: store = async (phone: string, config: Config): Promise<Store> => {
   const dirs = [SESSION_DIR, MEDIA_DIR, STORE_DIR]
   dirs.forEach((dir) => {
     if (!existsSync(dir)) {

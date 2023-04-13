@@ -6,10 +6,11 @@ import { MediaStore, getMediaStore, mediaStores } from './media_store'
 import mime from 'mime-types'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
+import { Config } from './config'
 
-export const MEDIA_DIR = './data/medias'
+export const MEDIA_DIR = '/medias'
 
-export const getMediaStoreFile: getMediaStore = (phone: string, config: object, getDataStore: getDataStore): MediaStore => {
+export const getMediaStoreFile: getMediaStore = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   if (!mediaStores.has(phone)) {
     console.debug('Creating media store file %s', phone)
     const store = mediaStoreFile(phone, config, getDataStore)
@@ -20,43 +21,44 @@ export const getMediaStoreFile: getMediaStore = (phone: string, config: object, 
   return mediaStores.get(phone) as MediaStore
 }
 
-export const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
-  const { message, key } = waMessage
-  if (message) {
-    const mediaMessage = getMediaValue(message)
-    if (mediaMessage?.mimetype) {
-      const extension = mime.extension(mediaMessage?.mimetype)
-      return `${phone}/${key.id}.${extension}`
-    }
-  }
-  throw 'Not possible get file name'
-}
-
-export const getFilePath = (fileName: string) => {
-  return `${MEDIA_DIR}/${fileName}`
-}
-
-function getMediaValue(
-  message: proto.IMessage,
-):
-  | proto.Message.IImageMessage
-  | proto.Message.IVideoMessage
-  | proto.Message.IAudioMessage
-  | proto.Message.IDocumentMessage
-  | proto.Message.IStickerMessage
-  | undefined {
-  return (
-    message?.stickerMessage ||
-    message?.imageMessage ||
-    message?.videoMessage ||
-    message?.audioMessage ||
-    message?.documentMessage ||
-    message?.stickerMessage ||
-    undefined
-  )
-}
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const mediaStoreFile = (phone: string, config: object, getDataStore: getDataStore): MediaStore => {
+export const mediaStoreFile = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
+  const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
+    const { message, key } = waMessage
+    if (message) {
+      const mediaMessage = getMediaValue(message)
+      if (mediaMessage?.mimetype) {
+        const extension = mime.extension(mediaMessage?.mimetype)
+        return `${phone}/${key.id}.${extension}`
+      }
+    }
+    throw 'Not possible get file name'
+  }
+
+  const getFilePath = (fileName: string) => {
+    return `${config.baseStore}${MEDIA_DIR}/${fileName}`
+  }
+
+  const getMediaValue = (
+    message: proto.IMessage,
+  ):
+    | proto.Message.IImageMessage
+    | proto.Message.IVideoMessage
+    | proto.Message.IAudioMessage
+    | proto.Message.IDocumentMessage
+    | proto.Message.IStickerMessage
+    | undefined => {
+    return (
+      message?.stickerMessage ||
+      message?.imageMessage ||
+      message?.videoMessage ||
+      message?.audioMessage ||
+      message?.documentMessage ||
+      message?.stickerMessage ||
+      undefined
+    )
+  }
+
   const saveMedia = async (messageType: string, waMessage: WAMessage) => {
     let buffer
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

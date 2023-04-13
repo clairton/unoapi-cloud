@@ -13,6 +13,7 @@ const {
   REJECT_CALLS_WEBHOOK,
   REJECT_CALLS,
   WEBHOOK_URL,
+  UNOAPI_BASE_STORE,
   WEBHOOK_TOKEN,
   WEBHOOK_HEADER,
   COMPOSING_MESSAGE,
@@ -34,6 +35,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
     config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
     config.composingMessage = COMPOSING_MESSAGE === _undefined ? false : COMPOSING_MESSAGE == 'true'
+    config.baseStore = UNOAPI_BASE_STORE === _undefined ? './data' : UNOAPI_BASE_STORE
     config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
     config.webhooks[0].url = WEBHOOK_URL

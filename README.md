@@ -198,12 +198,12 @@ COMPOSING_MESSAGE=true enable composing before send message as text length, defa
 REJECT_CALLS=message to send when receive a call, default is empty and not reject
 REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
 SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
+UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
 ```
 
 ## Examples
 
 [Integration with Chatwoot](examples/chatwoot/README.md)
-
 
 ## Legal
 

@@ -1,9 +1,10 @@
 import { makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from '@adiwajshing/baileys'
+import { Config } from './config'
 
 export const dataStores: Map<string, DataStore> = new Map()
 
 export interface getDataStore {
-  (phone: string, config: object): DataStore
+  (phone: string, config: Config): DataStore
 }
 
 export type DataStore = ReturnType<typeof makeInMemoryStore> & {

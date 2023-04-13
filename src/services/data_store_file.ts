@@ -6,10 +6,11 @@ import { existsSync, readFileSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
+import { Config } from './config'
 
 export const MEDIA_DIR = './data/medias'
 
-export const getDataStoreFile: getDataStore = (phone: string, config: object): DataStore => {
+export const getDataStoreFile: getDataStore = (phone: string, config: Config): DataStore => {
   if (!dataStores.has(phone)) {
     console.debug('Creating data store file %s', phone)
     const store = dataStoreFile(phone, config)
@@ -21,11 +22,11 @@ export const getDataStoreFile: getDataStore = (phone: string, config: object): D
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const dataStoreFile = (phone: string, config: any): DataStore => {
+const dataStoreFile = (phone: string, config: Config): DataStore => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const jids: Map<string, string> = new Map()
   const ids: Map<string, string> = new Map()
-  const store = makeInMemoryStore(config)
+  const store = makeInMemoryStore(config as object)
   const dataStore = store as DataStore
   const { bind, toJSON, fromJSON } = store
   store.toJSON = () => {
