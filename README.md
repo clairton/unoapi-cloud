@@ -205,6 +205,61 @@ UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
 
 [Integration with Chatwoot](examples/chatwoot/README.md)
 
+## Install as Systemctl
+
+Install nodejs 18 as https://nodejs.org/en/download/package-manager and Git
+
+`mkdir /opt/unoapi && cd /opt/unoapi`
+
+`git clone git@github.com:clairton/unoapi-cloud.git .`
+
+`npm install`
+
+`npm build`
+
+`cp .env.example .env && vi .env`
+
+```env
+WEBHOOK_URL=http://chatwoot_addres/webhooks/whatsapp
+WEBHOOK_TOKEN=chatwoot token
+BASE_URL=https://unoapi_address
+UNOAPI_BASE_STORE=/opt/unoapi/data
+WEBHOOK_HEADER=api_access_token
+```
+
+And other .env you desire
+
+`chown -R $(whoami) ./data/sessions && chown -R $(whoami) ./data/stores && chown -R $(whoami) ./data/medias`
+
+`vi /etc/systemd/system/unoapi.service` or `systemctl edit --force --full unoapi.service`
+
+And put
+
+```
+[Unit]
+Description=Unoapi
+ConditionPathExists=/opt/unoapi/data
+After=network.target
+  
+[Service]
+ExecStart=/usr/bin/node dist/index.js
+WorkingDirectory=/opt/unoapi
+CPUAccounting=yes
+MemoryAccounting=yes
+Type=simple
+Restart=on-failure
+TimeoutStopSec=5
+RestartSec=5
+
+[Install]  
+WantedBy=multi-user.target
+```
+Run
+
+`systemctl daemon-reload && systemctl enable unoapi.service && systemctl start unoapi.service`
+
+To show logs `journalctl -u unoapi.service -f`
+
 ## Legal
 
 - This code is in no way affiliated, authorized, maintained, sponsored or
