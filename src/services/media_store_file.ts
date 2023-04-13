@@ -139,5 +139,5 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       }
     }
   }
-  return { saveMedia, removeMedia, downloadMedia, getMedia }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName }
 }

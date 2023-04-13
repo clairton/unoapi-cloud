@@ -13,7 +13,7 @@ import { Config } from './config'
 
 const STORE_DIR = `./data/stores`
 
-export const getStoreFile: getStore = async (phone: string, config: object): Promise<Store> => {
+export const getStoreFile: getStore = async (phone: string, config: Config): Promise<Store> => {
   if (!stores.has(phone)) {
     console.debug('Creating file store %s', phone)
     const fstore: Store = await storeFile(phone, config)

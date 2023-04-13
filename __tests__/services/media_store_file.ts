@@ -4,6 +4,7 @@ import { proto } from '@adiwajshing/baileys'
 import { mock } from 'jest-mock-extended'
 import { getMediaStoreFile } from '../../src/services/media_store_file'
 import { MediaStore } from '../../src/services/media_store'
+import { defaultConfig } from '../../src/services/config'
 const phone = `${new Date().getTime()}`
 const remoteJid = `${new Date().getTime()}@s.whatsapp.net`
 const messageId = `wa.${new Date().getTime()}`
@@ -44,7 +45,7 @@ describe('media routes', () => {
   beforeEach(() => {
     dataStore.loadKey.mockReturnValue(new Promise((resolve) => resolve(messageKey)))
     dataStore.loadMessage.mockReturnValue(new Promise((resolve) => resolve(message)))
-    mediaStore = getMediaStoreFile(phone, {}, getTestDataStore)
+    mediaStore = getMediaStoreFile(phone, defaultConfig, getTestDataStore)
   })
 
   test('getMedia', async () => {

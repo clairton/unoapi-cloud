@@ -1,11 +1,12 @@
 import { AuthenticationState } from '@adiwajshing/baileys'
 import { DataStore } from './data_store'
 import { MediaStore } from './media_store'
+import { Config } from './config'
 
 export const stores: Map<string, Store> = new Map()
 
 export interface getStore {
-  (phone: string, config: object): Promise<Store>
+  (phone: string, config: Config): Promise<Store>
 }
 
 export type Store = {
@@ -16,5 +17,5 @@ export type Store = {
 }
 
 export interface store {
-  (phone: string, config: object): Promise<Store>
+  (phone: string, config: Config): Promise<Store>
 }

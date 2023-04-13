@@ -146,7 +146,7 @@ export class ClientBaileys implements Client {
       },
       messageTimestamp,
     }
-    await this.store.dataStore.setKey(id, waMessageKey)
+    await this.store?.dataStore?.setKey(id, waMessageKey)
     try {
       await this.outgoing.sendOne(this.phone, waMessage)
     } catch (error) {

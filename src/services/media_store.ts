@@ -1,4 +1,4 @@
-import { WAMessage } from '@adiwajshing/baileys'
+import { proto, WAMessage } from '@adiwajshing/baileys'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'
@@ -14,4 +14,5 @@ export type MediaStore = {
   saveMedia: (messageType: string, waMessage: WAMessage) => Promise<boolean>
   removeMedia: (fileName: string) => Promise<void>
   downloadMedia: (resp: Response, fileName: string) => Promise<void>
+  getFileName: (phone: string, waMessage: proto.IWebMessageInfo) => string
 }
