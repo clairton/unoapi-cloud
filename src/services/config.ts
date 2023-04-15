@@ -80,7 +80,7 @@ export const defaultConfig: Config = {
     {
       url: '',
       token: '',
-      header: 'Authorization',
+      header: '',
     },
   ],
   getGroupMetadata: ignoreGetGroupMetadata,
