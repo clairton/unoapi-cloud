@@ -27,6 +27,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _undefined: any = undefined
     config = defaultConfig
+    config.logLevel || process.env.LOG_LEVEL
     config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE_GROUP_MESSAGES == 'true'
     config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES == 'true'
     config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES == 'true'
