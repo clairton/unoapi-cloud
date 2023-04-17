@@ -54,6 +54,7 @@ export type Config = {
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
+  logLevel: string
   getGroupMetadata: GetGroupMetadata
 }
 
@@ -68,6 +69,7 @@ export const defaultConfig: Config = {
   composingMessage: false,
   rejectCalls: '',
   rejectCallsWebhook: '',
+  logLevel: '',
   autoRestart: false,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldIgnoreJid: (_jid: string) => false,

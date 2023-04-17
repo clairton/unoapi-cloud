@@ -9,9 +9,6 @@ import makeWASocket, {
 } from '@adiwajshing/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
-const logger = MAIN_LOGGER.child({})
-const level = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
-logger.level = level
 
 export class SendError extends Error {
   readonly code: number
@@ -58,6 +55,7 @@ export const connect = async ({
   config = {
     ignoreHistoryMessages: true,
     autoRestart: false,
+    logLevel: '',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     shouldIgnoreJid: (_jid: string) => false,
   },
@@ -140,6 +138,10 @@ export const connect = async ({
     console.debug('Connecting %s', phone)
 
     const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
+
+    const logger = MAIN_LOGGER.child({})
+    logger.level = config.logLevel || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
+
     try {
       sock = makeWASocket({
         auth: state,
