@@ -95,7 +95,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id)
+          const message = await store.loadMessage(remoteJid, id, undefined)
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
@@ -118,7 +118,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id)
+          const message = await store.loadMessage(remoteJid, id, undefined)
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)

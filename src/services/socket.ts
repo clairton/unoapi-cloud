@@ -151,7 +151,6 @@ export const connect = async ({
         syncFullHistory: !config.ignoreHistoryMessages,
         logger,
         getMessage,
-        shouldIgnoreJid: config.shouldIgnoreJid,
       })
     } catch (error) {
       if (error.isBoom && !error.isServer) {
