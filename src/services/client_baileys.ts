@@ -19,9 +19,9 @@ const clients: Map<string, Client> = new Map()
 interface Delay {
   (phone: string, to: string): Promise<void>
 }
-const delayOnSecondMessage: Delay = async (phone, to) => {
+const delayBeforeSecondMessage: Delay = async (phone, to) => {
   const time = 2000
-  console.debug(`Sleep for ${time} on second message ${phone} => ${to}`)
+  console.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
   return delay(time)
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
@@ -317,7 +317,6 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           console.debug('Send to baileys', to, content)
-          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
           let sockDelays = delays.get(this.phone)
           let toDelay
           try {
@@ -326,13 +325,14 @@ export class ClientBaileys implements Client {
               await toDelay(this.phone, to)
               sockDelays.set(to, continueAfterSecondMessage)
             } catch (error) {
-              sockDelays.set(to, delayOnSecondMessage)
+              sockDelays.set(to, delayBeforeSecondMessage)
             }
           } catch (error) {
             sockDelays = new Map<string, Delay>()
             delays.set(this.phone, sockDelays)
-            sockDelays.set(to, delayOnSecondMessage)
+            sockDelays.set(to, delayBeforeSecondMessage)
           }
+          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
           if (response) {
             console.debug('Sent to baileys', response)
             const key = response.key
