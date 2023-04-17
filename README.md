@@ -282,6 +282,8 @@ Released under the GPLv3 License.
 
 Comercial version is available:
 
+- config by number connection
+- many webhooks by number connection
 - queue and process messages
 - persist session in database
 - persist contacts, groups and messages in database
@@ -290,8 +292,7 @@ Comercial version is available:
 - admin dashboard
 - vpn connect by number
 
-More informations in http://wa.me/+5549988290955
-
+More informations in mailto:comercial@unoapi.cloud
 
 ## Donate to the project.
 
