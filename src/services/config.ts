@@ -41,7 +41,7 @@ export type Config = {
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
   ignoreHistoryMessages: boolean
-  ignoreYourSelfMessages: boolean
+  ignoreYourselfMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
   composingMessage: boolean
@@ -64,7 +64,7 @@ export const defaultConfig: Config = {
   ignoreBroadcastMessages: false,
   ignoreHistoryMessages: true,
   ignoreOwnMessages: true,
-  ignoreYourSelfMessages: true,
+  ignoreYourselfMessages: true,
   sendConnectionStatus: true,
   composingMessage: false,
   rejectCalls: '',

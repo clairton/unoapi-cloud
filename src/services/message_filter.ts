@@ -11,7 +11,10 @@ interface IgnoreKey {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreJid = (_jid: string) => false
+const notIgnoreJid = (jid: string) => {
+  console.info('Config to not ignore any jid')
+  return false
+}
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const notIgnoreKey = (key: WAMessageKey, messageType: string) => {
   console.info('Config to not ignore any key')
@@ -65,7 +68,7 @@ export class MessageFilter {
       console.info('Config to ignore key own messages')
       ignoresKey.push(IgnoreOwnKey)
     }
-    if (config.ignoreYourSelfMessages) {
+    if (config.ignoreYourselfMessages) {
       console.info('Config to ignore key yourself messages')
       const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string) => {
         if (['update', 'receipt'].includes(messageType)) {
@@ -89,8 +92,8 @@ export class MessageFilter {
       console.debug(`${jid} ignore by jid sum is ${sum}`)
       return sum > 0
     }
-    console.info('%s Configs to ignore by jid', ignoresJid.length)
-    console.info('%s Configs to ignore by key', ignoresKey.length)
+    console.info('%s Configs to ignore by jid', phone, ignoresJid.length)
+    console.info('%s Configs to ignore by key', phone, ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
     const ignoreKey = (key: WAMessageKey, messageType: string) => {
       const sum = ignoresKey.reduce((acc, f) => (f(key, messageType) ? ++acc : acc), 0)

@@ -42,7 +42,7 @@ describe('service message filter', () => {
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
-      ignoreYourSelfMessages: true,
+      ignoreYourselfMessages: true,
       rejectCalls: '',
     }
     phone = '5549988290955'
@@ -61,7 +61,7 @@ describe('service message filter', () => {
       ignoreBroadcastStatuses: false,
       ignoreBroadcastMessages: false,
       ignoreOwnMessages: false,
-      ignoreYourSelfMessages: false,
+      ignoreYourselfMessages: false,
       rejectCalls: '',
     }
     const filter: MessageFilter = new MessageFilter(phone, config)
