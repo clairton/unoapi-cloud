@@ -6,6 +6,7 @@ import makeWASocket, {
   WAMessageKey,
   delay,
   proto,
+  BinaryNode,
 } from '@adiwajshing/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
@@ -229,7 +230,26 @@ export const connect = async ({
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
     validateStatus()
-    return sock.rejectCall(callId, callFrom)
+
+    const stanza: BinaryNode = {
+      tag: 'call',
+      attrs: {
+        from: state.creds.me.id,
+        to: callFrom,
+      },
+      content: [
+        {
+          tag: 'reject',
+          attrs: {
+            'call-id': callId,
+            'call-creator': callFrom,
+            count: '0',
+          },
+          content: undefined,
+        },
+      ],
+    }
+    await sock.query(stanza)
   }
 
   // Refresh connection every 1 hour
