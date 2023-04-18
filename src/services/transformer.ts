@@ -224,7 +224,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const message: any = {
-      from: (fromMe ? phone : senderPhone).replace('+', ''),
+      from: senderPhone.replace('+', ''),
       id: whatsappMessageId,
       timestamp: messageTimestamp,
     }
