@@ -332,6 +332,8 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
             body: '🕒 Aguardando mensagem. Abra o Whatsapp no celular.',
           }
           message.type = 'text'
+        } else {
+          return
         }
         break
 
@@ -396,7 +398,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       case 'protocolMessage':
       case 'senderKeyDistributionMessage':
       case 'messageContextInfo':
-      case 'messageStubType':
         console.debug(`Ignore message type ${messageType}`)
         return
 
