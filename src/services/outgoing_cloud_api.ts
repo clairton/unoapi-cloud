@@ -16,8 +16,7 @@ export class OutgoingCloudApi implements Outgoing {
     const config = await this.getConfig(phone)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {
-      const messageType = getMessageType(m)
-      return m.key && !config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, messageType)
+      return m.key && m.key.remoteJid && !config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))
     })
     console.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))
