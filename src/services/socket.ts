@@ -7,6 +7,7 @@ import makeWASocket, {
   delay,
   proto,
   BinaryNode,
+  isJidGroup,
 } from '@adiwajshing/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
@@ -205,7 +206,7 @@ export const connect = async ({
 
   const send: sendMessage = async (to, message, options = { composing: false }) => {
     validateStatus()
-    const id = await exists(to)
+    const id = isJidGroup(to) ? to : await exists(to)
     if (id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
