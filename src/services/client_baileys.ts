@@ -205,13 +205,18 @@ export class ClientBaileys implements Client {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
       console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
-      if (
-        payload.type === 'notify' ||
-        (payload.type === 'append' && !this.config.ignoreOwnMessages && !['PENDING', 1, '1'].includes(payload.status))
-      ) {
+      if (payload.type === 'notify') {
         this.listener(payload.messages, false)
+      } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
+        // filter self message send with this sessio to not send same message many times
+        const ms = payload.messages.filter((m) => !['PENDING', 1, '1'].includes(m.status))
+        if (ms.length > 0) {
+          this.listener(ms, false)
+        } else {
+          console.debug('ignore messages.upsert type append with status pending')
+        }
       } else {
-        console.debug('ignore messages.upsert type append')
+        console.error('Unknown type: ', payload.type)
       }
     })
     event('messages.update', (messages: object[]) => {
