@@ -221,7 +221,7 @@ export const connect = async ({
       console.log(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message)
     }
-    throw new SendError(2, `The number ${to} does not have Whatsapp Account or was a error verify this!`)
+    throw new SendError(2, `The number ${to} does not have Whatsapp account or was a error verify this!`)
   }
 
   const read: readMessages = async (keys) => {

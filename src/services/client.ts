@@ -11,12 +11,14 @@ export interface getClient {
     outgoing,
     getConfig,
     onNewLogin,
+    onDisconnected,
   }: {
     phone: string
     incoming: Incoming
     outgoing: Outgoing
     getConfig: getConfig
     onNewLogin: (_phone: string) => void
+    onDisconnected: (_phone: string, _payload: object) => void
   }): Promise<Client>
 }
 

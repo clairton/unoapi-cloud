@@ -35,16 +35,18 @@ export const getClientBaileys: getClient = async ({
   outgoing,
   getConfig,
   onNewLogin,
+  onDisconnected,
 }: {
   phone: string
   incoming: Incoming
   outgoing: Outgoing
   getConfig: getConfig
   onNewLogin: (_phone: string) => void
+  onDisconnected: (_phone: string, _payload: object) => void
 }): Promise<Client> => {
   if (!clients.has(phone)) {
     console.info('Creating client baileys %s', phone)
-    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin, onDisconnected)
     console.info('Connecting client baileys %s', phone)
     await client.connect()
     console.info('Created and connected client baileys %s', phone)
@@ -85,6 +87,7 @@ export class ClientBaileys implements Client {
   private calls = new Map<string, boolean>()
   private getConfig: getConfig
   private onNewLogin
+  private onDisconnected
 
   private onWebhookError = async (error) => {
     if (!this.config.throwWebhookError && error instanceof FetchError && this.status.connected) {
@@ -162,6 +165,7 @@ export class ClientBaileys implements Client {
       outgoing: this.outgoing,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
+      onDisconnected: this.onDisconnected,
     })
   }
 
@@ -175,12 +179,13 @@ export class ClientBaileys implements Client {
     }
   }
 
-  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin) {
+  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin, onDisconnected) {
     this.phone = phone
     this.outgoing = outgoing
     this.incoming = incoming
     this.getConfig = getConfig
     this.onNewLogin = onNewLogin
+    this.onDisconnected = onDisconnected
   }
 
   async connect() {
@@ -372,7 +377,8 @@ export class ClientBaileys implements Client {
         const code = e.code
         const title = e.title
         await this.onStatus(title, true)
-        if ([3].includes(code)) {
+        if ([3, '3'].includes(code)) {
+          this.onDisconnected(this.phone, payload)
           this.connect()
         }
         const id = uuid()
