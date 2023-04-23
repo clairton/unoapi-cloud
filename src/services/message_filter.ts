@@ -3,11 +3,11 @@ import { Config, defaultConfig } from './config'
 import { jidToPhoneNumber } from './transformer'
 
 interface IgnoreJid {
-  (jid: string): boolean
+  (jid: string): boolean | undefined
 }
 
 interface IgnoreKey {
-  (key: WAMessageKey, messageType: string): boolean
+  (key: WAMessageKey, messageType: string | undefined): boolean | undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -16,13 +16,15 @@ const notIgnoreJid = (jid: string) => {
   return false
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreKey = (key: WAMessageKey, messageType: string) => {
+const notIgnoreKey: IgnoreKey = (_key: WAMessageKey, _messageType: string | undefined) => {
   console.info('Config to not ignore any key')
   return false
 }
 
-const IgnoreOwnKey: IgnoreKey = (key: WAMessageKey, messageType: string) => {
-  if (['update', 'receipt'].includes(messageType)) {
+const IgnoreOwnKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
+  if (!messageType) {
+    return true
+  } else if (['update', 'receipt'].includes(messageType)) {
     // update need process always
     return false
   } else {
@@ -70,8 +72,10 @@ export class MessageFilter {
     }
     if (config.ignoreYourselfMessages) {
       console.info('Config to ignore key yourself messages')
-      const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string) => {
-        if (['update', 'receipt'].includes(messageType)) {
+      const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string  |undefined) => {
+        if (!messageType) {
+          return true
+        } else if (['update', 'receipt'].includes(messageType)) {
           // update need process always
           return false
         } else {
@@ -95,7 +99,7 @@ export class MessageFilter {
     console.info('%s Configs to ignore by jid', phone, ignoresJid.length)
     console.info('%s Configs to ignore by key', phone, ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
-    const ignoreKey = (key: WAMessageKey, messageType: string) => {
+    const ignoreKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
       const sum = ignoresKey.reduce((acc, f) => (f(key, messageType) ? ++acc : acc), 0)
       console.debug(`key: ${JSON.stringify(key)} type: ${messageType} ignore sum is ${sum}`)
       return sum > 0

@@ -50,7 +50,7 @@ export type Config = {
   throwWebhookError: false
   rejectCallsWebhook: string
   shouldIgnoreJid: (jid: string) => boolean | undefined
-  shouldIgnoreKey: (key: WAMessageKey, messageType: string) => boolean | undefined
+  shouldIgnoreKey: (key: WAMessageKey, messageType: string | undefined) => boolean | undefined
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
@@ -74,7 +74,7 @@ export const defaultConfig: Config = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldIgnoreJid: (_jid: string) => false,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  shouldIgnoreKey: (_key: WAMessageKey, _messageType: string) => false,
+  shouldIgnoreKey: (_key: WAMessageKey, _messageType: string | undefined) => false,
   getStore: getStoreFile,
   throwWebhookError: false,
   baseStore: './data',

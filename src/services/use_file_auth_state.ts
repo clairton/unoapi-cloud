@@ -106,7 +106,7 @@ export const useFileAuthState = async (phone: string) => {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     set: async (data: any) => {
-      const tasks = []
+      const tasks: Promise<void>[] = []
       for (const category in data) {
         for (const id in data[category]) {
           const value = data[category][id]

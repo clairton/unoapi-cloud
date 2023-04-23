@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv'
+import dotenv from 'dotenv'
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
 
 import { App } from './app'
@@ -15,10 +15,11 @@ const { PORT, BASE_URL } = process.env
 const port: number = parseInt(PORT || '9876')
 import { v1 as uuid } from 'uuid'
 import { phoneNumberToJid } from './services/transformer'
+import { OnNewLogin } from './services/socket'
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
 
-const onNewLogin = async (phone: string) => {
+const onNewLogin: OnNewLogin = async (phone: string) => {
   const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
   const payload = {
     key: {
@@ -30,7 +31,7 @@ const onNewLogin = async (phone: string) => {
     },
     messageTimestamp: new Date().getTime(),
   }
-  return outgoingCloudApi.sendOne(phone, payload)
+  outgoingCloudApi.sendOne(phone, payload)
 }
 
 const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin)

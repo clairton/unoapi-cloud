@@ -8,9 +8,19 @@ import makeWASocket, {
   proto,
   BinaryNode,
   isJidGroup,
+  WASocket,
+  AnyMessageContent,
 } from '@adiwajshing/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
+import { Config } from './config'
+import { Store } from './store'
+
+export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
+export type OnStatus = (text: string, important: boolean) => Promise<void>
+export type OnDisconnect = () => Promise<void>
+export type OnNewLogin = (phone: string) => Promise<void>
+export type OnReconnect = () => Promise<void>
 
 export class SendError extends Error {
   readonly code: number
@@ -25,7 +35,7 @@ export class SendError extends Error {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export interface sendMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (_phone: string, _message: object, _options: any): Promise<any>
+  (_phone: string, _message: AnyMessageContent, _options: any): Promise<any>
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface readMessages {
@@ -41,7 +51,7 @@ export type Status = {
   connected: boolean
   disconnected: boolean
   reconnecting: boolean
-  connecting: boolean
+  connecting: boolean | undefined
 }
 
 export const connect = async ({
@@ -53,7 +63,6 @@ export const connect = async ({
   onReconnect,
   onNewLogin,
   attempts = Infinity,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   config = {
     ignoreHistoryMessages: true,
     autoRestart: false,
@@ -61,8 +70,18 @@ export const connect = async ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     shouldIgnoreJid: (_jid: string) => false,
   },
+}: {
+  phone: string
+  store: Store
+  onQrCode: OnQrCode
+  onStatus: OnStatus
+  onDisconnect: OnDisconnect
+  onReconnect: OnReconnect
+  onNewLogin: OnNewLogin
+  attempts: number
+  config: Partial<Config>
 }) => {
-  let sock = null
+  let sock: WASocket | undefined = undefined
   const msgRetryCounterMap: MessageRetryMap = {}
   const { dataStore, state, saveCreds } = store
 
@@ -71,7 +90,7 @@ export const connect = async ({
     connected: false,
     disconnected: false,
     reconnecting: false,
-    connecting: null,
+    connecting: undefined,
   }
 
   const onConnectionUpdate = async (event) => {
@@ -132,7 +151,10 @@ export const connect = async ({
   const getMessage = async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
     const { remoteJid, id } = key
     console.debug('load message for jid %s id %s', remoteJid, id)
-    return dataStore.loadMessage(remoteJid, id)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const message = await dataStore.loadMessage(remoteJid!, id!, undefined)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return message?.message ? new Promise((resolve) => resolve(message.message!)) : undefined
   }
 
   const connect = async () => {
@@ -154,8 +176,9 @@ export const connect = async ({
         logger,
         getMessage,
       })
-    } catch (error) {
-      if (error.isBoom && !error.isServer) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error && error.isBoom && !error.isServer) {
         const statusCode = error?.output?.statusCode
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut
         if (shouldReconnect) {
@@ -166,9 +189,11 @@ export const connect = async ({
         throw error
       }
     }
-    dataStore.bind(sock.ev)
-    sock.ev.on('creds.update', saveCreds)
-    sock.ev.on('connection.update', onConnectionUpdate)
+    if (sock) {
+      dataStore.bind(sock.ev)
+      sock.ev.on('creds.update', saveCreds)
+      sock.ev.on('connection.update', onConnectionUpdate)
+    }
   }
 
   const reconnect = async () => {
@@ -184,14 +209,15 @@ export const connect = async ({
     status.disconnected = !reconnect
     status.reconnecting = !!reconnect
     console.log(`${phone} disconnecting`)
-    return sock.end()
+    return sock && sock.end(undefined)
   }
 
   const exists = async (phone) => {
     if (!status.connected) {
       throw new Error('Client is disconnected')
     }
-    return dataStore.getJid(phone, sock)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return dataStore.getJid(phone, sock!)
   }
 
   const validateStatus = () => {
@@ -204,10 +230,10 @@ export const connect = async ({
     }
   }
 
-  const send: sendMessage = async (to, message, options = { composing: false }) => {
+  const send: sendMessage = async (to: string, message: AnyMessageContent, options = { composing: false }) => {
     validateStatus()
     const id = isJidGroup(to) ? to : await exists(to)
-    if (id) {
+    if (sock && id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
@@ -224,33 +250,34 @@ export const connect = async ({
     throw new SendError(2, `The number ${to} does not have Whatsapp account or was a error verify this!`)
   }
 
-  const read: readMessages = async (keys) => {
+  const read: readMessages = async (keys: WAMessageKey[]) => {
     validateStatus()
-    return sock.readMessages(keys)
+    return sock && sock.readMessages(keys)
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
     validateStatus()
-
-    const stanza: BinaryNode = {
-      tag: 'call',
-      attrs: {
-        from: state.creds.me.id,
-        to: callFrom,
-      },
-      content: [
-        {
-          tag: 'reject',
-          attrs: {
-            'call-id': callId,
-            'call-creator': callFrom,
-            count: '0',
-          },
-          content: undefined,
+    if (state?.creds?.me?.id && sock) {
+      const stanza: BinaryNode = {
+        tag: 'call',
+        attrs: {
+          from: state.creds.me.id,
+          to: callFrom,
         },
-      ],
+        content: [
+          {
+            tag: 'reject',
+            attrs: {
+              'call-id': callId,
+              'call-creator': callFrom,
+              count: '0',
+            },
+            content: undefined,
+          },
+        ],
+      }
+      await sock.query(stanza)
     }
-    await sock.query(stanza)
   }
 
   // Refresh connection every 1 hour
@@ -261,7 +288,7 @@ export const connect = async ({
 
   const event = (event, callback) => {
     console.info('Subscribe %s event:', phone, event)
-    sock.ev.on(event, callback)
+    sock && sock.ev.on(event, callback)
   }
 
   connect()

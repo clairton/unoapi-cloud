@@ -34,7 +34,7 @@ export class OutgoingCloudApi implements Outgoing {
       ;(message as any).groupMetadata = await config.getGroupMetadata(i, store!)
       if (i.key && i.key.id) {
         await store?.dataStore.setKey(i.key.id, i.key)
-        await store.dataStore.setMessage(i.key.remoteJid, i)
+        i.key.remoteJid && (await store.dataStore.setMessage(i.key.remoteJid, i))
       }
     }
     if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {

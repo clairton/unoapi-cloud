@@ -85,7 +85,7 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
       return phoneOrJid
     }
     if (!jids.has(phone)) {
-      let results = []
+      let results: unknown
       try {
         console.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

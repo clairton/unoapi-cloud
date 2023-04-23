@@ -99,7 +99,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
-            const binMessage = message.message[messageType]
+            const binMessage = message.message && messageType && message.message[messageType]
             fileName = binMessage.fileName
           }
         }
@@ -122,7 +122,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
-            const binMessage = message.message[messageType]
+            const binMessage = message.message && messageType && message.message[messageType]
             const filePath = await getFileName(phone, message)
             const mimeType = mime.lookup(filePath)
             const url = `${baseUrl}/v15.0/download/${filePath}`

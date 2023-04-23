@@ -255,12 +255,13 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         // {"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3EB03CDCC2A5D40DEFED"},"messageTimestamp":1676629371,"pushName":"Clairton Rodrigo Heinzen","message":{"contactsArrayMessage":{"contacts":[{"displayName":"Adapta","vcard":"BEGIN:VCARD\nVERSION:3.0\nN:;Adapta;;;\nFN:Adapta\nTEL;type=CELL;waid=554988333030:+55 49 8833-3030\nEND:VCARD"},{"displayName":"Silvia Castagna Heinzen","vcard":"BEGIN:VCARD\nVERSION:3.0\nN:Castagna Heinzen;Silvia;;;\nFN:Silvia Castagna Heinzen\nTEL;type=CELL;waid=554999621461:+55 49 9962-1461\nEND:VCARD"}],"contextInfo":{"disappearingMode":{"initiator":"CHANGED_IN_CHAT"}}},"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"DSu3J5WUK+vicA==","senderTimestamp":"1676571145","recipientKeyHash":"tz8qTGvqyPjOUw==","recipientTimestamp":"1666725555"},"deviceListMetadataVersion":2}}}}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const vcards = messageType == 'contactMessage' ? [binMessage.vcard] : binMessage.contacts.map((c: any) => c.vcard)
-        const contacts = []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const contacts: any[] = []
         for (let i = 0; i < vcards.length; i++) {
           const vcard = vcards[i]
           if (vcard) {
             const card: vCard = new vCard().parse(vcard.replace(/\r?\n/g, '\r\n'))
-            contacts.push({
+            const contact = {
               name: {
                 formatted_name: card.get('fn').valueOf(),
               },
@@ -269,7 +270,8 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
                   phone: card.get('tel').valueOf(),
                 },
               ],
-            })
+            }
+            contacts.push(contact)
           }
         }
         message.contacts = contacts

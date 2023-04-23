@@ -3,9 +3,9 @@ import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
-import { connect, Status, SendError, sendMessage, readMessages, rejectCall } from './socket'
+import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus } from './socket'
 import { Client, getClient } from './client'
-import { Config, getConfig } from './config'
+import { Config, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
@@ -25,7 +25,7 @@ const delayBeforeSecondMessage: Delay = async (phone, to) => {
   return delay(time)
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-const continueAfterSecondMessage: Delay = async (phone, to) => {}
+const continueAfterSecondMessage: Delay = async (phone, to) => { }
 
 const delays: Map<string, Map<string, Delay>> = new Map()
 
@@ -76,7 +76,7 @@ const rejectCallDefault: rejectCall = async (_keys) => {
 
 export class ClientBaileys implements Client {
   private phone: string
-  private config: Config
+  private config: Config = defaultConfig
   private status: Status = statusDefault
   private sendMessage = sendMessageDefault
   private readMessages = readMessagesDefault
@@ -102,7 +102,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onStatus = async (text: string, important) => {
+  private onStatus: OnStatus = async (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
       const payload = {
         key: {
@@ -126,7 +126,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onQrCode = async (qrCode: string, time, limit) => {
+  private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
     console.debug(`Received qrcode ${qrCode}`)
     const messageTimestamp = new Date().getTime()
     const id = uuid()
@@ -330,21 +330,11 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           console.debug('Send to baileys', to, content)
-          let sockDelays = delays.get(this.phone)
-          let toDelay
-          try {
-            toDelay = sockDelays.get(to)
-            try {
-              await toDelay(this.phone, to)
-              sockDelays.set(to, continueAfterSecondMessage)
-            } catch (error) {
-              sockDelays.set(to, delayBeforeSecondMessage)
-            }
-          } catch (error) {
-            sockDelays = new Map<string, Delay>()
-            delays.set(this.phone, sockDelays)
-            sockDelays.set(to, delayBeforeSecondMessage)
-          }
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
+          const toDelay = sockDelays.get(to) || (sockDelays.set(to, delayBeforeSecondMessage) && delayBeforeSecondMessage)
+          await toDelay(this.phone, to)
+          sockDelays.set(to, continueAfterSecondMessage)
           const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
           if (response) {
             console.debug('Sent to baileys', response)
