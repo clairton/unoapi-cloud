@@ -425,7 +425,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
         },
         id: messageId,
-        recipient_id: phone.replace('+', ''),
+        recipient_id: senderPhone.replace('+', ''),
         status: cloudApiStatus,
         timestamp: messageTimestamp || Math.floor(Date.now() / 1000),
       }
