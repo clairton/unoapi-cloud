@@ -63,17 +63,20 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'document':
     case 'video':
       const url = payload[type].link
-      response.caption = payload[type].caption
-      response.mimetype = mime.lookup(url)
-      if (payload[type].filename) {
-        response.fileName = payload[type].filename
-      }
-      if (payload[type].caption) {
+      if (url) {
         response.caption = payload[type].caption
+        response.mimetype = mime.lookup(url)
+        if (payload[type].filename) {
+          response.fileName = payload[type].filename
+        }
+        if (payload[type].caption) {
+          response.caption = payload[type].caption
+        }
+        response.fileName = payload[type].filename
+        response[type] = { url }
+        break
       }
-      response.fileName = payload[type].filename
-      response[type] = { url }
-      break
+      throw new Error(`Unknow message type ${type}`)
 
     case 'template':
       throw new BinTemplate()
