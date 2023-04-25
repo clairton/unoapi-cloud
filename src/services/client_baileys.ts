@@ -12,7 +12,6 @@ import { Response } from './response'
 import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
-import { FetchError } from 'node-fetch'
 const attempts = 6
 
 const clients: Map<string, Client> = new Map()
@@ -25,7 +24,7 @@ const delayBeforeSecondMessage: Delay = async (phone, to) => {
   return delay(time)
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-const continueAfterSecondMessage: Delay = async (phone, to) => { }
+const continueAfterSecondMessage: Delay = async (phone, to) => {}
 
 const delays: Map<string, Map<string, Delay>> = new Map()
 
@@ -90,7 +89,7 @@ export class ClientBaileys implements Client {
   private onDisconnected
 
   private onWebhookError = async (error) => {
-    if (!this.config.throwWebhookError && error instanceof FetchError && this.status.connected) {
+    if (!this.config.throwWebhookError && error.name === 'FetchError' && this.status.connected) {
       return this.incoming.send(
         this.phone,
         { to: this.phone, type: 'text', text: { body: `Error on send message to webhook: ${error.message}` } },

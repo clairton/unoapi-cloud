@@ -70,7 +70,8 @@ describe('service client baileys', () => {
     try {
       await client.send({ status }, {})
       expect(true).toBe(false)
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       expect(e.message).toBe(`Unknow message status ${status}`)
     }
   })
@@ -104,7 +105,8 @@ describe('service client baileys', () => {
       await client.connect()
       await client.send({ type }, {})
       expect(true).toBe(false)
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       expect(e.message).toBe(`Unknow message type ${type}`)
     }
   })

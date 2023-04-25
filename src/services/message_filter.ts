@@ -72,7 +72,7 @@ export class MessageFilter {
     }
     if (config.ignoreYourselfMessages) {
       console.info('Config to ignore key yourself messages')
-      const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string  |undefined) => {
+      const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
         if (!messageType) {
           return true
         } else if (['update', 'receipt'].includes(messageType)) {

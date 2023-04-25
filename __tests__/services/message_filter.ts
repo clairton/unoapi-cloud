@@ -51,7 +51,7 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: phone,
     }
-    expect(filter.isIgnoreKey(key, '')).toBe(true)
+    expect(filter.isIgnoreKey(key, 'conversation')).toBe(true)
   })
 
   test('not ignore yourself message', async () => {
@@ -69,7 +69,7 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: phone,
     }
-    expect(filter.isIgnoreKey(key, '')).toBe(false)
+    expect(filter.isIgnoreKey(key, 'conversation')).toBe(false)
   })
 
   test('ignore own message', async () => {
@@ -120,7 +120,7 @@ describe('service message filter', () => {
       fromMe: true,
       remoteJid: '123',
     }
-    expect(filter.isIgnoreKey(key, '')).toBe(false)
+    expect(filter.isIgnoreKey(key, 'conversation')).toBe(false)
   })
 
   test('ignore broadcast status', async () => {
