@@ -6,7 +6,7 @@ import { mediaStores } from './media_store'
 import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus } from './socket'
 import { Client, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
-import { toBaileysMessageContent, phoneNumberToJid } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { Incoming } from './incoming'
@@ -342,7 +342,7 @@ export class ClientBaileys implements Client {
               messaging_product: 'whatsapp',
               contacts: [
                 {
-                  wa_id: to.replace('+', ''),
+                  wa_id: jidToPhoneNumber(to, ''),
                 },
               ],
               messages: [
@@ -375,7 +375,7 @@ export class ClientBaileys implements Client {
           messaging_product: 'whatsapp',
           contacts: [
             {
-              wa_id: to.replace('+', ''),
+              wa_id: jidToPhoneNumber(to, ''),
             },
           ],
           messages: [
@@ -400,7 +400,7 @@ export class ClientBaileys implements Client {
                     statuses: [
                       {
                         id,
-                        recipient_id: to,
+                        recipient_id: jidToPhoneNumber(to, ''),
                         status: 'failed',
                         timestamp: Math.floor(Date.now() / 1000),
                         errors: [
