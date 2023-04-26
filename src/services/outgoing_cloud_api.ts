@@ -23,7 +23,7 @@ export class OutgoingCloudApi implements Outgoing {
   }
 
   public async sendOne(phone: string, message: object) {
-    console.debug(`Receive message %s`, message)
+    console.debug(`Receive message %s`, JSON.stringify(message))
     const i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
     console.debug(`messageType %s...`, messageType)
