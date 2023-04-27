@@ -18,13 +18,6 @@ const clients: Map<string, Client> = new Map()
 interface Delay {
   (phone: string, to: string): Promise<void>
 }
-const delayBeforeSecondMessage: Delay = async (phone, to) => {
-  const time = 2000
-  console.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
-  return delay(time)
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-const continueAfterSecondMessage: Delay = async (phone, to) => {}
 
 const delays: Map<string, Map<string, Delay>> = new Map()
 
@@ -126,7 +119,7 @@ export class ClientBaileys implements Client {
   }
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
-    console.debug(`Received qrcode ${qrCode}`)
+    console.debug('Received qrcode', this.phone, qrCode)
     const messageTimestamp = new Date().getTime()
     const id = uuid()
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
@@ -177,6 +170,16 @@ export class ClientBaileys implements Client {
       await this.onWebhookError(error)
     }
   }
+
+  private delayBeforeSecondMessage: Delay = async (phone, to) => {
+    const time = 2000
+    console.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
+    delays.get(phone).set(to, this.continueAfterSecondMessage)
+    return delay(time)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  private continueAfterSecondMessage: Delay = async (_phone, _to) => {}
 
   constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin, onDisconnected) {
     this.phone = phone
@@ -331,9 +334,9 @@ export class ClientBaileys implements Client {
           console.debug('Send to baileys', to, content)
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
-          const toDelay = sockDelays.get(to) || (sockDelays.set(to, delayBeforeSecondMessage) && delayBeforeSecondMessage)
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
           await toDelay(this.phone, to)
-          sockDelays.set(to, continueAfterSecondMessage)
           const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
           if (response) {
             console.debug('Sent to baileys', response)

@@ -94,7 +94,7 @@ export const connect = async ({
   }
 
   const onConnectionUpdate = async (event) => {
-    console.log('onConnectionUpdate ==>', event)
+    console.log('onConnectionUpdate ==>', phone, event)
     if (event.qr) {
       if (status.attempt++ > attempts || status.disconnected) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
