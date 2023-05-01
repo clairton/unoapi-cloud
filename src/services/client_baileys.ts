@@ -327,7 +327,7 @@ export class ClientBaileys implements Client {
           let content: AnyMessageContent
           if ('template' === type) {
             const template = new Template(this.getConfig)
-            content = await template.bind(this.phone, payload.template.name, payload.components)
+            content = await template.bind(this.phone, payload.template.name, payload.template.components)
           } else {
             content = toBaileysMessageContent(payload)
           }
