@@ -119,6 +119,7 @@ export const connect = async ({
     status.connected = true
     status.disconnected = false
     status.reconnecting = false
+    status.connecting = false
 
     console.log(`${phone} connected`)
 
@@ -130,6 +131,7 @@ export const connect = async ({
 
   const onDisconnected = async ({ lastDisconnect }) => {
     status.connected = false
+    status.connecting = false
     const statusCode = lastDisconnect?.error?.output?.statusCode
     console.log(`${phone} disconnected with status: ${statusCode}`)
     onDisconnect()
@@ -158,10 +160,11 @@ export const connect = async ({
   }
 
   const connect = async () => {
-    if (status.connected) return
+    if (status.connected || status.connecting) return
     console.debug('Connecting %s', phone)
+    status.connecting = true
 
-    const browser: WABrowserDescription = ['Unoapi Cloud', 'Chrome', release()]
+    const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
 
     const logger = MAIN_LOGGER.child({})
     logger.level = config.logLevel || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
@@ -213,15 +216,12 @@ export const connect = async ({
   }
 
   const exists = async (phone) => {
-    if (!status.connected) {
-      throw new Error('Client is disconnected')
-    }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.getJid(phone, sock!)
   }
 
   const validateStatus = () => {
-    if (status.disconnected) {
+    if (status.disconnected || !status.connected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
       } else {
