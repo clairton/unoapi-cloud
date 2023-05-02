@@ -213,12 +213,15 @@ export const connect = async ({
   }
 
   const exists = async (phone) => {
+    if (!status.connected) {
+      throw new Error('Client is disconnected')
+    }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.getJid(phone, sock!)
   }
 
   const validateStatus = () => {
-    if (status.disconnected || !status.connected) {
+    if (status.disconnected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
       } else {
