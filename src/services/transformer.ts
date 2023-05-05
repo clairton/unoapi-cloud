@@ -125,7 +125,6 @@ export const jidToPhoneNumber = (id: any, plus = '+'): string => {
     const phoneNumber = parsePhoneNumber(number, { regionCode: 'BR' })
     const nationalNumber = phoneNumber?.number?.significant || ''
     if (!phoneNumber.valid && nationalNumber?.length < 11) {
-      const country = '55'
       const prefix = number.substring(2, 4)
       const digits = number.match('.{8}$')[0]
       const digit = '9'
@@ -247,7 +246,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           filename,
           mime_type: mimetype,
           sha256: binMessage.fileSha256,
-          url: binMessage.url,
+          url: binMessage.url && binMessage.url.indexOf('base64') < 0 ? binMessage.url : '',
           id: mediaKey,
         }
         message.type = mediaType
