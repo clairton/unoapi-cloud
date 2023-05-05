@@ -118,18 +118,22 @@ export const formatJid = (jid: string) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const jidToPhoneNumber = (id: any, plus = '+'): string => {
+export const jidToPhoneNumber = (id: any, plus = '+', retry = true): string => {
   const number = (id || '').split('@')[0].split(':')[0].replace('+', '')
   const country = number.substring(0, 2)
   if (country == '55') {
     const phoneNumber = parsePhoneNumber(number, { regionCode: 'BR' })
     const nationalNumber = phoneNumber?.number?.significant || ''
     if (!phoneNumber.valid && nationalNumber?.length < 11) {
+      if (!retry) {
+        return number
+      }
+      const country = '55'
       const prefix = number.substring(2, 4)
       const digits = number.match('.{8}$')[0]
       const digit = '9'
       const out = `${plus}${country}${prefix}${digit}${digits}`.replace('+', '')
-      return jidToPhoneNumber(`${plus}${out}`, plus)
+      return jidToPhoneNumber(`${plus}${out}`, plus, false)
     }
     return `${plus}${phoneNumber?.number?.e164?.replace('+', '')}`
   } else {
