@@ -1,4 +1,4 @@
-import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast } from '@adiwajshing/baileys'
+import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast } from '@whiskeysockets/baileys'
 import { Config, defaultConfig } from './config'
 import { jidToPhoneNumber } from './transformer'
 

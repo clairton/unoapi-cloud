@@ -1,20 +1,19 @@
 import makeWASocket, {
   DisconnectReason,
   WABrowserDescription,
-  MessageRetryMap,
   fetchLatestBaileysVersion,
   WAMessageKey,
   delay,
   proto,
-  BinaryNode,
   isJidGroup,
   WASocket,
   AnyMessageContent,
-} from '@adiwajshing/baileys'
+} from '@whiskeysockets/baileys'
 import { release } from 'os'
-import MAIN_LOGGER from '@adiwajshing/baileys/lib/Utils/logger'
+import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
 import { Config } from './config'
 import { Store } from './store'
+import NodeCache from 'node-cache'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnStatus = (text: string, important: boolean) => Promise<void>
@@ -82,7 +81,7 @@ export const connect = async ({
   config: Partial<Config>
 }) => {
   let sock: WASocket | undefined = undefined
-  const msgRetryCounterMap: MessageRetryMap = {}
+  const msgRetryCounterCache = new NodeCache()
   const { dataStore, state, saveCreds } = store
 
   const status: Status = {
@@ -159,7 +158,7 @@ export const connect = async ({
     const { remoteJid, id } = key
     console.debug('load message for jid %s id %s', remoteJid, id)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const message = await dataStore.loadMessage(remoteJid!, id!, undefined)
+    const message = await dataStore.loadMessage(remoteJid!, id!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return message?.message ? new Promise((resolve) => resolve(message.message!)) : undefined
   }
@@ -179,10 +178,11 @@ export const connect = async ({
         auth: state,
         printQRInTerminal: true,
         browser,
-        msgRetryCounterMap,
+        msgRetryCounterCache,
         syncFullHistory: !config.ignoreHistoryMessages,
         logger,
         getMessage,
+        shouldIgnoreJid: config.shouldIgnoreJid,
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -260,31 +260,6 @@ export const connect = async ({
     return sock && sock.readMessages(keys)
   }
 
-  const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
-    validateStatus()
-    if (state?.creds?.me?.id && sock) {
-      const stanza: BinaryNode = {
-        tag: 'call',
-        attrs: {
-          from: state.creds.me.id,
-          to: callFrom,
-        },
-        content: [
-          {
-            tag: 'reject',
-            attrs: {
-              'call-id': callId,
-              'call-creator': callFrom,
-              count: '0',
-            },
-            content: undefined,
-          },
-        ],
-      }
-      await sock.query(stanza)
-    }
-  }
-
   // Refresh connection every 1 hour
   if (config.autoRestart) {
     const everyHourTime = 3600000
@@ -298,5 +273,5 @@ export const connect = async ({
 
   connect()
 
-  return { event, status, send, read, rejectCall }
+  return { event, status, send, read, rejectCall: sock.rejectCall }
 }

@@ -47,13 +47,14 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@adiwajshing/baileys": "^4.4.0",
     "@adiwajshing/keyed-db": "^0.2.4",
+    "@whiskeysockets/baileys": "^6.0.0",
     "awesome-phonenumber": "^5.1.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "link-preview-js": "^3.0.4",
     "mime-types": "^2.1.35",
+    "node-cache": "^5.1.2",
     "node-fetch": "2",
     "qrcode": "^1.5.1",
     "qrcode-terminal": "^0.12.0",

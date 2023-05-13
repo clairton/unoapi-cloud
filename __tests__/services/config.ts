@@ -2,7 +2,7 @@ import { mock } from 'jest-mock-extended'
 jest.mock('node-fetch')
 import { Store, getStore } from '../../src/services/store'
 import { DataStore } from '../../src/services/data_store'
-import { GroupMetadata } from '@adiwajshing/baileys'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 import { MediaStore } from '../../src/services/media_store'
 import { getConfig, getGroupMetadata, GetGroupMetadata } from '../../src/services/config'
 

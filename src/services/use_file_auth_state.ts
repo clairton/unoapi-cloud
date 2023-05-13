@@ -1,4 +1,4 @@
-import { BufferJSON, initAuthCreds, proto, AuthenticationState } from '@adiwajshing/baileys'
+import { BufferJSON, initAuthCreds, proto, AuthenticationState } from '@whiskeysockets/baileys'
 import { rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 
 export const useFileAuthState = async (phone: string) => {

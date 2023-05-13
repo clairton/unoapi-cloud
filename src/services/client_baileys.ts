@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, delay } from '@adiwajshing/baileys'
+import { AnyMessageContent, WAMessage, delay } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'

@@ -1,6 +1,6 @@
 import { getStore, Store } from './store'
 import { getStoreFile } from './store_file'
-import { GroupMetadata, WAMessage, WAMessageKey } from '@adiwajshing/baileys'
+import { GroupMetadata, WAMessage, WAMessageKey } from '@whiskeysockets/baileys'
 import { isIndividualJid } from './transformer'
 
 export interface GetGroupMetadata {

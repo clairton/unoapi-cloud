@@ -1,4 +1,4 @@
-import { makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from '@adiwajshing/baileys'
+import { makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from '@whiskeysockets/baileys'
 import { Config } from './config'
 
 export const dataStores: Map<string, DataStore> = new Map()

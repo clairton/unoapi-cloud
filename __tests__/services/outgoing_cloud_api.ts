@@ -5,7 +5,7 @@ import { Outgoing } from '../../src/services/outgoing'
 import { Store, getStore } from '../../src/services/store'
 import fetch, { Response } from 'node-fetch'
 import { DataStore } from '../../src/services/data_store'
-import { GroupMetadata } from '@adiwajshing/baileys'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig } from '../../src/services/config'
 

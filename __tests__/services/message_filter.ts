@@ -1,4 +1,4 @@
-import { WAMessageKey } from '@adiwajshing/baileys'
+import { WAMessageKey } from '@whiskeysockets/baileys'
 import { Config, defaultConfig } from '../../src/services/config'
 import { MessageFilter } from '../../src/services/message_filter'
 

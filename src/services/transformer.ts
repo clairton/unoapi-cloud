@@ -1,4 +1,4 @@
-import { AnyMessageContent, isJidUser } from '@adiwajshing/baileys'
+import { AnyMessageContent, isJidUser } from '@whiskeysockets/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'

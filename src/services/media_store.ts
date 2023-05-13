@@ -1,4 +1,4 @@
-import { proto, WAMessage } from '@adiwajshing/baileys'
+import { proto, WAMessage } from '@whiskeysockets/baileys'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'

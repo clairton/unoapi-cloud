@@ -1,4 +1,4 @@
-import { WAMessage } from '@adiwajshing/baileys'
+import { WAMessage } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
 import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BinTemplate } from './transformer'
@@ -16,7 +16,7 @@ export class OutgoingCloudApi implements Outgoing {
     const config = await this.getConfig(phone)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {
-      return m.key && m.key.remoteJid && !config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))
+      return !m.key || !config.shouldIgnoreKey(m.key, getMessageType(m))
     })
     console.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))

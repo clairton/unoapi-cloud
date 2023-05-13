@@ -1,4 +1,4 @@
-import { proto, WAMessage, downloadMediaMessage } from '@adiwajshing/baileys'
+import { proto, WAMessage, downloadMediaMessage } from '@whiskeysockets/baileys'
 import { getMessageType } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
@@ -95,7 +95,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id, undefined)
+          const message = await store.loadMessage(remoteJid, id)
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
@@ -118,7 +118,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id, undefined)
+          const message = await store.loadMessage(remoteJid, id)
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
