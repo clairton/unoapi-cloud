@@ -13,7 +13,7 @@ import { Response } from './response'
 import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
-const attempts = 6
+const attempts = 3
 
 const clients: Map<string, Client> = new Map()
 interface Delay {

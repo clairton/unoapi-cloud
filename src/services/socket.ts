@@ -108,6 +108,7 @@ export const connect = async ({
         status.disconnected = true
         status.attempt = 1
         sock && sock.logout()
+        dataStore.cleanSession()
       } else {
         onQrCode(event.qr, status.attempt, attempts)
         status.attempt++
