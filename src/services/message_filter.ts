@@ -89,10 +89,10 @@ export class MessageFilter {
     }
 
     const ignoreJid = (jid: string) => {
-      const fn = (acc, f) => {
+      const fn = (acc: number, f: IgnoreJid): number => {
         return f(jid) ? ++acc : acc
       }
-      const sum = ignoresJid.reduce(fn, 0)
+      const sum: number = ignoresJid.reduce(fn, 0)
       console.debug(`${jid} ignore by jid sum is ${sum}`)
       return sum > 0
     }
@@ -107,7 +107,7 @@ export class MessageFilter {
     this.ignoreKey = ignoresKey.length > 0 ? ignoreKey : notIgnoreKey
   }
 
-  isIgnoreJid(jid) {
+  isIgnoreJid(jid: string) {
     return this.ignoreJid(jid)
   }
 

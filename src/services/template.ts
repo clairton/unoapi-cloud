@@ -7,7 +7,8 @@ export class Template {
     this.getConfig = getConfig
   }
 
-  async bind(phone, name, parametersValues) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async bind(phone: string, name: string, parametersValues: any) {
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +24,8 @@ export class Template {
           const value = parametersValues.find((c: any) => c.type.toLowerCase() == type)
           if (value) {
             text = `${text}${component.text}`
-            value.parameters.forEach((parameter) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            value.parameters.forEach((parameter: any) => {
               text = text.replace(/\{\{.*?\}\}/, parameter.text)
             })
           }

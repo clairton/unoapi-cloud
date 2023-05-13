@@ -38,9 +38,6 @@ describe('service client baileys', () => {
 
   const status: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  const onDisconnected = (_phone: string, _payload: object) => {}
-
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
     outgoing = mock<Outgoing>()
@@ -58,7 +55,7 @@ describe('service client baileys', () => {
       }
       return config
     }
-    client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin, onDisconnected)
+    client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
     rejectCall = mockFn<rejectCall>()

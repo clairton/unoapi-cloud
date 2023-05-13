@@ -8,6 +8,7 @@ import makeWASocket, {
   isJidGroup,
   WASocket,
   AnyMessageContent,
+  BaileysEventMap,
 } from '@whiskeysockets/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
@@ -17,7 +18,8 @@ import NodeCache from 'node-cache'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnStatus = (text: string, important: boolean) => Promise<void>
-export type OnDisconnect = () => Promise<void>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type OnDisconnected = (phone: string, payload: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
 export type OnReconnect = () => Promise<void>
 
@@ -58,7 +60,7 @@ export const connect = async ({
   store,
   onQrCode,
   onStatus,
-  onDisconnect,
+  onDisconnected,
   onReconnect,
   onNewLogin,
   attempts = Infinity,
@@ -74,7 +76,7 @@ export const connect = async ({
   store: Store
   onQrCode: OnQrCode
   onStatus: OnStatus
-  onDisconnect: OnDisconnect
+  onDisconnected: OnDisconnected
   onReconnect: OnReconnect
   onNewLogin: OnNewLogin
   attempts: number
@@ -92,7 +94,8 @@ export const connect = async ({
     connecting: undefined,
   }
 
-  const onConnectionUpdate = async (event) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onConnectionUpdate = async (event: any) => {
     console.log('onConnectionUpdate ==>', phone, event)
     if (event.qr) {
       console.debug('QRCode generate....... %s of %s', status.attempt, attempts)
@@ -104,14 +107,14 @@ export const connect = async ({
         status.connected = false
         status.disconnected = true
         status.attempt = 1
-        sock.logout()
+        sock && sock.logout()
       } else {
         onQrCode(event.qr, status.attempt, attempts)
         status.attempt++
       }
     }
     if (event.connection === 'open') onConnected()
-    else if (event.connection === 'close') onDisconnected(event)
+    else if (event.connection === 'close') onDisconnect(event)
     else if (event.connection === 'connecting') onStatus(`Connnecting...`, false)
     else if (event.isNewLogin) {
       onNewLogin(phone)
@@ -133,12 +136,14 @@ export const connect = async ({
     })
   }
 
-  const onDisconnected = async ({ lastDisconnect }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onDisconnect = async (payload: any) => {
+    const { lastDisconnect } = payload
     status.connected = false
     status.connecting = false
     const statusCode = lastDisconnect?.error?.output?.statusCode
     console.log(`${phone} disconnected with status: ${statusCode}`)
-    onDisconnect()
+    onDisconnected(phone, payload)
     if (statusCode === DisconnectReason.loggedOut) {
       disconnect(false)
       console.log(`${phone} destroyed`)
@@ -210,7 +215,7 @@ export const connect = async ({
     onReconnect()
   }
 
-  const disconnect = (reconnect) => {
+  const disconnect = (reconnect: boolean) => {
     if (status.disconnected) return
 
     status.connected = false
@@ -220,7 +225,7 @@ export const connect = async ({
     return sock && sock.end(undefined)
   }
 
-  const exists = async (phone) => {
+  const exists = async (phone: string) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.getJid(phone, sock!)
   }
@@ -266,12 +271,14 @@ export const connect = async ({
     setInterval(reconnect, everyHourTime)
   }
 
-  const event = (event, callback) => {
+  const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
     console.info('Subscribe %s event:', phone, event)
     sock && sock.ev.on(event, callback)
   }
 
+  const rejectCall = sock && (sock as WASocket).rejectCall
+
   connect()
 
-  return { event, status, send, read, rejectCall: sock.rejectCall }
+  return { event, status, send, read, rejectCall }
 }

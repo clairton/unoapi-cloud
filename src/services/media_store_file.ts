@@ -95,11 +95,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const message: any = await store.loadMessage(remoteJid, id)
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
-            const binMessage = message.message && messageType && message.message[messageType]
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const binMessage: any = message.message && messageType && message.message[messageType]
             fileName = binMessage.fileName
           }
         }
@@ -118,11 +120,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          const message = await store.loadMessage(remoteJid, id)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const message: any = await store.loadMessage(remoteJid, id)
           console.debug('message %s for %s', message, key)
           if (message) {
             const messageType = getMessageType(message)
-            const binMessage = message.message && messageType && message.message[messageType]
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const binMessage: any = message.message && messageType && message.message[messageType]
             const filePath = await getFileName(phone, message)
             const mimeType = mime.lookup(filePath)
             const url = `${baseUrl}/v15.0/download/${filePath}`

@@ -98,7 +98,7 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
           return jid
         }
       }
-      const result = results && results[0]
+      const result = results && Array.isArray(results) && results[0]
       if (result && result.exists) {
         console.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
         jids.set(phoneOrJid, result.jid)

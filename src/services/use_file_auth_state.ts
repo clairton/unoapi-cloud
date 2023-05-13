@@ -1,4 +1,4 @@
-import { BufferJSON, initAuthCreds, proto, AuthenticationState } from '@whiskeysockets/baileys'
+import { BufferJSON, initAuthCreds, proto, AuthenticationState, AuthenticationCreds } from '@whiskeysockets/baileys'
 import { rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 
 export const useFileAuthState = async (phone: string) => {
@@ -8,36 +8,36 @@ export const useFileAuthState = async (phone: string) => {
     mkdirSync(phone, { recursive: true })
   }
 
-  const fileGet = (key) => {
+  const fileGet = (key: string) => {
     if (existsSync(key)) {
       return readFileSync(key, { encoding: 'utf-8' })
     }
     return ''
   }
 
-  const fileSet = (key, value) => {
+  const fileSet = (key: string, value: string) => {
     if (existsSync(key)) {
       fileDel(key)
     }
     writeFileSync(key, value, { encoding: 'utf-8' })
   }
 
-  const fileDel = (key) => {
+  const fileDel = (key: string) => {
     rmSync(key)
   }
 
-  const setAuth = (key, value, stringify) => {
+  const setAuth = (key: string, value: object, stringify: (p: object) => string) => {
     const authValue = stringify(value)
     return fileSet(key, authValue)
   }
-  const getAuth = async (key, parse) => {
+  const getAuth = async (key: string, parse: (p: string) => object) => {
     const authString = await fileGet(key)
     if (authString) {
       const authJson = parse(authString)
       return authJson
     }
   }
-  const delAuth = async (key) => {
+  const delAuth = async (key: string) => {
     if (existsSync(key)) {
       return fileDel(key)
     }
@@ -86,7 +86,7 @@ export const useFileAuthState = async (phone: string) => {
     }
   }
 
-  const creds = (await readData('')) || initAuthCreds()
+  const creds: AuthenticationCreds = ((await readData('')) || initAuthCreds()) as AuthenticationCreds
 
   const keys = {
     get: async (type: string, ids: string[]) => {

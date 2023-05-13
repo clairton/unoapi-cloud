@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AnyMessageContent, WAMessage, delay } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
-import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus } from './socket'
+import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus, OnNewLogin } from './socket'
 import { Client, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
@@ -27,18 +28,16 @@ export const getClientBaileys: getClient = async ({
   outgoing,
   getConfig,
   onNewLogin,
-  onDisconnected,
 }: {
   phone: string
   incoming: Incoming
   outgoing: Outgoing
   getConfig: getConfig
-  onNewLogin: (_phone: string) => void
-  onDisconnected: (_phone: string, _payload: object) => void
+  onNewLogin: OnNewLogin
 }): Promise<Client> => {
   if (!clients.has(phone)) {
     console.info('Creating client baileys %s', phone)
-    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin, onDisconnected)
+    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
     console.info('Connecting client baileys %s', phone)
     await client.connect()
     console.info('Created and connected client baileys %s', phone)
@@ -72,16 +71,16 @@ export class ClientBaileys implements Client {
   private status: Status = statusDefault
   private sendMessage = sendMessageDefault
   private readMessages = readMessagesDefault
-  private rejectCall = rejectCallDefault
+  private rejectCall: rejectCall | undefined = rejectCallDefault
   private outgoing: Outgoing
   private incoming: Incoming
   private store: Store | undefined
   private calls = new Map<string, boolean>()
   private getConfig: getConfig
   private onNewLogin
-  private onDisconnected
 
-  private onWebhookError = async (error) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private onWebhookError = async (error: any) => {
     if (!this.config.throwWebhookError && error.name === 'FetchError' && this.status.connected) {
       return this.incoming.send(
         this.phone,
@@ -112,7 +111,8 @@ export class ClientBaileys implements Client {
       try {
         const response = await this.outgoing.sendOne(this.phone, payload)
         return response
-      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
         await this.onWebhookError(error)
       }
     }
@@ -157,7 +157,6 @@ export class ClientBaileys implements Client {
       outgoing: this.outgoing,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
-      onDisconnected: this.onDisconnected,
     })
   }
 
@@ -174,20 +173,19 @@ export class ClientBaileys implements Client {
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
     console.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
-    delays.get(phone).set(to, this.continueAfterSecondMessage)
+    delays && (delays.get(phone) || new Map()).set(to, this.continueAfterSecondMessage)
     return delay(time)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   private continueAfterSecondMessage: Delay = async (_phone, _to) => {}
 
-  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin, onDisconnected) {
+  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin: OnNewLogin) {
     this.phone = phone
     this.outgoing = outgoing
     this.incoming = incoming
     this.getConfig = getConfig
     this.onNewLogin = onNewLogin
-    this.onDisconnected = onDisconnected
   }
 
   async connect() {
@@ -202,7 +200,8 @@ export class ClientBaileys implements Client {
       onStatus: this.onStatus,
       onNewLogin: this.onNewLogin,
       config: this.config,
-      onDisconnect: this.disconnect.bind(this),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onDisconnected: async (_phone: string, _payload: any) => this.disconnect(),
       onReconnect: this.onReconnect,
     })
     this.status = status
@@ -216,7 +215,8 @@ export class ClientBaileys implements Client {
         this.listener(payload.messages, false)
       } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
         // filter self message send with this sessio to not send same message many times
-        const ms = payload.messages.filter((m) => !['PENDING', 1, '1'].includes(m.status))
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ms = payload.messages.filter((m: any) => !['PENDING', 1, '1'].includes(m.status))
         if (ms.length > 0) {
           this.listener(ms, false)
         } else {
@@ -254,12 +254,13 @@ export class ClientBaileys implements Client {
     }
     if (this.config.rejectCalls) {
       console.info('Config to reject calls', this.phone, this.config.rejectCalls)
-      event('call', async (events) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      event('call', async (events: any[]) => {
         for (let i = 0; i < events.length; i++) {
           const { from, id, status } = events[i]
           if (status == 'ringing' && !this.calls.has(from)) {
             this.calls.set(from, true)
-            await this.rejectCall(id, from)
+            this.rejectCall && (await this.rejectCall(id, from))
             await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } }, {})
             if (this.config.rejectCallsWebhook) {
               const message = {
@@ -370,7 +371,6 @@ export class ClientBaileys implements Client {
         const title = e.title
         await this.onStatus(title, true)
         if ([3, '3'].includes(code)) {
-          this.onDisconnected(this.phone, payload)
           this.connect()
         }
         const id = uuid()

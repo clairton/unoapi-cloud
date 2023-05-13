@@ -2,8 +2,8 @@
   "name": "unoapi-cloud",
   "version": "0.21.4",
   "description": "Unoapi Cloud",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
     "./dist"
   ],
@@ -44,7 +44,7 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",

@@ -1,7 +1,7 @@
 import { Outgoing } from './outgoing'
 import { Response } from './response'
 import { Incoming } from './incoming'
-import { Status } from './socket'
+import { OnNewLogin, Status } from './socket'
 import { getConfig } from './config'
 
 export interface getClient {
@@ -11,14 +11,12 @@ export interface getClient {
     outgoing,
     getConfig,
     onNewLogin,
-    onDisconnected,
   }: {
     phone: string
     incoming: Incoming
     outgoing: Outgoing
     getConfig: getConfig
-    onNewLogin: (_phone: string) => void
-    onDisconnected: (_phone: string, _payload: object) => void
+    onNewLogin: OnNewLogin
   }): Promise<Client>
 }
 

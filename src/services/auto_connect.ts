@@ -3,6 +3,7 @@ import { getConfig } from './config'
 import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
 import { Incoming } from './incoming'
+import { OnNewLogin } from './socket'
 
 export const autoConnect = async (
   sessionStore: SessionStore,
@@ -10,9 +11,7 @@ export const autoConnect = async (
   outgoing: Outgoing,
   getConfig: getConfig,
   getClient: getClient,
-  onNewLogin: (_phone: string) => void,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  onDisconnected: (_phone: string, _payload: object) => void = (_phone: string, _payload: object) => {},
+  onNewLogin: OnNewLogin,
 ) => {
   try {
     const phones = await sessionStore.getPhones()
@@ -22,7 +21,7 @@ export const autoConnect = async (
       try {
         console.info(`Auto connecting phone ${phone}...`)
         try {
-          getClient({ phone, incoming, outgoing, getConfig, onNewLogin, onDisconnected })
+          getClient({ phone, incoming, outgoing, getConfig, onNewLogin })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {
