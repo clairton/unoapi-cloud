@@ -242,7 +242,7 @@ ConditionPathExists=/opt/unoapi/data
 After=network.target
   
 [Service]
-ExecStart=/usr/bin/node dist/index.js
+ExecStart=/usr/bin/node lib/index.js
 WorkingDirectory=/opt/unoapi
 CPUAccounting=yes
 MemoryAccounting=yes
