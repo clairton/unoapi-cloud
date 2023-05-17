@@ -1,12 +1,12 @@
 {
-  "exclude": ["./coverage", "./lib", "__tests__", "jest.config.js"],
+  "exclude": ["./coverage", "./dist", "__tests__", "jest.config.js"],
   "compilerOptions": {
     "target": "es2018",
     "module": "commonjs",
     "experimentalDecorators": true,
     "allowJs": false,
     "checkJs": false,
-    "outDir": "lib",
+    "outDir": "dist",
     "strict": false,
     "strictNullChecks": true,
     "skipLibCheck": true,
