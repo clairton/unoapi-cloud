@@ -277,7 +277,9 @@ export const connect = async ({
     sock && sock.ev.on(event, callback)
   }
 
-  const rejectCall = sock && (sock as WASocket).rejectCall
+  const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
+    return sock && (sock as WASocket).rejectCall(callId, callFrom)
+  }
 
   connect()
 
