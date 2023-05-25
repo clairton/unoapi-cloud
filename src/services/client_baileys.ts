@@ -318,6 +318,7 @@ export class ClientBaileys implements Client {
               console.debug('Baileys read message key %s!', key)
             }
           }
+          this.store?.dataStore?.setStatus(payload?.message_id, status)
           const r: Response = { ok: { success: true } }
           return r
         } else {

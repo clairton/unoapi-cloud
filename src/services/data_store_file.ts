@@ -26,6 +26,7 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const jids: Map<string, string> = new Map()
   const ids: Map<string, string> = new Map()
+  const statuses: Map<string, string> = new Map()
   const store = makeInMemoryStore(config as object)
   const dataStore = store as DataStore
   const { bind, toJSON, fromJSON } = store
@@ -35,6 +36,7 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
       keys: keys.values(),
       jids,
       ids,
+      statuses,
     }
   }
   store.fromJSON = (json) => {
@@ -43,6 +45,7 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
       keys: proto.IMessageKey[]
       jids: Map<string, string>
       ids: Map<string, string>
+      statuses: Map<string, string>
       chats: Chat[]
       contacts: { [id: string]: Contact }
       messages: { [id: string]: WAMessage[] }
@@ -77,8 +80,21 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
   dataStore.setKey = async (id: string, key: WAMessageKey) => {
     return new Promise((resolve) => keys.set(id, key) && resolve())
   }
+
+  dataStore.setStatus = async (
+    id: string,
+    status: 'scheduled' | 'pending' | 'without-whatsapp' | 'error' | 'failed' | 'sent' | 'delivered' | 'read' | 'played' | 'accepted' | 'deleted',
+  ) => {
+    statuses.set(id, status)
+  }
+  dataStore.loadStatus = async (id: string) => {
+    return statuses.get(id)
+  }
+
   dataStore.loadUnoId = async (id: string) => ids.get(id)
-  dataStore.setUnoId = async (id: string, unoId: string) => new Promise((resolve) => ids.set(id, unoId) && resolve())
+  dataStore.setUnoId = async (id: string, unoId: string) => {
+    ids.set(id, unoId)
+  }
   dataStore.getJid = async (phone: string, sock: Partial<WASocket>) => {
     const phoneOrJid = phoneNumberToJid(phone)
     if (!isIndividualJid(phoneOrJid)) {
