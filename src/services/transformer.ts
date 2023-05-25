@@ -64,15 +64,16 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'video':
       const url = payload[type].link
       if (url) {
-        response.caption = payload[type].caption
         response.mimetype = mime.lookup(url)
+        if (type == 'audio') {
+          response.ptt = true
+        }
         if (payload[type].filename) {
           response.fileName = payload[type].filename
         }
         if (payload[type].caption) {
           response.caption = payload[type].caption
         }
-        response.fileName = payload[type].filename
         response[type] = { url }
         break
       }
