@@ -248,10 +248,10 @@ export const connect = async ({
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
-        const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 10)
+        const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 100)
         await sock.presenceSubscribe(id)
         await delay(Math.floor(Math.random() * time) + 100)
-        await sock.sendPresenceUpdate('composing', id)
+        await sock.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
         await delay(Math.floor(Math.random() * time) + 200)
         await sock.sendPresenceUpdate('paused', id)
       }
