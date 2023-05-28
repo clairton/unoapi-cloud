@@ -35,7 +35,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     throw 'Not possible get file name'
   }
 
-  const getFilePath = (fileName: string) => {
+  const getFileUrl = async (fileName: string) => {
     return `${config.baseStore}${MEDIA_DIR}/${fileName}`
   }
 
@@ -72,19 +72,26 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
     const fileName = getFileName(phone, waMessage)
-    const filePath = getFilePath(fileName)
+    await saveMediaBuffer(fileName, buffer)
+    return true
+  }
+
+  const saveMediaBuffer = async (fileName: string, content: Buffer) => {
+    const filePath = await getFileUrl(fileName)
     const parts = filePath.split('/')
     const dir: string = parts.splice(0, parts.length - 1).join('/')
     if (!existsSync(dir)) {
       mkdirSync(dir)
     }
-    await writeFile(filePath, buffer)
+    await writeFile(filePath, content)
     return true
   }
+
   const removeMedia = async (fileName: string) => {
-    const filePath = getFilePath(fileName)
+    const filePath = await getFileUrl(fileName)
     return rmSync(filePath)
   }
+
   const downloadMedia = async (res: Response, file: string) => {
     const store = await getDataStore(phone, config)
     const mediaId = file.split('.')[0]
@@ -107,7 +114,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
         }
       }
     }
-    const filePath = getFilePath(`${phone}/${file}`)
+    const filePath = await getFileUrl(`${phone}/${file}`)
     res.contentType(mime.lookup(filePath) || '')
     res.download(filePath, fileName)
   }
@@ -143,5 +150,5 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       }
     }
   }
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl }
 }

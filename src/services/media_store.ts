@@ -12,7 +12,9 @@ export interface getMediaStore {
 export type MediaStore = {
   getMedia: (baseUrl: string, mediaId: string) => Promise<object | void>
   saveMedia: (messageType: string, waMessage: WAMessage) => Promise<boolean>
+  saveMediaBuffer: (fileName: string, buffer: Buffer) => Promise<boolean>
   removeMedia: (fileName: string) => Promise<void>
   downloadMedia: (resp: Response, fileName: string) => Promise<void>
   getFileName: (phone: string, waMessage: proto.IWebMessageInfo) => string
+  getFileUrl: (fileName: string) => Promise<string>
 }
