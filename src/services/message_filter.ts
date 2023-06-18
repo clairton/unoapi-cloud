@@ -11,7 +11,7 @@ interface IgnoreKey {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const notIgnoreJid = (jid: string) => {
+const notIgnoreJid = (_jid: string) => {
   console.info('Config to not ignore any jid')
   return false
 }
