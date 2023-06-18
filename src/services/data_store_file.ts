@@ -41,7 +41,7 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
   }
   store.fromJSON = (json) => {
     fromJSON(json)
-    const jsonData = json as {
+    const jsonData = json as unknown as {
       keys: proto.IMessageKey[]
       jids: Map<string, string>
       ids: Map<string, string>

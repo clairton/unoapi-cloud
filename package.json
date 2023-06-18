@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "0.25.0",
+  "version": "0.26.0-dev",
   "description": "Unoapi Cloud",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -47,8 +47,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@adiwajshing/keyed-db": "^0.2.4",
-    "@whiskeysockets/baileys": "^6.0.0",
+    "@whiskeysockets/baileys": "^6.3.0",
     "awesome-phonenumber": "^5.1.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
