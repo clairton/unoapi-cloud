@@ -357,7 +357,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
       case 'update':
         const baileysStatus = payload.status || payload.update.status
-        if (!baileysStatus) {
+        if (!baileysStatus && !payload?.update?.messageStubType && !payload?.update?.starred) {
           return
         }
         switch (baileysStatus) {
