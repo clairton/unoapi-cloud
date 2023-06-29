@@ -83,7 +83,19 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
 
   dataStore.setStatus = async (
     id: string,
-    status: 'scheduled' | 'pending' | 'without-whatsapp' | 'error' | 'failed' | 'sent' | 'delivered' | 'read' | 'played' | 'accepted' | 'deleted',
+    status:
+      | 'scheduled'
+      | 'pending'
+      | 'without-whatsapp'
+      | 'invalid-phone-number'
+      | 'error'
+      | 'failed'
+      | 'sent'
+      | 'delivered'
+      | 'read'
+      | 'played'
+      | 'accepted'
+      | 'deleted',
   ) => {
     statuses.set(id, status)
   }

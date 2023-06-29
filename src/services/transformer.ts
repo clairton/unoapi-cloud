@@ -121,6 +121,12 @@ export const formatJid = (jid: string) => {
   return `${jidSplit[0].split(':')[0]}@${jidSplit[1]}`
 }
 
+export const isValidPhoneNumber = (jid: string): boolean => {
+  const phoneNumber = jidToPhoneNumber(jid)
+  const parsed = parsePhoneNumber(phoneNumber)
+  return parsed.valid
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (id: any, plus = '+', retry = true): string => {
   const number = (id || '').split('@')[0].split(':')[0].replace('+', '')

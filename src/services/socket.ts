@@ -15,6 +15,7 @@ import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
 import { Config } from './config'
 import { Store } from './store'
 import NodeCache from 'node-cache'
+import { isValidPhoneNumber } from './transformer'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnStatus = (text: string, important: boolean) => Promise<void>
@@ -258,7 +259,11 @@ export const connect = async ({
       console.log(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message)
     }
-    throw new SendError(2, `The number ${to} does not have Whatsapp account or was a error verify this!`)
+    if (isValidPhoneNumber(id)) {
+      throw new SendError(2, `The number ${to} does not have Whatsapp account or was a error verify this!`)
+    } else {
+      throw new SendError(7, `The phone number ${to} is invalid!`)
+    }
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {

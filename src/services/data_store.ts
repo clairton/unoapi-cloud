@@ -14,7 +14,19 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   loadUnoId: (id: string) => Promise<string | undefined>
   setStatus: (
     id: string,
-    status: 'scheduled' | 'pending' | 'error' | 'failed' | 'sent' | 'delivered' | 'read' | 'played' | 'accepted' | 'deleted',
+    status:
+      | 'scheduled'
+      | 'pending'
+      | 'without-whatsapp'
+      | 'invalid-phone-number'
+      | 'error'
+      | 'failed'
+      | 'sent'
+      | 'delivered'
+      | 'read'
+      | 'played'
+      | 'accepted'
+      | 'deleted',
   ) => Promise<void>
   loadStatus: (id: string) => Promise<string | undefined>
   getJid: (phone: string, sock: Partial<WASocket>) => Promise<string>
