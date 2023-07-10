@@ -15,6 +15,7 @@ export class TemplatesController {
     console.debug('templates headers', req.headers)
     console.debug('templates params', req.params)
     console.debug('templates body', JSON.stringify(req.body, null, ' '))
+    console.debug('templates query', JSON.stringify(req.query, null, ' '))
     const { phone } = req.params
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
