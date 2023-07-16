@@ -310,12 +310,17 @@ export class ClientBaileys implements Client {
       if (status) {
         if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
           if (status == 'read') {
-            const key = await this.store?.dataStore?.loadKey(payload?.message_id)
-            console.debug('key %s for %s', key, payload?.message_id)
-            if (key) {
-              console.debug('Baileys read message key %s...', key)
-              await this.readMessages([key])
-              console.debug('Baileys read message key %s!', key)
+            const currentStatus = await this.store?.dataStore?.loadStatus(payload?.message_id)
+            if (currentStatus != status) {
+              const key = await this.store?.dataStore?.loadKey(payload?.message_id)
+              console.debug('key %s for %s', key, payload?.message_id)
+              if (key) {
+                console.debug('Baileys read message key %s...', key)
+                await this.readMessages([key])
+                console.debug('Baileys read message key %s!', key)
+              }
+            } else {
+              console.debug('Baileys already read message id %s!', payload?.message_id)
             }
           }
           this.store?.dataStore?.setStatus(payload?.message_id, status)
