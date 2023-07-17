@@ -174,6 +174,20 @@ export const jidToPhoneNumber = (id: any, plus = '+', retry = true): string => {
     }]
   }]
 }
+
+{
+  "key": {
+   "remoteJid": "554999379224@s.whatsapp.net",
+   "fromMe": true,
+   "id": "BAE55FF6705AD8DD"
+  },
+  "update": {
+   "status": 0,
+   "messageStubParameters": [
+    "405"
+   ]
+  }
+ }
 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fromBaileysMessageContent = (phone: string, payload: any): any => {
@@ -357,7 +371,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
       case 'update':
         const baileysStatus = payload.status || payload.update.status
-        if (!baileysStatus && !payload?.update?.messageStubType && !payload?.update?.starred) {
+        if (!baileysStatus && payload.update.status != 0 && !payload?.update?.messageStubType && !payload?.update?.starred) {
           return
         }
         switch (baileysStatus) {
@@ -447,9 +461,15 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       }
       if (cloudApiStatus == 'failed') {
         // https://github.com/tawn33y/whatsapp-cloud-api/issues/40#issuecomment-1290036629
+        let title = payload?.update?.title || 'The Unoapi Cloud has a error, verify the logs'
+        let code = payload?.update?.code || 1
+        if (payload?.update?.messageStubParameters == '405') {
+          title = 'message not allowed'
+          code = 8
+        }
         const error = {
-          code: payload?.update?.code || 1,
-          title: payload?.update?.title || 'The Unoapi Cloud has a error, verify the logs',
+          code,
+          title,
         }
         state.errors = [error]
       }

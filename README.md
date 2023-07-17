@@ -142,6 +142,7 @@ with:
 * 5 - Wait a moment, connecting process 
 * 6 - max qrcode generate 
 * 7 - invalid phone number
+* 8 - message not allowed
 
 ## Up for development
 

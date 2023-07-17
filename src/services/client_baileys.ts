@@ -315,7 +315,7 @@ export class ClientBaileys implements Client {
               const key = await this.store?.dataStore?.loadKey(payload?.message_id)
               console.debug('key %s for %s', key, payload?.message_id)
               if (key) {
-                console.debug('Baileys read message key %s...', key)
+                console.debug('Baileys reading message key %s...', key)
                 await this.readMessages([key])
                 console.debug('Baileys read message key %s!', key)
               }
