@@ -59,18 +59,20 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
       rmSync(dataFile)
     }
   }
-  try {
-    dataStore.readFromFile(dataFile)
-  } catch (error) {
-    console.debug(`Try read ${dataFile} again....`)
+  if (!config.ignoreDataStore) {
     try {
       dataStore.readFromFile(dataFile)
     } catch (error) {
-      console.error(`Error on read data store`, error)
+      console.debug(`Try read ${dataFile} again....`)
+      try {
+        dataStore.readFromFile(dataFile)
+      } catch (error) {
+        console.error(`Error on read data store`, error)
+      }
     }
+    setInterval(() => {
+      dataStore.writeToFile(dataFile), 10_0000
+    })
   }
-  setInterval(() => {
-    dataStore.writeToFile(dataFile), 10_0000
-  })
   return { state, saveCreds, dataStore, mediaStore }
 }

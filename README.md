@@ -201,6 +201,7 @@ REJECT_CALLS=message to send when receive a call, default is empty and not rejec
 REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
 SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
 UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
+IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
 ```
 
 ## Examples
