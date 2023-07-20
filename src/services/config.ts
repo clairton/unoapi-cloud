@@ -56,6 +56,7 @@ export type Config = {
   webhooks: Webhook[]
   logLevel: string
   getGroupMetadata: GetGroupMetadata
+  ignoreDataStore: boolean
 }
 
 export const defaultConfig: Config = {
@@ -86,6 +87,7 @@ export const defaultConfig: Config = {
     },
   ],
   getGroupMetadata: ignoreGetGroupMetadata,
+  ignoreDataStore: false,
 }
 
 export interface getConfig {
