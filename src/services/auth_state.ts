@@ -1,5 +1,6 @@
 import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds } from '@whiskeysockets/baileys'
 import { session } from './session'
+import logger from './logger'
 
 export const authState = async (session: session, phone: string) => {
   const { readData, writeData, removeData, getKey } = await session(phone)
@@ -44,7 +45,7 @@ export const authState = async (session: session, phone: string) => {
   }
 
   const saveCreds: () => Promise<void> = async () => {
-    console.debug('save creds')
+    logger.debug('save creds')
     await writeData('', creds)
   }
 

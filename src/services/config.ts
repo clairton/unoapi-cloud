@@ -2,6 +2,7 @@ import { getStore, Store } from './store'
 import { getStoreFile } from './store_file'
 import { GroupMetadata, WAMessage, WAMessageKey } from '@whiskeysockets/baileys'
 import { isIndividualJid } from './transformer'
+import logger from './logger'
 
 export interface GetGroupMetadata {
   (message: WAMessage, store: Store): Promise<GroupMetadata | undefined>
@@ -11,12 +12,12 @@ export interface GetGroupMetadata {
 export const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _store: Store) => undefined
 
 export const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store) => {
-  console.debug(`Retrieving group metadata...`)
+  logger.debug(`Retrieving group metadata...`)
   const { key } = message
   if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
     let groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
     if (groupMetadata) {
-      console.debug('Retrieved group metadata %s!', groupMetadata)
+      logger.debug('Retrieved group metadata %s!', groupMetadata)
     } else {
       groupMetadata = {
         id: key.remoteJid,
@@ -24,7 +25,7 @@ export const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, sto
         subject: key.remoteJid,
         participants: [],
       }
-      console.debug('Return group metadata %s!', groupMetadata)
+      logger.debug('Return group metadata %s!', groupMetadata)
     }
     return groupMetadata
   }

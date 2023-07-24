@@ -16,6 +16,7 @@ const port: number = parseInt(PORT || '9876')
 import { v1 as uuid } from 'uuid'
 import { phoneNumberToJid } from './services/transformer'
 import { OnNewLogin } from './services/socket'
+import logger from './services/logger'
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
 
@@ -38,8 +39,8 @@ const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfi
 const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv)
 
 app.server.listen(port, '0.0.0.0', async () => {
-  console.info('Unoapi Cloud listening on port:', port)
-  console.info('Successful started app!')
+  logger.info('Unoapi Cloud listening on port:', port)
+  logger.info('Successful started app!')
   const sessionStore: SessionStore = new SessionStoreFile()
   autoConnect(sessionStore, incomingBaileys, outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin)
 })
@@ -48,7 +49,7 @@ export default app
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on('unhandledRejection', (reason: any, promise) => {
-  console.error('unhandledRejection:', reason.stack)
-  console.error('promise:', promise)
+  logger.error('unhandledRejection:', reason.stack)
+  logger.error('promise:', promise)
   throw reason
 })

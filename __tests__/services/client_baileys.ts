@@ -11,16 +11,17 @@ import { proto } from '@whiskeysockets/baileys'
 import { DataStore } from '../../src/services/data_store'
 import { Incoming } from '../../src/services/incoming'
 import { dataStores } from '../../src/services/data_store'
+import logger from '../../src/services/logger'
 
 const mockConnect = connect as jest.MockedFunction<typeof connect>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const event = (event, _callback) => {
-  console.info('subscribe event: ', event)
+  logger.info('subscribe event: ', event)
 }
 
 const onNewLogin = async (phone: string) => {
-  console.log('New login', phone)
+  logger.info('New login', phone)
 }
 
 describe('service client baileys', () => {

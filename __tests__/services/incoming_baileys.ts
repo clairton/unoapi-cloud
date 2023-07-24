@@ -5,6 +5,7 @@ import { getClient, Client } from '../../src/services/client'
 import { Config, defaultConfig, getConfig, getConfigDefault } from '../../src/services/config'
 import { Status } from '../../src/services/socket'
 import { mock } from 'jest-mock-extended'
+import logger from '../../src/services/logger'
 
 class DummyClient implements Client {
   phone: string
@@ -50,7 +51,7 @@ const getClientDummy: getClient = async ({
 }
 
 const onNewLogin = async (phone: string) => {
-  console.log('New login', phone)
+  logger.info('New login', phone)
 }
 
 describe('service incoming baileys', () => {

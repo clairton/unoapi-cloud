@@ -13,6 +13,7 @@ import { Response } from './response'
 import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
+import logger from './logger'
 const attempts = 3
 
 const clients: Map<string, Client> = new Map()
@@ -36,14 +37,14 @@ export const getClientBaileys: getClient = async ({
   onNewLogin: OnNewLogin
 }): Promise<Client> => {
   if (!clients.has(phone)) {
-    console.info('Creating client baileys %s', phone)
+    logger.info('Creating client baileys %s', phone)
     const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
-    console.info('Connecting client baileys %s', phone)
+    logger.info('Connecting client baileys %s', phone)
     await client.connect()
-    console.info('Created and connected client baileys %s', phone)
+    logger.info('Created and connected client baileys %s', phone)
     clients.set(phone, client)
   } else {
-    console.debug('Retrieving client baileys %s', phone)
+    logger.debug('Retrieving client baileys %s', phone)
   }
   return clients.get(phone) as Client
 }
@@ -106,7 +107,7 @@ export class ClientBaileys implements Client {
         },
         messageTimestamp: new Date().getTime(),
       }
-      console.debug('onStatus', JSON.stringify(payload))
+      logger.debug('onStatus', JSON.stringify(payload))
 
       try {
         const response = await this.outgoing.sendOne(this.phone, payload)
@@ -119,7 +120,7 @@ export class ClientBaileys implements Client {
   }
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
-    console.debug('Received qrcode', this.phone, qrCode)
+    logger.debug('Received qrcode', this.phone, qrCode)
     const messageTimestamp = new Date().getTime()
     const id = uuid()
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
@@ -161,7 +162,7 @@ export class ClientBaileys implements Client {
   }
 
   private listener = async (messages: object[], update = true) => {
-    console.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, this.phone)
+    logger.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, this.phone)
     try {
       const resp = await this.outgoing.sendMany(this.phone, messages)
       return resp
@@ -172,7 +173,7 @@ export class ClientBaileys implements Client {
 
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
-    console.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
+    logger.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
     delays && (delays.get(phone) || new Map()).set(to, this.continueAfterSecondMessage)
     return delay(time)
   }
@@ -210,7 +211,7 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCall
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
-      console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
+      logger.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
       if (payload.type === 'notify') {
         this.listener(payload.messages, false)
       } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
@@ -220,23 +221,23 @@ export class ClientBaileys implements Client {
         if (ms.length > 0) {
           this.listener(ms, false)
         } else {
-          console.debug('ignore messages.upsert type append with status pending')
+          logger.debug('ignore messages.upsert type append with status pending')
         }
       } else {
-        console.error('Unknown type: ', payload.type)
+        logger.error('Unknown type: ', payload.type)
       }
     })
     event('messages.update', (messages: object[]) => {
-      console.debug('messages.update', this.phone, JSON.stringify(messages, null, ' '))
+      logger.debug('messages.update', this.phone, JSON.stringify(messages, null, ' '))
       this.listener(messages)
     })
     event('message-receipt.update', (messages: object[]) => {
-      console.debug('message-receipt.update', this.phone, JSON.stringify(messages, null, ' '))
+      logger.debug('message-receipt.update', this.phone, JSON.stringify(messages, null, ' '))
       this.listener(messages)
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.delete', (update: any) => {
-      console.debug('messages.delete', this.phone, JSON.stringify(update, null, ' '))
+      logger.debug('messages.delete', this.phone, JSON.stringify(update, null, ' '))
       const keys = update.keys || []
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload = keys.map((key: any) => {
@@ -246,14 +247,14 @@ export class ClientBaileys implements Client {
     })
 
     if (!this.config.ignoreHistoryMessages) {
-      console.info('Config import history messages', this.phone)
+      logger.info('Config import history messages', this.phone)
       event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
-        console.info('Importing history messages, is latest', isLatest, this.phone)
+        logger.info('Importing history messages, is latest', isLatest, this.phone)
         this.listener(messages, false)
       })
     }
     if (this.config.rejectCalls) {
-      console.info('Config to reject calls', this.phone, this.config.rejectCalls)
+      logger.info('Config to reject calls', this.phone, this.config.rejectCalls)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       event('call', async (events: any[]) => {
         for (let i = 0; i < events.length; i++) {
@@ -280,7 +281,7 @@ export class ClientBaileys implements Client {
               }
             }
             setTimeout(() => {
-              console.debug('Clean call rejecteds', from)
+              logger.debug('Clean call rejecteds', from)
               this.calls.delete(from)
             }, 10_000)
           }
@@ -290,7 +291,7 @@ export class ClientBaileys implements Client {
   }
 
   async disconnect() {
-    console.debug('Clean client, store for', this.phone)
+    logger.debug('Clean client, store for', this.phone)
     this.store = undefined
     // clean cache
     clients.delete(this.phone)
@@ -313,14 +314,14 @@ export class ClientBaileys implements Client {
             const currentStatus = await this.store?.dataStore?.loadStatus(payload?.message_id)
             if (currentStatus != status) {
               const key = await this.store?.dataStore?.loadKey(payload?.message_id)
-              console.debug('key %s for %s', key, payload?.message_id)
+              logger.debug('key %s for %s', key, payload?.message_id)
               if (key) {
-                console.debug('Baileys reading message key %s...', key)
+                logger.debug('Baileys reading message key %s...', key)
                 await this.readMessages([key])
-                console.debug('Baileys read message key %s!', key)
+                logger.debug('Baileys read message key %s!', key)
               }
             } else {
-              console.debug('Baileys already read message id %s!', payload?.message_id)
+              logger.debug('Baileys already read message id %s!', payload?.message_id)
             }
           }
           this.store?.dataStore?.setStatus(payload?.message_id, status)
@@ -338,7 +339,7 @@ export class ClientBaileys implements Client {
           } else {
             content = toBaileysMessageContent(payload)
           }
-          console.debug('Send to baileys', to, content)
+          logger.debug('Send to baileys', to, content)
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -346,7 +347,7 @@ export class ClientBaileys implements Client {
           await toDelay(this.phone, to)
           const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
           if (response) {
-            console.debug('Sent to baileys', response)
+            logger.debug('Sent to baileys', response)
             const key = response.key
             const ok = {
               messaging_product: 'whatsapp',
@@ -364,7 +365,7 @@ export class ClientBaileys implements Client {
             const r: Response = { ok }
             return r
           } else {
-            console.error('Response on sent to baileys is empty.....')
+            logger.error('Response on sent to baileys is empty.....')
             throw new SendError(5, 'Wait a moment, connecting process')
           }
         } else {

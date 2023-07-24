@@ -4,6 +4,7 @@ import fetch, { Response } from 'node-fetch'
 import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BinTemplate } from './transformer'
 import { getConfig } from './config'
 import { Template } from './template'
+import logger from './logger'
 
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
@@ -18,15 +19,15 @@ export class OutgoingCloudApi implements Outgoing {
     const filteredMessages = messages.filter((m: any) => {
       return !m.key || !config.shouldIgnoreKey(m.key, getMessageType(m))
     })
-    console.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
+    logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))
   }
 
   public async sendOne(phone: string, message: object) {
-    console.debug(`Receive message %s`, JSON.stringify(message))
+    logger.debug(`Receive message %s`, JSON.stringify(message))
     const i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
-    console.debug(`messageType %s...`, messageType)
+    logger.debug(`messageType %s...`, messageType)
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
@@ -38,7 +39,7 @@ export class OutgoingCloudApi implements Outgoing {
       }
     }
     if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-      console.debug(`Saving media...`)
+      logger.debug(`Saving media...`)
       await store?.mediaStore.saveMedia(messageType, i)
     }
     let data
@@ -60,7 +61,7 @@ export class OutgoingCloudApi implements Outgoing {
     if (data) {
       return this.send(phone, data)
     } else {
-      console.debug(`Not send message type ${messageType} to http phone %s message id %s`, phone, i?.key?.id)
+      logger.debug(`Not send message type ${messageType} to http phone %s message id %s`, phone, i?.key?.id)
     }
   }
 
@@ -77,9 +78,9 @@ export class OutgoingCloudApi implements Outgoing {
       [header]: token,
     }
     const uri = this.uri(url, phone)
-    console.debug(`Send url ${uri} with headers %s and body %s`, headers, body)
+    logger.debug(`Send url ${uri} with headers %s and body %s`, headers, body)
     const response: Response = await fetch(uri, { method: 'POST', body, headers })
-    console.debug('Response: ', response.status)
+    logger.debug('Response: ', response.status)
     if (!response.ok) {
       throw await response.text()
     }

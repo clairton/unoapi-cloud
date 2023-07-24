@@ -3,6 +3,7 @@ import { Client, getClient } from './client'
 import { getConfig } from './config'
 import { Outgoing } from './outgoing'
 import { OnNewLogin } from './socket'
+import logger from './logger'
 
 export class IncomingBaileys implements Incoming {
   private service: Outgoing
@@ -25,7 +26,7 @@ export class IncomingBaileys implements Incoming {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    console.debug('Retrieved client baileys %s', phone)
+    logger.debug('Retrieved client baileys %s', phone)
     return client.send(payload, options)
   }
 }
