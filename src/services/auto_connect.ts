@@ -4,6 +4,7 @@ import { SessionStore } from './session_store'
 import { Outgoing } from './outgoing'
 import { Incoming } from './incoming'
 import { OnNewLogin } from './socket'
+import logger from './logger'
 
 export const autoConnect = async (
   sessionStore: SessionStore,
@@ -15,28 +16,28 @@ export const autoConnect = async (
 ) => {
   try {
     const phones = await sessionStore.getPhones()
-    console.info(`${phones.length} phones to verify is auto connect`)
+    logger.info(`${phones.length} phones to verify is auto connect`)
     for (let i = 0, j = phones.length; i < j; i++) {
       const phone = phones[i]
       try {
-        console.info(`Auto connecting phone ${phone}...`)
+        logger.info(`Auto connecting phone ${phone}...`)
         try {
           getClient({ phone, incoming, outgoing, getConfig, onNewLogin })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {
-            console.info(`Connection already in progress ${phone}...`)
+            logger.info(`Connection already in progress ${phone}...`)
           } else {
             throw e
           }
         }
-        console.info(`Auto connected phone ${phone}!`)
+        logger.info(`Auto connected phone ${phone}!`)
       } catch (error) {
-        console.error(`Error on connect phone ${phone}`, error)
+        logger.error(`Error on connect phone ${phone}`, error)
       }
     }
   } catch (error) {
-    console.error('Erro on auto connect', error)
+    logger.error('Erro on auto connect', error)
     throw error
   }
 }

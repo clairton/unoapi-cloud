@@ -36,6 +36,7 @@ import { Request, Response } from 'express'
 import { Response as ResponseUno } from '../services/response'
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
+import logger from '../services/logger'
 
 export class MessagesController {
   private incoming: Incoming
@@ -47,18 +48,18 @@ export class MessagesController {
   }
 
   public async index(req: Request, res: Response) {
-    console.debug('messages method', req.method)
-    console.debug('messages headers', req.headers)
-    console.debug('messages params', req.params)
-    console.debug('messages body', JSON.stringify(req.body, null, ' '))
+    logger.debug('messages method', req.method)
+    logger.debug('messages headers', req.headers)
+    logger.debug('messages params', req.params)
+    logger.debug('messages body', JSON.stringify(req.body, null, ' '))
     const { phone } = req.params
     const payload: object = req.body
     try {
       const response: ResponseUno = await this.incoming.send(phone, payload, {})
-      console.debug('messages response', JSON.stringify(response.ok, null, ' '))
+      logger.debug('messages response', JSON.stringify(response.ok, null, ' '))
       await res.status(200).json(response.ok)
       if (response.error) {
-        console.debug('messages return status', JSON.stringify(response.error, null, ' '))
+        logger.debug('messages return status', JSON.stringify(response.error, null, ' '))
         await this.outgoing.send(phone, response.error)
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

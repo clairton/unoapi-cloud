@@ -2,6 +2,7 @@
 
 import { Request, Response } from 'express'
 import { getConfig } from '../services/config'
+import logger from '../services/logger'
 
 export class TemplatesController {
   private getConfig: getConfig
@@ -11,11 +12,11 @@ export class TemplatesController {
   }
 
   public async index(req: Request, res: Response) {
-    console.debug('templates method', req.method)
-    console.debug('templates headers', req.headers)
-    console.debug('templates params', req.params)
-    console.debug('templates body', JSON.stringify(req.body, null, ' '))
-    console.debug('templates query', JSON.stringify(req.query, null, ' '))
+    logger.debug('templates method', req.method)
+    logger.debug('templates headers', req.headers)
+    logger.debug('templates params', req.params)
+    logger.debug('templates body', JSON.stringify(req.body, null, ' '))
+    logger.debug('templates query', JSON.stringify(req.query, null, ' '))
     const { phone } = req.params
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)

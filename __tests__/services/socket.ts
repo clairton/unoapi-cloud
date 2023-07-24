@@ -4,6 +4,7 @@ import makeWASocket, { WASocket } from '@whiskeysockets/baileys'
 import { mock } from 'jest-mock-extended'
 import { Store } from '../../src/services/store'
 import { defaultConfig } from '../../src/services/config'
+import logger from '../../src/services/logger'
 const mockMakeWASocket = makeWASocket as jest.MockedFunction<typeof makeWASocket>
 
 describe('service socket', () => {
@@ -17,7 +18,7 @@ describe('service socket', () => {
   let onDisconnected: OnDisconnected
   let onReconnect: OnReconnect
   const onNewLogin = async (phone: string) => {
-    console.log('New login', phone)
+    logger.info('New login', phone)
   }
 
   beforeEach(async () => {

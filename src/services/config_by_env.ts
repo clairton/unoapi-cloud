@@ -1,5 +1,6 @@
 import { MessageFilter } from './message_filter'
 import { getConfig, defaultConfig, Config, ignoreGetGroupMetadata, getGroupMetadata } from './config'
+import logger from './logger'
 
 const {
   IGNORE_GROUP_MESSAGES,
@@ -51,7 +52,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
     config.getGroupMetadata = config.ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
-    console.debug('Config', config)
+    logger.debug('Config', config)
   }
   return config
 }

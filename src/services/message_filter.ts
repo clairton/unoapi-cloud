@@ -1,6 +1,7 @@
 import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast } from '@whiskeysockets/baileys'
 import { Config, defaultConfig } from './config'
 import { jidToPhoneNumber } from './transformer'
+import logger from './logger'
 
 interface IgnoreJid {
   (jid: string): boolean | undefined
@@ -12,12 +13,12 @@ interface IgnoreKey {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const notIgnoreJid = (_jid: string) => {
-  console.info('Config to not ignore any jid')
+  logger.info('Config to not ignore any jid')
   return false
 }
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const notIgnoreKey: IgnoreKey = (_key: WAMessageKey, _messageType: string | undefined) => {
-  console.info('Config to not ignore any key')
+  logger.info('Config to not ignore any key')
   return false
 }
 
@@ -29,7 +30,7 @@ const IgnoreOwnKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefi
     return false
   } else {
     const filter = key && !!key.fromMe
-    console.debug('IgnoreOwnKey: %s => %s', key, filter)
+    logger.debug('IgnoreOwnKey: %s => %s', key, filter)
     return filter
   }
 }
@@ -43,35 +44,35 @@ export class MessageFilter {
     const ignoresKey: IgnoreKey[] = []
 
     if (config.ignoreGroupMessages) {
-      console.info('Config to ignore jid group messages')
+      logger.info('Config to ignore jid group messages')
       ignoresJid.push((jid) => {
         const is = isJidGroup(jid)
-        console.debug(`${jid} is group ${is}`)
+        logger.debug(`${jid} is group ${is}`)
         return is
       })
     }
     if (config.ignoreBroadcastStatuses) {
-      console.info('Config to ignore jid broadcast statuses')
+      logger.info('Config to ignore jid broadcast statuses')
       ignoresJid.push((jid) => {
         const is = isJidStatusBroadcast(jid)
-        console.debug(`${jid} is status broadcast ${is}`)
+        logger.debug(`${jid} is status broadcast ${is}`)
         return is
       })
     }
     if (config.ignoreBroadcastMessages) {
-      console.info('Config to ignore jid broadcast messages')
+      logger.info('Config to ignore jid broadcast messages')
       ignoresJid.push((jid) => {
         const is = isJidBroadcast(jid)
-        console.debug(`${jid} is message broadcast ${is}`)
+        logger.debug(`${jid} is message broadcast ${is}`)
         return is
       })
     }
     if (config.ignoreOwnMessages) {
-      console.info('Config to ignore key own messages')
+      logger.info('Config to ignore key own messages')
       ignoresKey.push(IgnoreOwnKey)
     }
     if (config.ignoreYourselfMessages) {
-      console.info('Config to ignore key yourself messages')
+      logger.info('Config to ignore key yourself messages')
       const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
         if (!messageType) {
           return true
@@ -81,7 +82,7 @@ export class MessageFilter {
         } else {
           const senderPhone = jidToPhoneNumber(key.remoteJid, '')
           const filter = phone == senderPhone
-          console.debug('IgnoreYourSelfKey: %s === %s => %s', phone, senderPhone, filter)
+          logger.debug('IgnoreYourSelfKey: %s === %s => %s', phone, senderPhone, filter)
           return filter
         }
       }
@@ -93,15 +94,15 @@ export class MessageFilter {
         return f(jid) ? ++acc : acc
       }
       const sum: number = ignoresJid.reduce(fn, 0)
-      console.debug(`${jid} ignore by jid sum is ${sum}`)
+      logger.debug(`${jid} ignore by jid sum is ${sum}`)
       return sum > 0
     }
-    console.info('%s Configs to ignore by jid', phone, ignoresJid.length)
-    console.info('%s Configs to ignore by key', phone, ignoresKey.length)
+    logger.info('%s Configs to ignore by jid', phone, ignoresJid.length)
+    logger.info('%s Configs to ignore by key', phone, ignoresKey.length)
     this.ignoreJid = ignoresJid.length > 0 ? ignoreJid : notIgnoreJid
     const ignoreKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
       const sum = ignoresKey.reduce((acc, f) => (f(key, messageType) ? ++acc : acc), 0)
-      console.debug(`key: ${JSON.stringify(key)} type: ${messageType} ignore sum is ${sum}`)
+      logger.debug(`key: ${JSON.stringify(key)} type: ${messageType} ignore sum is ${sum}`)
       return sum > 0
     }
     this.ignoreKey = ignoresKey.length > 0 ? ignoreKey : notIgnoreKey

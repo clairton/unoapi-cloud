@@ -8,6 +8,7 @@ import { DataStore } from '../../src/services/data_store'
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig } from '../../src/services/config'
+import logger from '../../src/services/logger'
 
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>
 
@@ -72,7 +73,7 @@ describe('service incoming baileys', () => {
 
   test('send text with success', async () => {
     const mockUrl = `${url}/${phone}`
-    console.debug(`Mock url ${mockUrl}`)
+    logger.debug(`Mock url ${mockUrl}`)
     expect(fetch).toHaveBeenCalledTimes(0)
     const response = new Response('ok', { status: 200 })
     response.ok = true

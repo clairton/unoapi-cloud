@@ -2,6 +2,7 @@ import { AnyMessageContent, isJidUser } from '@whiskeysockets/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
+import logger from './logger'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
 
@@ -93,18 +94,18 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
 
 export const phoneNumberToJid = (phoneNumber: string) => {
   if (phoneNumber.indexOf('@') >= 0) {
-    console.debug('%s already is jid', phoneNumber)
+    logger.debug('%s already is jid', phoneNumber)
     return phoneNumber
   } else {
     const jid = `${jidToPhoneNumber(phoneNumber, '')}@s.whatsapp.net`
-    console.debug('transform %s to %s', phoneNumber, jid)
+    logger.debug('transform %s to %s', phoneNumber, jid)
     return jid
   }
 }
 
 export const isIndividualJid = (jid: string) => {
   const isIndividual = isJidUser(jid)
-  console.debug('jid %s is individual? %s', jid, isIndividual)
+  logger.debug('jid %s is individual? %s', jid, isIndividual)
   return isIndividual
 }
 
@@ -433,7 +434,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       case 'protocolMessage':
       case 'senderKeyDistributionMessage':
       case 'messageContextInfo':
-        console.debug(`Ignore message type ${messageType}`)
+        logger.debug(`Ignore message type ${messageType}`)
         return
 
       default:
@@ -483,10 +484,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       }
       change.value.messages.push(message)
     }
-    console.debug('fromBaileysMessageContent', phone, JSON.stringify(data, null, ' '))
+    logger.debug('fromBaileysMessageContent', phone, JSON.stringify(data, null, ' '))
     return data
   } catch (e) {
-    console.error('Error on convert baileys to cloud-api', e)
+    logger.error('Error on convert baileys to cloud-api', e)
     throw e
   }
 }

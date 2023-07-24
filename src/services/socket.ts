@@ -16,6 +16,7 @@ import { Config } from './config'
 import { Store } from './store'
 import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
+import logger from './logger'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnStatus = (text: string, important: boolean) => Promise<void>
@@ -97,9 +98,9 @@ export const connect = async ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onConnectionUpdate = async (event: any) => {
-    console.log('onConnectionUpdate ==>', phone, event)
+    logger.debug('onConnectionUpdate ==>', phone, event)
     if (event.qr) {
-      console.debug('QRCode generate....... %s of %s', status.attempt, attempts)
+      logger.debug('QRCode generate....... %s of %s', status.attempt, attempts)
       if (status.attempt > attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
         onStatus(message, true)
@@ -130,7 +131,7 @@ export const connect = async ({
     status.reconnecting = false
     status.connecting = false
 
-    console.log(`${phone} connected`)
+    logger.info(`${phone} connected`)
 
     fetchLatestBaileysVersion().then(({ version, isLatest }) => {
       const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
@@ -144,11 +145,11 @@ export const connect = async ({
     status.connected = false
     status.connecting = false
     const statusCode = lastDisconnect?.error?.output?.statusCode
-    console.log(`${phone} disconnected with status: ${statusCode}`)
+    logger.info(`${phone} disconnected with status: ${statusCode}`)
     onDisconnected(phone, payload)
     if (statusCode === DisconnectReason.loggedOut) {
       disconnect(false)
-      console.log(`${phone} destroyed`)
+      logger.info(`${phone} destroyed`)
       dataStore.cleanSession()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
       onStatus(message, true)
@@ -163,7 +164,7 @@ export const connect = async ({
 
   const getMessage = async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
     const { remoteJid, id } = key
-    console.debug('load message for jid %s id %s', remoteJid, id)
+    logger.debug('load message for jid %s id %s', remoteJid, id)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const message = await dataStore.loadMessage(remoteJid!, id!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -172,12 +173,12 @@ export const connect = async ({
 
   const connect = async () => {
     if (status.connected || status.connecting) return
-    console.debug('Connecting %s', phone)
+    logger.debug('Connecting %s', phone)
     status.connecting = true
 
     const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
 
-    const logger = MAIN_LOGGER.child({})
+    const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
 
     try {
@@ -187,7 +188,7 @@ export const connect = async ({
         browser,
         msgRetryCounterCache,
         syncFullHistory: !config.ignoreHistoryMessages,
-        logger,
+        logger: loggerBaileys,
         getMessage,
         shouldIgnoreJid: config.shouldIgnoreJid,
       })
@@ -212,7 +213,7 @@ export const connect = async ({
   }
 
   const reconnect = async () => {
-    console.log(`${phone} reconnecting`, status.attempt)
+    logger.info(`${phone} reconnecting`, status.attempt)
     await disconnect(true)
     onReconnect()
   }
@@ -223,7 +224,7 @@ export const connect = async ({
     status.connected = false
     status.disconnected = !reconnect
     status.reconnecting = !!reconnect
-    console.log(`${phone} disconnecting`)
+    logger.info(`${phone} disconnecting`)
     return sock && sock.end(undefined)
   }
 
@@ -256,7 +257,7 @@ export const connect = async ({
         await delay(Math.floor(Math.random() * time) + 200)
         await sock.sendPresenceUpdate('paused', id)
       }
-      console.log(`${phone} is sending message ==>`, id, message)
+      logger.info(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message)
     }
     if (isValidPhoneNumber(id)) {
@@ -278,7 +279,7 @@ export const connect = async ({
   }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
-    console.info('Subscribe %s event:', phone, event)
+    logger.info('Subscribe %s event:', phone, event)
     sock && sock.ev.on(event, callback)
   }
 

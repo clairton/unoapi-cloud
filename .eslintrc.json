@@ -21,6 +21,7 @@
         "SwitchCase": 1
       }
     ],
+    "no-console": "error",
     "no-multi-spaces": "error",
     "space-in-parens": "error",
     "no-multiple-empty-lines": "error",

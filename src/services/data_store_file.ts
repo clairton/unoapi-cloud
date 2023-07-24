@@ -7,16 +7,17 @@ import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
 import { Config } from './config'
+import logger from './logger'
 
 export const MEDIA_DIR = './data/medias'
 
 export const getDataStoreFile: getDataStore = (phone: string, config: Config): DataStore => {
   if (!dataStores.has(phone)) {
-    console.debug('Creating data store file %s', phone)
+    logger.debug('Creating data store file %s', phone)
     const store = dataStoreFile(phone, config)
     dataStores.set(phone, store)
   } else {
-    console.debug('Retrieving data store file %s', phone)
+    logger.debug('Retrieving data store file %s', phone)
   }
   return dataStores.get(phone) as DataStore
 }
@@ -65,9 +66,9 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ev.on('chats.delete', (deletions) => {
       for (const item of deletions) {
-        console.debug('chats.delete verify id: ', item)
+        logger.debug('chats.delete verify id: ', item)
         if (store.chats.get(item)) {
-          console.debug('chats.delete delete id: ', item)
+          logger.debug('chats.delete delete id: ', item)
           store.chats.deleteById(item)
         }
       }
@@ -115,23 +116,23 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
     if (!jids.has(phone)) {
       let results: unknown
       try {
-        console.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
+        logger.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         results = await sock.onWhatsApp!(phoneOrJid)
       } catch (_e) {
-        console.error(`Error on check if ${phoneOrJid} has whatsapp`)
+        logger.error(`Error on check if ${phoneOrJid} has whatsapp`)
         if (phone === phoneOrJid) {
           const jid = phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
-          console.info(`${phoneOrJid} is the phone connection ${phone} returning ${jid}`)
+          logger.info(`${phoneOrJid} is the phone connection ${phone} returning ${jid}`)
           return jid
         }
       }
       const result = results && Array.isArray(results) && results[0]
       if (result && result.exists) {
-        console.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
+        logger.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
         jids.set(phoneOrJid, result.jid)
       } else {
-        console.warn(`${phoneOrJid} not exists on WhatsApp`)
+        logger.warn(`${phoneOrJid} not exists on WhatsApp`)
       }
     }
     return jids.get(phoneOrJid) || ''
@@ -145,10 +146,10 @@ const dataStoreFile = (phone: string, config: Config): DataStore => {
   dataStore.cleanSession = async () => {
     const sessionDir = `${SESSION_DIR}/${phone}`
     if (existsSync(sessionDir)) {
-      console.info(`Clean session phone %s dir %s`, phone, sessionDir)
+      logger.info(`Clean session phone %s dir %s`, phone, sessionDir)
       return rmSync(sessionDir, { recursive: true })
     } else {
-      console.info(`Already empty session phone %s dir %s`, phone, sessionDir)
+      logger.info(`Already empty session phone %s dir %s`, phone, sessionDir)
     }
   }
   dataStore.loadTemplates = async () => {

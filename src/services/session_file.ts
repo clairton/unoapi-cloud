@@ -1,6 +1,7 @@
 import { BufferJSON } from '@whiskeysockets/baileys'
 import { rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 import { session, writeData, readData, removeData, getKey } from './session'
+import logger from './logger'
 
 export const sessionFile: session = async (
   phone: string,
@@ -49,42 +50,42 @@ export const sessionFile: session = async (
 
   const writeData: writeData = async (key: string, data: object) => {
     const file = getFile(key)
-    console.debug('write data', file)
+    logger.debug('write data', file)
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return setAuth(file, data, (value: any) => JSON.stringify(value, BufferJSON.replacer))
     } catch (error) {
-      console.error(`Error on write auth`, error)
+      logger.error(`Error on write auth`, error)
       throw error
     }
   }
 
   const readData: readData = async (key: string) => {
     const file = getFile(key)
-    console.debug('read data', file)
+    logger.debug('read data', file)
     try {
       return getAuth(file, (value: string) => {
         try {
           return value ? JSON.parse(value, BufferJSON.reviver) : undefined
         } catch (error) {
-          console.error(`Error on parsing auth: ${value}`)
+          logger.error(`Error on parsing auth: ${value}`)
           throw error
         }
       })
     } catch (error) {
-      console.error(`Error on read auth`, error)
+      logger.error(`Error on read auth`, error)
       throw error
     }
   }
 
   const removeData: removeData = async (key: string) => {
     const file = getFile(key)
-    console.debug('read data', file)
-    console.debug('remove data', file)
+    logger.debug('read data', file)
+    logger.debug('remove data', file)
     try {
       await delAuth(file)
     } catch (error) {
-      console.error(`Error on remove auth`, error)
+      logger.error(`Error on remove auth`, error)
       throw error
     }
   }

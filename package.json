@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "0.30.0-dev",
+  "version": "0.30.1-dev",
   "description": "Unoapi Cloud",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -55,6 +55,7 @@
     "mime-types": "^2.1.35",
     "node-cache": "^5.1.2",
     "node-fetch": "2",
+    "pino": "^8.14.1",
     "qrcode": "^1.5.1",
     "qrcode-terminal": "^0.12.0",
     "uuid": "^9.0.0",
