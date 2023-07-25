@@ -19,7 +19,6 @@ getStore.mockResolvedValue(store)
 store.dataStore = dataStore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getConfigTest: getConfig = async (_phone: string) => {
-  console.debug('aksjkdsjkldalkjaslkjklkj')
   return config
 }
 
