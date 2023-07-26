@@ -258,7 +258,7 @@ export const connect = async ({
         await sock.sendPresenceUpdate('paused', id)
       }
       logger.info(`${phone} is sending message ==>`, id, message)
-      return sock.sendMessage(id, message)
+      return sock.sendMessage(id, message, { backgroundColor: '' })
     }
     if (isValidPhoneNumber(id)) {
       throw new SendError(2, `The number ${to} does not have Whatsapp account or was a error verify this!`)
