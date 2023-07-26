@@ -17,6 +17,7 @@ import { Store } from './store'
 import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
+import { Level } from 'pino'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnStatus = (text: string, important: boolean) => Promise<void>
@@ -69,7 +70,7 @@ export const connect = async ({
   config = {
     ignoreHistoryMessages: true,
     autoRestart: false,
-    logLevel: '',
+    logLevel: undefined,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     shouldIgnoreJid: (_jid: string) => false,
   },
@@ -179,7 +180,7 @@ export const connect = async ({
     const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
 
     const loggerBaileys = MAIN_LOGGER.child({})
-    logger.level = config.logLevel || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
+    logger.level = config.logLevel as Level
 
     try {
       sock = makeWASocket({

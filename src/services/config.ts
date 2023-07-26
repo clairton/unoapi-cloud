@@ -3,6 +3,7 @@ import { getStoreFile } from './store_file'
 import { GroupMetadata, WAMessage, WAMessageKey } from '@whiskeysockets/baileys'
 import { isIndividualJid } from './transformer'
 import logger from './logger'
+import { Level } from 'pino'
 
 export interface GetGroupMetadata {
   (message: WAMessage, store: Store): Promise<GroupMetadata | undefined>
@@ -55,7 +56,7 @@ export type Config = {
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
-  logLevel: string
+  logLevel: Level | undefined
   getGroupMetadata: GetGroupMetadata
   ignoreDataStore: boolean
 }
@@ -71,7 +72,7 @@ export const defaultConfig: Config = {
   composingMessage: false,
   rejectCalls: '',
   rejectCallsWebhook: '',
-  logLevel: '',
+  logLevel: undefined,
   autoRestart: false,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldIgnoreJid: (_jid: string) => false,
