@@ -100,20 +100,21 @@ export const connect = async ({
     console.log('onConnectionUpdate ==>', phone, event)
     if (event.qr) {
       console.debug('QRCode generate....... %s of %s', status.attempt, attempts)
-      if (status.attempt > attempts) {
-        const message = `The ${attempts} times of generate qrcode is exceded!`
-        onStatus(message, true)
-        status.reconnecting = false
-        status.connecting = false
-        status.connected = false
-        status.disconnected = true
-        status.attempt = 1
-        sock && sock.logout()
-        dataStore.cleanSession()
-      } else {
-        onQrCode(event.qr, status.attempt, attempts)
-        status.attempt++
-      }
+      // if (status.attempt > attempts) {
+      //   const message = `The ${attempts} times of generate qrcode is exceded!`
+      //   onStatus(message, true)
+      //   status.reconnecting = false
+      //   status.connecting = false
+      //   status.connected = false
+      //   status.disconnected = true
+      //   status.attempt = 1
+      //   sock && sock.logout()
+      //   dataStore.cleanSession()
+      // } else {
+      //   onQrCode(event.qr, status.attempt, attempts)
+      //   status.attempt++
+      // }
+      onQrCode(event.qr, status.attempt, attempts)
     }
     if (event.connection === 'open') onConnected()
     else if (event.connection === 'close') onDisconnect(event)

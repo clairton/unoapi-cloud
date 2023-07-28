@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  app:
+  app-unoapi:
     build:
       dockerfile: develop.Dockerfile
     environment:
@@ -12,3 +12,8 @@ services:
     command: yarn dev
     ports:
       - 9876:9876
+    networks: 
+      - app-network
+networks:
+  app-network:
+    external: true

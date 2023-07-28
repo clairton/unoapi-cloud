@@ -230,7 +230,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       field: 'messages',
     }
     const data = {
-      object: 'whatsapp_business_account',
+      object: 'unoapi_cloud',
       entry: [
         {
           id: phone,

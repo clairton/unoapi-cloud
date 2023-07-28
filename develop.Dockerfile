@@ -1,15 +1,11 @@
-FROM node:18-alpine
+FROM node:18
 
-RUN apk --update --no-cache add git
+# RUN apk --update --no-cache add git
 
 WORKDIR /app
+ENV NODE_ENV development
 
-ADD ./package.json ./package.json
-ADD ./yarn.lock ./yarn.lock
-RUN yarn
+COPY . .
+RUN npm run build
 
-ADD ./tsconfig.json ./tsconfig.json
-ADD ./src ./src
-RUN yarn build
-
-ENTRYPOINT yarn dev
+ENTRYPOINT npm run dev

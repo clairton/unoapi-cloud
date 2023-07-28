@@ -5,7 +5,7 @@ import { Store, stores } from './store'
 import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
 import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus, OnNewLogin } from './socket'
-import { Client, getClient } from './client'
+import { Client, createConnectionInterface, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
 import { v1 as uuid } from 'uuid'
@@ -46,6 +46,16 @@ export const getClientBaileys: getClient = async ({
     console.debug('Retrieving client baileys %s', phone)
   }
   return clients.get(phone) as Client
+}
+
+export const createClientBaileys: createConnectionInterface = async ({ phone, incoming, outgoing, getConfig, onNewLogin }): Promise<boolean> => {
+  if (!clients.has(phone)) {
+    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    await client.connect()
+    return true
+  } else {
+    return false
+  }
 }
 
 const sendError = new SendError(3, 'disconnect number, please read qr code')
@@ -143,7 +153,7 @@ export class ClientBaileys implements Client {
     }
     await this.store?.dataStore?.setKey(id, waMessageKey)
     try {
-      await this.outgoing.sendOne(this.phone, waMessage)
+      await this.outgoing.sendQrCode(this.phone, qrCodeUrl)
     } catch (error) {
       await this.onWebhookError(error)
     }

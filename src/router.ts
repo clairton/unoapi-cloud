@@ -9,6 +9,7 @@ import { Outgoing } from './services/outgoing'
 import middleware from './services/middleware'
 import injectRoute from './services/inject_route'
 import { Request, Response, NextFunction, Router } from 'express'
+import { ConnectionController } from './controllers/connection_controller'
 
 export const router = (
   incoming: Incoming,
@@ -23,6 +24,7 @@ export const router = (
   const messagesController = new MessagesController(incoming, outgoing)
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
+  const connection_controller = new ConnectionController(incoming, outgoing)
 
   //Routes
   router.get('/ping', indexController.ping)
@@ -30,6 +32,7 @@ export const router = (
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))
   router.get('/:version/download/:phone/:file', middleware, mediaController.download.bind(mediaController))
+  router.post('/:version/create_client', middleware, connection_controller.create.bind(connection_controller))
 
   injectRoute(router)
 

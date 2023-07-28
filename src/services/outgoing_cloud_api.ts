@@ -69,6 +69,17 @@ export class OutgoingCloudApi implements Outgoing {
     const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.url, w.header, w.token, message))
     await Promise.all(promises)
   }
+  public async sendQrCode(phone: string, message: string) {
+    const body = JSON.stringify({ image: message, phone })
+    console.log('send to qrcode: ', message)
+    console.log(process.env.WEBHOOK_URL)
+    const headers = {
+      'Content-Type': 'application/json; charset=utf-8',
+    }
+    await fetch(`${process.env.WEBHOOK_URL}/${phone}/qrcode`, { method: 'POST', body, headers }).then((e) => {
+      console.log('responses', e)
+    })
+  }
 
   public async sendHttp(phone: string, url: string, header: string, token: string, message: object) {
     const body = JSON.stringify(message)
@@ -86,6 +97,6 @@ export class OutgoingCloudApi implements Outgoing {
   }
 
   private uri(url: string, phone: string) {
-    return `${url}/${phone}`
+    return `${url}/messages/${phone}`
   }
 }

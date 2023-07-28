@@ -10,7 +10,7 @@ import { SessionStoreFile } from './services/session_store_file'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { getConfigByEnv } from './services/config_by_env'
-import { getClientBaileys } from './services/client_baileys'
+import { createClientBaileys, getClientBaileys } from './services/client_baileys'
 const { PORT, BASE_URL } = process.env
 const port: number = parseInt(PORT || '9876')
 import { v1 as uuid } from 'uuid'
@@ -34,7 +34,7 @@ const onNewLogin: OnNewLogin = async (phone: string) => {
   outgoingCloudApi.sendOne(phone, payload)
 }
 
-const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin)
+const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin, createClientBaileys)
 const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv)
 
 app.server.listen(port, '0.0.0.0', async () => {
