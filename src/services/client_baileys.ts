@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { AnyMessageContent, WAMessage, WASocket, delay } from '@whiskeysockets/baileys'
+import { AnyMessageContent, WAMessage, delay } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
@@ -70,7 +69,6 @@ const rejectCallDefault: rejectCall = async (_keys) => {
 
 export class ClientBaileys implements Client {
   private phone: string
-  private sock: WASocket | undefined = undefined
   private config: Config = defaultConfig
   private status: Status = statusDefault
   private info: Info = infoDefault
@@ -157,7 +155,7 @@ export class ClientBaileys implements Client {
         const response: Response = await fetch(process.env.WEBHOOK_SESSION, { method: 'POST', body })
         logger.debug('Response Webhook Session', response)
       } else {
-        await this.store?.dataStore?.setKey(id, waMessageKey)        
+        await this.store?.dataStore?.setKey(id, waMessageKey)
         await this.outgoing.sendOne(this.phone, waMessage)
       }
     } catch (error) {
@@ -209,7 +207,7 @@ export class ClientBaileys implements Client {
   async connect() {
     this.config = await this.getConfig(this.phone)
     this.store = await this.config.getStore(this.phone, this.config)
-    const { sock, status, send, read, event, rejectCall } = await connect({
+    const { status, send, read, event, rejectCall } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -222,7 +220,6 @@ export class ClientBaileys implements Client {
       onDisconnected: async (_phone: string, _payload: any) => this.disconnect(),
       onReconnect: this.onReconnect,
     })
-    this.sock = sock
     this.status = status
     this.sendMessage = send
     this.readMessages = read
@@ -310,9 +307,6 @@ export class ClientBaileys implements Client {
 
   async disconnect() {
     logger.debug('Clean client, store for', this.phone)
-    if (this.sock) {
-      // await this.sock.logout(undefined)
-    }
     this.store = undefined
     // clean cache
     clients.delete(this.phone)
@@ -465,5 +459,4 @@ export class ClientBaileys implements Client {
   getInfo(): Info {
     return this.info
   }
-
 }

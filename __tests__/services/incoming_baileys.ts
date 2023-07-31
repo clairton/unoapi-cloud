@@ -29,7 +29,7 @@ class DummyClient implements Client {
   }
   getInfo(): Info {
     return mock<Info>()
-  }  
+  }
 }
 
 const dummyClient = new DummyClient()

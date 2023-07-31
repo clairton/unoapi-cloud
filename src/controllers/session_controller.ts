@@ -12,7 +12,6 @@ import { onNewLogin } from '../services/new_login'
 import logger from '../services/logger'
 
 export class SessionController {
-
   private getConfig: getConfig
   private getClient: getClient
   private incoming: Incoming
@@ -20,26 +19,26 @@ export class SessionController {
 
   constructor(incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, getClient: getClient) {
     this.incoming = incoming
-    this.outgoing = outgoing    
+    this.outgoing = outgoing
     this.getConfig = getConfig
     this.getClient = getClient
-  }  
+  }
 
   public async info(req: Request, res: Response) {
     logger.debug('info method', req.method)
     logger.debug('info headers', req.headers)
     logger.debug('info params', req.params)
     logger.debug('info body', JSON.stringify(req.body, null, ' '))
-    logger.debug('info query', JSON.stringify(req.query, null, ' '))    
+    logger.debug('info query', JSON.stringify(req.query, null, ' '))
     const { phone } = req.params
     try {
       if (clients && clients.has(phone)) {
         const client = clients.get(phone) as Client
         const config = await this.getConfig(phone)
-        return res.status(200).json({ 
+        return res.status(200).json({
           info: client.getInfo(),
           status: client.getStatus(),
-          webhooks: config.webhooks
+          webhooks: config.webhooks,
         })
       }
       return res.status(404).json({ status: 'error', message: `${phone} not found` })
@@ -53,7 +52,7 @@ export class SessionController {
     logger.debug('create headers', req.headers)
     logger.debug('create params', req.params)
     logger.debug('create body', JSON.stringify(req.body, null, ' '))
-    logger.debug('create query', JSON.stringify(req.query, null, ' '))    
+    logger.debug('create query', JSON.stringify(req.query, null, ' '))
     const { phone } = req.params
     try {
       const client: Client = await this.getClient({
@@ -64,7 +63,7 @@ export class SessionController {
         onNewLogin: onNewLogin(this.outgoing),
       })
       if (client) {
-        return res.status(200).json({ 
+        return res.status(200).json({
           info: client.getInfo(),
           status: client.getStatus(),
         })
@@ -80,14 +79,14 @@ export class SessionController {
     logger.debug('delete headers', req.headers)
     logger.debug('delete params', req.params)
     logger.debug('delete body', JSON.stringify(req.body, null, ' '))
-    logger.debug('delete query', JSON.stringify(req.query, null, ' '))    
+    logger.debug('delete query', JSON.stringify(req.query, null, ' '))
     const { phone } = req.params
     try {
       if (clients && clients.has(phone)) {
         const client = clients.get(phone) as Client
         if (client) {
           await client.disconnect()
-          return res.status(204).send()          
+          return res.status(204).send()
         }
       }
       return res.status(404).json({ status: 'error', message: `${phone} not found` })
@@ -95,5 +94,4 @@ export class SessionController {
       return res.status(500).json({ status: 'error', message: e.message })
     }
   }
-
 }

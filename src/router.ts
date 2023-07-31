@@ -30,13 +30,13 @@ export const router = (
   const messagesController = new MessagesController(incoming, outgoing)
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
-  const sessionController = new SessionController(incoming, outgoing, getConfig, getClient)  
+  const sessionController = new SessionController(incoming, outgoing, getConfig, getClient)
 
   //Routes
   router.get('/ping', indexController.ping)
   router.get('/:phone/session', middleware, sessionController.info.bind(sessionController))
   router.post('/:phone/session', middleware, sessionController.create.bind(sessionController))
-  router.delete('/:phone/session', middleware, sessionController.delete.bind(sessionController))  
+  router.delete('/:phone/session', middleware, sessionController.delete.bind(sessionController))
   router.get('/:version/:phone/message_templates', middleware, templatesController.index.bind(templatesController))
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))

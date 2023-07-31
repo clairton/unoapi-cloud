@@ -294,5 +294,5 @@ export const connect = async ({
 
   connect()
 
-  return { sock, event, status, send, read, rejectCall }
+  return { event, status, send, read, rejectCall }
 }
