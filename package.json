@@ -17,7 +17,8 @@
     "lint": "eslint src",
     "test": "ENV_FILE=./.env.test jest --coverage",
     "build": "./node_modules/typescript/bin/tsc -p .",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "clean:data": "rm -rf ./data/medias/* ./data/sessions/* ./data/stores/*.json"
   },
   "devDependencies": {
     "@types/express": "^4.17.17",

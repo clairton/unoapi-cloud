@@ -188,6 +188,7 @@ The ENV Configurations put default value and the format and same name of configs
 WEBHOOK_URL=the webhook url
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
+WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
 BASE_URL=current base url to download medias
 PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true

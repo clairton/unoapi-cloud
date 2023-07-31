@@ -58,6 +58,10 @@ export type Status = {
   connecting: boolean | undefined
 }
 
+export type Info = {
+  phone: string
+}
+
 export const connect = async ({
   phone,
   store,
@@ -290,5 +294,5 @@ export const connect = async ({
 
   connect()
 
-  return { event, status, send, read, rejectCall }
+  return { sock, event, status, send, read, rejectCall }
 }
