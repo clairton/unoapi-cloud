@@ -3,7 +3,7 @@ import { Incoming } from '../../src/services/incoming'
 import { Outgoing } from '../../src/services/outgoing'
 import { getClient, Client } from '../../src/services/client'
 import { Config, defaultConfig, getConfig, getConfigDefault } from '../../src/services/config'
-import { Status } from '../../src/services/socket'
+import { Info, Status } from '../../src/services/socket'
 import { mock } from 'jest-mock-extended'
 import logger from '../../src/services/logger'
 
@@ -27,6 +27,9 @@ class DummyClient implements Client {
   getStatus(): Status {
     return mock<Status>()
   }
+  getInfo(): Info {
+    return mock<Info>()
+  }  
 }
 
 const dummyClient = new DummyClient()

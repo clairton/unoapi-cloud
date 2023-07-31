@@ -1,7 +1,7 @@
 import { Outgoing } from './outgoing'
 import { Response } from './response'
 import { Incoming } from './incoming'
-import { OnNewLogin, Status } from './socket'
+import { Info, OnNewLogin, Status } from './socket'
 import { getConfig } from './config'
 
 export interface getClient {
@@ -35,4 +35,6 @@ export interface Client {
   send(payload: any, options: any): Promise<Response>
 
   getStatus(): Status
+
+  getInfo(): Info
 }
