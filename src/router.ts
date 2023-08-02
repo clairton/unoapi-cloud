@@ -33,6 +33,7 @@ export const router = (
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))
   router.get('/:version/download/:phone/:file', middleware, mediaController.download.bind(mediaController))
   router.post('/:version/create_client', middleware, connection_controller.create.bind(connection_controller))
+  // router.get('/healthcheck', middleware)
 
   injectRoute(router)
 

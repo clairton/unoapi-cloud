@@ -63,7 +63,8 @@ export class MessagesController {
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      return res.status(400).json({ status: 'error', message: e.message })
+      console.log('catch', e)
+      return res.status(400)
     }
   }
 }
