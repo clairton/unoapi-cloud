@@ -125,6 +125,7 @@ export const formatJid = (jid: string) => {
 export const isValidPhoneNumber = (jid: string): boolean => {
   const phoneNumber = jidToPhoneNumber(jid)
   const parsed = parsePhoneNumber(phoneNumber)
+  logger.debug('phone number %s is valid %s', phoneNumber, parsed.valid)
   return parsed.valid
 }
 

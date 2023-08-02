@@ -7,6 +7,7 @@ import {
   jidToPhoneNumber,
   fromBaileysMessageContent,
   toBaileysMessageContent,
+  isValidPhoneNumber,
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
@@ -886,5 +887,29 @@ describe('service transformer', () => {
       ],
     }
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
+  test('isValidPhoneNumber return true when 8 digits phone brazilian', async () => {
+    expect(isValidPhoneNumber('554988290955')).toEqual(true)
+  })
+
+  test('isValidPhoneNumber return true when 9 digits phone brazilian', async () => {
+    expect(isValidPhoneNumber('5549988290955')).toEqual(true)
+  })
+
+  test('isValidPhoneNumber return true when 8 digits phone brazilian with jid', async () => {
+    expect(isValidPhoneNumber('554988290955@s.whatsapp.net')).toEqual(true)
+  })
+
+  test('isValidPhoneNumber return true when 9 digits phone brazilian with jid', async () => {
+    expect(isValidPhoneNumber('5549988290955@s.whatsapp.net')).toEqual(true)
+  })
+
+  test('isValidPhoneNumber return true when +', async () => {
+    expect(isValidPhoneNumber('+554988290955')).toEqual(true)
+  })
+
+  test('isValidPhoneNumber return false when invalid', async () => {
+    expect(isValidPhoneNumber('+554998416834X')).toEqual(false)
   })
 })
