@@ -96,6 +96,14 @@ export class OutgoingCloudApi implements Outgoing {
     }
   }
 
+  public async sendChangeStatusHttp(phone: string, status: string) {
+    const headers = {
+      'Content-Type': 'application/json; charset=utf-8',
+    }
+    const body = JSON.stringify({ status })
+    await fetch(`${process.env.WEBHOOK_URL}/${phone}/change_status`, { method: 'POST', body, headers })
+  }
+
   private uri(url: string, phone: string) {
     return `${url}/messages/${phone}`
   }

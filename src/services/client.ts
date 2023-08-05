@@ -20,6 +20,22 @@ export interface getClient {
   }): Promise<Client>
 }
 
+export interface disconnectClientInterface {
+  ({
+    phone,
+    incoming,
+    outgoing,
+    getConfig,
+    onNewLogin,
+  }: {
+    phone: string
+    incoming: Incoming
+    outgoing: Outgoing
+    getConfig: getConfig
+    onNewLogin: OnNewLogin
+  }): Promise<boolean>
+}
+
 export interface createConnectionInterface {
   ({
     phone,

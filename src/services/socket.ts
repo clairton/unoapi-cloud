@@ -18,9 +18,9 @@ import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
-export type OnStatus = (text: string, important: boolean) => Promise<void>
+export type OnStatus = (text: string, important: boolean, status?: string) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type OnDisconnected = (phone: string, payload: any) => Promise<void>
+export type OnDisconnected = (phone: string, payload?: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
 export type OnReconnect = () => Promise<void>
 
@@ -54,6 +54,12 @@ export type Status = {
   disconnected: boolean
   reconnecting: boolean
   connecting: boolean | undefined
+}
+
+export const disconnectPhone = async ({ store, phone, onDisconnected }: { store: Store; phone: string; onDisconnected: OnDisconnected }) => {
+  const { dataStore } = store
+  dataStore.cleanSession()
+  onDisconnected(phone)
 }
 
 export const connect = async ({
@@ -118,7 +124,7 @@ export const connect = async ({
     }
     if (event.connection === 'open') onConnected()
     else if (event.connection === 'close') onDisconnect(event)
-    else if (event.connection === 'connecting') onStatus(`Connnecting...`, false)
+    else if (event.connection === 'connecting') onStatus(`Connnecting...`, false, 'QRCODE')
     else if (event.isNewLogin) {
       onNewLogin(phone)
     }
@@ -135,7 +141,7 @@ export const connect = async ({
 
     fetchLatestBaileysVersion().then(({ version, isLatest }) => {
       const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
-      onStatus(message, false)
+      onStatus(message, false, 'CONNECTED')
     })
   }
 
@@ -152,13 +158,16 @@ export const connect = async ({
       console.log(`${phone} destroyed`)
       dataStore.cleanSession()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      onStatus(message, true)
+      onStatus(message, true, 'DISCONECTED')
     } else if (statusCode === DisconnectReason.connectionReplaced) {
       disconnect(false)
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
-      return onStatus(message, true)
+      onStatus(message, true, 'DISCONECTED')
+    } else if (statusCode === DisconnectReason.connectionClosed) {
+      disconnect(false)
+      // dataStore.cleanSession()
     } else {
-      return reconnect()
+      reconnect()
     }
   }
 

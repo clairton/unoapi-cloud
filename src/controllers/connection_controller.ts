@@ -19,4 +19,13 @@ export class ConnectionController {
       return res.status(401).json({ message: 'Numero ja registrado' })
     }
   }
+  public async disconnect(req: Request, res: Response) {
+    const { phone } = req.params
+    const client = await this.incoming.disconnectClient(phone)
+    if (client) {
+      return res.status(200).json({ message: 'Cliente desconectado com sucesso!' })
+    } else {
+      return res.status(401).json({ message: 'Erro ao desconectar cliente!' })
+    }
+  }
 }
