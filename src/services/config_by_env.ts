@@ -1,5 +1,6 @@
 import { MessageFilter } from './message_filter'
 import { getConfig, defaultConfig, Config, ignoreGetGroupMetadata, getGroupMetadata } from './config'
+import { Level } from 'pino'
 
 const {
   IGNORE_GROUP_MESSAGES,
@@ -17,6 +18,7 @@ const {
   WEBHOOK_TOKEN,
   WEBHOOK_HEADER,
   COMPOSING_MESSAGE,
+  IGNORE_DATA_STORE,
 } = process.env
 
 let config: Config
@@ -27,11 +29,12 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _undefined: any = undefined
     config = defaultConfig
-    config.logLevel || process.env.LOG_LEVEL
-    config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES == _undefined ? true : IGNORE_GROUP_MESSAGES == 'true'
+    config.logLevel = (config.logLevel || process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
+    config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES === _undefined ? true : IGNORE_GROUP_MESSAGES == 'true'
     config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES === _undefined ? true : IGNORE_BROADCAST_STATUSES == 'true'
     config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES === _undefined ? false : IGNORE_OWN_MESSAGES == 'true'
     config.ignoreHistoryMessages = IGNORE_HISTORY_MESSAGES === _undefined ? false : IGNORE_HISTORY_MESSAGES == 'true'
+    config.ignoreDataStore = IGNORE_DATA_STORE === _undefined ? false : IGNORE_DATA_STORE == 'true'
     config.ignoreYourselfMessages = IGNORE_YOURSELF_MESSAGES === _undefined ? false : IGNORE_YOURSELF_MESSAGES == 'true'
     config.ignoreOwnMessages = IGNORE_OWN_MESSAGES === _undefined ? true : IGNORE_OWN_MESSAGES == 'true'
     config.sendConnectionStatus = SEND_CONNECTION_STATUS === _undefined ? true : SEND_CONNECTION_STATUS == 'true'
