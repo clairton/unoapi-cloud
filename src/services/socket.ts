@@ -252,7 +252,6 @@ export const connect = async ({
     status.reconnecting = !!reconnect
     if (!reconnect) {
       console.warn('LOGOUT')
-      sock?.ev.
       await sock?.logout()
     }
     console.log(`${phone} disconnecting`)
