@@ -6,6 +6,7 @@ import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
 import {
   connect,
+  disconnectInterface,
   disconnectPhone,
   OnNewLogin,
   OnQrCode,
@@ -14,9 +15,9 @@ import {
   rejectCall,
   SendError,
   sendMessage,
-  Status
+  Status,
 } from './socket'
-import {Client, createConnectionInterface, disconnectClientInterface, getClient} from './client'
+import { Client, createConnectionInterface, disconnectClientInterface, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
 import { jidToPhoneNumber, phoneNumberToJid, toBaileysMessageContent } from './transformer'
 import { v1 as uuid } from 'uuid'
@@ -62,8 +63,11 @@ export const getClientBaileys: getClient = async ({
 
 export const disconnectClient: disconnectClientInterface = async ({ phone, incoming, outgoing, getConfig, onNewLogin }) => {
   if (clients.has(phone)) {
-    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
-    await client.disconnectClient()
+    console.warn('DISCONECTING PHONE')
+    // const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    const client = clients.get(phone)
+    client?.disconnect(true)
+    // await client.disconnectClient()
     return true
   } else {
     return false
@@ -97,6 +101,10 @@ const rejectCallDefault: rejectCall = async (_keys) => {
   throw sendError
 }
 
+const disconnectSocketDefault: disconnectInterface = async (reconnect) => {
+  console.error('Erro ao desconectar whatsapp')
+}
+
 export class ClientBaileys implements Client {
   private phone: string
   private config: Config = defaultConfig
@@ -104,6 +112,7 @@ export class ClientBaileys implements Client {
   private sendMessage = sendMessageDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
+  private disconnectSocket: disconnectInterface | undefined = disconnectSocketDefault
   private outgoing: Outgoing
   private incoming: Incoming
   private store: Store | undefined
@@ -248,7 +257,7 @@ export class ClientBaileys implements Client {
   async connect() {
     this.config = await this.getConfig(this.phone)
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, event, rejectCall } = await connect({
+    const { status, send, read, event, rejectCall, disconnectManual } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -265,6 +274,7 @@ export class ClientBaileys implements Client {
     this.sendMessage = send
     this.readMessages = read
     this.rejectCall = rejectCall
+    this.disconnectSocket = disconnectManual
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
       console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
@@ -345,18 +355,35 @@ export class ClientBaileys implements Client {
       })
     }
   }
-  async disconnect() {
+  async disconnect(deleteConnection = false) {
     console.debug('Clean client, store for', this.phone)
-    this.store = undefined
-    // clean cache
-    clients.delete(this.phone)
-    stores.delete(this.phone)
-    dataStores.delete(this.phone)
-    mediaStores.delete(this.phone)
-    this.status = statusDefault
-    this.sendMessage = sendMessageDefault
-    this.readMessages = readMessagesDefault
-    this.rejectCall = rejectCallDefault
+    if (deleteConnection && this.disconnectSocket) {
+      console.log('teste', deleteConnection && this.disconnectSocket)
+      const dataStorePhone = dataStores.get(this.phone)
+      dataStorePhone?.cleanSession()
+      this.store = undefined
+      // clean cache
+      clients.delete(this.phone)
+      stores.delete(this.phone)
+      dataStores.delete(this.phone)
+      mediaStores.delete(this.phone)
+      this.status = statusDefault
+      this.sendMessage = sendMessageDefault
+      this.readMessages = readMessagesDefault
+      this.rejectCall = rejectCallDefault
+      await this.disconnectSocket(false)
+    } else {
+      this.store = undefined
+      // clean cache
+      clients.delete(this.phone)
+      stores.delete(this.phone)
+      dataStores.delete(this.phone)
+      mediaStores.delete(this.phone)
+      this.status = statusDefault
+      this.sendMessage = sendMessageDefault
+      this.readMessages = readMessagesDefault
+      this.rejectCall = rejectCallDefault
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

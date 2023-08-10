@@ -61,7 +61,7 @@ export class ConnectionInProgress extends Error {
 export interface Client {
   connect(): Promise<void>
 
-  disconnect(): Promise<void>
+  disconnect(deleteConnection?: boolean): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any, options: any): Promise<Response>

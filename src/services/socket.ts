@@ -48,6 +48,10 @@ export interface rejectCall {
   (_callId: string, _callFrom: string): Promise<void>
 }
 
+export interface disconnectInterface {
+  (reconnect: boolean): Promise<void>
+}
+
 export type Status = {
   attempt: number
   connected: boolean
@@ -185,7 +189,7 @@ export const connect = async ({
     console.debug('Connecting %s', phone)
     status.connecting = true
 
-    const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
+    const browser: WABrowserDescription = ['Respondai', 'Chrome', release()]
 
     const logger = MAIN_LOGGER.child({})
     logger.level = config.logLevel || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
@@ -227,12 +231,30 @@ export const connect = async ({
     onReconnect()
   }
 
-  const disconnect = (reconnect: boolean) => {
+  const disconnect: disconnectInterface = async (reconnect: boolean) => {
     if (status.disconnected) return
 
     status.connected = false
     status.disconnected = !reconnect
     status.reconnecting = !!reconnect
+    if (!reconnect) {
+      console.warn('LOGOUT')
+      await sock?.logout()
+    }
+    console.log(`${phone} disconnecting`)
+    return sock && sock.end(undefined)
+  }
+  const disconnectManual: disconnectInterface = async (reconnect: boolean) => {
+    if (status.disconnected) return
+
+    status.connected = false
+    status.disconnected = !reconnect
+    status.reconnecting = !!reconnect
+    if (!reconnect) {
+      console.warn('LOGOUT')
+      sock?.ev.
+      await sock?.logout()
+    }
     console.log(`${phone} disconnecting`)
     return sock && sock.end(undefined)
   }
@@ -298,5 +320,5 @@ export const connect = async ({
 
   connect()
 
-  return { event, status, send, read, rejectCall }
+  return { event, status, send, read, rejectCall, disconnectManual }
 }
