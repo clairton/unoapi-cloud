@@ -2,6 +2,7 @@ import { getStore, Store } from './store'
 import { getStoreFile } from './store_file'
 import { GroupMetadata, WAMessage, WAMessageKey } from '@whiskeysockets/baileys'
 import { isIndividualJid } from './transformer'
+import { Level } from 'pino'
 
 export interface GetGroupMetadata {
   (message: WAMessage, store: Store): Promise<GroupMetadata | undefined>
@@ -56,6 +57,7 @@ export type Config = {
   webhooks: Webhook[]
   logLevel: string
   getGroupMetadata: GetGroupMetadata
+  ignoreDataStore: boolean
 }
 
 export const defaultConfig: Config = {
@@ -86,6 +88,7 @@ export const defaultConfig: Config = {
     },
   ],
   getGroupMetadata: ignoreGetGroupMetadata,
+  ignoreDataStore: false,
 }
 
 export interface getConfig {
