@@ -2,7 +2,9 @@ import { AuthenticationState } from '@whiskeysockets/baileys'
 import { store, Store } from './store'
 import { DataStore } from './data_store'
 import { getDataStoreFile } from './data_store_file'
+import { authState } from './auth_state'
 import { useFileAuthState } from './use_file_auth_state'
+import { sessionFile } from './session_file'
 import { MEDIA_DIR } from './data_store_file'
 import { existsSync, readFileSync, rmSync, mkdirSync, renameSync } from 'fs'
 import { SESSION_DIR } from './session_store_file'
@@ -38,14 +40,19 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
   const mediaDir = `${MEDIA_DIR}/${phone}`
   console.info(`Store session in directory: ${sessionDir}`)
   console.info(`Store medias in directory: ${mediaDir}`)
-  const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await useFileAuthState(sessionDir)
+  
+  const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await authState(sessionFile, sessionDir)
+  
   const dataStore: DataStore = getDataStoreFile(phone, config) as DataStore
   const mediaStore: MediaStore = getMediaStoreFile(phone, config, getDataStoreFile) as MediaStore
+  
   const dataFile = `${STORE_DIR}/${phone}.json`
   console.info(`Store data in file: ${dataFile}`)
+  
   if (existsSync(dataFile)) {
     console.debug(`Store data in file already exist: ${dataFile}`)
     const content = readFileSync(dataFile)
+    
     if (content.toString()) {
       try {
         JSON.parse(content.toString())
@@ -59,6 +66,7 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
       rmSync(dataFile)
     }
   }
+  
   try {
     dataStore.readFromFile(dataFile)
   } catch (error) {
@@ -69,8 +77,10 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
       console.error(`Error on read data store`, error)
     }
   }
+  
   setInterval(() => {
     dataStore.writeToFile(dataFile), 10_0000
   })
+  
   return { state, saveCreds, dataStore, mediaStore }
 }
