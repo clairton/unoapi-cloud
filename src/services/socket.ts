@@ -184,7 +184,7 @@ export const connect = async ({
     const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
 
     const loggerBaileys = MAIN_LOGGER.child({})
-    logger.level = config.logLevel as Level
+    logger.level = (config.logLevel || process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
 
     try {
       sock = makeWASocket({
@@ -266,7 +266,7 @@ export const connect = async ({
       return sock.sendMessage(id, message, { backgroundColor: '' })
     }
     if (isValidPhoneNumber(id)) {
-      throw new SendError(2, `The number ${to} does not have Whatsapp account or was a error verify this!`)
+      throw new SendError(2, `The phone number ${to} does not have Whatsapp account!`)
     } else {
       throw new SendError(7, `The phone number ${to} is invalid!`)
     }
