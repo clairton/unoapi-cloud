@@ -65,7 +65,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       const url = payload[type].link
       if (url) {
         const mimetype = mime.lookup(url.split('?')[0])
-        if (mime) {
+        if (mimetype) {
           response.mimetype = mimetype
         }
         if (type == 'audio') {
