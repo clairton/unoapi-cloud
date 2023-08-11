@@ -24,7 +24,7 @@ export const authState = async (session: session, phone: string) => {
       return data
     },
     set: async (data) => {
-      const tasks = []
+      const tasks: Promise<void>[] = []
       for (const category in data) {
         for (const id in data[category]) {
           const value = data[category][id]
