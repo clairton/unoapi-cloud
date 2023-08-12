@@ -7,7 +7,9 @@ import { Outgoing } from '../../src/services/outgoing'
 import { defaultConfig, getConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
 import { getStore, Store } from '../../src/services/store'
+import { Client, getClient } from '../../src/services/client'
 
+const client = mock<Client>()
 const store = mock<Store>()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getConfigTest: getConfig = async (_phone: string) => {
@@ -17,6 +19,9 @@ const getConfigTest: getConfig = async (_phone: string) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTestStore: getStore = async (_phone: string, _config: object) => {
   return store
+}
+const getClientTest: getClient = async ({ phone, incoming, outgoing, getConfig, onNewLogin }) => {
+  return client
 }
 
 let phone: string
@@ -29,10 +34,10 @@ let outgoing: Outgoing
 describe('messages routes', () => {
   beforeEach(() => {
     phone = `${new Date().getTime()}`
-    outgoing = mock<Outgoing>()
     json = { data: `${new Date().getTime()}` }
+    outgoing = mock<Outgoing>()
     incoming = mock<Incoming>()
-    app = new App(incoming, outgoing, '', getConfigTest)
+    app = new App(incoming, outgoing, '', getConfigTest, getClientTest)
   })
 
   test('whatsapp with sucess', async () => {

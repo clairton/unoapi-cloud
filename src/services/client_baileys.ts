@@ -216,7 +216,7 @@ export class ClientBaileys implements Client {
       onStatus: this.onStatus,
       onNewLogin: this.onNewLogin,
       config: this.config,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       onDisconnected: async (_phone: string, _payload: any) => this.disconnect(),
       onReconnect: this.onReconnect,
     })
