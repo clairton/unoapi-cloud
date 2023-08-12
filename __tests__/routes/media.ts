@@ -10,13 +10,18 @@ import { writeFileSync, existsSync, mkdirSync } from 'fs'
 import { Outgoing } from '../../src/services/outgoing'
 import { getMediaStore, MediaStore } from '../../src/services/media_store'
 import { getStore, Store } from '../../src/services/store'
+import { Client, getClient } from '../../src/services/client'
+
 const phone = `${new Date().getTime()}`
 const messageId = `wa.${new Date().getTime()}`
 const url = `http://somehost`
 const mimetype = 'text/plain'
 const extension = 'txt'
+
+const client = mock<Client>()
 const dataStore = mock<DataStore>()
 const store = mock<Store>()
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTestDataStore: getDataStore = (_phone: string, _config: unknown): DataStore => {
   return dataStore
@@ -37,6 +42,9 @@ const getConfigTest: getConfig = async (_phone: string) => {
   defaultConfig.getStore = getTestStore
   return defaultConfig
 }
+const getClientTest: getClient = async ({ phone, incoming, outgoing, getConfig, onNewLogin }) => {
+  return client
+}
 
 describe('media routes', () => {
   let incoming: Incoming
@@ -46,7 +54,7 @@ describe('media routes', () => {
   beforeEach(() => {
     incoming = mock<Incoming>()
     outgoing = mock<Outgoing>()
-    app = new App(incoming, outgoing, url, getConfigTest)
+    app = new App(incoming, outgoing, url, getConfigTest, getClientTest)
   })
 
   test('index', async () => {
