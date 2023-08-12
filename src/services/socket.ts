@@ -261,7 +261,7 @@ export const connect = async ({
       logger.info(`${phone} is sending message ==>`, id, message)
       return sock.sendMessage(id, message, { backgroundColor: '' })
     }
-    if (!isValidPhoneNumber(id)) {
+    if (!isValidPhoneNumber(to)) {
       throw new SendError(7, `The phone number ${to} is invalid!`)
     }
     throw new SendError(2, `The phone number ${to} does not have Whatsapp account!`)
