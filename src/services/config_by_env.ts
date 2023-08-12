@@ -20,6 +20,7 @@ const {
   WEBHOOK_HEADER,
   COMPOSING_MESSAGE,
   IGNORE_DATA_STORE,
+  WEBHOOK_SESSION,
 } = process.env
 
 let config: Config
@@ -43,6 +44,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.baseStore = UNOAPI_BASE_STORE ? UNOAPI_BASE_STORE : './data'
     config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
+    config.sessionWebhook = WEBHOOK_SESSION || ''
     config.webhooks[0].url = WEBHOOK_URL || ''
     config.webhooks[0].token = WEBHOOK_TOKEN || ''
     if (WEBHOOK_HEADER) {
