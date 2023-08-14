@@ -266,9 +266,11 @@ export const connect = async ({
   const validateStatus = () => {
     if (status.disconnected || !status.connected) {
       if (status.connecting) {
-        throw new SendError(5, 'Wait a moment, connecting process')
+        // throw new SendError(5, 'Wait a moment, connecting process')
+        console.warn('Wait a moment, connecting process')
       } else {
-        throw new SendError(3, 'Disconnected number, please read qr code')
+        // throw new SendError(3, 'Disconnected number, please read qr code')
+        console.warn('Disconnected number, please read qr code')
       }
     }
   }

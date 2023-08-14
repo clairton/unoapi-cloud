@@ -443,7 +443,7 @@ export class ClientBaileys implements Client {
             return r
           } else {
             console.error('Response on sent to baileys is empty.....')
-            throw new SendError(5, 'Wait a moment, connecting process')
+            // throw new SendError(5, 'Wait a moment, connecting process')
           }
         } else {
           throw new Error(`Unknow message type ${type}`)

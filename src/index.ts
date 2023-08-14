@@ -20,18 +20,19 @@ import { OnNewLogin } from './services/socket'
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
 
 const onNewLogin: OnNewLogin = async (phone: string) => {
-  const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
-  const payload = {
-    key: {
-      remoteJid: phoneNumberToJid(phone),
-      id: uuid(),
-    },
-    message: {
-      conversation: message,
-    },
-    messageTimestamp: new Date().getTime(),
-  }
-  outgoingCloudApi.sendOne(phone, payload)
+  // const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
+  // const payload = {
+  //   key: {
+  //     remoteJid: phoneNumberToJid(phone),
+  //     id: uuid(),
+  //   },
+  //   message: {
+  //     conversation: message,
+  //   },
+  //   messageTimestamp: new Date().getTime(),
+  // }
+  // outgoingCloudApi.sendOne(phone, payload)
+  console.log('new login=')
 }
 
 const incomingBaileys: Incoming = new IncomingBaileys(
