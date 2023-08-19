@@ -24,7 +24,7 @@ const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfi
 const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv, getClientBaileys)
 
 app.server.listen(port, '0.0.0.0', async () => {
-  logger.info('Unoapi Cloud listening on port:', port)
+  logger.info(`Unoapi Cloud listening on port: ${port}`)
   logger.info('Successful started app!')
   const sessionStore: SessionStore = new SessionStoreFile()
   autoConnect(sessionStore, incomingBaileys, outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin(outgoingCloudApi))
