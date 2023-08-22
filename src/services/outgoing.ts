@@ -4,5 +4,5 @@ export interface Outgoing {
   send(phone: string, message: object): Promise<void>
   sendHttp(phone: string, url: string, header: string, token: string, message: object): Promise<void>
   sendQrCode(phone: string, message: string): Promise<void>
-  sendChangeStatusHttp(phone: string, status: string): Promise<void>
+  sendChangeStatusHttp(phone: string, status: string, whatsappNumberDiferente: boolean, message?: string): Promise<void>
 }

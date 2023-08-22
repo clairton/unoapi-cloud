@@ -134,7 +134,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onStatus: OnStatus = async (text: string, important, status) => {
+  private onStatus: OnStatus = async (text: string, important, status, whatsappNumberDiferente = false) => {
     if (this.config.sendConnectionStatus || important) {
       // const payload = {
       //   key: {
@@ -151,7 +151,8 @@ export class ClientBaileys implements Client {
 
       try {
         if (status) {
-          await this.outgoing.sendChangeStatusHttp(this.phone, status)
+          console.log('send status to chatbotAPI')
+          await this.outgoing.sendChangeStatusHttp(this.phone, status, whatsappNumberDiferente, text)
         } else {
           const payload = {
             key: {
@@ -267,7 +268,7 @@ export class ClientBaileys implements Client {
       onNewLogin: this.onNewLogin,
       config: this.config,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onDisconnected: async (_phone: string, _payload?: any) => this.disconnect(),
+      onDisconnected: async (_phone: string, _payload?: any, deleteConnection?: boolean) => this.disconnect(deleteConnection),
       onReconnect: this.onReconnect,
     })
     this.status = status

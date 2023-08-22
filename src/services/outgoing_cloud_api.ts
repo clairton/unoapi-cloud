@@ -96,12 +96,15 @@ export class OutgoingCloudApi implements Outgoing {
     }
   }
 
-  public async sendChangeStatusHttp(phone: string, status: string) {
+  public async sendChangeStatusHttp(phone: string, status: string, whatsappNumberDiferente: boolean, message?: string) {
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
     }
-    const body = JSON.stringify({ status })
-    await fetch(`${process.env.WEBHOOK_URL}/${phone}/change_status`, { method: 'POST', body, headers })
+    const body = JSON.stringify({ status, whatsappNumberDiferente, message })
+    console.log('status body', body)
+    await fetch(`${process.env.WEBHOOK_URL}/${phone}/change_status`, { method: 'POST', body, headers }).then((response) => {
+      console.log('response', response)
+    })
   }
 
   private uri(url: string, phone: string) {

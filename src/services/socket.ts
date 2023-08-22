@@ -18,9 +18,9 @@ import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
-export type OnStatus = (text: string, important: boolean, status?: string) => Promise<void>
+export type OnStatus = (text: string, important: boolean, status?: string, whatsappNumberDiferente?: boolean) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type OnDisconnected = (phone: string, payload?: any) => Promise<void>
+export type OnDisconnected = (phone: string, payload?: any, deleteConnection?: boolean, whatsappNumberDiferente?: boolean) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
 export type OnReconnect = () => Promise<void>
 
@@ -96,6 +96,7 @@ export const connect = async ({
   let sock: WASocket | undefined = undefined
   const msgRetryCounterCache = new NodeCache()
   const { dataStore, state, saveCreds } = store
+  let hasConflict = false
 
   const status: Status = {
     attempt: 1,
@@ -110,6 +111,7 @@ export const connect = async ({
     console.log('onConnectionUpdate ==>', phone, event)
     if (event.qr) {
       console.debug('QRCode generate....... %s of %s', status.attempt, attempts)
+      console.log('status', status)
       // if (status.attempt > attempts) {
       //   const message = `The ${attempts} times of generate qrcode is exceded!`
       //   onStatus(message, true)
@@ -158,11 +160,13 @@ export const connect = async ({
     console.log(`${phone} disconnected with status: ${statusCode}`)
     onDisconnected(phone, payload)
     if (statusCode === DisconnectReason.loggedOut) {
-      disconnect(false)
-      console.log(`${phone} destroyed`)
-      dataStore.cleanSession()
-      const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      onStatus(message, true, 'DISCONECTED')
+      if (!hasConflict) {
+        disconnect(false)
+        console.log(`${phone} destroyed`)
+        dataStore.cleanSession()
+        const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
+        onStatus(message, true, 'DISCONECTED')
+      }
     } else if (statusCode === DisconnectReason.connectionReplaced) {
       disconnect(false)
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
@@ -220,7 +224,25 @@ export const connect = async ({
     }
     if (sock) {
       dataStore.bind(sock.ev)
-      sock.ev.on('creds.update', saveCreds)
+      sock.ev.on('creds.update', async (creds) => {
+        console.log('credenciais', creds)
+        if (creds?.me) {
+          const numberPhoneCreds = creds.me?.id.split(':')[0]
+          if (numberPhoneCreds == phone) {
+            await saveCreds()
+          } else {
+            hasConflict = true
+            console.log('Numero diferentes')
+            await onStatus(
+              `O número do telefone informado ${phone} é diferente do QRcode lido (número ${numberPhoneCreds})`,
+              true,
+              'DISCONECTED',
+              true,
+            )
+            await onDisconnected(phone, '', true, true)
+          }
+        }
+      })
       sock.ev.on('connection.update', onConnectionUpdate)
     }
   }
