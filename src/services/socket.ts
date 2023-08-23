@@ -229,7 +229,7 @@ export const connect = async ({
         if (creds?.me) {
           const numberPhoneCreds = creds.me?.id.split(':')[0]
           let numberWithExtraNine
-          if (numberPhoneCreds.length < 13) {
+          if (numberPhoneCreds.startsWith('55') && numberPhoneCreds.length < 13) {
             numberWithExtraNine = numberPhoneCreds.substring(0, 4) + '9' + numberPhoneCreds.substring(4)
           }
           if (numberPhoneCreds == phone) {
