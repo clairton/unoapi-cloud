@@ -313,13 +313,13 @@ export class ClientBaileys implements Client {
       this.listener(payload)
     })
 
-    if (!this.config.ignoreHistoryMessages) {
-      console.info('Config import history messages', this.phone)
-      event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
-        console.info('Importing history messages, is latest', isLatest, this.phone)
-        this.listener(messages, false)
-      })
-    }
+    // if (!this.config.ignoreHistoryMessages) {
+    //   console.info('Config import history messages', this.phone)
+    //   event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
+    //     console.info('Importing history messages, is latest', isLatest, this.phone)
+    //     this.listener(messages, false)
+    //   })
+    // }
     if (this.config.rejectCalls) {
       console.info('Config to reject calls', this.phone, this.config.rejectCalls)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

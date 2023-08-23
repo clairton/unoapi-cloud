@@ -204,7 +204,7 @@ export const connect = async ({
         printQRInTerminal: true,
         browser,
         msgRetryCounterCache,
-        syncFullHistory: !config.ignoreHistoryMessages,
+        syncFullHistory: false,
         logger,
         getMessage,
         shouldIgnoreJid: config.shouldIgnoreJid,
