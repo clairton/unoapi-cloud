@@ -228,7 +228,13 @@ export const connect = async ({
         console.log('credenciais', creds)
         if (creds?.me) {
           const numberPhoneCreds = creds.me?.id.split(':')[0]
+          let numberWithExtraNine
+          if (numberPhoneCreds.length < 13) {
+            numberWithExtraNine = numberPhoneCreds.substring(0, 4) + '9' + numberPhoneCreds.substring(4)
+          }
           if (numberPhoneCreds == phone) {
+            await saveCreds()
+          } else if (numberWithExtraNine && numberWithExtraNine == phone) {
             await saveCreds()
           } else {
             hasConflict = true
