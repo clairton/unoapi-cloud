@@ -262,7 +262,7 @@ export const connect = async ({
         await delay(Math.floor(Math.random() * time) + 200)
         await sock.sendPresenceUpdate('paused', id)
       }
-      logger.info(`${phone} is sending message ==>`, id, message)
+      logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
       return sock.sendMessage(id, message, { backgroundColor: '' })
     }
     if (!isValidPhoneNumber(to)) {
