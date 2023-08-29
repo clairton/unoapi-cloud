@@ -62,7 +62,7 @@ export type Config = {
 
 export const defaultConfig: Config = {
   ignoreGroupMessages: true,
-  ignoreBroadcastStatuses: true,
+  ignoreBroadcastStatuses: false,
   ignoreBroadcastMessages: false,
   ignoreHistoryMessages: true,
   ignoreOwnMessages: true,
