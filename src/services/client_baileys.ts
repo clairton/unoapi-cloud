@@ -119,6 +119,7 @@ export class ClientBaileys implements Client {
   private calls = new Map<string, boolean>()
   private getConfig: getConfig
   private onNewLogin
+  private changeStatusDisconnect = true
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private onWebhookError = async (error: any) => {
@@ -152,7 +153,9 @@ export class ClientBaileys implements Client {
       try {
         if (status) {
           console.log('send status to chatbotAPI')
-          await this.outgoing.sendChangeStatusHttp(this.phone, status, whatsappNumberDiferente, text)
+          if (this.changeStatusDisconnect) {
+            await this.outgoing.sendChangeStatusHttp(this.phone, status, whatsappNumberDiferente, text)
+          }
         } else {
           const payload = {
             key: {
@@ -278,9 +281,9 @@ export class ClientBaileys implements Client {
     this.disconnectSocket = disconnectManual
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
-      console.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
+      console.log('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
       if (payload.type === 'notify') {
-        this.listener(payload.messages, false)
+        await this.listener(payload.messages, false)
       } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
         // filter self message send with this sessio to not send same message many times
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -295,11 +298,11 @@ export class ClientBaileys implements Client {
       }
     })
     event('messages.update', (messages: object[]) => {
-      console.debug('messages.update', this.phone, JSON.stringify(messages, null, ' '))
+      console.log('messages.update', this.phone, JSON.stringify(messages, null, ' '))
       this.listener(messages)
     })
     event('message-receipt.update', (messages: object[]) => {
-      console.debug('message-receipt.update', this.phone, JSON.stringify(messages, null, ' '))
+      console.log('message-receipt.update', this.phone, JSON.stringify(messages))
       this.listener(messages)
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -359,6 +362,7 @@ export class ClientBaileys implements Client {
   async disconnect(deleteConnection = false) {
     console.debug('Clean client, store for', this.phone)
     if (deleteConnection && this.disconnectSocket) {
+      this.changeStatusDisconnect = false
       console.log('teste', deleteConnection && this.disconnectSocket)
       const dataStorePhone = dataStores.get(this.phone)
       dataStorePhone?.cleanSession()
