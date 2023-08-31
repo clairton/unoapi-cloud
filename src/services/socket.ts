@@ -49,7 +49,7 @@ export interface rejectCall {
 }
 
 export interface disconnectInterface {
-  (reconnect: boolean): Promise<void>
+  (reconnect: boolean, socketClose?: boolean): Promise<void>
 }
 
 export type Status = {
@@ -129,7 +129,7 @@ export const connect = async ({
       onQrCode(event.qr, status.attempt, attempts)
     }
     if (event.connection === 'open') onConnected()
-    else if (event.connection === 'close') onDisconnect(event)
+    else if (event.connection === 'close') onDisconnect(event, true)
     else if (event.connection === 'connecting') onStatus(`Connnecting...`, false, 'QRCODE')
     else if (event.isNewLogin) {
       onNewLogin(phone)
@@ -152,7 +152,7 @@ export const connect = async ({
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onDisconnect = async (payload: any) => {
+  const onDisconnect = async (payload: any, socketClose: boolean) => {
     const { lastDisconnect } = payload
     status.connected = false
     status.connecting = false
@@ -161,7 +161,7 @@ export const connect = async ({
     onDisconnected(phone, payload)
     if (statusCode === DisconnectReason.loggedOut) {
       if (!hasConflict) {
-        disconnect(false)
+        disconnect(false, socketClose)
         console.log(`${phone} destroyed`)
         dataStore.cleanSession()
         const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
@@ -259,13 +259,13 @@ export const connect = async ({
     onReconnect()
   }
 
-  const disconnect: disconnectInterface = async (reconnect: boolean) => {
+  const disconnect: disconnectInterface = async (reconnect: boolean, socketClose = false) => {
     if (status.disconnected) return
 
     status.connected = false
     status.disconnected = !reconnect
     status.reconnecting = !!reconnect
-    if (!reconnect) {
+    if (!reconnect && !socketClose) {
       console.warn('LOGOUT')
       await sock?.logout()
     }
@@ -340,6 +340,7 @@ export const connect = async ({
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
     console.info('Subscribe %s event:', phone, event)
+    // sock?.sendMessageAck("")
     sock && sock.ev.on(event, callback)
   }
 
