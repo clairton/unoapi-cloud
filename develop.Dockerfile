@@ -1,15 +1,14 @@
 FROM node:18-alpine
 
 RUN apk --update --no-cache add git
+RUN wget -O /bin/wait-for https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for
+RUN chmod +x /bin/wait-for
 
 WORKDIR /app
 
-ADD ./package.json ./package.json
-ADD ./yarn.lock ./yarn.lock
-RUN yarn
-
-ADD ./tsconfig.json ./tsconfig.json
 ADD ./src ./src
-RUN yarn build
+ADD ./package.json ./package.json
+ADD ./tsconfig.json ./tsconfig.json
+ADD ./yarn.lock ./yarn.lock
 
-ENTRYPOINT yarn dev
+RUN yarn

@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "lib": ["es2020", "esnext.array", "DOM"]
+    "lib": ["es2020", "esnext.array", "DOM", "ES2021.String"]
   },
   "include": [
     "src/**/*"

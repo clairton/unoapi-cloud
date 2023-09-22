@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "0.31.2",
+  "version": "1.0.0-dev",
   "description": "Unoapi Cloud",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,12 +12,18 @@
   "license": "GPL-3.0",
   "private": false,
   "scripts": {
-    "dev": "./node_modules/nodemon/bin/nodemon.js",
-    "start": "node dist/index.js",
+    "cloud": "node dist/cloud.js",
     "lint": "eslint src",
     "test": "ENV_FILE=./.env.test jest --coverage",
     "build": "./node_modules/typescript/bin/tsc -p .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+    "dev": "./node_modules/nodemon/bin/nodemon.js src/index.ts",
+    "web-dev": "./node_modules/nodemon/bin/nodemon.js src/web.ts",
+    "worker-dev": "./node_modules/nodemon/bin/nodemon.js src/worker.ts",
+    "start-ts": "node --loader ts-node/esm src/index.ts",
+    "start": "node dist/index.js",
+    "web": "node dist/web.js",
+    "worker": "node dist/worker.js",
     "clean:data": "rm -rf ./data/medias/* ./data/sessions/* ./data/stores/*.json"
   },
   "devDependencies": {
@@ -48,6 +54,13 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "jschardet": "^3.0.0",
+    "yaml": "^2.2.1",
+    "@aws-sdk/client-s3": "^3.341.0",
+    "@aws-sdk/s3-request-presigner": "^3.341.0",
+    "@google-cloud/text-to-speech": "^4.2.2",
+    "@redis/client": "^1.5.6",
+    "amqplib": "^0.10.3",
     "@whiskeysockets/baileys": "^6.4.1",
     "awesome-phonenumber": "^5.1.0",
     "dotenv": "^16.0.3",

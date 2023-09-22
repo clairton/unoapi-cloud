@@ -1,6 +1,6 @@
 # Unoapi Cloud
 
-An implementation of Baileys(`https://github.com/adiwajshing/Baileys`) as
+An implementation of Baileys(`https://github.com/WhiskeySockets/Baileys`) as
 RESTful API service with multi device support with a Whatsapp Cloud API format
 `https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
@@ -180,6 +180,15 @@ Run `docker compose up`
 
 Visit `http://localhost:9876/ping` wil be render a "pong!"
 
+## Boot options
+
+`yarn start` up a single server and save session and media file in filesystem
+
+`yarn cloud` up a single server and save message in redis and message broker rabbitmq
+
+`yarn web` e `yarn worker` up a web and worker with redis and rabbitmq
+
+
 ## Environment Variables
 
 The ENV Configurations put default value and the format and same name of configs:
@@ -207,6 +216,25 @@ IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 ```
+
+Bucket env to config assets media compatible with S3:
+
+```env
+STORAGE_BUCKET_NAME
+STORAGE_ACCESS_KEY_ID
+STORAGE_SECRET_ACCESS_KEY
+STORAGE_REGION
+STORAGE_ENDPOINT
+STORAGE_FORCE_PATH_STYLE
+```
+
+Config connection to redis to temp save messages and rabbitmq broker
+
+```env
+AMQP_URL
+REDIS_URL
+```
+
 
 ## Examples
 
@@ -287,19 +315,7 @@ Released under the GPLv3 License.
 
 ## Need More
 
-Comercial version is available:
-
-- config by number connection
-- many webhooks by number connection
-- queue and process messages
-- persist session in database
-- persist contacts, groups and messages in database
-- save medias in S3 compatible
-- manage templates
-- admin dashboard
-- vpn connect by number
-
-More informations in mailto:comercial@unoapi.cloud
+Mail to comercial@unoapi.cloud
 
 ## Donate to the project.
 

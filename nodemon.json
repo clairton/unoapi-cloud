@@ -1,6 +1,5 @@
 {
   "watch": ["src"],
-  "ext": ".ts,.js",
-  "ignore": [],
-  "exec": "ts-node --esm ./src/index.ts"
+  "ext": ".ts",
+  "ignore": ["./coverage", "./dist", "__tests__", "jest.config.js"]
 }
