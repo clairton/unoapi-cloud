@@ -10,6 +10,7 @@ import middleware from './services/middleware'
 import injectRoute from './services/inject_route'
 import { Request, Response, NextFunction, Router } from 'express'
 import { ConnectionController } from './controllers/connection_controller'
+import {HealthCheckController} from "./controllers/health_check_controller";
 
 export const router = (
   incoming: Incoming,
@@ -25,15 +26,16 @@ export const router = (
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
   const connection_controller = new ConnectionController(incoming, outgoing)
+  const health_check_controller = new HealthCheckController()
 
   //Routes
-  router.get('/ping', indexController.ping)
   router.get('/:version/:phone/message_templates', middleware, templatesController.index.bind(templatesController))
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))
   router.get('/:version/download/:phone/:file', middleware, mediaController.download.bind(mediaController))
   router.post('/:version/create_client', middleware, connection_controller.create.bind(connection_controller))
   router.delete('/:version/:phone/disconnect', middleware, connection_controller.disconnect.bind(connection_controller))
+  router.get('/health_check', health_check_controller.index.bind(health_check_controller))
   // router.get('/healthcheck', middleware)
 
   injectRoute(router)
