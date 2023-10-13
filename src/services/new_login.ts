@@ -3,7 +3,7 @@ import { Outgoing } from './outgoing'
 import { OnNewLogin } from './socket'
 import { phoneNumberToJid } from './transformer'
 
-// eslint-disable-next-line
+/* eslint-disable */
 export const onNewLogin =
   (outgoing: Outgoing): OnNewLogin =>
   (phone: string): Promise<void> => {
@@ -20,3 +20,4 @@ export const onNewLogin =
     }
     return outgoing.sendOne(phone, payload)
   }
+/* eslint-enable */
