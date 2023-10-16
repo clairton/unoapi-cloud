@@ -26,7 +26,7 @@ LABEL \
   org.opencontainers.image.licenses="GPLv3"
 
 ENV NODE_ENV=production
-
+ 
 RUN addgroup -S u && adduser -S u -G u
 WORKDIR /home/u/app
 
@@ -34,7 +34,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/yarn.lock ./yarn.lock
 
-RUN apk --update --no-cache add git
+RUN apk --update --no-cache add git ffmpeg
 RUN yarn
 RUN apk del git
 
