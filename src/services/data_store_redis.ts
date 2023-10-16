@@ -140,7 +140,7 @@ const dataStoreRedis = (phone: string, config: Config): DataStore => {
     id: string,
     status: 'scheduled' | 'pending' | 'error' | 'failed' | 'sent' | 'delivered' | 'read' | 'played' | 'accepted' | 'deleted',
   ) => {
-    setMessageStatus(phone, id, status)
+    return setMessageStatus(phone, id, status)
   }
   dataStore.loadStatus = async (id: string) => {
     return getMessageStatus(phone, id)

@@ -339,7 +339,7 @@ export class ClientBaileys implements Client {
               logger.debug('Baileys already read message id %s!', payload?.message_id)
             }
           }
-          this.store?.dataStore?.setStatus(payload?.message_id, status)
+          await this.store?.dataStore?.setStatus(payload?.message_id, status)
           const r: Response = { ok: { success: true } }
           return r
         } else {
