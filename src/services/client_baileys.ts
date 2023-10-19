@@ -356,8 +356,12 @@ export class ClientBaileys implements Client {
           }
           let quoted: WAMessage | undefined = undefined
           if (payload?.context?.message_id) {
-            const remoteJid = phoneNumberToJid(to)
-            quoted = await this.store?.dataStore.loadMessage(remoteJid, payload?.context?.message_id)
+            const key = await this.store?.dataStore?.loadKey(payload?.context?.message_id)
+            logger.debug('Quoted message %s!', key?.id)
+            if (key?.id) {
+              const remoteJid = phoneNumberToJid(to)
+              quoted = await this.store?.dataStore.loadMessage(remoteJid, key?.id)
+            }
           }
           logger.debug('Send to baileys', to, content)
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

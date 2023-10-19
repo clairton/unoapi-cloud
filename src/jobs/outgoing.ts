@@ -40,6 +40,19 @@ export class OutgoingJob {
         if (idUno) {
           a.payload.key.id = idUno
         }
+        // reaction
+        const reactionId = a.payload?.message?.reactionMessage?.key?.id
+        if (reactionId) {
+          const unoReactionId = await store.dataStore.loadUnoId(reactionId)
+          a.payload.message.reactionMessage.key.id = unoReactionId
+        }
+        // quoted
+        const messageType = getMessageType(a?.payload)
+        const binMessage = messageType && a?.payload?.message && a?.payload.message[messageType]
+        if (messageType && binMessage?.contextInfo?.quotedMessage?.stanzaId) {
+          const unoStanzaId = await store.dataStore.loadUnoId(binMessage.contextInfo.quotedMessage.stanzaId)
+          a.payload.message[messageType].contextInfo.quotedMessage.stanzaId = unoStanzaId
+        }
       }
       await this.service.sendOne(phone, a.payload)
     }
