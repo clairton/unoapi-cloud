@@ -120,7 +120,7 @@ const authKey = (phone: string) => {
 }
 
 const messageStatusKey = (phone: string, id: string) => {
-  return `${BASE_KEY}-message-status:${phone}:${id}`
+  return `${BASE_KEY}message-status:${phone}:${id}`
 }
 
 const bulkMessageKeyBase = (phone: string, bulkId: string) => {
