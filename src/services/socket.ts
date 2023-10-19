@@ -248,7 +248,7 @@ export const connect = async ({
     }
   }
 
-  const send: sendMessage = async (to: string, message: AnyMessageContent, options = { composing: false }) => {
+  const send: sendMessage = async (to: string, message: AnyMessageContent, options = { composing: false, quoted: undefined }) => {
     validateStatus()
     const id = isJidGroup(to) ? to : await exists(to)
     if (sock && id) {
@@ -263,7 +263,11 @@ export const connect = async ({
         await sock.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
-      return sock.sendMessage(id, message, { backgroundColor: '' })
+      const opts = { backgroundColor: '' }
+      if (options.quoted) {
+        opts['quoted'] = options.quoted
+      }
+      return sock.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
       throw new SendError(7, `The phone number ${to} is invalid!`)

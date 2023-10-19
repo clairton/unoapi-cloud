@@ -354,13 +354,18 @@ export class ClientBaileys implements Client {
           } else {
             content = toBaileysMessageContent(payload)
           }
+          let quoted: WAMessage | undefined = undefined
+          if (payload?.context?.message_id) {
+            const remoteJid = phoneNumberToJid(to)
+            quoted = await this.store?.dataStore.loadMessage(remoteJid, payload?.context?.message_id)
+          }
           logger.debug('Send to baileys', to, content)
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
           await toDelay(this.phone, to)
-          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, ...options })
+          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, quoted, ...options })
           if (response) {
             logger.debug('Sent to baileys', response)
             const key = response.key
