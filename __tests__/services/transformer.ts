@@ -193,9 +193,7 @@ describe('service transformer', () => {
         extendedTextMessage: {
           text: body,
           contextInfo: {
-            quotedMessage: {
-              stanzaId,
-            },
+            stanzaId,
           },
         },
       },

@@ -49,9 +49,9 @@ export class OutgoingJob {
         // quoted
         const messageType = getMessageType(a?.payload)
         const binMessage = messageType && a?.payload?.message && a?.payload.message[messageType]
-        if (messageType && binMessage?.contextInfo?.quotedMessage?.stanzaId) {
-          const unoStanzaId = await store.dataStore.loadUnoId(binMessage.contextInfo.quotedMessage.stanzaId)
-          a.payload.message[messageType].contextInfo.quotedMessage.stanzaId = unoStanzaId
+        if (messageType && binMessage?.contextInfo?.stanzaId) {
+          const unoStanzaId = await store.dataStore.loadUnoId(binMessage.contextInfo.stanzaId)
+          a.payload.message[messageType].contextInfo.stanzaId = unoStanzaId
         }
       }
       await this.service.sendOne(phone, a.payload)
