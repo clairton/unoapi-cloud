@@ -214,6 +214,7 @@ describe('service transformer', () => {
                   {
                     context: {
                       message_id: stanzaId,
+                      id: stanzaId,
                     },
                     from: '5549988290955', // with 9 digit
                     id,

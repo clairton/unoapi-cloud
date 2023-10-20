@@ -490,6 +490,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       if (binMessage?.contextInfo?.stanzaId) {
         message.context = {
           message_id: binMessage?.contextInfo?.stanzaId,
+          id: binMessage?.contextInfo?.stanzaId,
         }
       }
       change.value.messages.push(message)

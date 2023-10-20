@@ -355,8 +355,9 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           let quoted: WAMessage | undefined = undefined
-          if (payload?.context?.message_id) {
-            const key = await this.store?.dataStore?.loadKey(payload?.context?.message_id)
+          const messageId = payload?.context?.message_id || payload?.context?.id
+          if (messageId) {
+            const key = await this.store?.dataStore?.loadKey(messageId)
             logger.debug('Quoted message %s!', key?.id)
             if (key?.id) {
               const remoteJid = phoneNumberToJid(to)
