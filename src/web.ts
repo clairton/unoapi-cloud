@@ -33,6 +33,6 @@ amqpGetChannel(UNOAPI_JOB_INCOMING, AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELA
 const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, getClientBaileys, security, injectRoute)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
-  logger.info('Unoapi Cloud Pro listening on port:', PORT)
+  logger.info('Unoapi Cloud Pro listening on port: %s', PORT)
   logger.info('Successful started app!')
 })

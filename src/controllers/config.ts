@@ -23,23 +23,23 @@ export class ConfigController {
   }
 
   public async get(req: Request, res: Response) {
-    logger.debug('register get headers', req.headers)
-    logger.debug('register get body', req.body)
-    logger.debug('register get params', req.params)
+    logger.debug('register get headers %s', req.headers)
+    logger.debug('register get body %s', req.body)
+    logger.debug('register get params %s', req.params)
     const { phone } = req.params
     try {
       const config = await getConfig(phone)
       res.send(JSON.stringify({ config }))
     } catch (e) {
-      logger.error('Error on retieve config', e)
+      logger.error('Error on retieve config: %s', e)
       return res.status(400).json({ status: 'error', message: 'Error on retieve config' })
     }
   }
 
   public async set(req: Request, res: Response) {
-    logger.debug('register get headers', req.headers)
-    logger.debug('register get body', req.body)
-    logger.debug('register get params', req.params)
+    logger.debug('register get headers %s', req.headers)
+    logger.debug('register get body %s', req.body)
+    logger.debug('register get params %s', req.params)
     const { phone } = req.params
     const { config } = req.body
     try {
@@ -74,7 +74,7 @@ export class ConfigController {
       }
       res.sendStatus(200)
     } catch (e) {
-      logger.error('Error on register config', e)
+      logger.error('Error on register config: %s', e)
       return res.status(400).json({ status: 'error', message: 'Error on register config' })
     }
   }

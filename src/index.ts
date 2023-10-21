@@ -34,7 +34,7 @@ export default app
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection:', reason.stack)
-  logger.error('promise:', promise)
+  logger.error('unhandledRejection: %s', reason.stack)
+  logger.error('promise: %s', promise)
   throw reason
 })

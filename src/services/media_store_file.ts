@@ -105,7 +105,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
         if (remoteJid && id) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const message: any = await store.loadMessage(remoteJid, id)
-          logger.debug('message %s for %s', JSON.stringify(message, null, ' '), JSON.stringify(key, null, ' '))
+          logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
             const messageType = getMessageType(message)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,13 +124,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     const store = await getDataStore(phone, config)
     if (mediaId) {
       const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
-      logger.debug('key %s for %s', JSON.stringify(key, null, ' '), mediaId)
+      logger.debug('key %s for %s', JSON.stringify(key), mediaId)
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const message: any = await store.loadMessage(remoteJid, id)
-          logger.debug('message %s for %s', JSON.stringify(message, null, ' '), JSON.stringify(key, null, ' '))
+          logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
             const messageType = getMessageType(message)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

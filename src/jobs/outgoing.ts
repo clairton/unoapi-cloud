@@ -44,13 +44,16 @@ export class OutgoingJob {
         const reactionId = a.payload?.message?.reactionMessage?.key?.id
         if (reactionId) {
           const unoReactionId = await store.dataStore.loadUnoId(reactionId)
+          logger.debug('Unoapi reaction id %s to Baileys reaction id %s', unoReactionId, reactionId)
           a.payload.message.reactionMessage.key.id = unoReactionId
         }
         // quoted
         const messageType = getMessageType(a?.payload)
         const binMessage = messageType && a?.payload?.message && a?.payload.message[messageType]
-        if (messageType && binMessage?.contextInfo?.stanzaId) {
-          const unoStanzaId = await store.dataStore.loadUnoId(binMessage.contextInfo.stanzaId)
+        const stanzaId = binMessage?.contextInfo?.stanzaId
+        if (messageType && stanzaId) {
+          const unoStanzaId = await store.dataStore.loadUnoId(stanzaId)
+          logger.debug('Unoapi stanza id %s to Baileys stanza id %s', unoStanzaId, stanzaId)
           a.payload.message[messageType].contextInfo.stanzaId = unoStanzaId
         }
       }

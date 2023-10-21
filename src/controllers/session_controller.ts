@@ -25,11 +25,11 @@ export class SessionController {
   }
 
   public async info(req: Request, res: Response) {
-    logger.debug('info method', req.method)
-    logger.debug('info headers', req.headers)
-    logger.debug('info params', req.params)
-    logger.debug('info body', JSON.stringify(req.body, null, ' '))
-    logger.debug('info query', JSON.stringify(req.query, null, ' '))
+    logger.debug('info method %s', req.method)
+    logger.debug('info headers %s', req.headers)
+    logger.debug('info params %s', req.params)
+    logger.debug('info body %s', JSON.stringify(req.body))
+    logger.debug('info query', JSON.stringify(req.query))
     const { phone } = req.params
     try {
       if (clients && clients.has(phone)) {
@@ -48,11 +48,11 @@ export class SessionController {
   }
 
   public async create(req: Request, res: Response) {
-    logger.debug('create method', req.method)
-    logger.debug('create headers', req.headers)
-    logger.debug('create params', req.params)
-    logger.debug('create body', JSON.stringify(req.body, null, ' '))
-    logger.debug('create query', JSON.stringify(req.query, null, ' '))
+    logger.debug('create method %s', req.method)
+    logger.debug('create headers %s', req.headers)
+    logger.debug('create params %s', req.params)
+    logger.debug('create body %s', JSON.stringify(req.body))
+    logger.debug('create query %s', JSON.stringify(req.query))
     const { phone } = req.params
     try {
       const client: Client = await this.getClient({
@@ -75,11 +75,11 @@ export class SessionController {
   }
 
   public async delete(req: Request, res: Response) {
-    logger.debug('delete method', req.method)
-    logger.debug('delete headers', req.headers)
-    logger.debug('delete params', req.params)
-    logger.debug('delete body', JSON.stringify(req.body, null, ' '))
-    logger.debug('delete query', JSON.stringify(req.query, null, ' '))
+    logger.debug('delete method %s', req.method)
+    logger.debug('delete headers %s', req.headers)
+    logger.debug('delete params %s', req.params)
+    logger.debug('delete body %s', JSON.stringify(req.body))
+    logger.debug('delete query %s', JSON.stringify(req.query))
     const { phone } = req.params
     try {
       if (clients && clients.has(phone)) {

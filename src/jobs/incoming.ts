@@ -28,7 +28,7 @@ export class IncomingJob {
     const options: object = a.options
     const idUno: string = a.id
     const response = await this.incoming.send(phone, payload, options)
-    logger.debug('Baileys response', phone, JSON.stringify(response, null, ' '))
+    logger.debug('Baileys response %s', phone, JSON.stringify(response))
     const channelNumber = phone.replace('+', '')
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
@@ -48,7 +48,7 @@ export class IncomingJob {
         dataStore.setKey(idUno, key)
       }
     } else if (!ok.success) {
-      throw `Unknow response ${JSON.stringify(response, null, ' ')}`
+      throw `Unknow response ${JSON.stringify(response)}`
     }
     let outgingPayload
     if (error) {

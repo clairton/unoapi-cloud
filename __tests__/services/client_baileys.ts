@@ -17,11 +17,11 @@ const mockConnect = connect as jest.MockedFunction<typeof connect>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const event = (event, _callback) => {
-  logger.info('subscribe event: ', event)
+  logger.info('subscribe event: %s', event)
 }
 
 const onNewLogin = async (phone: string) => {
-  logger.info('New login', phone)
+  logger.info('New login %s', phone)
 }
 
 describe('service client baileys', () => {

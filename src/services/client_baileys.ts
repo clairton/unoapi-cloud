@@ -226,7 +226,7 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCall
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
-      logger.debug('messages.upsert', this.phone, JSON.stringify(payload, null, ' '))
+      logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
       if (payload.type === 'notify') {
         this.listener(payload.messages, false)
       } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
@@ -243,16 +243,16 @@ export class ClientBaileys implements Client {
       }
     })
     event('messages.update', (messages: object[]) => {
-      logger.debug('messages.update', this.phone, JSON.stringify(messages, null, ' '))
+      logger.debug('messages.update %s', this.phone, JSON.stringify(messages))
       this.listener(messages)
     })
     event('message-receipt.update', (messages: object[]) => {
-      logger.debug('message-receipt.update', this.phone, JSON.stringify(messages, null, ' '))
+      logger.debug('message-receipt.update %s', this.phone, JSON.stringify(messages))
       this.listener(messages)
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.delete', (update: any) => {
-      logger.debug('messages.delete', this.phone, JSON.stringify(update, null, ' '))
+      logger.debug('messages.delete %s', this.phone, JSON.stringify(update))
       const keys = update.keys || []
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload = keys.map((key: any) => {

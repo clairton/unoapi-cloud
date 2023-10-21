@@ -487,15 +487,16 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
       change.value.statuses.push(state)
     } else {
       // {"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3A4F0B7A946F046A1AD0"},"messageTimestamp":1676632069,"pushName":"Clairton Rodrigo Heinzen","message":{"extendedTextMessage":{"text":"Isso","contextInfo":{"stanzaId":"BAE50C61B223F799","participant":"554998360838@s.whatsapp.net","quotedMessage":{"conversation":"*Odonto Excellence*: teste"}}},"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"31S8mj42p3wLiQ==","senderTimestamp":"1676571145","recipientKeyHash":"tz8qTGvqyPjOUw==","recipientTimestamp":"1675040504"},"deviceListMetadataVersion":2}}}
-      if (binMessage?.contextInfo?.stanzaId) {
+      const stanzaId = binMessage?.contextInfo?.stanzaId
+      if (stanzaId) {
         message.context = {
-          message_id: binMessage?.contextInfo?.stanzaId,
-          id: binMessage?.contextInfo?.stanzaId,
+          message_id: stanzaId,
+          id: stanzaId,
         }
       }
       change.value.messages.push(message)
     }
-    logger.debug('fromBaileysMessageContent', phone, JSON.stringify(data, null, ' '))
+    logger.debug('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
     return data
   } catch (e) {
     logger.error('Error on convert baileys to cloud-api', e)

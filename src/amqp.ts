@@ -29,11 +29,11 @@ export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   }
 
   amqpConnection.on('error', (err) => {
-    logger.error('Connection Error', err)
+    logger.error('Connection Error %s', err)
     amqpConnection = undefined
   })
   amqpConnection.on('close', (err) => {
-    logger.error('Connection Closed', err)
+    logger.error('Connection Closed %s', err)
     amqpConnection = undefined
   })
 
@@ -55,11 +55,11 @@ export const amqpGetChannel = async (
     const channel = await amqpCreateChannel(connection, queue, options)
     channels.set(queue, channel)
     channel.on('error', (err) => {
-      logger.error('Channel Error', err)
+      logger.error('Channel Error %s', err)
       channels.delete(queue)
     })
     channel.on('close', (err) => {
-      logger.error('Channel Closed', err)
+      logger.error('Channel Closed %s', err)
       channels.delete(queue)
     })
   }

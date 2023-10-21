@@ -96,7 +96,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
         if (remoteJid && id) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const message: any = await store.loadMessage(remoteJid, id)
-          logger.debug('message %s for %s', JSON.stringify(message, null, ' '), JSON.stringify(key, null, ' '))
+          logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
             const messageType = getMessageType(message)
             const binMessage = messageType && message.message[messageType]

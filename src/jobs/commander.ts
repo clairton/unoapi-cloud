@@ -53,7 +53,7 @@ export class CommanderJob {
       }
       this.outgoing.sendOne(phone, message)
     } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-webhook') {
-      logger.debug('Parsing webhook template...', phone)
+      logger.debug('Parsing webhook template... %s', phone)
       /**
        * webhook config expected
        * url:
@@ -63,14 +63,14 @@ export class CommanderJob {
       try {
         const service = new Template(this.getConfig)
         const { text } = await service.bind(phone, payload?.template.name, payload?.template.components)
-        logger.debug('Template webhook content', text)
+        logger.debug('Template webhook content %s', text)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const doc = parseDocument(text)
         if (doc.errors.length) {
-          logger.error('Error os parse yml', doc.errors)
+          logger.error('Error os parse yml %s', doc.errors)
         }
         const webhook = doc.toJS()
-        logger.debug('Template webhook', phone, JSON.stringify(webhook))
+        logger.debug('Template webhook %s', phone, JSON.stringify(webhook))
         const configRedis = (await this.getConfig(phone)) || {}
         const config = { ...configRedis }
         config.webhooks = [webhook]
@@ -81,7 +81,7 @@ export class CommanderJob {
         logger.error('Erro on parse to yml', error)
       }
     } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
-      logger.debug('Parsing bulk report template...', phone)
+      logger.debug('Parsing bulk report template... %s', phone)
       /**
        * webhook config expected
        * url:
@@ -91,28 +91,28 @@ export class CommanderJob {
       try {
         const service = new Template(this.getConfig)
         const { text } = await service.bind(phone, payload?.template.name, payload?.template.components)
-        logger.debug('Template bulk report content', text)
+        logger.debug('Template bulk report content %s', text)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const doc = parseDocument(text)
         if (doc.errors.length) {
-          logger.error('Error os parse yml', doc.errors)
+          logger.error('Error os parse yml %s', doc.errors)
         }
         const { bulk } = doc.toJS()
         await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, { phone, payload: { phone, id: bulk, unverified: true } })
       } catch (error) {
-        logger.error('Erro on parse to yml', error)
+        logger.error('Erro on parse to yml %s', error)
       }
     } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
-      logger.debug('Parsing config template...', phone)
+      logger.debug('Parsing config template... %s', phone)
       try {
         const service = new Template(this.getConfig)
         const { text } = await service.bind(phone, payload?.template.name, payload?.template.components)
         const doc = parseDocument(text)
         if (doc.errors.length) {
-          logger.error('Error os parse yml', doc.errors)
+          logger.error('Error os parse yml %s', doc.errors)
         }
         const configParsed = doc.toJS() || {}
-        logger.debug('Config template parsed', phone, JSON.stringify(configParsed))
+        logger.debug('Config template parsed %s', phone, JSON.stringify(configParsed))
         const keys = Object.keys(configParsed)
         const configToUpdate = keys.reduce((acc, key) => {
           if (configParsed[key]) {
@@ -120,14 +120,14 @@ export class CommanderJob {
           }
           return acc
         }, {})
-        logger.debug('Config template to update', phone, JSON.stringify(configToUpdate))
+        logger.debug('Config template to update %s', phone, JSON.stringify(configToUpdate))
         const configRedis = (await this.getConfig(phone)) || {}
         const config = { ...configRedis, ...configToUpdate }
         logger.debug('Change config %s to %s', JSON.stringify(configRedis), JSON.stringify(config))
         configs.delete(phone)
         await setConfig(phone, config)
       } catch (error) {
-        logger.error('Erro on parse to yml', error)
+        logger.error('Erro on parse to yml %s', error)
       }
     } else {
       logger.debug(`Commander ignore`)

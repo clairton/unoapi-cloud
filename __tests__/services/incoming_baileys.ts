@@ -54,7 +54,7 @@ const getClientDummy: getClient = async ({
 }
 
 const onNewLogin = async (phone: string) => {
-  logger.info('New login', phone)
+  logger.info('New login %s', phone)
 }
 
 describe('service incoming baileys', () => {

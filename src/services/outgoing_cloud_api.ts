@@ -86,7 +86,7 @@ export class OutgoingCloudApi implements Outgoing {
       logger.error(`Error on send to url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
     }
-    logger.debug('Response: ', response.status)
+    logger.debug('Response: %s', response.status)
     if (!response.ok) {
       throw await response.text()
     }

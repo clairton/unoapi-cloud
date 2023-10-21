@@ -48,18 +48,18 @@ export class MessagesController {
   }
 
   public async index(req: Request, res: Response) {
-    logger.debug('messages method', req.method)
-    logger.debug('messages headers', req.headers)
-    logger.debug('messages params', req.params)
-    logger.debug('messages body', JSON.stringify(req.body, null, ' '))
+    logger.debug('messages method %s', req.method)
+    logger.debug('messages headers %s', req.headers)
+    logger.debug('messages params %s', req.params)
+    logger.debug('messages body %s', JSON.stringify(req.body))
     const { phone } = req.params
     const payload: object = req.body
     try {
       const response: ResponseUno = await this.incoming.send(phone, payload, {})
-      logger.debug('messages response', JSON.stringify(response.ok, null, ' '))
+      logger.debug('messages response %s', JSON.stringify(response.ok))
       await res.status(200).json(response.ok)
       if (response.error) {
-        logger.debug('messages return status', JSON.stringify(response.error, null, ' '))
+        logger.debug('messages return status %s', JSON.stringify(response.error))
         await this.outgoing.send(phone, response.error)
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

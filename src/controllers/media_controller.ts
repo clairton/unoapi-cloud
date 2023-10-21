@@ -12,10 +12,10 @@ export class MediaController {
   }
 
   public async index(req: Request, res: Response) {
-    logger.debug('media index method', req.method)
-    logger.debug('media index headers', req.headers)
-    logger.debug('media index params', req.params)
-    logger.debug('media index body', JSON.stringify(req.body, null, ' '))
+    logger.debug('media index method %s', req.method)
+    logger.debug('media index headers %s', req.headers)
+    logger.debug('media index params %s', req.params)
+    logger.debug('media index body %s', JSON.stringify(req.body))
     const { media_id: mediaId, phone } = req.params
     if (mediaId) {
       const config = await this.getConfig(phone)
@@ -26,10 +26,10 @@ export class MediaController {
   }
 
   public async download(req: Request, res: Response) {
-    logger.debug('media download method', req.method)
-    logger.debug('media download headers', req.headers)
-    logger.debug('media download params', req.params)
-    logger.debug('media download body', JSON.stringify(req.body, null, ' '))
+    logger.debug('media download method %s', req.method)
+    logger.debug('media download headers %s', req.headers)
+    logger.debug('media download params %s', req.params)
+    logger.debug('media download body %s', JSON.stringify(req.body))
     const { file, phone } = req.params
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
