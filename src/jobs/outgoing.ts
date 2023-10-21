@@ -32,29 +32,37 @@ export class OutgoingJob {
       await Promise.all(filteredMessages.map(async (m) => amqpEnqueue(this.queueOutgoing, { phone, payload: m, split: false })))
     } else {
       const key = a.payload.key
+      const store = await config.getStore(phone, config)
       // possible update message
       if (key && key?.fromMe) {
-        const store = await config.getStore(phone, config)
         const idUno = await store.dataStore.loadUnoId(key.id)
         logger.debug('Unoapi id %s to Baileys id %s', idUno, a.payload.key.id)
         if (idUno) {
           a.payload.key.id = idUno
         }
-        // reaction
-        const reactionId = a.payload?.message?.reactionMessage?.key?.id
-        if (reactionId) {
-          const unoReactionId = await store.dataStore.loadUnoId(reactionId)
+      }
+      // reaction
+      const reactionId = a.payload?.message?.reactionMessage?.key?.id
+      if (reactionId) {
+        const unoReactionId = await store.dataStore.loadUnoId(reactionId)
+        if (unoReactionId) {
           logger.debug('Unoapi reaction id %s to Baileys reaction id %s', unoReactionId, reactionId)
           a.payload.message.reactionMessage.key.id = unoReactionId
+        } else {
+          logger.debug('Unoapi reaction id %s not overrided', reactionId)
         }
-        // quoted
-        const messageType = getMessageType(a?.payload)
-        const binMessage = messageType && a?.payload?.message && a?.payload.message[messageType]
-        const stanzaId = binMessage?.contextInfo?.stanzaId
-        if (messageType && stanzaId) {
-          const unoStanzaId = await store.dataStore.loadUnoId(stanzaId)
+      }
+      // quoted
+      const messageType = getMessageType(a?.payload)
+      const binMessage = messageType && a?.payload?.message && a?.payload.message[messageType]
+      const stanzaId = binMessage?.contextInfo?.stanzaId
+      if (messageType && stanzaId) {
+        const unoStanzaId = await store.dataStore.loadUnoId(stanzaId)
+        if (unoStanzaId) {
           logger.debug('Unoapi stanza id %s to Baileys stanza id %s', unoStanzaId, stanzaId)
           a.payload.message[messageType].contextInfo.stanzaId = unoStanzaId
+        } else {
+          logger.debug('Unoapi stanza id %s not overrided', stanzaId)
         }
       }
       await this.service.sendOne(phone, a.payload)
