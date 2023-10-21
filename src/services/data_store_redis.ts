@@ -10,7 +10,7 @@ import {
   isJidGroup,
 } from '@whiskeysockets/baileys'
 import { DataStore } from './data_store'
-import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE } from './transformer'
+import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
 import {
   delAuth,
@@ -118,18 +118,14 @@ const dataStoreRedis = (phone: string, config: Config): DataStore => {
     }
     return jid || ''
   }
-  dataStore.loadMessage = async (jid: string, id: string) => {
-    const split = jid.split('@')
-    const number = split[0].split(':')[0]
-    const newJid = `${number}@${split[1]}`
+  dataStore.loadMessage = async (remoteJid: string, id: string) => {
+    const newJid = isJidGroup(remoteJid) ? remoteJid : phoneNumberToJid(jidToPhoneNumber(remoteJid))
     const m = await getMessage(phone, newJid, id)
     const wm = m as proto.IWebMessageInfo
     return wm
   }
   dataStore.setMessage = async (remoteJid: string, message: WAMessage) => {
-    const split = remoteJid.split('@')
-    const number = split[0].split(':')[0]
-    const newJid = `${number}@${split[1]}`
+    const newJid = isJidGroup(remoteJid) ? remoteJid : phoneNumberToJid(jidToPhoneNumber(remoteJid))
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return setMessage(phone, newJid, message.key.id!, message)
   }
