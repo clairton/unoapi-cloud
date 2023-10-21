@@ -358,10 +358,11 @@ export class ClientBaileys implements Client {
           const messageId = payload?.context?.message_id || payload?.context?.id
           if (messageId) {
             const key = await this.store?.dataStore?.loadKey(messageId)
-            logger.debug('Quoted message %s!', key?.id)
+            logger.debug('Quoted message key %s!', key?.id)
             if (key?.id) {
               const remoteJid = phoneNumberToJid(to)
               quoted = await this.store?.dataStore.loadMessage(remoteJid, key?.id)
+              logger.debug('Quoted message %s!', JSON.stringify(quoted))
             }
           }
           logger.debug('Send to baileys', to, content)
