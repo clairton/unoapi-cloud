@@ -362,6 +362,12 @@ export class ClientBaileys implements Client {
             if (key?.id) {
               const remoteJid = phoneNumberToJid(to)
               quoted = await this.store?.dataStore.loadMessage(remoteJid, key?.id)
+              if (!quoted) {
+                const unoId = await this.store?.dataStore?.loadUnoId(key?.id)
+                if (unoId) {
+                  quoted = await this.store?.dataStore.loadMessage(remoteJid, unoId)
+                }
+              }
               logger.debug('Quoted message %s!', JSON.stringify(quoted))
             }
           }
@@ -373,7 +379,7 @@ export class ClientBaileys implements Client {
           await toDelay(this.phone, to)
           const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, quoted, ...options })
           if (response) {
-            logger.debug('Sent to baileys', response)
+            logger.debug('Sent to baileys %s', response)
             const key = response.key
             const ok = {
               messaging_product: 'whatsapp',
