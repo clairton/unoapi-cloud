@@ -109,12 +109,12 @@ export class ClientBaileys implements Client {
         },
         messageTimestamp: new Date().getTime(),
       }
-      logger.debug('onStatus', JSON.stringify(payload))
+      logger.debug('onStatus %s', JSON.stringify(payload))
       try {
         if (this.config.sessionWebhook) {
           const body = JSON.stringify({ info: this.info, status: this.status, ...payload })
           const response: Response = await fetch(this.config.sessionWebhook, { method: 'POST', body })
-          logger.debug('Response OnStatus Webhook Session', response)
+          logger.debug('Response OnStatus Webhook Session %s', JSON.stringify(response))
         } else {
           const response = await this.outgoing.sendOne(this.phone, payload)
           return response
@@ -127,7 +127,7 @@ export class ClientBaileys implements Client {
   }
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
-    logger.debug('Received qrcode', this.phone, qrCode)
+    logger.debug('Received qrcode %s %s', this.phone, qrCode)
     const messageTimestamp = new Date().getTime()
     const id = uuid()
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
@@ -153,7 +153,7 @@ export class ClientBaileys implements Client {
       if (this.config.sessionWebhook) {
         const body = JSON.stringify({ info: this.info, status: this.status, ...waMessage })
         const response: Response = await fetch(this.config.sessionWebhook, { method: 'POST', body })
-        logger.debug('Response Webhook Session', response)
+        logger.debug('Response Webhook Session %', JSON.stringify(response))
       } else {
         await this.store?.dataStore?.setKey(id, waMessageKey)
         await this.outgoing.sendOne(this.phone, waMessage)
@@ -243,11 +243,11 @@ export class ClientBaileys implements Client {
       }
     })
     event('messages.update', (messages: object[]) => {
-      logger.debug('messages.update %s', this.phone, JSON.stringify(messages))
+      logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
       this.listener(messages)
     })
     event('message-receipt.update', (messages: object[]) => {
-      logger.debug('message-receipt.update %s', this.phone, JSON.stringify(messages))
+      logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(messages))
       this.listener(messages)
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,14 +262,14 @@ export class ClientBaileys implements Client {
     })
 
     if (!this.config.ignoreHistoryMessages) {
-      logger.info('Config import history messages', this.phone)
+      logger.info('Config import history messages %', this.phone)
       event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
-        logger.info('Importing history messages, is latest', isLatest, this.phone)
+        logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
         this.listener(messages, false)
       })
     }
     if (this.config.rejectCalls) {
-      logger.info('Config to reject calls', this.phone, this.config.rejectCalls)
+      logger.info('Config to reject calls %s %s', this.phone, this.config.rejectCalls)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       event('call', async (events: any[]) => {
         for (let i = 0; i < events.length; i++) {
@@ -296,7 +296,7 @@ export class ClientBaileys implements Client {
               }
             }
             setTimeout(() => {
-              logger.debug('Clean call rejecteds', from)
+              logger.debug('Clean call rejecteds %s', from)
               this.calls.delete(from)
             }, 10_000)
           }
@@ -379,7 +379,7 @@ export class ClientBaileys implements Client {
           await toDelay(this.phone, to)
           const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, quoted, ...options })
           if (response) {
-            logger.debug('Sent to baileys %s', response)
+            logger.debug('Sent to baileys %s', JSON.stringify(response))
             const key = response.key
             const ok = {
               messaging_product: 'whatsapp',

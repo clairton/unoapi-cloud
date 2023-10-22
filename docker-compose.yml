@@ -26,7 +26,7 @@ x-minio: &minio
   env_file: .env
   environment:
     MINIO_SERVER_URL: http://localhost:9000
-    MINIO_BROWSER_REDIRECT_URL: http://localhost:9000/console
+    MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
   expose:
     - 9000:9000
     - 9001:9001

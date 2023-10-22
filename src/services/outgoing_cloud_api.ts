@@ -78,7 +78,7 @@ export class OutgoingCloudApi implements Outgoing {
       [header]: token,
     }
     const uri = this.uri(url, phone)
-    logger.debug(`Send url ${uri} with headers %s and body %s`, headers, body)
+    logger.debug(`Send url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
     let response: Response
     try {
       response = await fetch(uri, { method: 'POST', body, headers })

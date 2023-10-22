@@ -49,8 +49,8 @@ export class MessagesController {
 
   public async index(req: Request, res: Response) {
     logger.debug('messages method %s', req.method)
-    logger.debug('messages headers %s', req.headers)
-    logger.debug('messages params %s', req.params)
+    logger.debug('messages headers %s', JSON.stringify(req.headers))
+    logger.debug('messages params %s', JSON.stringify(req.params))
     logger.debug('messages body %s', JSON.stringify(req.body))
     const { phone } = req.params
     const payload: object = req.body
