@@ -8,6 +8,8 @@ import { jidToPhoneNumber, phoneNumberToJid } from '../services/transformer'
 import textToSpeech, { protos } from '@google-cloud/text-to-speech'
 import { getConfig } from '../services/config'
 import logger from '../services/logger'
+import * as XLSX from 'xlsx'
+import mime from 'mime-types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const render = (template: string, params: any) => {
@@ -180,8 +182,11 @@ export class BulkParserJob {
       const template = defaultTemplate || 'sisodonto'
       const fomatter = formatters[template]
       let buffer
+      let type: string | false = 'csv'
       if (url.indexOf('base64') >= 0) {
         logger.debug(`Downloadind base64...!`)
+        const contentType = url.split(':')[1].split(';')[0]
+        type = mime.extension(contentType)
         const parts = url.split(',')
         const base64 = parts[1]
         buffer = Buffer.from(base64, 'base64')
@@ -189,6 +194,9 @@ export class BulkParserJob {
       } else {
         logger.debug(`Downloadind url...!`)
         const response = await axios.get(url, { responseType: 'arraybuffer' })
+        const headers = response.headers
+        const contentType = headers['content-type']
+        type = mime.extension(contentType)
         logger.debug(`Downloaded url!`)
         buffer = Buffer.from(response.data)
       }
@@ -198,10 +206,20 @@ export class BulkParserJob {
       } else if (encoding == 'windows-1252') {
         encoding = 'latin1'
       }
-      const csvData = buffer.toString(encoding as BufferEncoding)
+      logger.debug('Bulk type %s', type)
+      let csvData
+      if (type && ['xlsx', 'xls'].includes(type)) {
+        const workBook: XLSX.WorkBook = XLSX.read(buffer)
+        const worksheet: XLSX.WorkSheet = workBook.Sheets[workBook.SheetNames[0]]
+        csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' })
+      } else if (type == 'csv') {
+        csvData = buffer.toString(encoding as BufferEncoding)
+      } else {
+        throw `unknown type ${type}`
+      }
+      logger.debug('Bulk parser csv %s', csvData)
       const rows = convert(csvData)
-      logger.debug('Bulk parser csv', csvData)
-      logger.debug('Bulk parser rows', rows)
+      logger.debug('Bulk parser rows %s', JSON.stringify(rows))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = []
       for (let i = 0, j = rows.length; i < j; i++) {
@@ -226,7 +244,7 @@ export class BulkParserJob {
         payload: { phone, messages, id, length: messages.length },
       })
     } catch (error) {
-      logger.error('Error on parse bulk:', error)
+      logger.error('Error on parse bulk: %s', error)
       const message = {
         key: {
           fromMe: true,

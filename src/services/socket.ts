@@ -103,7 +103,7 @@ export const connect = async ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onConnectionUpdate = async (event: any) => {
-    logger.debug('onConnectionUpdate ==>', phone, event)
+    logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
       logger.debug('QRCode generate....... %s of %s', status.attempt, attempts)
       if (status.attempt > attempts) {
