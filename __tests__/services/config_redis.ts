@@ -42,7 +42,7 @@ describe('service config redis', () => {
     const copy = process.env.WEBHOOK_HEADER
     process.env.WEBHOOK_HEADER = headerEnv
     const headerRedis = `${new Date().getTime()}`
-    mockGetConfig.mockResolvedValue({ webhooks: [{ header: headerRedis }] })
+    mockGetConfig.mockResolvedValue({ webhooks: [{ url: 'http....', header: headerRedis }] })
     const config = await getConfigRedis(`${new Date().getTime()}`)
     process.env.WEBHOOK_HEADER = copy
     expect(config.webhooks[0].header).toBe(headerRedis)

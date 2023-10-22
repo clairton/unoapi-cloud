@@ -40,7 +40,8 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     config.rejectCalls = 'rejectCalls' in configRedis ? configRedis.rejectCalls : IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = 'rejectCallsWebhook' in configRedis ? configRedis.rejectCallsWebhook : REJECT_CALLS_WEBHOOK || ''
     config.throwWebhookError = 'throwWebhookError' in configRedis ? configRedis.throwWebhookError : true
-    if (configRedis.webhooks && configRedis.webhooks.length) {
+    logger.debug('configRedis.webhooks %s', JSON.stringify(configRedis.webhooks))
+    if (configRedis.webhooks && configRedis.webhooks.length && configRedis.webhooks[0].url) {
       config.webhooks = configRedis.webhooks
     } else {
       config.webhooks = [
@@ -55,7 +56,7 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
     config.getGroupMetadata = config.ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
     config.getStore = getStoreRedis
-    logger.debug('Config', phone, config)
+    logger.debug('Config: %s -> %s', phone, JSON.stringify(config))
     configs.set(phone, config)
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
