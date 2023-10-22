@@ -54,9 +54,11 @@ export class OutgoingCloudApi implements Outgoing {
       }
     } finally {
       const state = data?.entry[0]?.changes[0]?.value?.statuses[0] || {}
-      const status = state.status || 'error'
-      const id = state.id
-      store?.dataStore?.setStatus(id, status)
+      if (state) {
+        const status = state.status || 'error'
+        const id = state.id
+        await store?.dataStore?.setStatus(id, status)
+      }
     }
     if (data) {
       return this.send(phone, data)
