@@ -215,6 +215,7 @@ UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
 IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
+UNOAPI_RETRY_REQUEST_DELAY: retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 
 Bucket env to config assets media compatible with S3:

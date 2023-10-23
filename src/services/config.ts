@@ -48,6 +48,7 @@ export type Config = {
   sendConnectionStatus: boolean
   composingMessage: boolean
   autoRestart: boolean
+  retryRequestDelayMs: number
   rejectCalls: string
   throwWebhookError: false
   rejectCallsWebhook: string
@@ -76,6 +77,7 @@ export const defaultConfig: Config = {
   rejectCallsWebhook: '',
   logLevel: undefined,
   autoRestart: false,
+  retryRequestDelayMs: 1_000,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldIgnoreJid: (_jid: string) => false,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

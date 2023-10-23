@@ -16,6 +16,7 @@ const {
   REJECT_CALLS,
   WEBHOOK_URL,
   UNOAPI_BASE_STORE,
+  UNOAPI_RETRY_REQUEST_DELAY,
   WEBHOOK_TOKEN,
   WEBHOOK_HEADER,
   COMPOSING_MESSAGE,
@@ -44,6 +45,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.baseStore = UNOAPI_BASE_STORE ? UNOAPI_BASE_STORE : './data'
     config.rejectCalls = IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK || ''
+    config.retryRequestDelayMs = parseInt(UNOAPI_RETRY_REQUEST_DELAY || '1_000')
     config.sessionWebhook = WEBHOOK_SESSION || ''
     config.webhooks[0].url = WEBHOOK_URL || ''
     config.webhooks[0].token = WEBHOOK_TOKEN || ''

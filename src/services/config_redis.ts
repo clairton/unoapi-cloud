@@ -17,7 +17,11 @@ const getValue = (configRedis: any, envKey: any) => {
     return configRedis[key]
   }
   if (envKey in process.env) {
-    return process.env[envKey] == 'true'
+    if (process.env[envKey] == 'true') {
+      return true
+    } else if (process.env[envKey] == 'false') {
+      return false
+    }
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (defaultConfig as any)[key]
@@ -37,6 +41,7 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     config.ignoreYourselfMessages = getValue(configRedis, 'IGNORE_YOURSELF_MESSAGES')
     config.ignoreOwnMessages = getValue(configRedis, 'IGNORE_OWN_MESSAGES')
     config.sendConnectionStatus = getValue(configRedis, 'SEND_CONNECTION_STATUS')
+    config.retryRequestDelayMs = getValue(configRedis, 'UNOAPI_RETRY_REQUEST_DELAY')
     config.rejectCalls = 'rejectCalls' in configRedis ? configRedis.rejectCalls : IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = 'rejectCallsWebhook' in configRedis ? configRedis.rejectCallsWebhook : REJECT_CALLS_WEBHOOK || ''
     config.throwWebhookError = 'throwWebhookError' in configRedis ? configRedis.throwWebhookError : true
