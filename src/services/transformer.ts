@@ -494,6 +494,33 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           id: stanzaId,
         }
       }
+
+      // {"key":{"remoteJid":"554936213177@s.whatsapp.net","fromMe":false,"id":"1EBD1D8356472403AFE7102D05D6B21B"},"messageTimestamp":1698057926,"pushName":"Odonto Excellence","broadcast":false,"message":{"extendedTextMessage":{"text":"https://fb.me/4QHYHT0Fv","matchedText":"https://fb.me/4QHYHT0Fv","previewType":"NONE","contextInfo":{"forwardingScore":1,"isForwarded":true,"externalAdReply":{"title":"Converse conosco!","body":"🤩 PRÓTESE FLEXÍVEL: VOCÊ JÁ CONHECE? 🤩\\n\\n✅ Maior Conforto\\n✅ Mais Natural\\n✅ Mais Bonita\\n✅ Sem Grampos Aparentes\\n\\nEstes são os benefícios que a PRÓTESE FLEXÍVEL pode te proporcionar. Tenha a sua LIBERDADE de volta, e volte a sorrir e a comer com tranquilidade!!! 🍎🌽🥩🍗\\n\\n⭐ ESSA É SUA CHANCE, NÃO DEIXE PASSAR!\\n\\n📲 Garanta sua avaliação e vamos falar a respeito dessa possibilidade de TRANSFORMAÇÃO!! 💖","mediaType":"VIDEO","thumbnailUrl":"https://scontent.xx.fbcdn.net/v/t15.5256-10/341500845_517424053756219_5530967817243282036_n.jpg?stp=dst-jpg_s851x315&_nc_cat=105&ccb=1-7&_nc_sid=0808e3&_nc_ohc=K-u3hFrS1xcAX-NaRwd&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=00_AfDNIQXVcym0OF49i-UJSEX0rri9IlrwXPQkcXOpTfH-xQ&oe=653A3E2F","mediaUrl":"https://www.facebook.com/OdontoExcellenceSaoMiguel/videos/179630185187923/","thumbnail":"/9j/4AAQSkZJRgABAQAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGgcAigAYkZCTUQwYTAwMGE2YzAxMDAwMGQ5MDEwMDAwNzMwMjAwMDBiZDAyMDAwMGZkMDIwMDAwODMwMzAwMDAxZDA0MDAwMDU0MDQwMDAwOTYwNDAwMDBkYTA0MDAwMGQyMDUwMDAwAP/bAEMABgQFBgUEBgYFBgcHBggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/CABEIADIAMgMBIgACEQEDEQH/xAAaAAADAQEBAQAAAAAAAAAAAAAABAUGAwEC/8QAFwEBAQEBAAAAAAAAAAAAAAAAAQIDBP/aAAwDAQACEAMQAAAB7LotYdhMZYrOdwuhecNATMOzmNYureQ4GdHHXONXmxwSJaaQdvKOdak0MuMJQExenyFK1ADneUCsEgM+v//EACAQAAICAgICAwAAAAAAAAAAAAECAAMEERMhBRIUIjH/2gAIAQEAAQUC3031hfqx9ytG4iZuLb3vrgdyfGXNER6i+IjThSFwRh07WnWlEyKxbXe5xLPnLFb2lFjTfEj5Lqfn9M9OSp8RVvFx/vlXqinyF5OJkKQ11Ix7by7aee6CWqjwr6u4BRVIHIQeZo37L+pV+CZQHpP/xAAgEQACAQMEAwAAAAAAAAAAAAAAAgEDEjEQERMhMkFR/9oACAEDAQE/AWSGOOFzJUT3BaIkxgslsCq6FwsRBU2iOhdvp1pXwU/LT//EAB0RAAICAQUAAAAAAAAAAAAAAAABEBEhAgMSMUH/2gAIAQIBAT8BTGxZUbjvoWkqizj6VkRcuP/EACQQAAEDAwQCAwEAAAAAAAAAAAEAAhEDECESMUFRImEEIDKB/9oACAEBAAY/Ar+1J3F828RKa4aRHBUVGwpavysoPdJnhYs5pxPK01P4e1vZjGtwhjJUNXk2UW1WYPaxUcpcITG03eY64TdWw6CfU+Q4NKjVJ9IFohb24atMyjnKww/UQhaYzb//xAAfEAEAAwEAAgMBAQAAAAAAAAABABEhMWFxQVGRoRD/2gAIAQEAAT8hqsZpCOo1gfCKSW36f7RQYbuVXsGLPSbTxVksdfnjOxb/ACFWm/UxiC46BchpDwjVaM43GfSWyx9cNsBitlCoVAsKMtA9Uv1UEYf4ngAkKSM+DJsWuAza92sGRD8NFxGszcyE+XkXYp8sUbp+T25b0eScE8oBYH1OPB8jMi309ngYoOzZ4fE3d9TmUFGu1Byf/9oADAMBAAIAAwAAABCpUH4aO33xxv8AdjiD/8QAGhEBAQEBAQEBAAAAAAAAAAAAAQARMSEQcf/aAAgBAwEBPxATSPdACcX511eQmAIml+bAHhLEM2x9NWQ5crh8/8QAGhEBAQEAAwEAAAAAAAAAAAAAAQARECExQf/aAAgBAgEBPxBTpgSHlZMcjZCWlidvac6tHvEvt44//8QAIhABAAICAwEAAQUAAAAAAAAAAQARITFBUXFhkaGxwdHh/9oACAEBAAE/ELgC6IhR1ESCHFWGi8xRFxrP+D+8pJeObUEMSiHbfsaiXJlL/JU8W88CEAakQX4OmXygd1e0CCqM/UPBXx8gSHoA49g3iVFEDuzfdRK6UiCvhPGBDJqBi+feyWmG+okWXwHcu5BhA0ZqIF5VuouFW0XqUB/Vg/2Ic4Sw7B4bMj9Imnqgujq3c1ClB+sMFSoUAVS6v5Cs1Vazt3fkU1aHEUweytNAnJsrfVzTNey/SIkytuMRZpdEXSy4G4qghkGk4hVrKwtXryAQAbSymCI0jhCj+CI5KzdABLFtwWEULXJYQxAjl0wYr/MSmXU//9k=","sourceType":"ad","sourceId":"120200422938230365","sourceUrl":"https://fb.me/4QHYHT0Fv","containsAutoReply":false,"renderLargerThumbnail":true,"showAdAttribution":true,"ctwaClid":"ARA5EWTktP0VPr7ZyKkYKKQN_HfFye5re1giQ6os1ZjiFa0Pdftvs-ESdUtWgOjkEoBsJ_mCh86z8dBguiatoESpGwM"}},"inviteLinkGroupTypeV2":"DEFAULT"},"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"BmI9Pyppe2nL+A==","senderTimestamp":"1696945176","recipientKeyHash":"ltZ5vMXiILth5A==","recipientTimestamp":"1697942459"},"deviceListMetadataVersion":2}},"verifiedBizName":"Odonto Excellence"}
+      const externalAdReply = binMessage?.contextInfo?.externalAdReply
+      if (externalAdReply) {
+        message.referral = {
+          source_url: externalAdReply.sourceUrl,
+          source_id: externalAdReply.sourceId,
+          source_type: externalAdReply.sourceType,
+          headline: externalAdReply.title,
+          body: externalAdReply.body,
+          media_type: externalAdReply.mediaType,
+          image_url: externalAdReply.thumbnail,
+          video_url: externalAdReply.mediaUrl,
+          thumbnail_url: externalAdReply.thumbnailUrl,
+          ctwa_clid: externalAdReply.ctwaClid,
+        }
+
+        if (message.type == 'text') {
+          message.text.body = `${message.text.body}
+            ${externalAdReply.title}
+
+            ${externalAdReply.body}
+          
+            ${externalAdReply.mediaUrl}
+          `
+        }
+      }
       change.value.messages.push(message)
     }
     logger.debug('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
