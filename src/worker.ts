@@ -107,6 +107,6 @@ startWorker()
 
 // // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // process.on('unhandledRejection', (reason: any, promise) => {
-//   logger.error('unhandledRejection:', reason, reason.stack, promise)
+//   logger.error('unhandledRejection: %s %s %s', reason, reason.stack, promise)
 //   throw reason
 // })

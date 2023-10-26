@@ -37,7 +37,7 @@ export const autoConnect = async (
       }
     }
   } catch (error) {
-    logger.error('Erro on auto connect', error)
+    logger.error('Erro on auto connect %s', error)
     throw error
   }
 }

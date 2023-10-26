@@ -28,7 +28,7 @@ export const sessionRedis: session = async (phone: string) => {
         }
       })
     } catch (error) {
-      logger.error(`Error on read auth`, error)
+      logger.error('Error on read auth %s', error)
       throw error
     }
   }
@@ -37,7 +37,7 @@ export const sessionRedis: session = async (phone: string) => {
     try {
       await delAuth(getBase(key))
     } catch (error) {
-      logger.error(`Error on remove auth`, error)
+      logger.error('Error on remove auth %s', error)
       throw error
     }
   }

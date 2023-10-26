@@ -55,14 +55,14 @@ export const sessionFile: session = async (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return setAuth(file, data, (value: any) => JSON.stringify(value, BufferJSON.replacer))
     } catch (error) {
-      logger.error(`Error on write auth`, error)
+      logger.error(`Error on write auth %s`, error)
       throw error
     }
   }
 
   const readData: readData = async (key: string) => {
     const file = getFile(key)
-    logger.debug('read data', file)
+    logger.debug('read data %s', file)
     try {
       return getAuth(file, (value: string) => {
         try {
@@ -73,7 +73,7 @@ export const sessionFile: session = async (
         }
       })
     } catch (error) {
-      logger.error(`Error on read auth`, error)
+      logger.error('Error on read auth %s', error)
       throw error
     }
   }

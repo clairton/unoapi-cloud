@@ -535,7 +535,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     logger.debug('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
     return data
   } catch (e) {
-    logger.error('Error on convert baileys to cloud-api', e)
+    logger.error('Error on convert baileys to cloud-api %s', e)
     throw e
   }
 }
