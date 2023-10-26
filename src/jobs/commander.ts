@@ -78,7 +78,7 @@ export class CommanderJob {
         configs.delete(phone)
         await setConfig(phone, config)
       } catch (error) {
-        logger.error('Erro on parse to yml', error)
+        logger.error('Erro on parse to yml %s', error)
       }
     } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
       logger.debug('Parsing bulk report template... %s', phone)

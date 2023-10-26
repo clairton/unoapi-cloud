@@ -239,7 +239,7 @@ export class ClientBaileys implements Client {
           logger.debug('ignore messages.upsert type append with status pending')
         }
       } else {
-        logger.error('Unknown type: ', payload.type)
+        logger.error('Unknown type: %s', payload.type)
       }
     })
     event('messages.update', (messages: object[]) => {
