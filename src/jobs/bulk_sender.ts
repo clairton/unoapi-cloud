@@ -1,4 +1,4 @@
-import { phoneNumberToJid } from '../services/transformer'
+import { phoneNumberToJid, jidToPhoneNumber } from '../services/transformer'
 import { amqpEnqueue } from '../amqp'
 import {
   UNOAPI_BULK_BATCH,
@@ -74,7 +74,7 @@ export class BulkSenderJob {
                         profile: {
                           name: m.payload.to,
                         },
-                        wa_id: m.payload.to,
+                        wa_id: jidToPhoneNumber(m.payload.to, ''),
                       },
                     ],
                     messages: [
