@@ -99,7 +99,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     let fileName = ''
     if (mediaId) {
       const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
-      logger.debug('key %s for %s', key, mediaId)
+      logger.debug('key %s for %s', JSON.stringify(key), mediaId)
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {

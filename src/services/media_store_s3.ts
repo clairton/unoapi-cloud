@@ -90,7 +90,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     const mediaId = file.split('.')[0]
     if (mediaId) {
       const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
-      logger.debug('key %s for %s', key, mediaId)
+      logger.debug('key %s for %s', JSON.stringify(key), mediaId)
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
