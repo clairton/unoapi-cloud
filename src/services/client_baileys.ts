@@ -113,7 +113,11 @@ export class ClientBaileys implements Client {
       try {
         if (this.config.sessionWebhook) {
           const body = JSON.stringify({ info: this.info, status: this.status, ...payload })
-          const response: Response = await fetch(this.config.sessionWebhook, { method: 'POST', body })
+          const response = await fetch(this.config.sessionWebhook, {
+            method: 'POST',
+            body: body,
+            headers: { 'Content-Type': 'application/json' },
+          })
           logger.debug('Response OnStatus Webhook Session', response)
         } else {
           const response = await this.outgoing.sendOne(this.phone, payload)
@@ -152,7 +156,11 @@ export class ClientBaileys implements Client {
     try {
       if (this.config.sessionWebhook) {
         const body = JSON.stringify({ info: this.info, status: this.status, ...waMessage })
-        const response: Response = await fetch(this.config.sessionWebhook, { method: 'POST', body })
+        const response = await fetch(this.config.sessionWebhook, {
+          method: 'POST',
+          body: body,
+          headers: { 'Content-Type': 'application/json' },
+        })
         logger.debug('Response Webhook Session', response)
       } else {
         await this.store?.dataStore?.setKey(id, waMessageKey)
