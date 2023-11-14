@@ -4,7 +4,9 @@ import { getConfig as getConfigCache } from './redis'
 import { getStoreRedis } from './store_redis'
 import logger from './logger'
 import { Level } from 'pino'
-const { IGNORE_CALLS, REJECT_CALLS, REJECT_CALLS_WEBHOOK, LOG_LEVEL, NODE_ENV, WEBHOOK_TOKEN, WEBHOOK_HEADER, WEBHOOK_URL } = process.env
+
+const { IGNORE_CALLS, REJECT_CALLS, REJECT_CALLS_WEBHOOK, LOG_LEVEL, NODE_ENV, WEBHOOK_TOKEN, WEBHOOK_HEADER, WEBHOOK_URL, WEBHOOK_SESSION } =
+  process.env
 
 export const configs: Map<string, Config> = new Map()
 
@@ -37,6 +39,7 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     config.ignoreYourselfMessages = getValue(configRedis, 'IGNORE_YOURSELF_MESSAGES')
     config.ignoreOwnMessages = getValue(configRedis, 'IGNORE_OWN_MESSAGES')
     config.sendConnectionStatus = getValue(configRedis, 'SEND_CONNECTION_STATUS')
+    config.sessionWebhook = 'sessionWebhook' in configRedis ? configRedis.sessionWebhook : WEBHOOK_SESSION || WEBHOOK_SESSION || ''
     config.rejectCalls = 'rejectCalls' in configRedis ? configRedis.rejectCalls : IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = 'rejectCallsWebhook' in configRedis ? configRedis.rejectCallsWebhook : REJECT_CALLS_WEBHOOK || ''
     config.throwWebhookError = 'throwWebhookError' in configRedis ? configRedis.throwWebhookError : true
