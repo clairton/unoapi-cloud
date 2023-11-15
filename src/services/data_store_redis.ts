@@ -151,11 +151,16 @@ const dataStoreRedis = (phone: string, config: Config): DataStore => {
         name: 'hello',
         status: 'APPROVED',
         category: 'UTILITY',
-        language: 'pt_BR',
         components: [
           {
-            text: 'Olá!',
+            text: '{{hello}}',
             type: 'BODY',
+            parameters: [
+              {
+                type: 'text',
+                text: 'hello',
+              },
+            ],
           },
         ],
       }

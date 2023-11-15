@@ -12,9 +12,9 @@ export class TemplatesController {
   }
 
   public async index(req: Request, res: Response) {
-    logger.debug('templates method %s', req.method)
-    logger.debug('templates headers %s', req.headers)
-    logger.debug('templates params %s', req.params)
+    logger.debug('templates method %s', JSON.stringify(req.method))
+    logger.debug('templates headers %s', JSON.stringify(req.headers))
+    logger.debug('templates params %s', JSON.stringify(req.params))
     logger.debug('templates body %s', JSON.stringify(req.body))
     logger.debug('templates query %s', JSON.stringify(req.query))
     const { phone } = req.params

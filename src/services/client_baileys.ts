@@ -238,7 +238,7 @@ export class ClientBaileys implements Client {
       if (payload.type === 'notify') {
         this.listener(payload.messages, false)
       } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
-        // filter self message send with this sessio to not send same message many times
+        // filter self message send with this session to not send same message many times
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ms = payload.messages.filter((m: any) => !['PENDING', 1, '1'].includes(m.status))
         if (ms.length > 0) {
