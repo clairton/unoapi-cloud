@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS } from '../defaults'
+import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_LIMIT } from '../defaults'
 import { amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber } from '../services/transformer'
@@ -27,6 +27,7 @@ export class IncomingJob {
     const payload: any = a.payload
     const options: object = a.options
     const idUno: string = a.id
+    const retries: number = a.retries ? a.retries + 1 : 1
     const response = await this.incoming.send(phone, payload, options)
     logger.debug('Baileys response %s', phone, JSON.stringify(response))
     const channelNumber = phone.replace('+', '')
@@ -54,6 +55,12 @@ export class IncomingJob {
     if (error) {
       error.entry[0].changes[0].value.statuses[0].id = idUno
       outgingPayload = error
+      const status = error.entry[0].changes[0].value.statuses[0]
+      const code = status?.errors[0]?.code
+      // retry when error: 5 - Wait a moment, connecting process
+      if (retries < UNOAPI_MESSAGE_RETRY_LIMIT && ['5'].includes(code)) {
+        await amqpEnqueue(UNOAPI_JOB_INCOMING, { ...data, retries }, options)
+      }
     } else {
       outgingPayload = {
         object: 'whatsapp_business_account',

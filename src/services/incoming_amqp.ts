@@ -15,7 +15,7 @@ export class IncomingAmqp implements Incoming {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { status, type, to } = payload as any
     if (status) {
-      options['priority'] = 3 // update status is always not very important
+      options['priority'] = 3 // update status is always middle important
       await amqpEnqueue(this.queueName, { phone, payload, options }, options)
       return { ok: { success: true } }
     } else if (type) {
