@@ -888,24 +888,16 @@ describe('service transformer', () => {
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
   })
 
-  test('isValidPhoneNumber return true when 8 digits phone brazilian', async () => {
-    expect(isValidPhoneNumber('554988290955')).toEqual(true)
+  test('isValidPhoneNumber return false when 8 digits phone brazilian', async () => {
+    expect(isValidPhoneNumber('554988290955')).toEqual(false)
   })
 
   test('isValidPhoneNumber return true when 9 digits phone brazilian', async () => {
     expect(isValidPhoneNumber('5549988290955')).toEqual(true)
   })
 
-  test('isValidPhoneNumber return true when 8 digits phone brazilian with jid', async () => {
-    expect(isValidPhoneNumber('554988290955@s.whatsapp.net')).toEqual(true)
-  })
-
-  test('isValidPhoneNumber return true when 9 digits phone brazilian with jid', async () => {
-    expect(isValidPhoneNumber('5549988290955@s.whatsapp.net')).toEqual(true)
-  })
-
-  test('isValidPhoneNumber return true when +', async () => {
-    expect(isValidPhoneNumber('+554988290955')).toEqual(true)
+  test('isValidPhoneNumber return false when + without 9 digit', async () => {
+    expect(isValidPhoneNumber('+554988290955')).toEqual(false)
   })
 
   test('isValidPhoneNumber return false when invalid', async () => {

@@ -123,38 +123,33 @@ export const formatJid = (jid: string) => {
   return `${jidSplit[0].split(':')[0]}@${jidSplit[1]}`
 }
 
-export const isValidPhoneNumber = (jid: string): boolean => {
-  const phoneNumber = jidToPhoneNumber(jid)
-  const parsed = parsePhoneNumber(phoneNumber)
-  const isValid = parsed.valid || parsed.possible
-  if (!isValid) {
-    logger.warn('phone number %s is valid %s', phoneNumber, isValid)
+export const isValidPhoneNumber = (value: string, nine = false): boolean => {
+  const number = `+${(value || '').split('@')[0].split(':')[0].replace('+', '')}`
+  const country = number.replace('+', '').substring(0, 2)
+  const parsed = parsePhoneNumber(number)
+  const numbers = parsed?.number?.significant || ''
+  const isInValid = !parsed.valid || !parsed.possible || (nine && country == '55' && numbers.length < 11 && ['6', '7', '8', '9'].includes(numbers[4]))
+  if (isInValid) {
+    logger.warn('phone number %s is invalid %s', value, isInValid)
   }
-  return isValid
+  return !isInValid
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const jidToPhoneNumber = (id: any, plus = '+', retry = true): string => {
-  const number = (id || '').split('@')[0].split(':')[0].replace('+', '')
+export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string => {
+  const number = (value || '').split('@')[0].split(':')[0].replace('+', '')
   const country = number.substring(0, 2)
   if (country == '55') {
-    const phoneNumber = parsePhoneNumber(number, { regionCode: 'BR' })
-    const nationalNumber = phoneNumber?.number?.significant || ''
-    if (!phoneNumber.valid && nationalNumber?.length < 11) {
-      if (!retry) {
-        return number
-      }
-      const country = '55'
+    const isValid = isValidPhoneNumber(`+${number}`, true)
+    if (!isValid && retry) {
       const prefix = number.substring(2, 4)
       const digits = number.match('.{8}$')[0]
       const digit = '9'
       const out = `${plus}${country}${prefix}${digit}${digits}`.replace('+', '')
       return jidToPhoneNumber(`${plus}${out}`, plus, false)
     }
-    return `${plus}${phoneNumber?.number?.e164?.replace('+', '')}`
-  } else {
-    return `${plus}${number.replace('+', '')}`
   }
+  return `${plus}${number.replace('+', '')}`
 }
 
 /*
