@@ -95,6 +95,10 @@ describe('service transformer', () => {
     expect(jidToPhoneNumber('12345678901:123@s.whatsapp.net')).toEqual('+12345678901')
   })
 
+  test('jidToPhoneNumber Fixed +', async () => {
+    expect(jidToPhoneNumber('554936213177@s.whatsapp.net')).toEqual('+554936213177')
+  })
+
   test('jidToPhoneNumber without + and put 9˚ digit', async () => {
     expect(jidToPhoneNumber('+554988290955@s.whatsapp.net', '')).toEqual('5549988290955')
   })
@@ -898,6 +902,14 @@ describe('service transformer', () => {
 
   test('isValidPhoneNumber return false when + without 9 digit', async () => {
     expect(isValidPhoneNumber('+554988290955')).toEqual(false)
+  })
+
+  test('isValidPhoneNumber return true when + fixed line brazilian', async () => {
+    expect(isValidPhoneNumber('+5536213155')).toEqual(false)
+  })
+
+  test('isValidPhoneNumber return true when internacional valid', async () => {
+    expect(isValidPhoneNumber('+595985523065')).toEqual(true)
   })
 
   test('isValidPhoneNumber return false when invalid', async () => {
