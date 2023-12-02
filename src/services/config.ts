@@ -32,6 +32,7 @@ export const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, sto
   }
   return undefined
 }
+
 export type Webhook = {
   url: string
   token: string

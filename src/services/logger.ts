@@ -1,6 +1,8 @@
 import P, { Level } from 'pino'
 
+import { UNO_LOG_LEVEL } from '../defaults'
+
 const logger = P({ timestamp: () => `,"time":"${new Date().toJSON()}"` })
-logger.level = (process.env.UNO_LOG_LEVEL || process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
+logger.level = UNO_LOG_LEVEL as Level
 
 export default logger
