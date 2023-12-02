@@ -211,7 +211,7 @@ export class BulkParserJob {
       if (type && ['xlsx', 'xls'].includes(type)) {
         const workBook: XLSX.WorkBook = XLSX.read(buffer)
         const worksheet: XLSX.WorkSheet = workBook.Sheets[workBook.SheetNames[0]]
-        csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' })
+        csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: ';', blankrows: false })
       } else if (type == 'csv') {
         csvData = buffer.toString(encoding as BufferEncoding)
       } else {
