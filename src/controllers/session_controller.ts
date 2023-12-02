@@ -26,8 +26,8 @@ export class SessionController {
 
   public async info(req: Request, res: Response) {
     logger.debug('info method %s', req.method)
-    logger.debug('info headers %s', req.headers)
-    logger.debug('info params %s', req.params)
+    logger.debug('info headers %s', JSON.stringify(req.headers))
+    logger.debug('info params %s', JSON.stringify(req.params))
     logger.debug('info body %s', JSON.stringify(req.body))
     logger.debug('info query', JSON.stringify(req.query))
     const { phone } = req.params
@@ -49,8 +49,8 @@ export class SessionController {
 
   public async create(req: Request, res: Response) {
     logger.debug('create method %s', req.method)
-    logger.debug('create headers %s', req.headers)
-    logger.debug('create params %s', req.params)
+    logger.debug('create headers %s', JSON.stringify(req.headers))
+    logger.debug('create params %s', JSON.stringify(req.params))
     logger.debug('create body %s', JSON.stringify(req.body))
     logger.debug('create query %s', JSON.stringify(req.query))
     const { phone } = req.params
@@ -76,8 +76,8 @@ export class SessionController {
 
   public async delete(req: Request, res: Response) {
     logger.debug('delete method %s', req.method)
-    logger.debug('delete headers %s', req.headers)
-    logger.debug('delete params %s', req.params)
+    logger.debug('delete headers %s', JSON.stringify(req.headers))
+    logger.debug('delete params %s', JSON.stringify(req.params))
     logger.debug('delete body %s', JSON.stringify(req.body))
     logger.debug('delete query %s', JSON.stringify(req.query))
     const { phone } = req.params
