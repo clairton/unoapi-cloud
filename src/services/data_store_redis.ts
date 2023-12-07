@@ -102,6 +102,7 @@ const dataStoreRedis = (phone: string, config: Config): DataStore => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let results: any[] = []
       try {
+        logger.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         results = await sock.onWhatsApp!(phoneOrJid)
       } catch (_e) {

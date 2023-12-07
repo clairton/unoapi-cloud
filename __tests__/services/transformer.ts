@@ -24,6 +24,14 @@ describe('service transformer', () => {
     expect(phoneNumberToJid(jid)).toEqual(jid)
   })
 
+  test('phoneNumberToJid with fixed line', async () => {
+    expect(phoneNumberToJid('+554936213155')).toEqual('554936213155@s.whatsapp.net')
+  })
+
+  test('phoneNumberToJid with fixed line', async () => {
+    expect(phoneNumberToJid('554936213155')).toEqual('554936213155@s.whatsapp.net')
+  })
+
   test('getMessageType with conversation', async () => {
     expect(getMessageType({ message: { conversation: 'test' } })).toEqual('conversation')
   })
@@ -905,7 +913,7 @@ describe('service transformer', () => {
   })
 
   test('isValidPhoneNumber return true when + fixed line brazilian', async () => {
-    expect(isValidPhoneNumber('+5536213155')).toEqual(false)
+    expect(isValidPhoneNumber('+554936213155', true)).toEqual(true)
   })
 
   test('isValidPhoneNumber return true when internacional valid', async () => {
