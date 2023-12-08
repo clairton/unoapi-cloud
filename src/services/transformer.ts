@@ -66,12 +66,15 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'video':
       const url = payload[type].link
       if (url) {
-        const mimetype = mime.lookup(url.split('?')[0])
+        let mimetype = mime.lookup(url.split('?')[0])
+        if (type == 'audio') {
+          if (mimetype == 'audio/ogg') {
+            mimetype = 'audio/ogg; codecs=opus'
+          }
+          response.ptt = true
+        }
         if (mimetype) {
           response.mimetype = mimetype
-        }
-        if (type == 'audio') {
-          response.ptt = true
         }
         if (payload[type].filename) {
           response.fileName = payload[type].filename
