@@ -114,7 +114,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
             if (contentType) {
               res.contentType(contentType)
             }
-            res.setHeader('Content-disposition', `attachment; filename="${fileName}"; filename*=utf-8''${fileName}`)
+            res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(fileName)}"`)
             stream.pipe(res)
           } else {
             logger.error('Not retrieve the media: %', file)
