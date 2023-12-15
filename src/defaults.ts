@@ -16,6 +16,7 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 
 // behavior of unoapi
 export const CONNECTION_TIMEOUT = process.env.CONNECTION_TIMEOUT || 140_000
+export const UNOAPI_RETRY_REQUEST_DELAY = process.env.UNOAPI_RETRY_REQUEST_DELAY || 1_000
 export const QR_TIMEOUT = process.env.QR_TIMEOUT || 30_000
 export const SLEEP_TIME = process.env.SLEEP_TIME || 500
 export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6

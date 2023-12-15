@@ -5,7 +5,17 @@ import { getStoreRedis } from './store_redis'
 import logger from './logger'
 import { Level } from 'pino'
 
-import { IGNORE_CALLS, REJECT_CALLS, REJECT_CALLS_WEBHOOK, LOG_LEVEL, WEBHOOK_TOKEN, WEBHOOK_HEADER, WEBHOOK_URL, WEBHOOK_SESSION } from '../defaults'
+import {
+  IGNORE_CALLS,
+  REJECT_CALLS,
+  REJECT_CALLS_WEBHOOK,
+  LOG_LEVEL,
+  WEBHOOK_TOKEN,
+  WEBHOOK_HEADER,
+  WEBHOOK_URL,
+  WEBHOOK_SESSION,
+  UNOAPI_RETRY_REQUEST_DELAY,
+} from '../defaults'
 
 export const configs: Map<string, Config> = new Map()
 
@@ -43,7 +53,7 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     config.ignoreOwnMessages = getValue(configRedis, 'IGNORE_OWN_MESSAGES')
     config.sendConnectionStatus = getValue(configRedis, 'SEND_CONNECTION_STATUS')
     config.sessionWebhook = configRedis && 'sessionWebhook' in configRedis ? configRedis.sessionWebhook : WEBHOOK_SESSION || ''
-    config.retryRequestDelayMs = getValue(configRedis, 'UNOAPI_RETRY_REQUEST_DELAY')
+    config.retryRequestDelayMs = configRedis && 'retryRequestDelayMs' in configRedis ? configRedis.retryRequestDelayMs : UNOAPI_RETRY_REQUEST_DELAY
     config.rejectCalls = configRedis && 'rejectCalls' in configRedis ? configRedis.rejectCalls : IGNORE_CALLS || REJECT_CALLS || ''
     config.rejectCallsWebhook = configRedis && 'rejectCallsWebhook' in configRedis ? configRedis.rejectCallsWebhook : REJECT_CALLS_WEBHOOK || ''
     config.throwWebhookError = configRedis && 'throwWebhookError' in configRedis ? configRedis.throwWebhookError : true
