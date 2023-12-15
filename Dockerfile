@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 ENV NODE_ENV=development
 
@@ -14,7 +14,7 @@ ADD ./src ./src
 ADD ./tsconfig.json ./tsconfig.json
 RUN yarn build
 
-FROM node:18-alpine
+FROM node:20-alpine
 
 LABEL \
   maintainer="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
