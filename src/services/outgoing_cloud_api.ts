@@ -1,7 +1,7 @@
 import { WAMessage } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
-import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BinTemplate } from './transformer'
+import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BindTemplateError } from './transformer'
 import { getConfig } from './config'
 import { Template } from './template'
 import logger from './logger'
@@ -46,7 +46,7 @@ export class OutgoingCloudApi implements Outgoing {
     try {
       data = fromBaileysMessageContent(phone, message)
     } catch (error) {
-      if (error instanceof BinTemplate) {
+      if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message

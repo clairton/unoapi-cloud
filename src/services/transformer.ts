@@ -6,7 +6,7 @@ import logger from './logger'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
 
-export class BinTemplate extends Error {
+export class BindTemplateError extends Error {
   constructor() {
     super('')
   }
@@ -88,7 +88,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       throw new Error(`Unknow message type ${type}`)
 
     case 'template':
-      throw new BinTemplate()
+      throw new BindTemplateError()
 
     default:
       throw new Error(`Unknow message type ${type}`)
