@@ -196,7 +196,7 @@ export const connect = async ({
         logger: loggerBaileys,
         getMessage,
         shouldIgnoreJid: config.shouldIgnoreJid,
-        retryRequestDelayMs: 1_000,
+        retryRequestDelayMs: config.retryRequestDelayMs,
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
