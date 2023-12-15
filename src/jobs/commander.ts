@@ -78,7 +78,7 @@ export class CommanderJob {
         configs.delete(phone)
         await setConfig(phone, config)
       } catch (error) {
-        logger.error('Erro on parse to yml %s', error)
+        logger.error(error, 'Erro on parse to yml')
       }
     } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
       logger.debug('Parsing bulk report template... %s', phone)
@@ -100,7 +100,7 @@ export class CommanderJob {
         const { bulk } = doc.toJS()
         await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, { phone, payload: { phone, id: bulk, unverified: true } })
       } catch (error) {
-        logger.error('Erro on parse to yml %s', error)
+        logger.error(error, 'Erro on parse to yml')
       }
     } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
       logger.debug('Parsing config template... %s', phone)
@@ -127,7 +127,7 @@ export class CommanderJob {
         configs.delete(phone)
         await setConfig(phone, config)
       } catch (error) {
-        logger.error('Erro on parse to yml %s', error)
+        logger.error(error, 'Erro on parse to yml')
       }
     } else {
       logger.debug(`Commander ignore`)

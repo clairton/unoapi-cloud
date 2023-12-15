@@ -33,11 +33,11 @@ export const autoConnect = async (
         }
         logger.info(`Auto connected phone ${phone}!`)
       } catch (error) {
-        logger.error(`Error on connect phone ${phone}`, error)
+        logger.error(error, `Error on connect phone ${phone}`)
       }
     }
   } catch (error) {
-    logger.error('Erro on auto connect %s', error)
+    logger.error(error, 'Erro on auto connect')
     throw error
   }
 }
