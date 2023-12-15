@@ -52,6 +52,7 @@ export class OutgoingCloudApi implements Outgoing {
         const i: any = message
         data = await template.bind(phone, i.template.name, i.template.components)
       }
+      throw error
     } finally {
       const state = data?.entry[0]?.changes[0]?.value?.statuses[0] || {}
       if (state) {
