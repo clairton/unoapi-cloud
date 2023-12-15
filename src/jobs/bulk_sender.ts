@@ -134,7 +134,7 @@ export class BulkSenderJob {
         messageTimestamp: new Date().getTime(),
       }
       logger.debug(statusMessage)
-      this.outgoing.sendOne(phone, messageUpdate)
+      await this.outgoing.sendOne(phone, messageUpdate)
     } catch (error) {
       const text = `Error on send bulk ${phone}: ${JSON.stringify(error)}`
       logger.error(text)
@@ -149,7 +149,7 @@ export class BulkSenderJob {
         },
         messageTimestamp: new Date().getTime(),
       }
-      this.outgoing.sendOne(phone, messageError)
+      await this.outgoing.sendOne(phone, messageError)
       throw error
     }
   }
