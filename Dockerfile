@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:21-alpine AS builder
 
 ENV NODE_ENV=development
 
