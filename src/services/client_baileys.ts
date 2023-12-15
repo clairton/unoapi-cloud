@@ -6,13 +6,14 @@ import { mediaStores } from './media_store'
 import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus, OnNewLogin, Info } from './socket'
 import { Client, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
+import { FailedSend } from './outgoing_cloud_api'
 const attempts = 3
 
 export const clients: Map<string, Client> = new Map()
@@ -125,6 +126,7 @@ export class ClientBaileys implements Client {
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
+        logger.error(error, 'Erro on send status')
         await this.onWebhookError(error)
       }
     }
@@ -167,6 +169,7 @@ export class ClientBaileys implements Client {
         await this.outgoing.sendOne(this.phone, waMessage)
       }
     } catch (error) {
+      logger.error(error, 'Erro on send qrcode')
       await this.onWebhookError(error)
     }
   }
@@ -187,8 +190,39 @@ export class ClientBaileys implements Client {
     try {
       const resp = await this.outgoing.sendMany(this.phone, messages)
       return resp
-    } catch (error) {
-      await this.onWebhookError(error)
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const others: any[] = []
+      if (e instanceof FailedSend) {
+        const errors = e.getErrors()
+        for (let i = errors.length; i < errors.length; i++) {
+          const error = errors[i]
+          if (error instanceof DecryptError) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const message = (error.getContent() as any)?.changes[0]?.value?.messages[0]
+            if (message.id) {
+              const payload = {
+                messaging_product: 'whatsapp',
+                context: {
+                  message_id: message.id,
+                },
+                to: message.to,
+                type: 'text',
+                text: {
+                  body: '.',
+                },
+              }
+              await this.incoming.send(this.phone, payload, {})
+              await this.outgoing.send(this.phone, error.getContent())
+            }
+          } else {
+            others.push(error)
+          }
+        }
+      }
+      if (others.length) {
+        await this.onWebhookError(e)
+      }
     }
   }
 
@@ -300,6 +334,7 @@ export class ClientBaileys implements Client {
               try {
                 await this.outgoing.sendOne(this.phone, message)
               } catch (error) {
+                logger.error(error, 'Erro on reject call')
                 await this.onWebhookError(error)
               }
             }

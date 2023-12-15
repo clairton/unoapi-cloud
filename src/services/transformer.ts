@@ -12,6 +12,19 @@ export class BindTemplateError extends Error {
   }
 }
 
+export class DecryptError extends Error {
+  private content: object
+
+  constructor(content: object) {
+    super('')
+    this.content = content
+  }
+
+  getContent() {
+    return this.content
+  }
+}
+
 const TYPE_MESSAGES_TO_PROCESS = [
   'viewOnceMessage',
   'editedMessage',
@@ -383,6 +396,8 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
             body: '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.',
           }
           message.type = 'text'
+          change.value.messages.push(message)
+          throw new DecryptError(data)
         } else {
           return
         }

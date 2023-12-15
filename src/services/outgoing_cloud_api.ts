@@ -6,6 +6,21 @@ import { getConfig } from './config'
 import { Template } from './template'
 import logger from './logger'
 
+export class FailedSend extends Error {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private errors: any[]
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(errors: any[]) {
+    super('')
+    this.errors = errors
+  }
+
+  getErrors() {
+    return this.errors
+  }
+}
+
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
 
@@ -20,7 +35,20 @@ export class OutgoingCloudApi implements Outgoing {
       return !m.key || !config.shouldIgnoreKey(m.key, getMessageType(m))
     })
     logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
-    await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errors: any[] = []
+    await Promise.all(
+      filteredMessages.map(async (m: object) => {
+        try {
+          return this.sendOne(phone, m)
+        } catch (error) {
+          errors.push({ error, message: m })
+        }
+      }),
+    )
+    if (errors.length) {
+      throw new FailedSend(errors)
+    }
   }
 
   public async sendOne(phone: string, message: object) {
@@ -86,7 +114,7 @@ export class OutgoingCloudApi implements Outgoing {
     try {
       response = await fetch(uri, { method: 'POST', body, headers })
     } catch (error) {
-      logger.error(`Error on send to url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
+      logger.error(error, `Error on send to url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
     }
     logger.debug('Response: %s', response.status)

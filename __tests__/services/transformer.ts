@@ -8,6 +8,7 @@ import {
   fromBaileysMessageContent,
   toBaileysMessageContent,
   isValidPhoneNumber,
+  DecryptError,
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
@@ -897,7 +898,15 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    try {
+      fromBaileysMessageContent(phoneNumer, input)
+    } catch (error) {
+      if (error instanceof DecryptError) {
+        expect(error.getContent()).toEqual(output)
+      } else {
+        throw error
+      }
+    }
   })
 
   test('isValidPhoneNumber return false when 8 digits phone brazilian', async () => {
