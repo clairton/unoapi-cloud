@@ -1,7 +1,7 @@
 import { Outgoing } from '../services/outgoing'
 import { UNOAPI_JOB_OUTGOING } from '../defaults'
 import { amqpEnqueue } from '../amqp'
-import { getMessageType } from '../services/transformer'
+import { DecryptError, getMessageType } from '../services/transformer'
 import { getConfig } from '../services/config'
 import logger from '../services/logger'
 
@@ -9,11 +9,13 @@ export class OutgoingJob {
   private service: Outgoing
   private getConfig: getConfig
   private queueOutgoing: string
+  private queueIncoming: string
 
-  constructor(service: Outgoing, getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING) {
+  constructor(service: Outgoing, getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING, queueIncoming: string = UNOAPI_JOB_OUTGOING) {
     this.service = service
     this.getConfig = getConfig
     this.queueOutgoing = queueOutgoing
+    this.queueIncoming = queueIncoming
   }
 
   async consume(data: object) {
@@ -65,7 +67,31 @@ export class OutgoingJob {
           logger.debug('Unoapi stanza id %s not overrided', stanzaId)
         }
       }
-      await this.service.sendOne(phone, a.payload)
+      try {
+        await this.service.sendOne(phone, a.payload)
+      } catch (error) {
+        if (error instanceof DecryptError) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const message = (error.getContent() as any)?.changes[0]?.value?.messages[0]
+          if (message.id) {
+            const payload = {
+              messaging_product: 'whatsapp',
+              context: {
+                message_id: message.id,
+              },
+              to: message.to,
+              type: 'text',
+              text: {
+                body: '.',
+              },
+            }
+            await amqpEnqueue(this.queueIncoming, { phone, payload })
+            await this.service.send(phone, error.getContent())
+          }
+        } else {
+          throw error
+        }
+      }
     }
   }
 }
