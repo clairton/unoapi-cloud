@@ -218,7 +218,7 @@ UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 UNOAPI_RETRY_REQUEST_DELAY: retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 
-Bucket env to config assets media compatible with S3:
+Bucket env to config assets media compatible with S3, this config can't save in redis:
 
 ```env
 STORAGE_BUCKET_NAME
@@ -229,11 +229,44 @@ STORAGE_ENDPOINT
 STORAGE_FORCE_PATH_STYLE
 ```
 
-Config connection to redis to temp save messages and rabbitmq broker
+Config connection to redis to temp save messages and rabbitmq broker, this config can't save in redis too.
 
 ```env
 AMQP_URL
 REDIS_URL
+```
+
+## Config with redis
+
+The `.env` can be save on redis too and use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
+
+```json
+{
+  "authToken": "xpto", // token auth this number
+  "rejectCalls":"Reject Call Text do send do number calling to you",
+  "rejectCallsWebhook":"Message send to webhook when receive a call",
+  "ignoreGroupMessages": true,
+  "ignoreBroadcastStatuses": true,
+  "ignoreBroadcastMessages": false,
+  "ignoreHistoryMessages": true,
+  "ignoreOwnMessages": true,
+  "ignoreYourselfMessages": true,
+  "sendConnectionStatus": true,
+  "composingMessage": false,
+  "sessionWebhook": "",
+  "logLevel": undefined,
+  "autoRestart": false,
+  "retryRequestDelayMs": 1_000,
+  "throwWebhookError": false,
+  "webhooks": [ // can be many webhooks
+    {
+      "url": "http://localhost:3000/whatsapp/webhook",
+      "token": "kslflkhlkwq",
+      "header": "api_acess_token",
+    }
+  ],
+  "ignoreDataStore": false
+}
 ```
 
 
