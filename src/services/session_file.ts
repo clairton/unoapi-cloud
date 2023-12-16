@@ -55,7 +55,7 @@ export const sessionFile: session = async (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return setAuth(file, data, (value: any) => JSON.stringify(value, BufferJSON.replacer))
     } catch (error) {
-      logger.error(`Error on write auth %s`, error)
+      logger.error(error, 'Error on write auth')
       throw error
     }
   }
@@ -68,12 +68,12 @@ export const sessionFile: session = async (
         try {
           return value ? JSON.parse(value, BufferJSON.reviver) : undefined
         } catch (error) {
-          logger.error(`Error on parsing auth: ${value}`)
+          logger.error(error, `Error on parsing auth: ${value}`)
           throw error
         }
       })
     } catch (error) {
-      logger.error('Error on read auth %s', error)
+      logger.error(error, 'Error on read auth %s')
       throw error
     }
   }
@@ -85,7 +85,7 @@ export const sessionFile: session = async (
     try {
       await delAuth(file)
     } catch (error) {
-      logger.error(`Error on remove auth`, error)
+      logger.error(error, 'Error on remove auth')
       throw error
     }
   }

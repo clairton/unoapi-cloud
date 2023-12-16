@@ -18,7 +18,7 @@ describe('service config redis', () => {
   test('use default', async () => {
     mockGetConfig.mockResolvedValue({})
     const config = await getConfigRedis(`${new Date().getTime()}`)
-    expect(config.ignoreGroupMessages).toBe(true)
+    expect(config.ignoreGroupMessages).toBe(false)
   })
 
   test('use env', async () => {

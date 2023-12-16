@@ -11,7 +11,7 @@ export class SessionStoreRedis implements SessionStore {
       const keys = await redisKeys(pattern)
       return keys.map((key: string) => key.replace(toReplace, ''))
     } catch (error) {
-      logger.error('Erro on auto connect %s', error)
+      logger.error(error, 'Erro on get configs')
       throw error
     }
   }

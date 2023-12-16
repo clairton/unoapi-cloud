@@ -31,7 +31,7 @@ export class ConfigController {
       const config = await getConfig(phone)
       res.send(JSON.stringify({ config }))
     } catch (e) {
-      logger.error('Error on retieve config: %s', e)
+      logger.error(e, 'Error on retieve config')
       return res.status(400).json({ status: 'error', message: 'Error on retieve config' })
     }
   }
@@ -74,7 +74,7 @@ export class ConfigController {
       }
       res.sendStatus(200)
     } catch (e) {
-      logger.error('Error on register config: %s', e)
+      logger.error(e, 'Error on register config')
       return res.status(400).json({ status: 'error', message: 'Error on register config' })
     }
   }

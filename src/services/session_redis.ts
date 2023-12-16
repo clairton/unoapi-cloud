@@ -12,7 +12,7 @@ export const sessionRedis: session = async (phone: string) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setAuth(getBase(key), data, (value: any) => JSON.stringify(value, BufferJSON.replacer))
     } catch (error) {
-      logger.error(`Error on write auth`, error)
+      logger.error(error, 'Error on write auth')
       throw error
     }
   }
@@ -28,7 +28,7 @@ export const sessionRedis: session = async (phone: string) => {
         }
       })
     } catch (error) {
-      logger.error('Error on read auth %s', error)
+      logger.error(error, 'Error on read auth')
       throw error
     }
   }
@@ -37,7 +37,7 @@ export const sessionRedis: session = async (phone: string) => {
     try {
       await delAuth(getBase(key))
     } catch (error) {
-      logger.error('Error on remove auth %s', error)
+      logger.error(error, 'Error on remove auth %s')
       throw error
     }
   }

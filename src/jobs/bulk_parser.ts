@@ -244,7 +244,7 @@ export class BulkParserJob {
         payload: { phone, messages, id, length: messages.length },
       })
     } catch (error) {
-      logger.error('Error on parse bulk: %s', error)
+      logger.error(error, 'Error on parse bulk')
       const message = {
         key: {
           fromMe: true,

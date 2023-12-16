@@ -213,6 +213,9 @@ REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empt
 SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
 UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
 IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
+AUTO_CONNECT=true, auto connect on start service
+AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto restart
+THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default id false
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 UNOAPI_RETRY_REQUEST_DELAY: retry delay in miliseconds when decrypt failed, default is 1_000(a second)
@@ -255,7 +258,8 @@ The `.env` can be save on redis too and use different webhook by session number,
   "composingMessage": false,
   "sessionWebhook": "",
   "logLevel": undefined,
-  "autoRestart": false,
+  "autoConnect": false,
+  "autoRestartMs": 3_600_000, // restart connection every hour
   "retryRequestDelayMs": 1_000,
   "throwWebhookError": false,
   "webhooks": [ // can be many webhooks

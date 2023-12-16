@@ -12,7 +12,7 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
-import { Config } from './config'
+import { Config, defaultConfig } from './config'
 import { Store } from './store'
 import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
@@ -71,13 +71,7 @@ export const connect = async ({
   onReconnect,
   onNewLogin,
   attempts = Infinity,
-  config = {
-    ignoreHistoryMessages: true,
-    autoRestart: false,
-    logLevel: undefined,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    shouldIgnoreJid: (_jid: string) => false,
-  },
+  config = defaultConfig,
 }: {
   phone: string
   store: Store
@@ -281,10 +275,8 @@ export const connect = async ({
     return sock && sock.readMessages(keys)
   }
 
-  // Refresh connection every 1 hour
-  if (config.autoRestart) {
-    const everyHourTime = 3600000
-    setInterval(reconnect, everyHourTime)
+  if (config.autoRestartMs) {
+    setInterval(reconnect, config.autoRestartMs)
   }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {

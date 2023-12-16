@@ -40,9 +40,14 @@ export const getClientBaileys: getClient = async ({
   if (!clients.has(phone)) {
     logger.info('Creating client baileys %s', phone)
     const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
-    logger.info('Connecting client baileys %s', phone)
-    await client.connect()
-    logger.info('Created and connected client baileys %s', phone)
+    const config = await getConfig(phone)
+    if (config.autoConnect) {
+      logger.info('Connecting client baileys %s', phone)
+      await client.connect()
+      logger.info('Created and connected client baileys %s', phone)
+    } else {
+      logger.info('Config client baileys to not auto connect %s', phone)
+    }
     clients.set(phone, client)
   } else {
     logger.debug('Retrieving client baileys %s', phone)

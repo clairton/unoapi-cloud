@@ -137,7 +137,7 @@ export class BulkSenderJob {
       await this.outgoing.sendOne(phone, messageUpdate)
     } catch (error) {
       const text = `Error on send bulk ${phone}: ${JSON.stringify(error)}`
-      logger.error(text)
+      logger.error(error, 'Error on send bulk')
       const messageError = {
         key: {
           fromMe: true,
