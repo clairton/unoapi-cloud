@@ -180,7 +180,7 @@ Run `docker compose up`
 
 Visit `http://localhost:9876/ping` wil be render a "pong!"
 
-## Boot options
+## Start options
 
 `yarn start` up a single server and save session and media file in filesystem
 
@@ -189,9 +189,9 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 `yarn web` e `yarn worker` up a web and worker with redis and rabbitmq
 
 
-## Environment Variables
+## Config Options with Environment Variables
 
-The ENV Configurations put default value and the format and same name of configs:
+Create a `.env`file and put configuration if you need change default value:
 
 ```env
 WEBHOOK_URL=the webhook url
