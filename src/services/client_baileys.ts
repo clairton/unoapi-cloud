@@ -204,7 +204,7 @@ export class ClientBaileys implements Client {
           const error = errors[i]
           if (error instanceof DecryptError) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const message = (error.getContent() as any)?.changes[0]?.value?.messages[0]
+            const message = (error.getContent() as any)?.entry?.changes[0]?.value?.messages[0]
             if (message.id) {
               const payload = {
                 messaging_product: 'whatsapp',
