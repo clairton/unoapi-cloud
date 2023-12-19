@@ -200,6 +200,9 @@ export const connect = async ({
         if (shouldReconnect) {
           disconnect(true)
           connect()
+        } else {
+          const message = error?.output?.payload?.error
+          onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
         }
       } else {
         throw error
