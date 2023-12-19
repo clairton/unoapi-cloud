@@ -1,36 +1,40 @@
 import { getStore, Store } from './store'
 import { getStoreFile } from './store_file'
-import { GroupMetadata, WAMessage, WAMessageKey } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessageKey } from '@whiskeysockets/baileys'
 import { isIndividualJid } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 
-export interface GetGroupMetadata {
-  (message: WAMessage, store: Store): Promise<GroupMetadata | undefined>
+export interface GetMessageMetadata {
+  <T>(data: T, store: Store): Promise<T>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const ignoreGetGroupMetadata: GetGroupMetadata = async (_message: WAMessage, _store: Store) => undefined
+export const ignoreGetMessageMetadata: GetMessageMetadata = async <T>(data: T, _store: Store) => data
 
-export const getGroupMetadata: GetGroupMetadata = async (message: WAMessage, store: Store) => {
+export const getMessageMetadata: GetMessageMetadata = async <T>(message: T, store: Store) => {
   logger.debug(`Retrieving group metadata...`)
-  const { key } = message
+  const key = message && message['key']
   if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
-    let groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
+    const groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
     if (groupMetadata) {
       logger.debug('Retrieved group metadata %s!', groupMetadata)
     } else {
-      groupMetadata = {
-        id: key.remoteJid,
-        owner: '',
-        subject: key.remoteJid,
-        participants: [],
+      let groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
+      if (groupMetadata) {
+        logger.debug('Retrieved group metadata %s!', groupMetadata)
+      } else {
+        groupMetadata = {
+          id: key.remoteJid,
+          owner: '',
+          subject: key.remoteJid,
+          participants: [],
+        }
       }
-      logger.debug('Return group metadata %s!', groupMetadata)
+      message['groupMetadata'] = groupMetadata
     }
-    return groupMetadata
   }
-  return undefined
+  return message
 }
 
 export type Webhook = {
@@ -61,7 +65,7 @@ export type Config = {
   baseStore: string
   webhooks: Webhook[]
   logLevel: Level | undefined
-  getGroupMetadata: GetGroupMetadata
+  getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
 }
 
@@ -95,7 +99,7 @@ export const defaultConfig: Config = {
       header: '',
     },
   ],
-  getGroupMetadata: ignoreGetGroupMetadata,
+  getMessageMetadata: ignoreGetMessageMetadata,
   ignoreDataStore: false,
 }
 

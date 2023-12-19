@@ -1,8 +1,9 @@
-import { getConfig, Config } from './config'
+import { getConfig, Config, ignoreGetMessageMetadata, getMessageMetadata } from './config'
 import { getConfig as getConfigCache } from './redis'
 import { getStoreRedis } from './store_redis'
 import logger from './logger'
 import { getConfigByEnv } from './config_by_env'
+import { MessageFilter } from './message_filter'
 
 export const configs: Map<string, Config> = new Map()
 
@@ -21,6 +22,10 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
         }
       }
     }
+    const filter: MessageFilter = new MessageFilter(phone, config)
+    config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
+    config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
+    config.getMessageMetadata = config.ignoreGroupMessages ? ignoreGetMessageMetadata : getMessageMetadata
     config.getStore = getStoreRedis
     logger.info('Config redis: %s -> %s', phone, JSON.stringify(config))
     configs.set(phone, config)

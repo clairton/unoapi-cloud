@@ -1,5 +1,5 @@
 import { MessageFilter } from './message_filter'
-import { getConfig, defaultConfig, Config, ignoreGetGroupMetadata, getGroupMetadata } from './config'
+import { getConfig, defaultConfig, Config, ignoreGetMessageMetadata, getMessageMetadata } from './config'
 import logger from './logger'
 import { Level } from 'pino'
 
@@ -56,7 +56,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
-    config.getGroupMetadata = config.ignoreGroupMessages ? ignoreGetGroupMetadata : getGroupMetadata
+    config.getMessageMetadata = config.ignoreGroupMessages ? ignoreGetMessageMetadata : getMessageMetadata
     logger.info('Config by env: %s -> %s', phone, config)
   }
   return config
