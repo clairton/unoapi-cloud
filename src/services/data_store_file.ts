@@ -14,7 +14,7 @@ import {
 } from '@whiskeysockets/baileys'
 import makeOrderedDictionary from '@whiskeysockets/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@whiskeysockets/baileys/lib/Store/make-in-memory-store'
-import { TYPE_MESSAGES_TO_PROCESS_FILE, getMessageType, isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
+import { TYPE_MESSAGES_TO_PROCESS_FILE, getMessageType, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'

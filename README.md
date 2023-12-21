@@ -243,7 +243,7 @@ REDIS_URL
 
 ## Config with redis
 
-The `.env` can be save on redis too and use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
+The `.env` can be save one configm, but on redis use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
 
 ```json
 {
@@ -273,6 +273,33 @@ The `.env` can be save on redis too and use different webhook by session number,
   ],
   "ignoreDataStore": false
 }
+```
+
+## Templates
+
+The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-templates:${PHONE_NUMBER}`. The json format is:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "hello",
+    "status": "APPROVED",
+    "category": "UTILITY",
+    "components": [
+      {
+        "text": "{{hello}}"",
+        "type": "BODY",
+        "parameters": [
+          {
+            "type": "text",
+            "text": "hello",
+          },
+        ],
+      },
+    ],
+  }
+]
 ```
 
 
