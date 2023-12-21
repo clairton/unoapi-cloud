@@ -27,7 +27,7 @@ const storeRedis: store = async (phone: string, config: Config): Promise<Store> 
   logger.info(`Store session: ${phone}`)
   logger.info(`Store medias in directory: ${mediaDir}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await authState(sessionRedis, phone)
-  const dataStore: DataStore = getDataStoreRedis(phone, config) as DataStore
+  const dataStore: DataStore = await getDataStoreRedis(phone, config)
   const mediaStore: MediaStore = getMediaStoreS3(phone, config, getDataStoreRedis) as MediaStore
   logger.info(`Store data in redis`)
   return { state, saveCreds, dataStore, mediaStore }

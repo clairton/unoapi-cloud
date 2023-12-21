@@ -21,16 +21,7 @@ const extension = 'txt'
 const client = mock<Client>()
 const dataStore = mock<DataStore>()
 const store = mock<Store>()
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getTestDataStore: getDataStore = (_phone: string, _config: unknown): DataStore => {
-  return dataStore
-}
 const mediaStore = mock<MediaStore>()
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getTestMediaStore: getMediaStore = (_phone: string, _config: unknown, getDataStore: getDataStore): MediaStore => {
-  return mediaStore
-}
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTestStore: getStore = async (_phone: string, _config: object) => {
   store.dataStore = dataStore
@@ -42,7 +33,7 @@ const getConfigTest: getConfig = async (_phone: string) => {
   defaultConfig.getStore = getTestStore
   return defaultConfig
 }
-const getClientTest: getClient = async ({ phone, incoming, outgoing, getConfig, onNewLogin }) => {
+const getClientTest: getClient = async ({}) => {
   return client
 }
 

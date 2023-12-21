@@ -1,16 +1,6 @@
-import {
-  makeInMemoryStore,
-  BaileysEventEmitter,
-  proto,
-  WAMessage,
-  WAMessageUpdate,
-  MessageUpsertType,
-  WAMessageKey,
-  WASocket,
-  isJidGroup,
-} from '@whiskeysockets/baileys'
+import { proto, WAMessage, WAMessageKey, isJidGroup, GroupMetadata } from '@whiskeysockets/baileys'
 import { DataStore } from './data_store'
-import { getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, jidToPhoneNumber, phoneNumberToJid } from './transformer'
+import { jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
 import {
   delAuth,
@@ -25,14 +15,19 @@ import {
   getTemplates,
   setMessageStatus,
   getMessageStatus,
+  getProfilePicture,
+  setProfilePicture,
+  setGroup,
+  getGroup,
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
+import { getDataStoreFile } from './data_store_file'
 
-export const getDataStoreRedis: getDataStore = (phone: string, config: Config): DataStore => {
+export const getDataStoreRedis: getDataStore = async (phone: string, config: Config): Promise<DataStore> => {
   if (!dataStores.has(phone)) {
     logger.debug('Creating redis data store %s', phone)
-    const store = dataStoreRedis(phone, config)
+    const store = await dataStoreRedis(phone, config)
     dataStores.set(phone, store)
   } else {
     logger.debug('Retrieving redis data store %s', phone)
@@ -40,109 +35,62 @@ export const getDataStoreRedis: getDataStore = (phone: string, config: Config): 
   return dataStores.get(phone) as DataStore
 }
 
-const dataStoreRedis = (phone: string, config: Config): DataStore => {
+const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const store = makeInMemoryStore(config as any)
-  const dataStore = store as unknown as DataStore
-  const bind = store.bind
-  store.bind = async (ev: BaileysEventEmitter) => {
-    await bind(ev)
-    // to prevent Value not found at KeyedDB.deleteById
-    ev.removeAllListeners('chats.delete')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ev.on('chats.delete', (deletions) => {
-      for (const item of deletions) {
-        logger.debug('chats.delete verify id: ', item)
-        if (store.chats.get(item)) {
-          logger.debug('chats.delete delete id: ', item)
-          store.chats.deleteById(item)
-        }
-      }
-    })
-    ev.on('messages.upsert', async ({ messages }: { messages: WAMessage[]; type: MessageUpsertType }) => {
-      for (const msg of messages) {
-        const { key } = msg
-        if (key.id) {
-          await dataStore.setKey(key.id, key)
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          await dataStore.setMessage(key.remoteJid!, msg)
-          const messageType = getMessageType(msg)
-          if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
-            const { mediaStore } = await config.getStore(phone, config)
-            await mediaStore.saveMedia(messageType, msg)
-          }
-        }
-      }
-    })
-    ev.on('messages.update', (updates: WAMessageUpdate[]) => {
-      for (const update of updates) {
-        const { key } = update
-        if (key.id) {
-          dataStore.setKey(key.id, key)
-        }
-      }
-    })
-  }
-  dataStore.loadKey = async (id: string) => {
+  const store: DataStore = await getDataStoreFile(phone, config)
+  store.loadKey = async (id: string) => {
     const key = await getKey(phone, id)
     const mkey: WAMessageKey = key as WAMessageKey
     return mkey
   }
-  dataStore.setKey = async (id: string, key: WAMessageKey) => {
+  store.setKey = async (id: string, key: WAMessageKey) => {
     await setKey(phone, id, key)
   }
-  dataStore.loadUnoId = async (id: string) => await getUnoId(phone, id)
-  dataStore.setUnoId = async (id: string, unoId: string) => setUnoId(phone, id, unoId)
-  dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
-    if (isJidGroup(phoneOrJid)) {
-      return phoneOrJid
-    }
-    let jid = await getJid(phone, phoneOrJid)
-    if (!jid) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let results: any[] = []
-      try {
-        logger.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        results = await sock.onWhatsApp!(phoneOrJid)
-      } catch (_e) {
-        logger.error(`Erro on check if ${phoneOrJid} has whatsapp`)
-      }
-      const result = results && results[0]
-      if (result && result.exists && result.jid) {
-        jid = result.jid
-        logger.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${jid}`)
-        await setJid(phone, phoneOrJid, jid)
-      } else {
-        logger.warn(`${phoneOrJid} not exists on WhatsApp`)
-      }
-    }
-    return jid || ''
+  store.getImageUrl = async (jid: string) => {
+    return getProfilePicture(phone, jid)
   }
-  dataStore.loadMessage = async (remoteJid: string, id: string) => {
+  store.setImageUrl = async (jid: string, url: string) => {
+    await setProfilePicture(phone, jid, url)
+  }
+  store.getGroupMetada = async (jid: string) => {
+    return getGroup(phone, jid)
+  }
+  store.setGroupMetada = async (jid: string, data: GroupMetadata) => {
+    return setGroup(phone, jid, data)
+  }
+  store.loadUnoId = async (id: string) => await getUnoId(phone, id)
+  store.setUnoId = async (id: string, unoId: string) => setUnoId(phone, id, unoId)
+
+  store.loadJid = async (phoneOrJid: string) => {
+    return getJid(phone, phoneOrJid)
+  }
+  store.setJid = async (phoneOrJid: string, jid: string) => {
+    await setJid(phone, phoneOrJid, jid)
+  }
+  store.loadMessage = async (remoteJid: string, id: string) => {
     const newJid = isJidGroup(remoteJid) ? remoteJid : phoneNumberToJid(jidToPhoneNumber(remoteJid))
     const m = await getMessage(phone, newJid, id)
     const wm = m as proto.IWebMessageInfo
     return wm
   }
-  dataStore.setMessage = async (remoteJid: string, message: WAMessage) => {
+  store.setMessage = async (remoteJid: string, message: WAMessage) => {
     const newJid = isJidGroup(remoteJid) ? remoteJid : phoneNumberToJid(jidToPhoneNumber(remoteJid))
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return setMessage(phone, newJid, message.key.id!, message)
   }
-  dataStore.cleanSession = async () => {
+  store.cleanSession = async () => {
     await delAuth(phone)
   }
-  dataStore.setStatus = async (
+  store.setStatus = async (
     id: string,
     status: 'scheduled' | 'pending' | 'error' | 'failed' | 'sent' | 'delivered' | 'read' | 'played' | 'accepted' | 'deleted',
   ) => {
     return setMessageStatus(phone, id, status)
   }
-  dataStore.loadStatus = async (id: string) => {
+  store.loadStatus = async (id: string) => {
     return getMessageStatus(phone, id)
   }
-  dataStore.loadTemplates = async () => {
+  store.loadTemplates = async () => {
     const templates = await getTemplates(phone)
     if (templates) {
       return templates
@@ -277,5 +225,5 @@ const dataStoreRedis = (phone: string, config: Config): DataStore => {
       return [hello, bulkReport, webhook, config]
     }
   }
-  return dataStore
+  return store
 }

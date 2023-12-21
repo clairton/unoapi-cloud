@@ -41,7 +41,7 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
   logger.info(`Store session in directory: ${sessionDir}`)
   logger.info(`Store medias in directory: ${mediaDir}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await authState(sessionFile, sessionDir)
-  const dataStore: DataStore = getDataStoreFile(phone, config) as DataStore
+  const dataStore: DataStore = await getDataStoreFile(phone, config)
   const mediaStore: MediaStore = getMediaStoreFile(phone, config, getDataStoreFile) as MediaStore
   if (!config.ignoreDataStore) {
     const dataFile = `${STORE_DIR}/${phone}.json`

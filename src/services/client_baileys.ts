@@ -1,12 +1,25 @@
-import { AnyMessageContent, WAMessage, delay } from '@whiskeysockets/baileys'
+import { AnyMessageContent, GroupMetadata, WAMessage, delay } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
-import { connect, Status, SendError, sendMessage, readMessages, rejectCall, OnQrCode, OnStatus, OnNewLogin, Info } from './socket'
+import {
+  connect,
+  Status,
+  SendError,
+  sendMessage,
+  readMessages,
+  rejectCall,
+  OnQrCode,
+  OnStatus,
+  OnNewLogin,
+  fetchImageUrl,
+  fetchGroupMetadata,
+  Info,
+} from './socket'
 import { Client, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { Incoming } from './incoming'
@@ -64,12 +77,24 @@ const infoDefault: Info = { phone: '' }
 const sendMessageDefault: sendMessage = async (_phone, _message) => {
   throw sendError
 }
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const readMessagesDefault: readMessages = async (_keys) => {
   throw sendError
 }
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rejectCallDefault: rejectCall = async (_keys) => {
+  throw sendError
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const fetchImageUrlDefault: fetchImageUrl = async (_jid: string) => {
+  throw sendError
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const fetchGroupMetadataDefault: fetchGroupMetadata = async (_jid: string) => {
   throw sendError
 }
 
@@ -79,6 +104,8 @@ export class ClientBaileys implements Client {
   private status: Status = statusDefault
   private info: Info = infoDefault
   private sendMessage = sendMessageDefault
+  private fetchImageUrl = fetchImageUrlDefault
+  private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
   private outgoing: Outgoing
@@ -253,8 +280,15 @@ export class ClientBaileys implements Client {
 
   async connect() {
     this.config = await this.getConfig(this.phone)
+    if (!this.config.ignoreGroupMessages) {
+      logger.debug('Override config.getMessageMetadata')
+      this.config.getMessageMetadata = async <T>(data: T) => {
+        logger.debug(data, 'Put metadata in message')
+        return this.getMessageMetadata(data)
+      }
+    }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, event, rejectCall } = await connect({
+    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -271,6 +305,8 @@ export class ClientBaileys implements Client {
     this.sendMessage = send
     this.readMessages = read
     this.rejectCall = rejectCall
+    this.fetchImageUrl = fetchImageUrl
+    this.fetchGroupMetadata = fetchGroupMetadata
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
@@ -365,6 +401,8 @@ export class ClientBaileys implements Client {
     this.sendMessage = sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
+    this.fetchImageUrl = fetchImageUrlDefault
+    this.fetchGroupMetadata = fetchGroupMetadataDefault
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -515,6 +553,42 @@ export class ClientBaileys implements Client {
       }
     }
     throw new Error(`Unknow message type ${JSON.stringify(payload)}`)
+  }
+
+  async getMessageMetadata<T>(message: T) {
+    const key = message && message['key']
+    let remoteJid
+    if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
+      logger.debug(`Retrieving group metadata...`)
+      remoteJid = key.participant
+      let groupMetadata: GroupMetadata | undefined = await this.fetchGroupMetadata(key.remoteJid)
+      if (groupMetadata) {
+        logger.debug(groupMetadata, 'Retrieved group metadata %s!')
+      } else {
+        groupMetadata = {
+          id: key.remoteJid,
+          owner: '',
+          subject: key.remoteJid,
+          participants: [],
+        }
+      }
+      message['groupMetadata'] = groupMetadata
+      logger.debug(`Retrieving group profile picture...`)
+      try {
+        groupMetadata['profilePicture'] = await this.fetchImageUrl(key.remoteJid)
+      } catch (error) {
+        logger.error(error, 'Error on retrieve group profile picture')
+      }
+    } else {
+      remoteJid = key.remoteJid
+    }
+    logger.debug(`Retrieving user picture...`)
+    try {
+      message['profilePicture'] = await this.fetchImageUrl(remoteJid)
+    } catch (error) {
+      logger.error(error, 'Error on retrieve user profile picture')
+    }
+    return message
   }
 
   getStatus(): Status {

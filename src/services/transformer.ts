@@ -231,6 +231,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     if (payload.groupMetadata) {
       groupMetadata.group_subject = payload.groupMetadata.subject
       groupMetadata.group_id = chatJid
+      groupMetadata.group_picture = payload.groupMetadata.profilePicture
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statuses: any[] = []
@@ -250,6 +251,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
           {
             profile: {
               name: profileName,
+              picture: payload.profilePicture,
             },
             ...groupMetadata,
             wa_id: jidToPhoneNumber(senderPhone, ''),

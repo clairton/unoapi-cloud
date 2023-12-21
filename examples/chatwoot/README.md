@@ -1,12 +1,13 @@
 # Unoapi Cloud with Chatwoot
 
 Get the chatwoot source or image and change the env `WHATSAPP_CLOUD_BASE_URL=http://localhost:9876` and up, or use a custom version with some features to integrate with in `https://github.com/clairton/chatwoot`:
-  - put the agent name in message
-  -⁠ use official whatsapp cloud api and unoapi in the same chatwoot instance
-  - send read events to unoapi
-  - work with groups
-  -⁠ show message sent by another whatsapp connection
-  -⁠ disable 24 window
+- put the agent name in message
+-⁠ use official whatsapp cloud api and unoapi in the same chatwoot instance
+- send read events to unoapi
+- work with groups
+-⁠ show message sent by another whatsapp connection
+-⁠ disable 24 window
+- sicronize user and group profile image
 
 Copy the token ![image](prints/copy_token.png)
 

@@ -1,41 +1,13 @@
-import { getStore, Store } from './store'
+import { getStore } from './store'
 import { getStoreFile } from './store_file'
-import { GroupMetadata, WAMessageKey } from '@whiskeysockets/baileys'
-import { isIndividualJid } from './transformer'
-import logger from './logger'
+import { WAMessageKey } from '@whiskeysockets/baileys'
 import { Level } from 'pino'
 
 export interface GetMessageMetadata {
-  <T>(data: T, store: Store): Promise<T>
+  <T>(message: T): Promise<T>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const ignoreGetMessageMetadata: GetMessageMetadata = async <T>(data: T, _store: Store) => data
-
-export const getMessageMetadata: GetMessageMetadata = async <T>(message: T, store: Store) => {
-  logger.debug(`Retrieving group metadata...`)
-  const key = message && message['key']
-  if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
-    const groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
-    if (groupMetadata) {
-      logger.debug('Retrieved group metadata %s!', groupMetadata)
-    } else {
-      let groupMetadata: GroupMetadata = await store?.dataStore.fetchGroupMetadata(key.remoteJid, undefined)
-      if (groupMetadata) {
-        logger.debug('Retrieved group metadata %s!', groupMetadata)
-      } else {
-        groupMetadata = {
-          id: key.remoteJid,
-          owner: '',
-          subject: key.remoteJid,
-          participants: [],
-        }
-      }
-      message['groupMetadata'] = groupMetadata
-    }
-  }
-  return message
-}
+export const getMessageMetadataDefault: GetMessageMetadata = async <T>(data: T) => data
 
 export type Webhook = {
   url: string
@@ -99,7 +71,7 @@ export const defaultConfig: Config = {
       header: '',
     },
   ],
-  getMessageMetadata: ignoreGetMessageMetadata,
+  getMessageMetadata: getMessageMetadataDefault,
   ignoreDataStore: false,
 }
 

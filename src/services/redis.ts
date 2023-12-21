@@ -1,6 +1,7 @@
 import { createClient } from '@redis/client'
 import { REDIS_URL, DATA_JID_TTL, DATA_TTL, SESSION_TTL } from '../defaults'
 import logger from './logger'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 
 export const BASE_KEY = 'unoapi-'
 
@@ -155,15 +156,23 @@ export const jidKey = (phone: string, jid: string) => {
   return `${BASE_KEY}jid:${phone}:${jid}`
 }
 
+export const profilePictureKey = (phone: string, jid: string) => {
+  return `${BASE_KEY}profile-picture:${phone}:${jid}`
+}
+
+export const groupKey = (phone: string, jid: string) => {
+  return `${BASE_KEY}group:${phone}:${jid}`
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getJid = async (phone: string, jid: any) => {
   const key = jidKey(phone, jid)
   return redisGet(key)
 }
 
-export const setJid = async (phone: string, jid: string, mkey: object) => {
+export const setJid = async (phone: string, jid: string, validJid: string) => {
   const key = jidKey(phone, jid)
-  await client.set(key, mkey, { EX: DATA_JID_TTL })
+  await client.set(key, validJid, { EX: DATA_JID_TTL })
 }
 
 export const getMessageStatus = async (phone: string, id: string) => {
@@ -307,6 +316,29 @@ export const setMessage = async (phone: string, jid: string, id: string, value: 
   const key = messageKey(phone, jid, id)
   const string = JSON.stringify(value)
   return redisSetAndExpire(key, string, DATA_TTL)
+}
+
+export const getProfilePicture = async (phone: string, jid: string) => {
+  const key = profilePictureKey(phone, jid)
+  return redisGet(key)
+}
+
+export const setProfilePicture = async (phone: string, jid: string, url: string) => {
+  const key = profilePictureKey(phone, jid)
+  return redisSetAndExpire(key, url, DATA_TTL)
+}
+
+export const getGroup = async (phone: string, jid: string) => {
+  const key = groupKey(phone, jid)
+  const group = await redisGet(key)
+  if (group) {
+    return JSON.parse(group) as GroupMetadata
+  }
+}
+
+export const setGroup = async (phone: string, jid: string, data: GroupMetadata) => {
+  const key = groupKey(phone, jid)
+  return redisSetAndExpire(key, JSON.stringify(data), DATA_TTL)
 }
 
 export const getUnoId = async (phone: string, idBaileys: string) => {

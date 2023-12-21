@@ -87,8 +87,8 @@ https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-example
 Message status update on this
 https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/payload-examples#message-status-updates
 
-To turn possible work with group, we add two fields(group_id, group_subject) in
-message beside cloud api format if `IGNORE_GROUP_MESSAGES` is `false`.
+To turn possible work with group, we add three fields(group_id, group_subject and group_picture) in
+message beside cloud api format if `IGNORE_GROUP_MESSAGES` is `false`. Unoapi put field` picture` in profile.
 
 ```json
 {
@@ -104,10 +104,12 @@ message beside cloud api format if `IGNORE_GROUP_MESSAGES` is `false`.
               },
               "contacts": [{
                   "profile": {
-                    "name": "NAME"
+                    "name": "NAME",
+                    "picture": "url of image" // extra field of whatsapp cloud api oficial
                   },
-                  "group_id": "123345@g.us",
-                  "group_subject": "Awesome Group",
+                  "group_id": "123345@g.us", // extra field of whatsapp cloud api oficial
+                  "group_subject": "Awesome Group", // extra field of whatsapp cloud api oficial
+                  "group_picture": "url of image", // extra field of whatsapp cloud api oficial
                   "wa_id": PHONE_NUMBER
                 }],
               "messages": [{

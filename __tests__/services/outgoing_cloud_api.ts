@@ -5,9 +5,8 @@ import { Outgoing } from '../../src/services/outgoing'
 import { Store, getStore } from '../../src/services/store'
 import fetch, { Response } from 'node-fetch'
 import { DataStore } from '../../src/services/data_store'
-import { GroupMetadata } from '@whiskeysockets/baileys'
 import { MediaStore } from '../../src/services/media_store'
-import { Config, getConfig, defaultConfig } from '../../src/services/config'
+import { Config, getConfig, defaultConfig, getMessageMetadataDefault } from '../../src/services/config'
 import logger from '../../src/services/logger'
 
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>
@@ -42,16 +41,6 @@ const mediaPayload = {
     },
   },
 }
-const groupPayload = {
-  key: {
-    remoteJid: 'askjhasd@g.us',
-    fromMe: false,
-    id: 'kasjhdkjhasjkshad',
-  },
-  message: {
-    conversation: 'skdfkdshf',
-  },
-}
 
 describe('service incoming baileys', () => {
   beforeEach(() => {
@@ -62,6 +51,7 @@ describe('service incoming baileys', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getConfig = async (_phone: string) => {
       config.getStore = getStore
+      config.getMessageMetadata = getMessageMetadataDefault
       return config
     }
     store = mock<Store>()
@@ -96,14 +86,5 @@ describe('service incoming baileys', () => {
     await service.sendOne(phone, mediaPayload)
     expect(saveMedia).toHaveBeenCalledTimes(1)
     expect(send).toHaveBeenCalledTimes(1)
-  })
-
-  test('sendOne with group', async () => {
-    config.ignoreGroupMessages = false
-    service = new OutgoingCloudApi(getConfig)
-    const fetchGroupMetadata = jest.spyOn(config, 'getGroupMetadata')
-    fetchGroupMetadata.mockResolvedValue(mock<GroupMetadata>())
-    await service.sendOne(phone, groupPayload)
-    expect(fetchGroupMetadata).toHaveBeenCalledTimes(1)
   })
 })

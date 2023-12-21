@@ -9,6 +9,7 @@ import makeWASocket, {
   WASocket,
   AnyMessageContent,
   BaileysEventMap,
+  GroupMetadata,
 } from '@whiskeysockets/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
@@ -36,18 +37,25 @@ export class SendError extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export interface sendMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (_phone: string, _message: AnyMessageContent, _options: any): Promise<any>
+  (_phone: string, _message: AnyMessageContent, _options: unknown): Promise<any>
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export interface readMessages {
   (_keys: WAMessageKey[]): Promise<void>
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export interface rejectCall {
   (_callId: string, _callFrom: string): Promise<void>
+}
+
+export interface fetchImageUrl {
+  (_jid: string): Promise<string | undefined>
+}
+
+export interface fetchGroupMetadata {
+  (_jid: string): Promise<GroupMetadata | undefined>
 }
 
 export type Status = {
@@ -246,7 +254,11 @@ export const connect = async ({
     }
   }
 
-  const send: sendMessage = async (to: string, message: AnyMessageContent, options = { composing: false, quoted: undefined }) => {
+  const send: sendMessage = async (
+    to: string,
+    message: AnyMessageContent,
+    options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
+  ) => {
     validateStatus()
     const id = isJidGroup(to) ? to : await exists(to)
     if (sock && id) {
@@ -288,10 +300,20 @@ export const connect = async ({
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
-    return sock && (sock as WASocket).rejectCall(callId, callFrom)
+    return sock && sock.rejectCall(callId, callFrom)
+  }
+
+  const fetchImageUrl: fetchImageUrl = async (jid: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return dataStore.loadImageUrl(jid, sock!)
+  }
+
+  const fetchGroupMetadata: fetchGroupMetadata = async (jid: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return dataStore.loadGroupMetada(jid, sock!)
   }
 
   connect()
 
-  return { event, status, send, read, rejectCall }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata }
 }

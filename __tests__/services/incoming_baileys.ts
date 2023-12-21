@@ -24,6 +24,10 @@ class DummyClient implements Client {
   async send(payload: any): Promise<any> {
     return true
   }
+  async getMessageMetadata<T>(data: T) {
+    return data
+  }
+
   getStatus(): Status {
     return mock<Status>()
   }

@@ -5,7 +5,7 @@ import { defaultConfig } from '../../src/services/config'
 describe('service data store file', () => {
   const phone = `${new Date().getMilliseconds()}`
   test('return a new instance', async () => {
-    const dataStore: DataStore = getDataStoreFile(phone, defaultConfig)
+    const dataStore: DataStore = await getDataStoreFile(phone, defaultConfig)
     expect(dataStore).toBe(dataStore)
   })
 })

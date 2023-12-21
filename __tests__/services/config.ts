@@ -2,13 +2,13 @@ import { mock } from 'jest-mock-extended'
 jest.mock('node-fetch')
 import { Store, getStore } from '../../src/services/store'
 import { DataStore } from '../../src/services/data_store'
-import { GroupMetadata } from '@whiskeysockets/baileys'
 import { MediaStore } from '../../src/services/media_store'
-import { getConfig, getGroupMetadata, GetGroupMetadata } from '../../src/services/config'
+import { getConfig, getConfigDefault } from '../../src/services/config'
 
 let store: Store
-let getConfig: getConfig
+const getConfig: getConfig = getConfigDefault
 let getStore: getStore
+let phone: string
 
 const individualPayload = {
   key: {
@@ -32,23 +32,19 @@ const groupPayload = {
   },
 }
 
-describe('service incoming baileys', () => {
+describe('config', () => {
   beforeEach(() => {
     store = mock<Store>()
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
+    phone = `${new Date().getTime()}`
   })
 
-  test('call store fetchGroupMetadata when is group message', async () => {
-    const get: GetGroupMetadata = getGroupMetadata
-    const fetchGroupMetadata = jest.spyOn(store.dataStore, 'fetchGroupMetadata')
-    fetchGroupMetadata.mockResolvedValue(mock<GroupMetadata>())
-    await get(groupPayload, store)
-    expect(fetchGroupMetadata).toHaveBeenCalledTimes(1)
+  test('getMessageMetada Indifidual', async () => {
+    expect(await (await getConfig(phone)).getMessageMetadata(individualPayload)).toBe(individualPayload)
   })
 
-  test('not call store fetchGroupMetadata when is individual message', async () => {
-    const get: GetGroupMetadata = getGroupMetadata
-    await get(individualPayload, store)
+  test('getMessageMetada Group', async () => {
+    expect(await (await getConfig(phone)).getMessageMetadata(groupPayload)).toBe(groupPayload)
   })
 })

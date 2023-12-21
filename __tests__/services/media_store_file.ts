@@ -35,7 +35,7 @@ const message: proto.IWebMessageInfo = {
 }
 const dataStore = mock<DataStore>()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getTestDataStore: getDataStore = (_phone: string, _config: unknown): DataStore => {
+const getTestDataStore: getDataStore = async (_phone: string, _config: unknown): Promise<DataStore> => {
   return dataStore
 }
 

@@ -34,6 +34,8 @@ export interface Client {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any, options: any): Promise<Response>
 
+  getMessageMetadata<T>(message: T): Promise<T>
+
   getStatus(): Status
 
   getInfo(): Info

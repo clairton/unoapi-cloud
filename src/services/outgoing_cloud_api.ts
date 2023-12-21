@@ -60,7 +60,7 @@ export class OutgoingCloudApi implements Outgoing {
     const store = await config.getStore(phone, config)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      message = await config.getMessageMetadata(i, store!)
+      message = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
         await store?.dataStore.setKey(i.key.id, i.key)
         i.key.remoteJid && (await store.dataStore.setMessage(i.key.remoteJid, i))
@@ -117,9 +117,9 @@ export class OutgoingCloudApi implements Outgoing {
       logger.error(error, `Error on send to url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
     }
-    logger.debug('Response: %s', response.status)
-    if (!response.ok) {
-      throw await response.text()
+    logger.debug('Response: %s', response?.status)
+    if (!response?.ok) {
+      throw await response?.text()
     }
   }
 
