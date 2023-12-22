@@ -321,7 +321,7 @@ PS: After update JSON, restart de docker container or service
 
 ## Install as Systemctl
 
-Install nodejs 18 as https://nodejs.org/en/download/package-manager and Git
+Install nodejs 21 as https://nodejs.org/en/download/package-manager and Git
 
 `mkdir /opt/unoapi && cd /opt/unoapi`
 
