@@ -275,9 +275,11 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
 }
 ```
 
+PS: After update JSON, restart de docker container or service
+
 ## Templates
 
-The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-templates:${PHONE_NUMBER}`. The json format is:
+The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-template:${PHONE_NUMBER}`. The json format is:
 
 ```json
 [
@@ -302,10 +304,20 @@ The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER
 ]
 ```
 
+PS: After update JSON, restart de docker container or service
+
 
 ## Examples
 
 [Integration with Chatwoot](examples/chatwoot/README.md)
+
+### Docker compose with chatwoot 
+
+`https://github.com/clairton/unoapi-cloud/blob/main/examples/chatwoot/docker-compose.yml`
+
+### Docker compose with unoapi
+
+`https://github.com/clairton/unoapi-cloud/blob/main/examples/docker-compose.yml`
 
 ## Install as Systemctl
 
