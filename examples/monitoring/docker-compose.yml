@@ -1,0 +1,92 @@
+# https://cylab.be/blog/241/use-loki-to-monitor-the-logs-of-your-docker-compose-application?accept-cookies=1
+# https://mpolinowski.github.io/docs/DevOps/Provisioning/2021-04-07--loki-prometheus-grafana/2021-04-07/
+version: '3'
+
+services:
+  loki:
+    image: grafana/loki:2.6.1
+    networks:
+      - default
+    volumes:
+      - loki_data:/loki
+
+  promtail:
+    image: grafana/promtail:2.6.1
+    networks:
+      - default
+    depends_on:
+      - loki
+    volumes:
+      # to read container labels and logs
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    entrypoint: 
+      - sh
+      - -euc
+      - |
+        cat <<EOF > /etc/promtail/promtail-config.yml
+        server:
+          http_listen_port: 9080
+          grpc_listen_port: 0
+
+        clients:
+          - url: http://loki:3100/loki/api/v1/push
+
+        scrape_configs:
+          - job_name: docker
+            # use docker.sock to filter containers
+            docker_sd_configs:
+              - host: "unix:///var/run/docker.sock"
+                refresh_interval: 15s
+            # filters:
+            #   - name: label
+            #     values: ["com.docker.compose.project=.*"]
+            relabel_configs:
+              - source_labels: ['__meta_docker_container_name']
+                regex: '/(.*)'
+                target_label: 'container'
+        EOF
+        /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml
+
+  # Default creds are admin:password
+  grafana:
+    image: grafana/grafana:10.2.2-ubuntu
+    depends_on:
+      - loki
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - external-dns
+      - default
+    ports:
+      - 3001:3000
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: logger.${DOMAIN}
+      VIRTUAL_HOST: logger.${DOMAIN}
+    entrypoint: 
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/loki.yml
+        apiVersion: 1
+        datasources:
+          - name: loki
+            type: loki
+            access: proxy 
+            url: http://loki:3100
+            basicAuth: false
+            editable: false
+            isDefault: true
+        EOF
+        /run.sh
+
+volumes:
+  grafana_data:
+  loki_data:
+
+networks:
+  external-dns:
+    external: true
