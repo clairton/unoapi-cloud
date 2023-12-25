@@ -566,7 +566,7 @@ export class ClientBaileys implements Client {
       remoteJid = key.participant
       let groupMetadata: GroupMetadata | undefined = await this.fetchGroupMetadata(key.remoteJid)
       if (groupMetadata) {
-        logger.debug(groupMetadata, 'Retrieved group metadata %s!')
+        logger.debug(groupMetadata, 'Retrieved group metadata!')
       } else {
         groupMetadata = {
           id: key.remoteJid,
@@ -585,11 +585,13 @@ export class ClientBaileys implements Client {
     } else {
       remoteJid = key.remoteJid
     }
-    logger.debug(`Retrieving user picture...`)
-    try {
-      message['profilePicture'] = await this.fetchImageUrl(remoteJid)
-    } catch (error) {
-      logger.error(error, 'Error on retrieve user profile picture')
+    if (remoteJid) {
+      logger.debug(`Retrieving user picture...`)
+      try {
+        message['profilePicture'] = await this.fetchImageUrl(remoteJid)
+      } catch (error) {
+        logger.error(error, 'Error on retrieve user profile picture')
+      }
     }
     return message
   }
