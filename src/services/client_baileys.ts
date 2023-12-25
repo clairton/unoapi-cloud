@@ -556,6 +556,9 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
+    if (!this.status.connected) {
+      return message
+    }
     const key = message && message['key']
     let remoteJid
     if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
