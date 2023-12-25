@@ -59,7 +59,6 @@ export class OutgoingCloudApi implements Outgoing {
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       message = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
         await store?.dataStore.setKey(i.key.id, i.key)
