@@ -267,7 +267,7 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
     {
       "url": "http://localhost:3000/whatsapp/webhook",
       "token": "kslflkhlkwq",
-      "header": "api_acess_token",
+      "header": "api_acess_token"
     }
   ],
   "ignoreDataStore": false
