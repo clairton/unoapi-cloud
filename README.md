@@ -247,7 +247,7 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
 
 ```json
 {
-  "authToken": "xpto", // token auth this number
+  "authToken": "xpto",
   "rejectCalls":"Reject Call Text do send do number calling to you",
   "rejectCallsWebhook":"Message send to webhook when receive a call",
   "ignoreGroupMessages": true,
@@ -261,10 +261,10 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
   "sessionWebhook": "",
   "logLevel": undefined,
   "autoConnect": false,
-  "autoRestartMs": 3_600_000, // restart connection every hour
+  "autoRestartMs": 3_600_000
   "retryRequestDelayMs": 1_000,
   "throwWebhookError": false,
-  "webhooks": [ // can be many webhooks
+  "webhooks": [
     {
       "url": "http://localhost:3000/whatsapp/webhook",
       "token": "kslflkhlkwq",
