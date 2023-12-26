@@ -287,12 +287,9 @@ export class ClientBaileys implements Client {
 
   async connect() {
     this.config = await this.getConfig(this.phone)
-    if (!this.config.ignoreGroupMessages) {
-      logger.debug('Override config.getMessageMetadata')
-      this.config.getMessageMetadata = async <T>(data: T) => {
-        logger.debug(data, 'Put metadata in message')
-        return this.getMessageMetadata(data)
-      }
+    this.config.getMessageMetadata = async <T>(data: T) => {
+      logger.debug(data, 'Put metadata in message')
+      return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
     const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists } = await connect({
