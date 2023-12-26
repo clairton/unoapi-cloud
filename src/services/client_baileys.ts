@@ -16,6 +16,7 @@ import {
   fetchImageUrl,
   fetchGroupMetadata,
   Info,
+  exists,
 } from './socket'
 import { Client, getClient } from './client'
 import { Config, defaultConfig, getConfig } from './config'
@@ -98,6 +99,11 @@ const fetchGroupMetadataDefault: fetchGroupMetadata = async (_jid: string) => {
   throw sendError
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const existsDefault: exists = async (_jid: string) => {
+  throw sendError
+}
+
 export class ClientBaileys implements Client {
   private phone: string
   private config: Config = defaultConfig
@@ -105,6 +111,7 @@ export class ClientBaileys implements Client {
   private info: Info = infoDefault
   private sendMessage = sendMessageDefault
   private fetchImageUrl = fetchImageUrlDefault
+  private exists = existsDefault
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
@@ -288,7 +295,7 @@ export class ClientBaileys implements Client {
       }
     }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata } = await connect({
+    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -307,6 +314,7 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCall
     this.fetchImageUrl = fetchImageUrl
     this.fetchGroupMetadata = fetchGroupMetadata
+    this.exists = exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
@@ -403,6 +411,7 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCallDefault
     this.fetchImageUrl = fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadataDefault
+    this.exists = existsDefault
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -586,11 +595,14 @@ export class ClientBaileys implements Client {
       remoteJid = key.remoteJid
     }
     if (remoteJid) {
-      logger.debug(`Retrieving user picture...`)
-      try {
-        message['profilePicture'] = await this.fetchImageUrl(remoteJid)
-      } catch (error) {
-        logger.error(error, 'Error on retrieve user profile picture')
+      const jid = await this.exists(remoteJid)
+      if (jid) {
+        try {
+          logger.debug(`Retrieving user picture...`)
+          message['profilePicture'] = await this.fetchImageUrl(jid)
+        } catch (error) {
+          logger.error(error, 'Error on retrieve user profile picture')
+        }
       }
     }
     return message

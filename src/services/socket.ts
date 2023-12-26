@@ -58,6 +58,10 @@ export interface fetchGroupMetadata {
   (_jid: string): Promise<GroupMetadata | undefined>
 }
 
+export interface exists {
+  (_jid: string): Promise<string | undefined>
+}
+
 export type Status = {
   attempt: number
   connected: boolean
@@ -239,7 +243,7 @@ export const connect = async ({
     return sock && sock.end(undefined)
   }
 
-  const exists = async (phone: string) => {
+  const exists: exists = async (phone: string) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.getJid(phone, sock!)
   }
@@ -315,5 +319,5 @@ export const connect = async ({
 
   connect()
 
-  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists }
 }

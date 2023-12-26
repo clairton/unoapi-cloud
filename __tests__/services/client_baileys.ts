@@ -5,7 +5,17 @@ import { Config, getConfig, defaultConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
 import { Outgoing } from '../../src/services/outgoing'
 import { Store } from '../../src/services/store'
-import { connect, Status, SendError, sendMessage, readMessages, rejectCall, fetchImageUrl, fetchGroupMetadata } from '../../src/services/socket'
+import {
+  connect,
+  Status,
+  SendError,
+  sendMessage,
+  readMessages,
+  rejectCall,
+  fetchImageUrl,
+  fetchGroupMetadata,
+  exists,
+} from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
 import { proto } from '@whiskeysockets/baileys'
 import { DataStore } from '../../src/services/data_store'
@@ -33,6 +43,7 @@ describe('service client baileys', () => {
   let dataStore: DataStore
   let send
   let read
+  let exists
   let rejectCall
   let fetchImageUrl
   let fetchGroupMetadata
@@ -61,10 +72,11 @@ describe('service client baileys', () => {
     client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
+    exists = mockFn<exists>()
     rejectCall = mockFn<rejectCall>()
     fetchImageUrl = mockFn<fetchImageUrl>()
     fetchGroupMetadata = mockFn<fetchGroupMetadata>()
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists })
   })
 
   test('call send with unknown status', async () => {
@@ -118,7 +130,7 @@ describe('service client baileys', () => {
     send = async () => {
       throw new SendError(1, '')
     }
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists })
     await client.connect()
     const response = await client.send(payload, {})
     expect(response.error.entry.length).toBe(1)
