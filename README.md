@@ -259,10 +259,9 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
   "sendConnectionStatus": true,
   "composingMessage": false,
   "sessionWebhook": "",
-  "logLevel": undefined,
   "autoConnect": false,
-  "autoRestartMs": 3_600_000
-  "retryRequestDelayMs": 1_000,
+  "autoRestartMs": 3600000,
+  "retryRequestDelayMs": 1000,
   "throwWebhookError": false,
   "webhooks": [
     {
