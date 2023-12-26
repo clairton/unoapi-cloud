@@ -31,7 +31,7 @@ export class CommanderJob {
     if (payload.type === 'document' && payload?.document?.caption?.toLowerCase() == 'campanha') {
       logger.debug(`Commander processing`)
       const id = uuid()
-      await amqpEnqueue(this.queueBulkParser, {
+      await amqpEnqueue(this.queueBulkParser, phone, {
         phone,
         payload: {
           id,
@@ -98,7 +98,7 @@ export class CommanderJob {
           logger.error('Error os parse yml %s', doc.errors)
         }
         const { bulk } = doc.toJS()
-        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, { phone, payload: { phone, id: bulk, unverified: true } })
+        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { phone, id: bulk, unverified: true } })
       } catch (error) {
         logger.error(error, 'Erro on parse to yml')
       }

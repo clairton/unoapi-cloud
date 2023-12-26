@@ -31,7 +31,7 @@ export class OutgoingJob {
         return m.key && m.key.remoteJid && !config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))
       })
       logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
-      await Promise.all(filteredMessages.map(async (m) => amqpEnqueue(this.queueOutgoing, { phone, payload: m, split: false })))
+      await Promise.all(filteredMessages.map(async (m) => amqpEnqueue(this.queueOutgoing, phone, { phone, payload: m, split: false })))
     } else {
       const key = a.payload.key
       const store = await config.getStore(phone, config)
@@ -85,7 +85,7 @@ export class OutgoingJob {
                 body: '.',
               },
             }
-            await amqpEnqueue(this.queueIncoming, { phone, payload })
+            await amqpEnqueue(this.queueIncoming, phone, { phone, payload })
             await this.service.send(phone, error.getContent())
           }
         } else {

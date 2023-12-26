@@ -63,7 +63,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
     await s3Client.send(new PutObjectCommand(putParams))
     logger.debug(`Uploaded file ${fileName} to bucket ${bucket}!`)
-    await amqpEnqueue(UNOAPI_JOB_MEDIA, { phone, fileName: fileName }, { delay: DATA_TTL * 1000 })
+    await amqpEnqueue(UNOAPI_JOB_MEDIA, phone, { phone, fileName: fileName }, { delay: DATA_TTL * 1000 })
     return true
   }
 

@@ -28,11 +28,10 @@ const injectRoute: injectRoute = async (router: Router) => {
   router.post('/:phone', security, configController.set)
 }
 
-amqpGetChannel(UNOAPI_JOB_INCOMING, AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 5 }) // create a channel with priority
-
 const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, getClientBaileys, security, injectRoute)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
+  await amqpGetChannel(UNOAPI_JOB_INCOMING, '', AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 5 }) // create a channel with priority
   logger.info('Unoapi Cloud Pro listening on port: %s', PORT)
   logger.info('Successful started app!')
 })

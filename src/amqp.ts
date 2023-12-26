@@ -1,5 +1,12 @@
 import amqp, { Connection, Channel, Options, ConsumeMessage } from 'amqplib'
-import { AMQP_URL, UNOAPI_X_COUNT_RETRIES, UNOAPI_X_MAX_RETRIES, UNOAPI_MESSAGE_RETRY_LIMIT, UNOAPI_MESSAGE_RETRY_DELAY } from './defaults'
+import {
+  AMQP_URL,
+  UNOAPI_X_COUNT_RETRIES,
+  UNOAPI_X_MAX_RETRIES,
+  UNOAPI_MESSAGE_RETRY_LIMIT,
+  UNOAPI_MESSAGE_RETRY_DELAY,
+  UNOAPI_JOB_BIND,
+} from './defaults'
 import logger from './services/logger'
 
 const queueDelay = (queue: string) => `${queue}.delayed`
@@ -8,6 +15,7 @@ const queueDead = (queue: string) => `${queue}.dead`
 let amqpConnection: Connection | undefined
 
 const channels = new Map<string, Channel>()
+const routes = new Map<string, boolean>()
 
 export type CreateOption = {
   delay: number
@@ -29,11 +37,11 @@ export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   }
 
   amqpConnection.on('error', (err) => {
-    logger.error('Connection Error %s', err)
+    logger.error(err, 'Connection Error')
     amqpConnection = undefined
   })
   amqpConnection.on('close', (err) => {
-    logger.error('Connection Closed %s', err)
+    logger.error(err, 'Connection Closed')
     amqpConnection = undefined
   })
 
@@ -47,6 +55,7 @@ export const amqpDisconnect = async (connection: Connection) => {
 
 export const amqpGetChannel = async (
   queue: string,
+  phone: string,
   amqpUrl = AMQP_URL,
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0 },
 ) => {
@@ -55,13 +64,17 @@ export const amqpGetChannel = async (
     const channel = await amqpCreateChannel(connection, queue, options)
     channels.set(queue, channel)
     channel.on('error', (err) => {
-      logger.error('Channel Error %s', err)
+      logger.error(err, 'Channel Error')
       channels.delete(queue)
     })
     channel.on('close', (err) => {
-      logger.error('Channel Closed %s', err)
+      logger.error(err, 'Channel Closed')
       channels.delete(queue)
     })
+  }
+  if (phone && !routes.get(phone)) {
+    await amqpEnqueue(UNOAPI_JOB_BIND, '', { phone })
+    routes.set(phone, true)
   }
   return channels.get(queue)
 }
@@ -76,43 +89,38 @@ export const amqpCreateChannel = async (
   channel.prefetch(1)
   const queueDeadd = queueDead(queue)
   logger.info('Creating queue %s...', queueDeadd)
-  await channel.assertQueue(queueDeadd, {
+  await channel.assertExchange(queueDeadd, 'direct', {
     durable: true,
   })
-  const parameters = {
-    'x-dead-letter-exchange': '',
-    'x-dead-letter-routing-key': queueDeadd,
-  }
+  const parameters = { 'x-dead-letter-exchange': queueDeadd }
   if (options.priority) {
     parameters['x-max-priority'] = options.priority
   }
-  await channel.assertQueue(queue, {
+  await channel.assertExchange(queue, 'direct', {
     durable: true,
     arguments: parameters,
   })
   logger.info('Created queue %s!', queueDeadd)
-  if (options.delay) {
-    const queueDelayed = queueDelay(queue)
-    logger.info('Creating queue %s...', queueDelayed)
-    await channel.assertQueue(queueDelayed, {
-      durable: true,
-      arguments: {
-        'x-dead-letter-exchange': '',
-        'x-dead-letter-routing-key': queue,
-      },
-    })
-    logger.info('Created queue %s!', queueDelayed)
-  }
+  // if (options.delay) {
+  const queueDelayed = queueDelay(queue)
+  logger.info('Creating queue %s...', queueDelayed)
+  await channel.assertExchange(queueDelayed, 'direct', {
+    durable: true,
+    arguments: { 'x-dead-letter-exchange': queue },
+  })
+  logger.info('Created queue %s!', queueDelayed)
+  // }
   logger.info('Created channel %s!', queue)
   return channel
 }
 
 export const amqpEnqueue = async (
   queue: string,
+  phone: string,
   payload: object,
   options: Partial<EnqueueOption> = { delay: 0, dead: false, maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT, countRetries: 0, priority: 0 },
 ) => {
-  const channel: Channel | undefined = await amqpGetChannel(queue, AMQP_URL, options)
+  const channel: Channel | undefined = await amqpGetChannel(queue, phone, AMQP_URL, options)
   if (!channel) {
     throw `Not create channel for queue ${queue}`
   }
@@ -139,16 +147,17 @@ export const amqpEnqueue = async (
   } else {
     queueName = queue
   }
-  await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(payload)), properties)
+  await channel.publish(queueName, phone, Buffer.from(JSON.stringify(payload)), properties)
   logger.info('Enqueued at %s with payload %s and properties %s', queueName, JSON.stringify(payload), JSON.stringify(properties))
 }
 
 export const amqpConsume = async (
   queue: string,
+  phone: string,
   callback: (data: object) => Promise<void>,
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0 },
 ) => {
-  const channel = await amqpGetChannel(queue, AMQP_URL, options)
+  const channel = await amqpGetChannel(queue, phone, AMQP_URL, options)
   if (!channel) {
     throw `Not create channel for queue ${queue}`
   }
@@ -172,13 +181,38 @@ export const amqpConsume = async (
       const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
       if (countRetries >= maxRetries) {
         logger.info('Reject %s retries', countRetries)
-        await amqpEnqueue(queue, data, { dead: true })
+        await amqpEnqueue(queue, phone, data, { dead: true })
       } else {
         logger.info('Enqueue retry %s of %s', countRetries, maxRetries)
-        await amqpEnqueue(queue, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY, maxRetries, countRetries })
+        await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY, maxRetries, countRetries })
       }
       await channel.ack(payload)
     }
   }
-  channel.consume(queue, fn)
+
+  const queueDeadd = queueDead(queue)
+  const channelQueueDead = await channel.assertQueue(queueDeadd, { durable: true })
+  await channel.bindQueue(channelQueueDead.queue, queueDeadd, phone)
+
+  const channelQueue = await channel.assertQueue(queue, {
+    durable: true,
+    // exclusive: true,
+    arguments: {
+      'x-dead-letter-exchange': queueDeadd,
+      'x-dead-letter-routing-key': phone,
+    },
+  })
+  await channel.bindQueue(channelQueue.queue, queue, phone)
+
+  const queueDelayed = queueDelay(queue)
+  const channelQueueDelayed = await channel.assertQueue(queueDelayed, {
+    durable: true,
+    arguments: {
+      'x-dead-letter-exchange': queue,
+      'x-dead-letter-routing-key': phone,
+    },
+  })
+  await channel.bindQueue(channelQueueDelayed.queue, queueDelayed, phone)
+
+  channel.consume(channelQueue.queue, fn)
 }

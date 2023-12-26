@@ -56,7 +56,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
-    logger.info('Config by env: %s -> %s', phone, config)
+    logger.info('Config by env: %s -> %s', phone, JSON.stringify(config))
   }
   return config
 }

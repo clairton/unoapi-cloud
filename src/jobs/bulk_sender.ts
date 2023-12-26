@@ -98,7 +98,7 @@ export class BulkSenderJob {
         }
         if (['audio', 'image', 'video', 'document'].includes(messageType)) {
           webhookMessage.entry[0].changes[0].value.messages[0][messageType].id = `${phone}/${messageId}`
-          f = () => amqpEnqueue(UNOAPI_JOB_BULK_WEBHOOK, { phone, payload: webhookMessage })
+          f = () => amqpEnqueue(UNOAPI_JOB_BULK_WEBHOOK, phone, { phone, payload: webhookMessage })
         }
         await f()
         await setbulkMessage(phone, id, messageId, m.payload.to)
@@ -111,6 +111,7 @@ export class BulkSenderJob {
         const messagesToRenqueue = messages.slice(batch)
         await amqpEnqueue(
           UNOAPI_JOB_BULK_SENDER,
+          phone,
           {
             phone,
             payload: { phone, messages: messagesToRenqueue, id, length },
@@ -120,7 +121,7 @@ export class BulkSenderJob {
         statusMessage = `Bulk ${id} phone ${phone} reenqueuing ${messagesToRenqueue.length} message(s) with delay ${delayToResend}...`
       } else {
         statusMessage = `Bulk ${id} phone ${phone} is finished with ${messagesToSend.length} message(s)!`
-        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, { phone, payload: { id, length } }, { delay: UNOAPI_BULK_DELAY * 1000 })
+        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { id, length } }, { delay: UNOAPI_BULK_DELAY * 1000 })
       }
       const messageUpdate = {
         key: {
