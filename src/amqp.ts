@@ -199,7 +199,7 @@ export const amqpConsume = async (
     // exclusive: true,
     arguments: {
       'x-dead-letter-exchange': queueDeadd,
-      'x-dead-letter-routing-key': phone,
+      // 'x-dead-letter-routing-key': phone,
     },
   })
   await channel.bindQueue(channelQueue.queue, queue, phone)
@@ -209,7 +209,7 @@ export const amqpConsume = async (
     durable: true,
     arguments: {
       'x-dead-letter-exchange': queue,
-      'x-dead-letter-routing-key': phone,
+      // 'x-dead-letter-routing-key': phone,
     },
   })
   await channel.bindQueue(channelQueueDelayed.queue, queueDelayed, phone)
