@@ -289,7 +289,7 @@ The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER
     "category": "UTILITY",
     "components": [
       {
-        "text": "{{hello}}"",
+        "text": "{{hello}}",
         "type": "BODY",
         "parameters": [
           {
