@@ -1,10 +1,12 @@
 # https://cylab.be/blog/241/use-loki-to-monitor-the-logs-of-your-docker-compose-application?accept-cookies=1
 # https://mpolinowski.github.io/docs/DevOps/Provisioning/2021-04-07--loki-prometheus-grafana/2021-04-07/
+# https://prometheus.io/docs/guides/cadvisor/
 version: '3'
 
 services:
   loki:
     image: grafana/loki:2.6.1
+    restart: allways
     networks:
       - default
     volumes:
@@ -12,6 +14,7 @@ services:
 
   promtail:
     image: grafana/promtail:2.6.1
+    restart: allways
     networks:
       - default
     depends_on:
@@ -48,9 +51,9 @@ services:
         EOF
         /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml
 
-  # Default creds are admin:password
   grafana:
     image: grafana/grafana:10.2.2-ubuntu
+    restart: allways
     depends_on:
       - loki
     volumes:
@@ -58,13 +61,12 @@ services:
     networks:
       - external-dns
       - default
-    ports:
-      - 3001:3000
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
       VIRTUAL_PORT: 3000
       LETSENCRYPT_HOST: logger.${DOMAIN}
       VIRTUAL_HOST: logger.${DOMAIN}
+      GF_USERS_ALLOW_SIGN_UP: false
     entrypoint: 
       - sh
       - -euc
@@ -79,13 +81,67 @@ services:
             url: http://loki:3100
             basicAuth: false
             editable: false
+            isDefault: false
+          - name: Prometheus
+            type: prometheus
+            access: proxy
+            url: http://prometheus:9090
             isDefault: true
+            editable: false
         EOF
         /run.sh
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: allways
+    volumes:
+      - prometheus_data:/prometheus
+    networks:
+      - default
+    entrypoint: 
+      - sh
+      - -euc
+      - |
+        cat <<EOF > /prometheus/prometheus.yml
+          scrape_configs:
+          - job_name: cadvisor
+            scrape_interval: 5s
+            static_configs:
+            - targets:
+              - cadvisor:8080
+        EOF
+        /bin/prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    privileged: true
+    restart: allways
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - default
+    depends_on:
+    - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: allways
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
 
 volumes:
   grafana_data:
   loki_data:
+  redis_data:
+  prometheus_data:
 
 networks:
   external-dns:
