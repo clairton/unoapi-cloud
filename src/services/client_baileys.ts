@@ -447,6 +447,7 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           let quoted: WAMessage | undefined = undefined
+          let disappearingMessagesInChat = false
           const messageId = payload?.context?.message_id || payload?.context?.id
           if (messageId) {
             const key = await this.store?.dataStore?.loadKey(messageId)
@@ -464,12 +465,20 @@ export class ClientBaileys implements Client {
             }
           }
           logger.debug('Send to baileys', to, content)
+          if (payload?.ttl) {
+            disappearingMessagesInChat = payload.ttl
+          }
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
           await toDelay(this.phone, to)
-          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, quoted, ...options })
+          const response = await this.sendMessage(to, content, {
+            composing: this.config.composingMessage,
+            quoted,
+            disappearingMessagesInChat,
+            ...options,
+          })
           if (response) {
             logger.debug('Sent to baileys %s', JSON.stringify(response))
             const key = response.key
