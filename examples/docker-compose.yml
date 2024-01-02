@@ -1,7 +1,7 @@
 version: '3'
 
 x-base: &base
-  image: docker.io/clairton/unoapi-cloud:v1.3.7
+  image: docker.io/clairton/unoapi-cloud:v1.9.0
   entrypoint: echo 'ok!'
   environment:
     AMQP_URL: amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672
@@ -10,7 +10,7 @@ x-base: &base
     STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID}
     STORAGE_BUCKET_NAME: ${STORAGE_BUCKET_NAME}
     STORAGE_ENDPOINT:	${STORAGE_ENDPOINT}
-    STORAGE_FORCE_PATH_STYLE:	'true'
+    STORAGE_FORCE_PATH_STYLE: ${STORAGE_FORCE_PATH_STYLE}
     STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY}
     WEBHOOK_HEADER: api_access_token
     WEBHOOK_URL: ${WEBHOOK_URL}
@@ -32,8 +32,6 @@ x-base: &base
     LOG_LEVEL: ${LOG_LEVEL}
     UNO_LOG_LEVEL: ${UNO_LOG_LEVEL}
   restart: 'no'
-  volumes:
-    - /root/unoapi-cloud-text-to-speech.json:/home/uno/unoapi-cloud-text-to-speech.json
   depends_on:
     - redis
     - rabbitmq
