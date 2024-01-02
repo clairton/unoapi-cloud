@@ -154,7 +154,7 @@ export const amqpEnqueue = async (
 export const amqpConsume = async (
   queue: string,
   phone: string,
-  callback: (data: object) => Promise<void>,
+  callback: (data: object, options?: { countRetries: number; maxRetries: number }) => Promise<void>,
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0 },
 ) => {
   const channel = await amqpGetChannel(queue, phone, AMQP_URL, options)
@@ -168,17 +168,16 @@ export const amqpConsume = async (
     }
     const content: string = payload.content.toString()
     const data = JSON.parse(content)
+    const headers = payload.properties.headers || {}
+    const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
+    const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
       logger.debug('Received queue %s message %s with headers %s', queue, content, JSON.stringify(payload.properties.headers))
-      await callback(data)
+      await callback(data, { countRetries, maxRetries })
       logger.debug('Ack message!')
       await channel.ack(payload)
     } catch (error) {
       logger.error(error)
-      const headers = payload.properties.headers || {}
-      const v = headers[UNOAPI_X_COUNT_RETRIES] || '0'
-      const countRetries = parseInt(v) + 1
-      const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
       if (countRetries >= maxRetries) {
         logger.info('Reject %s retries', countRetries)
         await amqpEnqueue(queue, phone, data, { dead: true })

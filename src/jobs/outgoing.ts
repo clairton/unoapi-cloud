@@ -1,5 +1,5 @@
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_OUTGOING } from '../defaults'
+import { UNOAPI_JOB_OUTGOING, UNOAPI_JOB_INCOMING } from '../defaults'
 import { amqpEnqueue } from '../amqp'
 import { DecryptError, getMessageType } from '../services/transformer'
 import { getConfig } from '../services/config'
@@ -11,14 +11,14 @@ export class OutgoingJob {
   private queueOutgoing: string
   private queueIncoming: string
 
-  constructor(service: Outgoing, getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING, queueIncoming: string = UNOAPI_JOB_OUTGOING) {
+  constructor(service: Outgoing, getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING, queueIncoming: string = UNOAPI_JOB_INCOMING) {
     this.service = service
     this.getConfig = getConfig
     this.queueOutgoing = queueOutgoing
     this.queueIncoming = queueIncoming
   }
 
-  async consume(data: object) {
+  async consume(data: object, options?: { countRetries: number; maxRetries: number }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
     const phone: string = a.phone
@@ -70,27 +70,11 @@ export class OutgoingJob {
       try {
         await this.service.sendOne(phone, a.payload)
       } catch (error) {
-        if (error instanceof DecryptError) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const message = (error.getContent() as any)?.entry[0]?.changes[0]?.value?.messages[0]
-          if (message.id) {
-            const payload = {
-              messaging_product: 'whatsapp',
-              context: {
-                message_id: message.id,
-              },
-              to: message.to,
-              type: 'text',
-              text: {
-                body: '.',
-              },
-            }
-            await amqpEnqueue(this.queueIncoming, phone, { phone, payload })
-            await this.service.send(phone, error.getContent())
-          }
-        } else {
-          throw error
+        if (error instanceof DecryptError && options && options?.countRetries >= options?.maxRetries) {
+          // send message asking to open whatsapp to see
+          await this.service.send(phone, error.getContent())
         }
+        throw error
       }
     }
   }
