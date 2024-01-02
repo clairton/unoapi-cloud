@@ -114,7 +114,7 @@ export const connect = async ({
       logger.debug('QRCode generate....... %s of %s', status.attempt, attempts)
       if (status.attempt > attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
-        onStatus(message, true)
+        await onStatus(message, true)
         status.reconnecting = false
         status.connecting = false
         status.connected = false
@@ -129,13 +129,13 @@ export const connect = async ({
     }
     if (event.connection === 'open') onConnected()
     else if (event.connection === 'close') onDisconnect(event)
-    else if (event.connection === 'connecting') onStatus(`Connnecting...`, false)
+    else if (event.connection === 'connecting') await onStatus(`Connnecting...`, false)
     else if (event.isNewLogin) {
       onNewLogin(phone)
     }
   }
 
-  const onConnected = () => {
+  const onConnected = async () => {
     status.attempt = 0
     status.connected = true
     status.disconnected = false
@@ -144,10 +144,9 @@ export const connect = async ({
 
     logger.info(`${phone} connected`)
 
-    fetchLatestBaileysVersion().then(({ version, isLatest }) => {
-      const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
-      onStatus(message, false)
-    })
+    const { version, isLatest } = await fetchLatestBaileysVersion()
+    const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
+    await onStatus(message, false)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,7 +162,7 @@ export const connect = async ({
       logger.info(`${phone} destroyed`)
       dataStore.cleanSession()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      onStatus(message, true)
+      await onStatus(message, true)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
       disconnect(false)
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
@@ -214,7 +213,7 @@ export const connect = async ({
           connect()
         } else {
           const message = error?.output?.payload?.error
-          onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
+          await onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
         }
       } else {
         throw error
@@ -295,6 +294,7 @@ export const connect = async ({
   }
 
   if (config.autoRestartMs) {
+    await onStatus(`Config to auto restart in ${config.autoRestartMs} milliseconds.`, true)
     setInterval(reconnect, config.autoRestartMs)
   }
 
