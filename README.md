@@ -206,7 +206,7 @@ IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
 IGNORE_STATUS_MESSAGE=false to send stories in socket to webhook, default true
 IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
-IGNORE_HISTORY_MESSAGES=true to import messages when connect, default is true
+IGNORE_HISTORY_MESSAGES=false to import messages when connect, default is true
 IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
 IGNORE_YOURSELF_MESSAGES=true to ignore messages for yourself, default is true, possible loop if was false
 COMPOSING_MESSAGE=true enable composing before send message as text length, default false
@@ -220,7 +220,7 @@ AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto res
 THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default id false
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
-UNOAPI_RETRY_REQUEST_DELAY: retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+UNOAPI_RETRY_REQUEST_DELAY=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:

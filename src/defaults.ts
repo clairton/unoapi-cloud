@@ -62,7 +62,7 @@ export const IGNORE_BROADCAST_STATUSES: boolean =
 export const IGNORE_BROADCAST_MESSAGES: boolean =
   process.env.IGNORE_BROADCAST_MESSAGES === _undefined ? false : process.env.IGNORE_OWN_MESSAGES == 'true'
 export const IGNORE_HISTORY_MESSAGES: boolean =
-  process.env.IGNORE_HISTORY_MESSAGES === _undefined ? false : process.env.IGNORE_HISTORY_MESSAGES == 'true'
+  process.env.IGNORE_HISTORY_MESSAGES === _undefined ? true : process.env.IGNORE_HISTORY_MESSAGES == 'true'
 export const IGNORE_DATA_STORE: boolean = process.env.IGNORE_DATA_STORE === _undefined ? false : process.env.IGNORE_DATA_STORE == 'true'
 export const IGNORE_YOURSELF_MESSAGES: boolean =
   process.env.IGNORE_YOURSELF_MESSAGES === _undefined ? false : process.env.IGNORE_YOURSELF_MESSAGES == 'true'
