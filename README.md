@@ -373,6 +373,9 @@ Run
 
 To show logs `journalctl -u unoapi.service -f`
 
+## Caution with whatsapp web connection
+More then 14 days without open app in smartphone, the connection with whatsapp web is invalidated and need to read a new qrcode.
+
 ## Legal
 
 - This code is in no way affiliated, authorized, maintained, sponsored or
