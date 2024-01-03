@@ -45,6 +45,7 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'senderKeyDistributionMessage',
   'messageContextInfo',
   'messageStubType',
+  'documentWithCaptionMessage',
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -338,6 +339,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
       case 'ephemeralMessage':
       case 'viewOnceMessage':
+      case 'documentWithCaptionMessage':
         const changedPayload = {
           ...payload,
           message: binMessage.message,
