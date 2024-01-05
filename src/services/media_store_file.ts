@@ -25,39 +25,17 @@ export const getMediaStoreFile: getMediaStore = (phone: string, config: Config, 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mediaStoreFile = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
-    const { message, key } = waMessage
-    if (message) {
-      const mediaMessage = getMediaValue(message)
-      if (mediaMessage?.mimetype) {
-        const extension = mime.extension(mediaMessage?.mimetype)
-        return `${phone}/${key.id}.${extension}`
-      }
+    const { key } = waMessage
+    const binMessage = getBinMessage(waMessage)
+    if (binMessage?.message?.mimetype) {
+      const extension = mime.extension(binMessage?.message?.mimetype)
+      return `${phone}/${key.id}.${extension}`
     }
     throw 'Not possible get file name'
   }
 
   const getFileUrl = async (fileName: string) => {
     return `${config.baseStore}${MEDIA_DIR}/${fileName}`
-  }
-
-  const getMediaValue = (
-    message: proto.IMessage,
-  ):
-    | proto.Message.IImageMessage
-    | proto.Message.IVideoMessage
-    | proto.Message.IAudioMessage
-    | proto.Message.IDocumentMessage
-    | proto.Message.IStickerMessage
-    | undefined => {
-    return (
-      message?.stickerMessage ||
-      message?.imageMessage ||
-      message?.videoMessage ||
-      message?.audioMessage ||
-      message?.documentMessage ||
-      message?.stickerMessage ||
-      undefined
-    )
   }
 
   const saveMedia = async (waMessage: WAMessage) => {
