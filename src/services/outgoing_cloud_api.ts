@@ -1,7 +1,7 @@
 import { WAMessage } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
-import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BindTemplateError } from './transformer'
+import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
 import { getConfig } from './config'
 import { Template } from './template'
 import logger from './logger'
@@ -65,9 +65,9 @@ export class OutgoingCloudApi implements Outgoing {
         i.key.remoteJid && (await store.dataStore.setMessage(i.key.remoteJid, i))
       }
     }
-    if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+    if (isSaveMedia(i)) {
       logger.debug(`Saving media...`)
-      await store?.mediaStore.saveMedia(messageType, i)
+      await store?.mediaStore.saveMedia(i)
     }
     let data
     try {

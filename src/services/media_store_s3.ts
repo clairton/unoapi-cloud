@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage } from '@whiskeysockets/baileys'
-import { getMessageType } from './transformer'
+import { getBinMessage } from './transformer'
 import { UNOAPI_JOB_MEDIA, DATA_TTL } from '../defaults'
 import { mediaStores, MediaStore, getMediaStore } from './media_store'
 import { Response } from 'express'
@@ -34,11 +34,11 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
   const mediaStore = mediaStoreFile(phone, config, getDataStore)
   const getMedia = mediaStore.getMedia
 
-  const saveMedia = async (messageType: string, waMessage: WAMessage) => {
+  const saveMedia = async (waMessage: WAMessage) => {
     let buffer
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyM: any = waMessage
-    const localUrl = anyM.message[messageType].url
+    const binMessage = getBinMessage(waMessage)
+    const localUrl = binMessage?.message?.url
 
     if (localUrl.indexOf('base64') >= 0) {
       const parts = localUrl.split(',')
@@ -98,10 +98,9 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
           const message: any = await store.loadMessage(remoteJid, id)
           logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
-            const messageType = getMessageType(message)
-            const binMessage = messageType && message.message[messageType]
+            const binMessage = getBinMessage(message)
             const fileNameS3 = mediaStore.getFileName(phone, message as WAMessage)
-            const fileName = binMessage.fileName || fileNameS3
+            const fileName = binMessage?.message?.fileName || fileNameS3
             const params = {
               Bucket: bucket,
               Key: fileNameS3,

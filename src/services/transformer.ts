@@ -1,4 +1,4 @@
-import { AnyMessageContent, isJidUser } from '@whiskeysockets/baileys'
+import { AnyMessageContent, WAMessage, WAMessageContent, isJidUser, normalizeMessageContent, proto } from '@whiskeysockets/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -62,6 +62,32 @@ export const getMessageType = (payload: any) => {
     return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
   } else if (payload.messageStubType) {
     return 'messageStubType'
+  }
+}
+
+export const isSaveMedia = (message: WAMessage) => {
+  const normalizedMessage = getNormalizedMessage(message)
+  const messageType = normalizedMessage && getMessageType(normalizedMessage)
+  return messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getBinMessage = (waMessage: WAMessage): { messageType: string; message: any } | undefined => {
+  const message: proto.IMessage | undefined = normalizeMessageContent(waMessage.message)
+  const messageType = getMessageType({ message })
+  if (message && messageType && message[messageType]) {
+    return { messageType, message: message[messageType] }
+  }
+}
+
+export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefined => {
+  const binMessage = getBinMessage(waMessage)
+  if (binMessage) {
+    let { message } = binMessage
+    if (message.editedMessage) {
+      message = message.protocolMessage?.editedMessage
+    }
+    return { key: waMessage.key, message: { [binMessage.messageType]: message } }
   }
 }
 
