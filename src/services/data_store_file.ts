@@ -14,7 +14,7 @@ import {
 } from '@whiskeysockets/baileys'
 import makeOrderedDictionary from '@whiskeysockets/baileys/lib/Store/make-ordered-dictionary'
 import { waMessageID } from '@whiskeysockets/baileys/lib/Store/make-in-memory-store'
-import { TYPE_MESSAGES_TO_PROCESS_FILE, getMessageType, jidToPhoneNumber, phoneNumberToJid } from './transformer'
+import { isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
@@ -99,10 +99,9 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
           await dataStore.setKey(key.id, key)
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           await dataStore.setMessage(key.remoteJid!, msg)
-          const messageType = getMessageType(msg)
-          if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+          if (isSaveMedia(msg)) {
             const { mediaStore } = await config.getStore(phone, config)
-            await mediaStore.saveMedia(messageType, msg)
+            await mediaStore.saveMedia(msg)
           }
         }
       }

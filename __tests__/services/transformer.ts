@@ -1,3 +1,4 @@
+import { WAMessage, proto } from '@whiskeysockets/baileys'
 import {
   phoneNumberToJid,
   getMessageType,
@@ -9,6 +10,7 @@ import {
   toBaileysMessageContent,
   isValidPhoneNumber,
   DecryptError,
+  getNormalizedMessage,
 } from '../../src/services/transformer'
 
 describe('service transformer', () => {
@@ -931,5 +933,26 @@ describe('service transformer', () => {
 
   test('isValidPhoneNumber return false when invalid', async () => {
     expect(isValidPhoneNumber('+554998416834X')).toEqual(false)
+  })
+
+  test('getNormalizedMessage documentWithCaptionMessage', async () => {
+    const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
+    const documentMessage: proto.Message.IDocumentMessage = {
+      url: 'https://mmg.whatsapp.net/v/t62.7119-24/24248058_881769707068106_5138895532383847851_n.enc?ccb=11-4&oh=01_AdQM6YlfR3dW_UvRoLmPQeqOl08pdn8DNtTCTP1DMz4gcA&oe=65BCEDEA&_nc_sid=5e03e0&mms3=true',
+      mimetype: 'text/csv',
+      title: 'Clientes-03-01-2024-11-38-32.csv',
+      caption: 'pode subir essa campanha por favor',
+    }
+    const input: WAMessage = {
+      key,
+      message: {
+        documentWithCaptionMessage: { message: { documentMessage } },
+      },
+    }
+    const output = {
+      key,
+      message: { documentMessage },
+    }
+    expect(getNormalizedMessage(input)).toEqual(output)
   })
 })

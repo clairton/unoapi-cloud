@@ -447,7 +447,7 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           let quoted: WAMessage | undefined = undefined
-          let disappearingMessagesInChat = false
+          let disappearingMessagesInChat: boolean | number = false
           const messageId = payload?.context?.message_id || payload?.context?.id
           if (messageId) {
             const key = await this.store?.dataStore?.loadKey(messageId)
