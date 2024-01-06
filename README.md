@@ -4,7 +4,7 @@ An implementation of Baileys(`https://github.com/WhiskeySockets/Baileys`) as
 RESTful API service with multi device support with a Whatsapp Cloud API format
 `https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
-The media files are saved in file system at folder data with the session.
+The media files are saved in file system at folder data with the session or in redis.
 
 ## Send a Message
 
