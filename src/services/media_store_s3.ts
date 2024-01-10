@@ -49,7 +49,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
 
-    saveMediaBuffer(fileName, buffer)
+    await saveMediaBuffer(fileName, buffer)
 
     return true
   }
