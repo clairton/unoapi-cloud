@@ -62,6 +62,10 @@ export interface exists {
   (_jid: string): Promise<string | undefined>
 }
 
+export interface close {
+  (): Promise<void>
+}
+
 export type Status = {
   attempt: number
   connected: boolean
@@ -317,7 +321,11 @@ export const connect = async ({
     return dataStore.loadGroupMetada(jid, sock!)
   }
 
+  const close: close = async () => {
+    return sock?.end(undefined)
+  }
+
   connect()
 
-  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close }
 }

@@ -35,6 +35,7 @@ export const UNOAPI_JOB_BIND = `${UNOAPI_QUEUE_NAME}.bind`
 export const UNOAPI_JOB_OUTGOING = `${UNOAPI_QUEUE_NAME}.outgoing`
 export const UNOAPI_JOB_CONTACT = `${UNOAPI_QUEUE_NAME}.contact`
 export const UNOAPI_JOB_BULK_PARSER = `${UNOAPI_QUEUE_NAME}.bulk.parser`
+export const UNOAPI_JOB_RELOAD = `${UNOAPI_QUEUE_NAME}.reload`
 export const UNOAPI_JOB_BULK_SENDER = `${UNOAPI_QUEUE_NAME}.bulk.sender`
 export const UNOAPI_JOB_BULK_STATUS = `${UNOAPI_QUEUE_NAME}.bulk.status`
 export const UNOAPI_JOB_BULK_REPORT = `${UNOAPI_QUEUE_NAME}.bulk.report`

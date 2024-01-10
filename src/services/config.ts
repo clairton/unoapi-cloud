@@ -3,6 +3,8 @@ import { getStoreFile } from './store_file'
 import { WAMessageKey } from '@whiskeysockets/baileys'
 import { Level } from 'pino'
 
+export const configs: Map<string, Config> = new Map()
+
 export interface GetMessageMetadata {
   <T>(message: T): Promise<T>
 }

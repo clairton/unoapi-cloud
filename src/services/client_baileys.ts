@@ -17,9 +17,10 @@ import {
   fetchGroupMetadata,
   Info,
   exists,
+  close,
 } from './socket'
 import { Client, getClient } from './client'
-import { Config, defaultConfig, getConfig } from './config'
+import { Config, configs, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError, isIndividualJid } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
@@ -104,10 +105,13 @@ const existsDefault: exists = async (_jid: string) => {
   throw sendError
 }
 
+const closeDefault = async () => logger.info(`Close connection`)
+
 export class ClientBaileys implements Client {
   private phone: string
   private config: Config = defaultConfig
   private status: Status = statusDefault
+  private close: close = closeDefault
   private info: Info = infoDefault
   private sendMessage = sendMessageDefault
   private fetchImageUrl = fetchImageUrlDefault
@@ -292,7 +296,7 @@ export class ClientBaileys implements Client {
       return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists } = await connect({
+    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -311,6 +315,7 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCall
     this.fetchImageUrl = fetchImageUrl
     this.fetchGroupMetadata = fetchGroupMetadata
+    this.close = close
     this.exists = exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
@@ -402,6 +407,8 @@ export class ClientBaileys implements Client {
     stores.delete(this.phone)
     dataStores.delete(this.phone)
     mediaStores.delete(this.phone)
+    configs.delete(this.phone)
+    await this.close()
     this.status = statusDefault
     this.sendMessage = sendMessageDefault
     this.readMessages = readMessagesDefault
@@ -409,6 +416,7 @@ export class ClientBaileys implements Client {
     this.fetchImageUrl = fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadataDefault
     this.exists = existsDefault
+    this.close = closeDefault
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
