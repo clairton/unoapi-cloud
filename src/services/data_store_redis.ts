@@ -170,7 +170,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         language: 'pt_BR',
         components: [
           {
-            text: `logLevel: {{logLevel}}\nrejectCallsWebhook: {{rejectCallsWebhook}}\nrejectCalls: {{rejectCalls}}\ncomposingMessage: {{composingMessage}}\nsendConnectionStatus: {{sendConnectionStatus}}\nignoreOwnMessages: {{ignoreOwnMessages}}\nignoreYourselfMessages: {{ignoreYourselfMessages}}\nignoreHistoryMessages: {{ignoreHistoryMessages}}\nignoreGroupMessages: {{ignoreGroupMessages}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}`,
+            text: `logLevel: {{logLevel}}\nrejectCallsWebhook: {{rejectCallsWebhook}}\nrejectCalls: {{rejectCalls}}\ncomposingMessage: {{composingMessage}}\nsendConnectionStatus: {{sendConnectionStatus}}\nignoreOwnMessages: {{ignoreOwnMessages}}\nignoreYourselfMessages: {{ignoreYourselfMessages}}\nignoreHistoryMessages: {{ignoreHistoryMessages}}\nignoreGroupMessages: {{ignoreGroupMessages}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}`,
             type: 'BODY',
             parameters: [
               {
@@ -208,10 +208,6 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
               {
                 type: 'boolean',
                 text: 'ignoreGroupMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreBroadcastStatuses',
               },
               {
                 type: 'boolean',
