@@ -15,6 +15,7 @@ import {
   fetchImageUrl,
   fetchGroupMetadata,
   exists,
+  close,
 } from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
 import { proto } from '@whiskeysockets/baileys'
@@ -49,6 +50,7 @@ describe('service client baileys', () => {
   let fetchGroupMetadata
   let getConfig: getConfig
   let config: Config
+  let close: close
 
   const status: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
 
@@ -57,6 +59,7 @@ describe('service client baileys', () => {
     outgoing = mock<Outgoing>()
     incoming = mock<Incoming>()
     dataStore = mock<DataStore>()
+    close = mock<close>()
     store = mock<Store>()
     store.dataStore = dataStore
     config = defaultConfig
@@ -76,7 +79,7 @@ describe('service client baileys', () => {
     rejectCall = mockFn<rejectCall>()
     fetchImageUrl = mockFn<fetchImageUrl>()
     fetchGroupMetadata = mockFn<fetchGroupMetadata>()
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close })
   })
 
   test('call send with unknown status', async () => {
@@ -130,7 +133,7 @@ describe('service client baileys', () => {
     send = async () => {
       throw new SendError(1, '')
     }
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close })
     await client.connect()
     const response = await client.send(payload, {})
     expect(response.error.entry.length).toBe(1)

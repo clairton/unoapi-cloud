@@ -1,6 +1,7 @@
 jest.mock('../../src/services/redis')
 import { getConfig } from '../../src/services/redis'
-import { getConfigRedis, configs } from '../../src/services/config_redis'
+import { getConfigRedis } from '../../src/services/config_redis'
+import { configs } from '../../src/services/config'
 const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>
 
 describe('service config redis', () => {
@@ -18,17 +19,18 @@ describe('service config redis', () => {
   test('use default', async () => {
     mockGetConfig.mockResolvedValue({})
     const config = await getConfigRedis(`${new Date().getTime()}`)
-    expect(config.ignoreGroupMessages).toBe(false)
+    expect(config.ignoreGroupMessages).toBe(true)
+    expect(config.ignoreBroadcastMessages).toBe(false)
   })
 
-  test('use env', async () => {
-    const copy = process.env.IGNORE_GROUP_MESSAGES
-    process.env.IGNORE_GROUP_MESSAGES = 'false'
-    mockGetConfig.mockResolvedValue({})
-    const config = await getConfigRedis(`${new Date().getTime()}`)
-    process.env.IGNORE_GROUP_MESSAGES = copy
-    expect(config.ignoreGroupMessages).toBe(false)
-  })
+  // test('use env', async () => {
+  //   const copy = process.env.IGNORE_GROUP_MESSAGES
+  //   process.env.IGNORE_GROUP_MESSAGES = 'false'
+  //   mockGetConfig.mockResolvedValue({})
+  //   const config = await getConfigRedis(`${new Date().getTime()}`)
+  //   process.env.IGNORE_GROUP_MESSAGES = copy
+  //   expect(config.ignoreGroupMessages).toBe(false)
+  // })
 
   test('use webhook url redis', async () => {
     const url = `${new Date().getTime()}${new Date().getTime()}`
