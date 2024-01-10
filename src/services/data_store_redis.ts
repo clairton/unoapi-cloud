@@ -178,28 +178,16 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
                 text: 'logLevel',
               },
               {
-                type: 'text',
-                text: 'rejectCallsWebhook',
-              },
-              {
-                type: 'text',
-                text: 'rejectCalls',
+                type: 'boolean',
+                text: 'ignoreGroupMessages',
               },
               {
                 type: 'boolean',
-                text: 'composingMessage',
+                text: 'ignoreBroadcastStatuses',
               },
               {
                 type: 'boolean',
-                text: 'composingMessage',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreOwnMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreYourselfMessages',
+                text: 'ignoreBroadcastMessages',
               },
               {
                 type: 'boolean',
@@ -207,11 +195,39 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
               },
               {
                 type: 'boolean',
-                text: 'ignoreGroupMessages',
+                text: 'sendConnectionStatus',
               },
               {
                 type: 'boolean',
-                text: 'ignoreBroadcastStatuses',
+                text: 'autoConnect',
+              },
+              {
+                type: 'number',
+                text: 'autoRestartMs',
+              },
+              {
+                type: 'boolean',
+                text: 'composingMessage',
+              },
+              {
+                type: 'text',
+                text: 'rejectCalls',
+              },
+              {
+                type: 'text',
+                text: 'rejectCallsWebhook',
+              },
+              {
+                type: 'boolean',
+                text: 'throwWebhookError',
+              },
+              {
+                type: 'number',
+                text: 'retryRequestDelayMs',
+              },
+              {
+                type: 'text',
+                text: 'sessionWebhook',
               },
             ],
           },
