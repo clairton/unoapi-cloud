@@ -13,7 +13,6 @@ import { mediaStoreFile } from './media_store_file'
 import mime from 'mime-types'
 import { Config } from './config'
 import logger from './logger'
-import { getConfig } from './redis'
 
 export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   if (!mediaStores.has(phone)) {

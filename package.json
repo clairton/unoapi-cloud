@@ -14,7 +14,7 @@
   "scripts": {
     "cloud": "node dist/cloud.js",
     "lint": "eslint src",
-    "test": "ENV_FILE=./.env.test jest --coverage",
+    "test": "jest --coverage",
     "build": "./node_modules/typescript/bin/tsc -p .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "dev": "./node_modules/nodemon/bin/nodemon.js src/index.ts",
