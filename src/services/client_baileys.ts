@@ -1,4 +1,4 @@
-import { AnyMessageContent, GroupMetadata, WAMessage, delay } from '@whiskeysockets/baileys'
+import { AnyMessageContent, GroupMetadata, WAMessage, delay, isJidGroup } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
@@ -584,7 +584,7 @@ export class ClientBaileys implements Client {
     }
     const key = message && message['key']
     let remoteJid
-    if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
+    if (key.remoteJid && isJidGroup(key.remoteJid)) {
       logger.debug(`Retrieving group metadata...`)
       remoteJid = key.participant
       let groupMetadata: GroupMetadata | undefined
