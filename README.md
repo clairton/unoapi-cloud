@@ -154,6 +154,7 @@ with:
 * 6 - max qrcode generate 
 * 7 - invalid phone number
 * 8 - message not allowed
+* 9 - connection lost
 
 ## Up for development
 

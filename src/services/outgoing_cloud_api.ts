@@ -62,7 +62,9 @@ export class OutgoingCloudApi implements Outgoing {
       message = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
         await store?.dataStore.setKey(i.key.id, i.key)
-        i.key.remoteJid && (await store.dataStore.setMessage(i.key.remoteJid, i))
+        if (i.key.remoteJid) {
+          await store.dataStore.setMessage(i.key.remoteJid, i)
+        }
       }
     }
     if (isSaveMedia(i)) {

@@ -233,7 +233,7 @@ export const connect = async ({
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
     await disconnect(true)
-    onReconnect()
+    return onReconnect()
   }
 
   const disconnect = (reconnect: boolean) => {
@@ -251,13 +251,18 @@ export const connect = async ({
     return dataStore.getJid(phone, sock!)
   }
 
-  const validateStatus = () => {
+  const validateStatus = async () => {
     if (status.disconnected || !status.connected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
       } else {
         throw new SendError(3, 'Disconnected number, please read qr code')
       }
+    }
+    if (!sock) {
+      await onStatus(`Socket connection is null`, true)
+      await reconnect()
+      throw new SendError(9, 'Connection lost, please retry connect')
     }
   }
 
@@ -266,25 +271,25 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    validateStatus()
+    await validateStatus()
     const id = isJidGroup(to) ? to : await exists(to)
-    if (sock && id) {
+    if (id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
         const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 100)
-        await sock.presenceSubscribe(id)
+        await sock?.presenceSubscribe(id)
         await delay(Math.floor(Math.random() * time) + 100)
-        await sock.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
+        await sock?.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
         await delay(Math.floor(Math.random() * time) + 200)
-        await sock.sendPresenceUpdate('paused', id)
+        await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
       const opts = { backgroundColor: '' }
       if (options.quoted) {
         opts['quoted'] = options.quoted
       }
-      return sock.sendMessage(id, message, opts)
+      return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
       throw new SendError(7, `The phone number ${to} is invalid!`)
@@ -293,8 +298,8 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
-    validateStatus()
-    return sock && sock.readMessages(keys)
+    await validateStatus()
+    return sock?.readMessages(keys)
   }
 
   if (config.autoRestartMs) {
@@ -304,11 +309,11 @@ export const connect = async ({
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
     logger.info('Subscribe %s event:', phone, event)
-    sock && sock.ev.on(event, callback)
+    return sock?.ev?.on(event, callback)
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
-    return sock && sock.rejectCall(callId, callFrom)
+    return sock?.rejectCall(callId, callFrom)
   }
 
   const fetchImageUrl: fetchImageUrl = async (jid: string) => {
