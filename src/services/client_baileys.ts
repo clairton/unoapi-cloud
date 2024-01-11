@@ -21,7 +21,7 @@ import {
 } from './socket'
 import { Client, getClient } from './client'
 import { Config, configs, defaultConfig, getConfig } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError, isIndividualJid } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { Incoming } from './incoming'
