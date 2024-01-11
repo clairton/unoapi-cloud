@@ -13,6 +13,7 @@ import { mediaStoreFile } from './media_store_file'
 import mime from 'mime-types'
 import { Config } from './config'
 import logger from './logger'
+import { getConfig } from './redis'
 
 export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   if (!mediaStores.has(phone)) {
@@ -32,6 +33,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
 
   const mediaStore = mediaStoreFile(phone, config, getDataStore)
   const getMedia = mediaStore.getMedia
+  const getDownloadUrl = mediaStore.getDownloadUrl
 
   const saveMedia = async (waMessage: WAMessage) => {
     let buffer
@@ -46,9 +48,13 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
     await saveMediaBuffer(fileName, buffer)
-    if (binMessage?.messageType && waMessage.message) {
-      waMessage.message[binMessage?.messageType]['url'] = await getFileUrl(fileName)
-    }
+    // if (binMessage?.messageType && waMessage.message) {
+    //   const filePath = await mediaStore.getFileName(phone, waMessage)
+    //   const config = await getConfig(phone)
+    //   const url = await getDownloadUrl(config.baseUrl, filePath)
+    //   console.log(`binMessage?.messageType ${binMessage?.messageType} waMessage ${JSON.stringify(waMessage)}`)
+    //   waMessage.message[binMessage?.messageType]['url'] = url
+    // }
     return waMessage
   }
 
@@ -122,5 +128,5 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
   }
 
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl }
 }

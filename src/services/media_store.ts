@@ -17,4 +17,5 @@ export type MediaStore = {
   downloadMedia: (resp: Response, fileName: string) => Promise<void>
   getFileName: (phone: string, waMessage: proto.IWebMessageInfo) => string
   getFileUrl: (fileName: string) => Promise<string>
+  getDownloadUrl: (baseUrl: string, fileName: string) => Promise<string>
 }

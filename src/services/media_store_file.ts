@@ -38,6 +38,10 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     return `${config.baseStore}${MEDIA_DIR}/${fileName}`
   }
 
+  const getDownloadUrl = async (baseUrl: string, filePath: string) => {
+    return `${baseUrl}/v15.0/download/${filePath}`
+  }
+
   const saveMedia = async (waMessage: WAMessage) => {
     let buffer
     const binMessage = getBinMessage(waMessage)
@@ -115,7 +119,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
             const binMessage = getBinMessage(message)
             const filePath = await getFileName(phone, message)
             const mimeType = mime.lookup(filePath)
-            const url = `${baseUrl}/v15.0/download/${filePath}`
+            const url = await getDownloadUrl(baseUrl, filePath)
             return {
               messaging_product: 'whatsapp',
               url,
@@ -129,5 +133,5 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       }
     }
   }
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl }
 }
