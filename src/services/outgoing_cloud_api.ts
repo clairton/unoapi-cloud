@@ -53,7 +53,7 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async sendOne(phone: string, message: object) {
     logger.debug(`Receive message %s`, JSON.stringify(message))
-    const i: WAMessage = message as WAMessage
+    let i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
     logger.debug(`messageType %s...`, messageType)
     const config = await this.getConfig(phone)
@@ -67,7 +67,7 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (isSaveMedia(i)) {
       logger.debug(`Saving media...`)
-      await store?.mediaStore.saveMedia(i)
+      i = await store?.mediaStore.saveMedia(i)
     }
     let data
     try {

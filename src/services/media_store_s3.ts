@@ -24,7 +24,6 @@ export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, ge
   }
   return mediaStores.get(phone) as MediaStore
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s3Config = STORAGE_OPTIONS((config as any).storage)
@@ -36,10 +35,8 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
 
   const saveMedia = async (waMessage: WAMessage) => {
     let buffer
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const binMessage = getBinMessage(waMessage)
     const localUrl = binMessage?.message?.url
-
     if (localUrl.indexOf('base64') >= 0) {
       const parts = localUrl.split(',')
       const base64 = parts[1]
@@ -48,10 +45,11 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
-
     await saveMediaBuffer(fileName, buffer)
-
-    return true
+    if (binMessage?.messageType && waMessage.message) {
+      waMessage.message[binMessage?.messageType]['url'] = await getFileUrl(fileName)
+    }
+    return waMessage
   }
 
   const saveMediaBuffer = async (fileName: string, content: Buffer) => {

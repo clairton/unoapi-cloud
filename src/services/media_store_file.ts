@@ -51,7 +51,10 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
     const fileName = getFileName(phone, waMessage)
     await saveMediaBuffer(fileName, buffer)
-    return true
+    if (binMessage?.messageType && waMessage.message) {
+      waMessage.message[binMessage?.messageType]['url'] = await getFileUrl(fileName)
+    }
+    return waMessage
   }
 
   const saveMediaBuffer = async (fileName: string, content: Buffer) => {
