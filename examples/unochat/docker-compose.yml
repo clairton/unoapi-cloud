@@ -1,0 +1,93 @@
+version: '3'
+
+x-base: &base
+  image: clairton/chatwoot:v3.4.4-uno
+  restart: always
+  env_file: .env
+
+services:
+  chatwoot-web:
+    <<: *base
+    depends_on:
+      - postgres
+      - redis
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    ports:
+      - 3000:3000
+
+  chatwoot-worker:
+    <<: *base
+    depends_on:
+      - postgres
+      - redis
+      - unoapi
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+
+  chatwoot-migrate:
+    <<: *base
+    environment:
+      POSTGRES_STATEMENT_TIMEOUT: 600s
+    depends_on:
+      - postgres
+      - redis
+    restart: 'no'
+    command:  ['bundle', 'exec', 'rails', 'db:chatwoot_prepare']
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis:/data
+    command: redis-server --appendonly yes
+    restart: always
+    env_file: .env
+
+  postgres:
+    image: postgres:16.1-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    env_file: .env
+    restart: always
+
+  unoapi:
+    image: clairton/unoapi-cloud:v1.12.4
+    env_file: .env
+    depends_on:
+      - redis
+      - rabbitmq
+      - minio
+    entrypoint: yarn cloud
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    restart: always
+    env_file: .env
+  
+  minio:
+    image: quay.io/minio/minio:latest
+    command: server /data
+    volumes:
+      - minio:/data
+    restart: always
+    env_file: .env
+
+  minio-mc:
+    image: quay.io/minio/mc:latest
+    env_file: .env
+    restart: 'no'
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local $STORAGE_ENDPOINT $STORAGE_ACCESS_KEY_ID $STORAGE_SECRET_ACCESS_KEY;
+      /usr/bin/mc mb local/$STORAGE_BUCKET_NAME;
+      "
+
+volumes:
+  redis:
+  postgres:
+  minio:
+  rabbitmq:
+  letsencrypt:
