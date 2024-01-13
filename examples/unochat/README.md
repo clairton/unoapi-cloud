@@ -62,3 +62,5 @@ OBS:
 13 - Cole esse token na caixa de entrada, para garantir que haja a comunicação entre o chatwoot e unoapi
 
 ![image](prints/update_inbox.png)
+
+14 - Honre a Deus, seja Feliz, beba água, contribua com melhorias para o opensource, não faça spam e se quiser mandar uma doação, os dados no readme principal.
