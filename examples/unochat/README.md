@@ -1,6 +1,15 @@
-# Unoapi Cloud with Chatwoot
+# Unoapi e Chatwoot em poucos comandos
 
-OBS: vou utilizar meu dominio lvh.me e você deve trocar pelo seu.
+OBS: 
+  - vou utilizar meu dominio lvh.me e você deve trocar pelo seu.
+  - essa versão do chatwoot que esta sendo usada aqui tem algumas customizações que ainda não foram aceitas pelo time do chatwoot:
+    - coloca o nome do agente na mensagem
+    -⁠ pode editar o endereço da caixa de entrada do whatsapp, assim pode usar a oficial e a unoapi na mesma instalação
+    - marca as mensagem no whatsapp como lido quando o agente visualiza a conversa
+    - funciona as conversas em grupo
+    -⁠ trata a mensagem enviads por outras conexões, inclusive o aplicativo
+    -⁠ desabilita a janela de 24 horas do whatsapp cloud oficial
+    - sincroniza as imagens de perfil dos grupos e usuarios
 
 1 - Para iniciar você precisa apontar os DNS para o ip da sua VPS, isso deve ser feito no registro.br, cloudflare, ou no lugar onde você tem configurado o seu dominio:
   - chatwoot.lvh.me
@@ -34,7 +43,7 @@ OBS: vou utilizar meu dominio lvh.me e você deve trocar pelo seu.
 8 - Após isso precisa reiniciar o serviço do unoapi para ele ler esse valor:
   - `docker compose restart unoapi`
 
-9 - Novamente no chatwoot, crie um caixa de entrada, com o tipo Whatsapp, em "ID do número de telefone" e "ID da Conta de Negócios" use o mesmo numero de telefone sem o "+", outra questão importante para o Brasil, use o numero se for celular, com 9 digito.
+9 - Novamente no chatwoot, crie um caixa de entrada, com o tipo Whatsapp, em "ID do número de telefone" e "ID da Conta de Negócios" use o mesmo numero de telefone sem o "+", outra questão importante para o Brasil, use o numero se for celular, com 9 digito. Em "Whatsapp Cloud API URL" habilite a edição e deixe com o conteudo "http://unoapi:9876"
 
 ![image](prints/create_inbox.png)
 

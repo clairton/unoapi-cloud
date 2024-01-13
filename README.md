@@ -322,11 +322,16 @@ PS: After update JSON, restart de docker container or service
 
 ### Docker compose with chatwoot 
 
-`https://github.com/clairton/unoapi-cloud/blob/main/examples/chatwoot/docker-compose.yml`
+`https://github.com/clairton/unoapi-cloud/blob/main/examples/chatwoot/README.md`
 
 ### Docker compose with unoapi
 
 `https://github.com/clairton/unoapi-cloud/blob/main/examples/docker-compose.yml`
+
+
+### Docker compose with chatwoot and unoapi together
+
+`https://github.com/clairton/unoapi-cloud/blob/main/examples/unochat/README.md`
 
 ## Install as Systemctl
 
