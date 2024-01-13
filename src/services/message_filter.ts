@@ -30,7 +30,7 @@ const IgnoreOwnKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefi
     return false
   } else {
     const filter = key && !!key.fromMe
-    logger.debug('IgnoreOwnKey: %s => %s', key, filter)
+    logger.debug('IgnoreOwnKey: %s => %s', JSON.stringify(key), filter)
     return filter
   }
 }

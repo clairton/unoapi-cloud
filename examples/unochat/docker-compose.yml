@@ -4,16 +4,57 @@ x-base: &base
   image: clairton/chatwoot:v3.4.4-uno
   restart: always
   env_file: .env
+  links:
+    - traefik:${MINIO_DOMAIN}
 
 services:
+  traefik:
+    image: traefik:2.4
+    container_name: traefik
+    restart: unless-stopped
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    # labels:
+      # - traefik.enable=true
+      # - traefik.http.routers.api.rule=Host(`traefik.selfhosted.co.za`)
+      # - traefik.http.routers.api.entrypoints=https
+      # - traefik.http.routers.api.service=api@internal
+      # - traefik.http.routers.api.tls=true
+      # - traefik.http.routers.api.tls.certresolver=letsencrypt
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    command:
+      - --api
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.http=true
+      - --entrypoints.http.address=:80
+      - --entrypoints.https=true
+      - --entrypoints.https.address=:443
+      - --log=true
+      - --log.level=DEBUG
+      # - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      # - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
+      # - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      # - --certificatesresolvers.myresolver.acme.email=postmaster@example.com
+      # - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+
   chatwoot-web:
     <<: *base
     depends_on:
       - postgres
       - redis
     command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
-    ports:
-      - 3000:3000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.chatwoot.rule=Host(`${CHATWOOT_DOMAIN}`)
+      - traefik.http.routers.chatwoot.entrypoints=http,https
+      - traefik.http.routers.chatwoot.service=chatwoot
+      # - traefik.http.routers.chatwoot.tls.certresolver=myresolver
+      - traefik.http.services.chatwoot.loadbalancer.server.port=3000
 
   chatwoot-worker:
     <<: *base
@@ -56,6 +97,8 @@ services:
       - rabbitmq
       - minio
     entrypoint: yarn cloud
+    links:
+      - traefik:${MINIO_DOMAIN}
     restart: always
 
   rabbitmq:
@@ -67,21 +110,30 @@ services:
   
   minio:
     image: quay.io/minio/minio:latest
-    command: server /data
+    command: server /data --address ":9000" --console-address ":9001"
     volumes:
       - minio:/data
     restart: always
     env_file: .env
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.minio.rule=Host(`${MINIO_DOMAIN}`)
+      - traefik.http.routers.minio.entrypoints=http,https
+      - traefik.http.routers.minio.service=minio
+      # - traefik.http.routers.minio.tls.certresolver=myresolver
+      - traefik.http.services.minio.loadbalancer.server.port=9000
 
   minio-mc:
     image: quay.io/minio/mc:latest
     env_file: .env
     restart: 'no'
+    links:
+      - traefik:${MINIO_DOMAIN}
     depends_on:
       - minio
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc alias set local $STORAGE_ENDPOINT $STORAGE_ACCESS_KEY_ID $STORAGE_SECRET_ACCESS_KEY;
+      /usr/bin/mc alias set local $MINIO_URL $STORAGE_ACCESS_KEY_ID $STORAGE_SECRET_ACCESS_KEY;
       /usr/bin/mc mb local/$STORAGE_BUCKET_NAME;
       "
 
