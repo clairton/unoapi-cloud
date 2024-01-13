@@ -6,6 +6,7 @@ x-base: &base
   env_file: .env
   links:
     - traefik:${MINIO_DOMAIN}
+    - traefik:${UNOAPI_DOMAIN}
 
 services:
   traefik:
@@ -47,7 +48,7 @@ services:
       - traefik.http.routers.chatwoot.rule=Host(`${CHATWOOT_DOMAIN}`)
       - traefik.http.routers.chatwoot.entrypoints=http,https
       - traefik.http.routers.chatwoot.service=chatwoot
-      # - traefik.http.routers.chatwoot.tls.certresolver=myresolver
+      - traefik.http.routers.chatwoot.tls.certresolver=myresolver
 
   chatwoot-worker:
     <<: *base
@@ -80,6 +81,8 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     env_file: .env
+    ports:
+      - 5432:5432
     restart: always
 
   unoapi:
@@ -92,7 +95,15 @@ services:
     entrypoint: yarn cloud
     links:
       - traefik:${MINIO_DOMAIN}
+      - traefik:${UNOAPI_DOMAIN}
     restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.unoapi.loadbalancer.server.port=9876
+      - traefik.http.routers.unoapi.rule=Host(`${UNOAPI_DOMAIN}`)
+      - traefik.http.routers.unoapi.entrypoints=http,https
+      - traefik.http.routers.unoapi.service=unoapi
+      - traefik.http.routers.minio.tls.certresolver=myresolver
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -122,6 +133,7 @@ services:
     restart: 'no'
     links:
       - traefik:${MINIO_DOMAIN}
+      - traefik:${UNOAPI_DOMAIN}
     depends_on:
       - minio
     entrypoint: >
