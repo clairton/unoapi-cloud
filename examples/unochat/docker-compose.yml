@@ -10,22 +10,14 @@ x-base: &base
 services:
   traefik:
     image: traefik:2.4
-    container_name: traefik
-    restart: unless-stopped
+    restart: always
+    env_file: .env
     volumes:
       - letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    # labels:
-      # - traefik.enable=true
-      # - traefik.http.routers.api.rule=Host(`traefik.selfhosted.co.za`)
-      # - traefik.http.routers.api.entrypoints=https
-      # - traefik.http.routers.api.service=api@internal
-      # - traefik.http.routers.api.tls=true
-      # - traefik.http.routers.api.tls.certresolver=letsencrypt
     ports:
       - 80:80
       - 443:443
-      - 8080:8080
     command:
       - --api
       - --providers.docker=true
@@ -36,11 +28,12 @@ services:
       - --entrypoints.https.address=:443
       - --log=true
       - --log.level=DEBUG
-      # - --certificatesresolvers.myresolver.acme.httpchallenge=true
-      # - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
-      # - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      # - --certificatesresolvers.myresolver.acme.email=postmaster@example.com
-      # - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+      - --entrypoints.web.http.redirections.entrypoint.to=https
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.myresolver.acme.email=${LETSECRYPT_EMAIL}
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
 
   chatwoot-web:
     <<: *base
@@ -50,11 +43,11 @@ services:
     command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
     labels:
       - traefik.enable=true
+      - traefik.http.services.chatwoot.loadbalancer.server.port=3000
       - traefik.http.routers.chatwoot.rule=Host(`${CHATWOOT_DOMAIN}`)
       - traefik.http.routers.chatwoot.entrypoints=http,https
       - traefik.http.routers.chatwoot.service=chatwoot
       # - traefik.http.routers.chatwoot.tls.certresolver=myresolver
-      - traefik.http.services.chatwoot.loadbalancer.server.port=3000
 
   chatwoot-worker:
     <<: *base
@@ -117,11 +110,11 @@ services:
     env_file: .env
     labels:
       - traefik.enable=true
+      - traefik.http.services.minio.loadbalancer.server.port=9000
       - traefik.http.routers.minio.rule=Host(`${MINIO_DOMAIN}`)
       - traefik.http.routers.minio.entrypoints=http,https
       - traefik.http.routers.minio.service=minio
-      # - traefik.http.routers.minio.tls.certresolver=myresolver
-      - traefik.http.services.minio.loadbalancer.server.port=9000
+      - traefik.http.routers.minio.tls.certresolver=myresolver
 
   minio-mc:
     image: quay.io/minio/mc:latest
