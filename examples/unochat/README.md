@@ -63,4 +63,4 @@ OBS:
 
 ![image](prints/update_inbox.png)
 
-14 - Honre a Deus, seja Feliz, beba água, contribua com melhorias para o opensource, não faça spam e se quiser mandar uma doação, os dados no readme principal.
+14 - Honre a Deus, seja Feliz, beba água, contribua com melhorias para o opensource, não faça spam e se quiser mandar uma doação, os dados estão no readme principal.
