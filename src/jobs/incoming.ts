@@ -50,6 +50,9 @@ export class IncomingJob {
       }
     } else if (!ok.success) {
       throw `Unknow response ${JSON.stringify(response)}`
+    } else if (ok.success) {
+      logger.debug('Message id %s update to status %s', payload?.message_id, payload?.status)
+      return
     }
     let outgingPayload
     if (error) {
