@@ -573,7 +573,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
             ${externalAdReply.body}
           
-            ${externalAdReply.mediaUrl}
+            ${externalAdReply.mediaUrl || externalAdReply.thumbnailUrl}
           `
         }
       }
