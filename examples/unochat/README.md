@@ -2,6 +2,7 @@
 
 OBS: 
   - vou utilizar meu dominio lvh.me e você deve trocar pelo seu.
+  - use uma maquina ou vps limpa, pois temos uma serviço do traefik que vai utilizar a porta 80 e 443, se ja tiver um ngnix ou algum outro serviço rodando utilizando essa porta vai conflitar e não vai dar certo
   - essa versão do chatwoot que esta sendo usada aqui tem algumas customizações que ainda não foram aceitas pelo time do chatwoot:
     - coloca o nome do agente na mensagem
     - marca as mensagem no whatsapp como lido quando o agente visualiza a conversa
