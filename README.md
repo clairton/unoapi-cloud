@@ -400,6 +400,10 @@ their platform, so this shouldn't be considered totally safe.
 
 Released under the GPLv3 License.
 
+## WhatsApp Group
+
+https://chat.whatsapp.com/FZd0JyPVMLq94FHf59I8HU
+
 ## Need More
 
 Mail to comercial@unoapi.cloud
