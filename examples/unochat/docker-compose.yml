@@ -103,7 +103,7 @@ services:
       - traefik.http.routers.unoapi.rule=Host(`${UNOAPI_DOMAIN}`)
       - traefik.http.routers.unoapi.entrypoints=http,https
       - traefik.http.routers.unoapi.service=unoapi
-      - traefik.http.routers.minio.tls.certresolver=myresolver
+      - traefik.http.routers.unoapi.tls.certresolver=myresolver
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
