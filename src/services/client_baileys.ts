@@ -290,6 +290,7 @@ export class ClientBaileys implements Client {
   }
 
   async connect() {
+    logger.debug('Client Baileys connecting for %s', this.phone)
     this.config = await this.getConfig(this.phone)
     this.config.getMessageMetadata = async <T>(data: T) => {
       logger.debug(data, 'Put metadata in message')
@@ -397,10 +398,11 @@ export class ClientBaileys implements Client {
         }
       })
     }
+    logger.debug('Client Baileys connected for %s', this.phone)
   }
 
   async disconnect() {
-    logger.debug('Clean client, store for %s', this.phone)
+    logger.debug('Clean client store for %s', this.phone)
     this.store = undefined
     // clean cache
     clients.delete(this.phone)
