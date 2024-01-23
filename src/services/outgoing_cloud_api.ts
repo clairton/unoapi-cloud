@@ -1,7 +1,7 @@
 import { WAMessage } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import fetch, { Response } from 'node-fetch'
-import { fromBaileysMessageContent, getMessageType, TYPE_MESSAGES_TO_PROCESS_FILE, BindTemplateError } from './transformer'
+import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
 import { getConfig } from './config'
 import { Template } from './template'
 import logger from './logger'
@@ -53,22 +53,23 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async sendOne(phone: string, message: object) {
     logger.debug(`Receive message %s`, JSON.stringify(message))
-    const i: WAMessage = message as WAMessage
+    let i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
     logger.debug(`messageType %s...`, messageType)
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       message = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
         await store?.dataStore.setKey(i.key.id, i.key)
-        i.key.remoteJid && (await store.dataStore.setMessage(i.key.remoteJid, i))
+        if (i.key.remoteJid) {
+          await store.dataStore.setMessage(i.key.remoteJid, i)
+        }
       }
     }
-    if (messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)) {
+    if (isSaveMedia(i)) {
       logger.debug(`Saving media...`)
-      await store?.mediaStore.saveMedia(messageType, i)
+      i = await store?.mediaStore.saveMedia(i)
     }
     let data
     try {

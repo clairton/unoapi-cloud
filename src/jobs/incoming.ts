@@ -34,7 +34,7 @@ export class IncomingJob {
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
       logger.debug(`Enqueue in commmander...`)
-      await amqpEnqueue(this.queueCommander, { phone, payload })
+      await amqpEnqueue(this.queueCommander, phone, { phone, payload })
     }
     const { ok, error } = response
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {
@@ -50,6 +50,9 @@ export class IncomingJob {
       }
     } else if (!ok.success) {
       throw `Unknow response ${JSON.stringify(response)}`
+    } else if (ok.success) {
+      logger.debug('Message id %s update to status %s', payload?.message_id, payload?.status)
+      return
     }
     let outgingPayload
     if (error) {
@@ -59,7 +62,7 @@ export class IncomingJob {
       const code = status?.errors[0]?.code
       // retry when error: 5 - Wait a moment, connecting process
       if (retries < UNOAPI_MESSAGE_RETRY_LIMIT && ['5'].includes(code)) {
-        await amqpEnqueue(UNOAPI_JOB_INCOMING, { ...data, retries }, options)
+        await amqpEnqueue(UNOAPI_JOB_INCOMING, phone, { ...data, retries }, options)
       }
     } else {
       outgingPayload = {
@@ -96,7 +99,7 @@ export class IncomingJob {
         ],
       }
     }
-    amqpEnqueue(UNOAPI_JOB_BULK_STATUS, { phone, payload: outgingPayload, type: 'whatsapp' })
+    amqpEnqueue(UNOAPI_JOB_BULK_STATUS, phone, { phone, payload: outgingPayload, type: 'whatsapp' })
     await this.outgoing.send(phone, outgingPayload)
   }
 }

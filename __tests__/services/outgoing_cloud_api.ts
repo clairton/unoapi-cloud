@@ -82,7 +82,7 @@ describe('service incoming baileys', () => {
     const saveMedia = jest.spyOn(store.mediaStore, 'saveMedia')
     const send = jest.spyOn(service, 'send')
     send.mockResolvedValue()
-    saveMedia.mockResolvedValue(true)
+    saveMedia.mockResolvedValue(mediaPayload)
     await service.sendOne(phone, mediaPayload)
     expect(saveMedia).toHaveBeenCalledTimes(1)
     expect(send).toHaveBeenCalledTimes(1)

@@ -239,7 +239,7 @@ export class BulkParserJob {
         messageTimestamp: new Date().getTime(),
       }
       this.outgoing.sendOne(phone, message)
-      await amqpEnqueue(this.queueBulkSender, {
+      await amqpEnqueue(this.queueBulkSender, phone, {
         phone,
         payload: { phone, messages, id, length: messages.length },
       })

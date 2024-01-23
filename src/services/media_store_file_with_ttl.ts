@@ -21,13 +21,12 @@ export const getMediaStoreFileWithTTL: getMediaStore = (phone: string, config: C
 const mediaStoreFileWithTTL = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   const mediaStore = mediaStoreFile(phone, config, getDataStore)
   const saveMedia = mediaStore.saveMedia
-  mediaStore.saveMedia = async (messageType: string, waMessage: WAMessage) => {
-    if (await saveMedia(messageType, waMessage)) {
+  mediaStore.saveMedia = async (waMessage: WAMessage) => {
+    if (await saveMedia(waMessage)) {
       const fileName = mediaStore.getFileName(phone, waMessage)
-      await amqpEnqueue(UNOAPI_JOB_MEDIA, { phone, fileName: fileName }, { delay: DATA_TTL * 1000 })
-      return true
+      await amqpEnqueue(UNOAPI_JOB_MEDIA, phone, { phone, fileName: fileName }, { delay: DATA_TTL * 1000 })
     }
-    return false
+    return waMessage
   }
   return mediaStore
 }

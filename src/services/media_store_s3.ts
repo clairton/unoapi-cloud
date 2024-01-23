@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage } from '@whiskeysockets/baileys'
-import { getMessageType } from './transformer'
+import { getBinMessage } from './transformer'
 import { UNOAPI_JOB_MEDIA, DATA_TTL } from '../defaults'
 import { mediaStores, MediaStore, getMediaStore } from './media_store'
 import { Response } from 'express'
@@ -24,7 +24,6 @@ export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, ge
   }
   return mediaStores.get(phone) as MediaStore
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s3Config = STORAGE_OPTIONS((config as any).storage)
@@ -33,13 +32,12 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
 
   const mediaStore = mediaStoreFile(phone, config, getDataStore)
   const getMedia = mediaStore.getMedia
+  const getDownloadUrl = mediaStore.getDownloadUrl
 
-  const saveMedia = async (messageType: string, waMessage: WAMessage) => {
+  const saveMedia = async (waMessage: WAMessage) => {
     let buffer
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyM: any = waMessage
-    const localUrl = anyM.message[messageType].url
-
+    const binMessage = getBinMessage(waMessage)
+    const localUrl = binMessage?.message?.url
     if (localUrl.indexOf('base64') >= 0) {
       const parts = localUrl.split(',')
       const base64 = parts[1]
@@ -48,10 +46,15 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
-
-    saveMediaBuffer(fileName, buffer)
-
-    return true
+    await saveMediaBuffer(fileName, buffer)
+    // if (binMessage?.messageType && waMessage.message) {
+    //   const filePath = await mediaStore.getFileName(phone, waMessage)
+    //   const config = await getConfig(phone)
+    //   const url = await getDownloadUrl(config.baseUrl, filePath)
+    //   console.log(`binMessage?.messageType ${binMessage?.messageType} waMessage ${JSON.stringify(waMessage)}`)
+    //   waMessage.message[binMessage?.messageType]['url'] = url
+    // }
+    return waMessage
   }
 
   const saveMediaBuffer = async (fileName: string, content: Buffer) => {
@@ -63,7 +66,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
     await s3Client.send(new PutObjectCommand(putParams))
     logger.debug(`Uploaded file ${fileName} to bucket ${bucket}!`)
-    await amqpEnqueue(UNOAPI_JOB_MEDIA, { phone, fileName: fileName }, { delay: DATA_TTL * 1000 })
+    await amqpEnqueue(UNOAPI_JOB_MEDIA, phone, { phone, fileName: fileName }, { delay: DATA_TTL * 1000 })
     return true
   }
 
@@ -98,10 +101,9 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
           const message: any = await store.loadMessage(remoteJid, id)
           logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
-            const messageType = getMessageType(message)
-            const binMessage = messageType && message.message[messageType]
+            const binMessage = getBinMessage(message)
             const fileNameS3 = mediaStore.getFileName(phone, message as WAMessage)
-            const fileName = binMessage.fileName || fileNameS3
+            const fileName = binMessage?.message?.fileName || fileNameS3
             const params = {
               Bucket: bucket,
               Key: fileNameS3,
@@ -125,5 +127,5 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
   }
 
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl }
 }

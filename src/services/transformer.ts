@@ -1,4 +1,4 @@
-import { AnyMessageContent, isJidUser } from '@whiskeysockets/baileys'
+import { AnyMessageContent, WAMessage, isJidUser, normalizeMessageContent, proto } from '@whiskeysockets/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -29,6 +29,8 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'viewOnceMessage',
   'editedMessage',
   'ephemeralMessage',
+  'documentWithCaptionMessage',
+  'viewOnceMessageV2',
   'imageMessage',
   'videoMessage',
   'audioMessage',
@@ -60,6 +62,32 @@ export const getMessageType = (payload: any) => {
     return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
   } else if (payload.messageStubType) {
     return 'messageStubType'
+  }
+}
+
+export const isSaveMedia = (message: WAMessage) => {
+  const normalizedMessage = getNormalizedMessage(message)
+  const messageType = normalizedMessage && getMessageType(normalizedMessage)
+  return messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getBinMessage = (waMessage: WAMessage): { messageType: string; message: any } | undefined => {
+  const message: proto.IMessage | undefined = normalizeMessageContent(waMessage.message)
+  const messageType = getMessageType({ message })
+  if (message && messageType && message[messageType]) {
+    return { messageType, message: message[messageType] }
+  }
+}
+
+export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefined => {
+  const binMessage = getBinMessage(waMessage)
+  if (binMessage) {
+    let { message } = binMessage
+    if (message.editedMessage) {
+      message = message.protocolMessage?.editedMessage
+    }
+    return { key: waMessage.key, message: { [binMessage.messageType]: message } }
   }
 }
 
@@ -338,6 +366,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
       case 'ephemeralMessage':
       case 'viewOnceMessage':
+      case 'viewOnceMessageV2':
+      // {"key":{"remoteJid":"554891710539@s.whatsapp.net","fromMe":false,"id":"3EB016D7881A2C29E25378"},"messageTimestamp":1704301811,"pushName":"Rodrigo","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"n3DiVMM5RFh8Cg==","senderTimestamp":"1703800265","recipientKeyHash":"5IqwqCOTqgXgCA==","recipientTimestamp":"1704205568"},"deviceListMetadataVersion":2},"documentWithCaptionMessage":{"message":{"documentMessage":{"url":"https://mmg.whatsapp.net/v/t62.7119-24/24248058_881769707068106_5138895532383847851_n.enc?ccb=11-4&oh=01_AdQM6YlfR3dW_UvRoLmPQeqOl08pdn8DNtTCTP1DMz4gcA&oe=65BCEDEA&_nc_sid=5e03e0&mms3=true","mimetype":"text/csv","title":"Clientes-03-01-2024-11-38-32.csv","fileSha256":"dmBD4FB1aoDA9fnIRXbvqgExKmxqK6qjGFIGETMmH4Y=","fileLength":"266154","mediaKey":"Mmu+1SthUQuVn8JM+W1Uwttkb3Vo/VQlSJQd/ddNixU=","fileName":"Clientes-03-01-2024-11-38-32.csv","fileEncSha256":"+EadJ+TTn43nOvcccdXAdHSYt9KQy+R7lcsmwkotQnY=","directPath":"/v/t62.7119-24/24248058_881769707068106_5138895532383847851_n.enc?ccb=11-4&oh=01_AdQM6YlfR3dW_UvRoLmPQeqOl08pdn8DNtTCTP1DMz4gcA&oe=65BCEDEA&_nc_sid=5e03e0","mediaKeyTimestamp":"1704301417","contactVcard":false,"contextInfo":{"ephemeralSettingTimestamp":"1702988379","disappearingMode":{"initiator":"CHANGED_IN_CHAT"}},"caption":"pode subir essa campanha por favor"}}}}}
+      case 'documentWithCaptionMessage':
         const changedPayload = {
           ...payload,
           message: binMessage.message,
@@ -542,7 +573,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
             ${externalAdReply.body}
           
-            ${externalAdReply.mediaUrl}
+            ${externalAdReply.mediaUrl || externalAdReply.thumbnailUrl}
           `
         }
       }

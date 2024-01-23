@@ -1,4 +1,4 @@
-import { AnyMessageContent, GroupMetadata, WAMessage, delay } from '@whiskeysockets/baileys'
+import { AnyMessageContent, GroupMetadata, WAMessage, delay, isJidGroup } from '@whiskeysockets/baileys'
 import { Outgoing } from './outgoing'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
@@ -16,10 +16,12 @@ import {
   fetchImageUrl,
   fetchGroupMetadata,
   Info,
+  exists,
+  close,
 } from './socket'
 import { Client, getClient } from './client'
-import { Config, defaultConfig, getConfig } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError, isIndividualJid } from './transformer'
+import { Config, configs, defaultConfig, getConfig } from './config'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import { Incoming } from './incoming'
@@ -98,13 +100,22 @@ const fetchGroupMetadataDefault: fetchGroupMetadata = async (_jid: string) => {
   throw sendError
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const existsDefault: exists = async (_jid: string) => {
+  throw sendError
+}
+
+const closeDefault = async () => logger.info(`Close connection`)
+
 export class ClientBaileys implements Client {
   private phone: string
   private config: Config = defaultConfig
   private status: Status = statusDefault
+  private close: close = closeDefault
   private info: Info = infoDefault
   private sendMessage = sendMessageDefault
   private fetchImageUrl = fetchImageUrlDefault
+  private exists = existsDefault
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
@@ -231,7 +242,7 @@ export class ClientBaileys implements Client {
           const error = errors[i]
           if (error instanceof DecryptError) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const message = (error.getContent() as any)?.entry?.changes[0]?.value?.messages[0]
+            const message = (error.getContent() as any)?.entry[0]?.changes[0]?.value?.messages[0]
             if (message.id) {
               const payload = {
                 messaging_product: 'whatsapp',
@@ -280,15 +291,12 @@ export class ClientBaileys implements Client {
 
   async connect() {
     this.config = await this.getConfig(this.phone)
-    if (!this.config.ignoreGroupMessages) {
-      logger.debug('Override config.getMessageMetadata')
-      this.config.getMessageMetadata = async <T>(data: T) => {
-        logger.debug(data, 'Put metadata in message')
-        return this.getMessageMetadata(data)
-      }
+    this.config.getMessageMetadata = async <T>(data: T) => {
+      logger.debug(data, 'Put metadata in message')
+      return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata } = await connect({
+    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -307,6 +315,8 @@ export class ClientBaileys implements Client {
     this.rejectCall = rejectCall
     this.fetchImageUrl = fetchImageUrl
     this.fetchGroupMetadata = fetchGroupMetadata
+    this.close = close
+    this.exists = exists
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
@@ -397,12 +407,16 @@ export class ClientBaileys implements Client {
     stores.delete(this.phone)
     dataStores.delete(this.phone)
     mediaStores.delete(this.phone)
+    configs.delete(this.phone)
+    await this.close()
     this.status = statusDefault
     this.sendMessage = sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
     this.fetchImageUrl = fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadataDefault
+    this.exists = existsDefault
+    this.close = closeDefault
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -419,13 +433,15 @@ export class ClientBaileys implements Client {
               if (key) {
                 logger.debug('Baileys reading message key %s...', JSON.stringify(key))
                 await this.readMessages([key])
+                await this.store?.dataStore?.setStatus(payload?.message_id, status)
                 logger.debug('Baileys read message key %s!', JSON.stringify(key))
               }
             } else {
               logger.debug('Baileys already read message id %s!', payload?.message_id)
             }
+          } else {
+            await this.store?.dataStore?.setStatus(payload?.message_id, status)
           }
-          await this.store?.dataStore?.setStatus(payload?.message_id, status)
           const r: Response = { ok: { success: true } }
           return r
         } else {
@@ -441,6 +457,7 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(payload)
           }
           let quoted: WAMessage | undefined = undefined
+          let disappearingMessagesInChat: boolean | number = false
           const messageId = payload?.context?.message_id || payload?.context?.id
           if (messageId) {
             const key = await this.store?.dataStore?.loadKey(messageId)
@@ -458,12 +475,20 @@ export class ClientBaileys implements Client {
             }
           }
           logger.debug('Send to baileys', to, content)
+          if (payload?.ttl) {
+            disappearingMessagesInChat = payload.ttl
+          }
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
           await toDelay(this.phone, to)
-          const response = await this.sendMessage(to, content, { composing: this.config.composingMessage, quoted, ...options })
+          const response = await this.sendMessage(to, content, {
+            composing: this.config.composingMessage,
+            quoted,
+            disappearingMessagesInChat,
+            ...options,
+          })
           if (response) {
             logger.debug('Sent to baileys %s', JSON.stringify(response))
             const key = response.key
@@ -556,14 +581,22 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
+    if (!this.status.connected) {
+      return message
+    }
     const key = message && message['key']
     let remoteJid
-    if (key.remoteJid && !isIndividualJid(key.remoteJid)) {
+    if (key.remoteJid && isJidGroup(key.remoteJid)) {
       logger.debug(`Retrieving group metadata...`)
       remoteJid = key.participant
-      let groupMetadata: GroupMetadata | undefined = await this.fetchGroupMetadata(key.remoteJid)
+      let groupMetadata: GroupMetadata | undefined
+      try {
+        groupMetadata = await this.fetchGroupMetadata(key.remoteJid)
+      } catch (error) {
+        logger.warn(error, 'Ignore error fetch group metadata')
+      }
       if (groupMetadata) {
-        logger.debug(groupMetadata, 'Retrieved group metadata %s!')
+        logger.debug(groupMetadata, 'Retrieved group metadata!')
       } else {
         groupMetadata = {
           id: key.remoteJid,
@@ -577,16 +610,21 @@ export class ClientBaileys implements Client {
       try {
         groupMetadata['profilePicture'] = await this.fetchImageUrl(key.remoteJid)
       } catch (error) {
-        logger.error(error, 'Error on retrieve group profile picture')
+        logger.warn(error, 'Ignore error on retrieve group profile picture')
       }
     } else {
       remoteJid = key.remoteJid
     }
-    logger.debug(`Retrieving user picture...`)
-    try {
-      message['profilePicture'] = await this.fetchImageUrl(remoteJid)
-    } catch (error) {
-      logger.error(error, 'Error on retrieve user profile picture')
+    if (remoteJid) {
+      const jid = await this.exists(remoteJid)
+      if (jid) {
+        try {
+          logger.debug(`Retrieving user picture...`)
+          message['profilePicture'] = await this.fetchImageUrl(jid)
+        } catch (error) {
+          logger.warn(error, 'Ignore error on retrieve user profile picture')
+        }
+      }
     }
     return message
   }

@@ -1,11 +1,9 @@
-import { getConfig, Config } from './config'
+import { getConfig, Config, configs } from './config'
 import { getConfig as getConfigCache } from './redis'
 import { getStoreRedis } from './store_redis'
 import logger from './logger'
 import { getConfigByEnv } from './config_by_env'
 import { MessageFilter } from './message_filter'
-
-export const configs: Map<string, Config> = new Map()
 
 export const getConfigRedis: getConfig = async (phone: string): Promise<Config> => {
   if (!configs.has(phone)) {

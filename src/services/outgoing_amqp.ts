@@ -15,21 +15,21 @@ export class OutgoingAmqp implements Outgoing {
   }
 
   public async sendMany(phone: string, payload: object[]) {
-    await amqpEnqueue(this.queueOutgoing, { phone, payload, split: true })
+    await amqpEnqueue(this.queueOutgoing, phone, { phone, payload, split: true })
   }
 
   public async sendOne(phone: string, payload: object) {
     const config = await this.getConfig(phone)
-    await amqpEnqueue(this.queueOutgoing, { phone, payload, webhooks: config.webhooks, split: false })
+    await amqpEnqueue(this.queueOutgoing, phone, { phone, payload, webhooks: config.webhooks, split: false })
   }
 
   public async send(phone: string, payload: object) {
     const config = await this.getConfig(phone)
-    await amqpEnqueue(this.queueWebhooker, { phone, webhooks: config.webhooks, payload, split: true })
+    await amqpEnqueue(this.queueWebhooker, phone, { phone, webhooks: config.webhooks, payload, split: true })
   }
 
   public async sendHttp(phone: string, url: string, header: string, token: string, payload: object) {
     const webhook = { url, token, header }
-    await amqpEnqueue(this.queueWebhooker, { phone, webhook, payload, split: true })
+    await amqpEnqueue(this.queueWebhooker, phone, { phone, webhook, payload, split: true })
   }
 }

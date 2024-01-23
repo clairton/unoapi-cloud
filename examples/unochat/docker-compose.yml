@@ -1,0 +1,148 @@
+version: '3'
+
+x-base: &base
+  image: clairton/chatwoot:v3.4.4-uno
+  restart: always
+  env_file: .env
+  links:
+    - traefik:${MINIO_DOMAIN}
+    - traefik:${UNOAPI_DOMAIN}
+
+services:
+  traefik:
+    image: traefik:2.4
+    restart: always
+    env_file: .env
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 80:80
+      - 443:443
+    command:
+      - --api
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.http=true
+      - --entrypoints.http.address=:80
+      - --entrypoints.https=true
+      - --entrypoints.https.address=:443
+      - --log=true
+      - --log.level=DEBUG
+      - --entrypoints.web.http.redirections.entrypoint.to=https
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.myresolver.acme.httpchallenge=true
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.myresolver.acme.email=${LETSECRYPT_EMAIL}
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+
+  chatwoot-web:
+    <<: *base
+    depends_on:
+      - postgres
+      - redis
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.chatwoot.loadbalancer.server.port=3000
+      - traefik.http.routers.chatwoot.rule=Host(`${CHATWOOT_DOMAIN}`)
+      - traefik.http.routers.chatwoot.entrypoints=http,https
+      - traefik.http.routers.chatwoot.service=chatwoot
+      - traefik.http.routers.chatwoot.tls.certresolver=myresolver
+
+  chatwoot-worker:
+    <<: *base
+    depends_on:
+      - postgres
+      - redis
+      - unoapi
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+
+  chatwoot-migrate:
+    <<: *base
+    environment:
+      POSTGRES_STATEMENT_TIMEOUT: 600s
+    depends_on:
+      - postgres
+      - redis
+    restart: 'no'
+    command:  ['bundle', 'exec', 'rails', 'db:chatwoot_prepare']
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis:/data
+    command: redis-server --appendonly yes
+    restart: always
+    env_file: .env
+
+  postgres:
+    image: postgres:16.1-alpine
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    env_file: .env
+    restart: always
+
+  unoapi:
+    image: clairton/unoapi-cloud:v1.12.4
+    env_file: .env
+    depends_on:
+      - redis
+      - rabbitmq
+      - minio
+    entrypoint: yarn cloud
+    links:
+      - traefik:${MINIO_DOMAIN}
+      - traefik:${UNOAPI_DOMAIN}
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.unoapi.loadbalancer.server.port=9876
+      - traefik.http.routers.unoapi.rule=Host(`${UNOAPI_DOMAIN}`)
+      - traefik.http.routers.unoapi.entrypoints=http,https
+      - traefik.http.routers.unoapi.service=unoapi
+      - traefik.http.routers.unoapi.tls.certresolver=myresolver
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    restart: always
+    env_file: .env
+  
+  minio:
+    image: quay.io/minio/minio:latest
+    command: server /data --address ":9000" --console-address ":9001"
+    volumes:
+      - minio:/data
+    restart: always
+    env_file: .env
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.minio.loadbalancer.server.port=9000
+      - traefik.http.routers.minio.rule=Host(`${MINIO_DOMAIN}`)
+      - traefik.http.routers.minio.entrypoints=http,https
+      - traefik.http.routers.minio.service=minio
+      - traefik.http.routers.minio.tls.certresolver=myresolver
+
+  minio-mc:
+    image: quay.io/minio/mc:latest
+    env_file: .env
+    restart: 'no'
+    links:
+      - traefik:${MINIO_DOMAIN}
+      - traefik:${UNOAPI_DOMAIN}
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local $MINIO_URL $STORAGE_ACCESS_KEY_ID $STORAGE_SECRET_ACCESS_KEY;
+      /usr/bin/mc mb local/$STORAGE_BUCKET_NAME;
+      "
+
+volumes:
+  redis:
+  postgres:
+  minio:
+  rabbitmq:
+  letsencrypt:

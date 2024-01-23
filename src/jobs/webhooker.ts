@@ -18,7 +18,7 @@ export class WebhookerJob {
       const webhooks: Webhook[] = a.webhooks
       Promise.all(
         webhooks.map((webhook) => {
-          return amqpEnqueue(UNOAPI_JOB_WEBHOOKER, { phone, payload, webhook })
+          return amqpEnqueue(UNOAPI_JOB_WEBHOOKER, phone, { phone, payload, webhook })
         }),
       )
     } else if (a.webhook) {

@@ -170,40 +170,12 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         language: 'pt_BR',
         components: [
           {
-            text: `logLevel: {{logLevel}}\nrejectCallsWebhook: {{rejectCallsWebhook}}\nrejectCalls: {{rejectCalls}}\ncomposingMessage: {{composingMessage}}\nsendConnectionStatus: {{sendConnectionStatus}}\nignoreOwnMessages: {{ignoreOwnMessages}}\nignoreYourselfMessages: {{ignoreYourselfMessages}}\nignoreHistoryMessages: {{ignoreHistoryMessages}}\nignoreGroupMessages: {{ignoreGroupMessages}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}`,
+            text: `logLevel: {{logLevel}}\nrejectCallsWebhook: {{rejectCallsWebhook}}\nrejectCalls: {{rejectCalls}}\ncomposingMessage: {{composingMessage}}\nsendConnectionStatus: {{sendConnectionStatus}}\nignoreOwnMessages: {{ignoreOwnMessages}}\nignoreYourselfMessages: {{ignoreYourselfMessages}}\nignoreHistoryMessages: {{ignoreHistoryMessages}}\nignoreGroupMessages: {{ignoreGroupMessages}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}`,
             type: 'BODY',
             parameters: [
               {
                 type: 'text',
                 text: 'logLevel',
-              },
-              {
-                type: 'text',
-                text: 'rejectCallsWebhook',
-              },
-              {
-                type: 'text',
-                text: 'rejectCalls',
-              },
-              {
-                type: 'boolean',
-                text: 'composingMessage',
-              },
-              {
-                type: 'boolean',
-                text: 'composingMessage',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreOwnMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreYourselfMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreHistoryMessages',
               },
               {
                 type: 'boolean',
@@ -215,7 +187,47 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
               },
               {
                 type: 'boolean',
-                text: 'ignoreBroadcastStatuses',
+                text: 'ignoreBroadcastMessages',
+              },
+              {
+                type: 'boolean',
+                text: 'ignoreHistoryMessages',
+              },
+              {
+                type: 'boolean',
+                text: 'sendConnectionStatus',
+              },
+              {
+                type: 'boolean',
+                text: 'autoConnect',
+              },
+              {
+                type: 'number',
+                text: 'autoRestartMs',
+              },
+              {
+                type: 'boolean',
+                text: 'composingMessage',
+              },
+              {
+                type: 'text',
+                text: 'rejectCalls',
+              },
+              {
+                type: 'text',
+                text: 'rejectCallsWebhook',
+              },
+              {
+                type: 'boolean',
+                text: 'throwWebhookError',
+              },
+              {
+                type: 'number',
+                text: 'retryRequestDelayMs',
+              },
+              {
+                type: 'text',
+                text: 'sessionWebhook',
               },
             ],
           },

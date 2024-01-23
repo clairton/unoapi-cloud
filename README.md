@@ -1,10 +1,19 @@
-# Unoapi Cloud
+<div align="center">
+
+[![Whatsapp Group](https://img.shields.io/badge/Group-WhatsApp-%2322BC18)](https://chat.whatsapp.com/CRBaGd850uB1QigKRcguJU)
+[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange)](https://www.postman.com/clairtonrodrigo/workspace/unoapi/collection/2340422-8951a202-9a18-42ea-b6be-42f57b4d768d?tab=variables) 
+[![License](https://img.shields.io/badge/license-GPL--3.0-orange)](./LICENSE)
+[![Support](https://img.shields.io/badge/Donation-picpay-green)](https://app.picpay.com/user/clairton.rodrigo)
+[![Support](https://img.shields.io/badge/Buy%20me-coffe-orange)](https://www.buymeacoffee.com/clairton)
+
+</div>
+<h1 align="center">Unoapi Cloud</h1>
 
 An implementation of Baileys(`https://github.com/WhiskeySockets/Baileys`) as
 RESTful API service with multi device support with a Whatsapp Cloud API format
 `https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
-The media files are saved in file system at folder data with the session.
+The media files are saved in file system at folder data with the session or in redis.
 
 ## Send a Message
 
@@ -145,6 +154,7 @@ with:
 * 6 - max qrcode generate 
 * 7 - invalid phone number
 * 8 - message not allowed
+* 9 - connection lost
 
 ## Up for development
 
@@ -206,7 +216,7 @@ IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
 IGNORE_STATUS_MESSAGE=false to send stories in socket to webhook, default true
 IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
-IGNORE_HISTORY_MESSAGES=true to import messages when connect, default is true
+IGNORE_HISTORY_MESSAGES=false to import messages when connect, default is true
 IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
 IGNORE_YOURSELF_MESSAGES=true to ignore messages for yourself, default is true, possible loop if was false
 COMPOSING_MESSAGE=true enable composing before send message as text length, default false
@@ -220,7 +230,7 @@ AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto res
 THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default id false
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
-UNOAPI_RETRY_REQUEST_DELAY: retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+UNOAPI_RETRY_REQUEST_DELAY=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
@@ -247,7 +257,7 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
 
 ```json
 {
-  "authToken": "xpto", // token auth this number
+  "authToken": "xpto",
   "rejectCalls":"Reject Call Text do send do number calling to you",
   "rejectCallsWebhook":"Message send to webhook when receive a call",
   "ignoreGroupMessages": true,
@@ -259,16 +269,15 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
   "sendConnectionStatus": true,
   "composingMessage": false,
   "sessionWebhook": "",
-  "logLevel": undefined,
   "autoConnect": false,
-  "autoRestartMs": 3_600_000, // restart connection every hour
-  "retryRequestDelayMs": 1_000,
+  "autoRestartMs": 3600000,
+  "retryRequestDelayMs": 1000,
   "throwWebhookError": false,
-  "webhooks": [ // can be many webhooks
+  "webhooks": [
     {
       "url": "http://localhost:3000/whatsapp/webhook",
       "token": "kslflkhlkwq",
-      "header": "api_acess_token",
+      "header": "api_acess_token"
     }
   ],
   "ignoreDataStore": false
@@ -290,7 +299,7 @@ The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER
     "category": "UTILITY",
     "components": [
       {
-        "text": "{{hello}}"",
+        "text": "{{hello}}",
         "type": "BODY",
         "parameters": [
           {
@@ -309,15 +318,11 @@ PS: After update JSON, restart de docker container or service
 
 ## Examples
 
-[Integration with Chatwoot](examples/chatwoot/README.md)
+### [Docker compose with chatwoot](examples/chatwoot/README.md)
 
-### Docker compose with chatwoot 
+### [Docker compose with unoapi](examples/docker-compose.yml)
 
-`https://github.com/clairton/unoapi-cloud/blob/main/examples/chatwoot/docker-compose.yml`
-
-### Docker compose with unoapi
-
-`https://github.com/clairton/unoapi-cloud/blob/main/examples/docker-compose.yml`
+### [Docker compose with chatwoot and unoapi together](examples/unochat/README.md)
 
 ## Install as Systemctl
 
@@ -374,6 +379,9 @@ Run
 
 To show logs `journalctl -u unoapi.service -f`
 
+## Caution with whatsapp web connection
+More then 14 days without open app in smartphone, the connection with whatsapp web is invalidated and need to read a new qrcode.
+
 ## Legal
 
 - This code is in no way affiliated, authorized, maintained, sponsored or
@@ -391,6 +399,10 @@ using this software. WhatsApp does not allow bots using unofficial methods on
 their platform, so this shouldn't be considered totally safe.
 
 Released under the GPLv3 License.
+
+## WhatsApp Group
+
+https://chat.whatsapp.com/FZd0JyPVMLq94FHf59I8HU
 
 ## Need More
 

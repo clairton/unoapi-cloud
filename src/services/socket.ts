@@ -58,6 +58,14 @@ export interface fetchGroupMetadata {
   (_jid: string): Promise<GroupMetadata | undefined>
 }
 
+export interface exists {
+  (_jid: string): Promise<string | undefined>
+}
+
+export interface close {
+  (): Promise<void>
+}
+
 export type Status = {
   attempt: number
   connected: boolean
@@ -110,7 +118,7 @@ export const connect = async ({
       logger.debug('QRCode generate....... %s of %s', status.attempt, attempts)
       if (status.attempt > attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
-        onStatus(message, true)
+        await onStatus(message, true)
         status.reconnecting = false
         status.connecting = false
         status.connected = false
@@ -125,13 +133,13 @@ export const connect = async ({
     }
     if (event.connection === 'open') onConnected()
     else if (event.connection === 'close') onDisconnect(event)
-    else if (event.connection === 'connecting') onStatus(`Connnecting...`, false)
+    else if (event.connection === 'connecting') await onStatus(`Connnecting...`, false)
     else if (event.isNewLogin) {
       onNewLogin(phone)
     }
   }
 
-  const onConnected = () => {
+  const onConnected = async () => {
     status.attempt = 0
     status.connected = true
     status.disconnected = false
@@ -140,10 +148,9 @@ export const connect = async ({
 
     logger.info(`${phone} connected`)
 
-    fetchLatestBaileysVersion().then(({ version, isLatest }) => {
-      const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
-      onStatus(message, false)
-    })
+    const { version, isLatest } = await fetchLatestBaileysVersion()
+    const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
+    await onStatus(message, false)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -159,7 +166,7 @@ export const connect = async ({
       logger.info(`${phone} destroyed`)
       dataStore.cleanSession()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      onStatus(message, true)
+      await onStatus(message, true)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
       disconnect(false)
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
@@ -210,7 +217,7 @@ export const connect = async ({
           connect()
         } else {
           const message = error?.output?.payload?.error
-          onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
+          await onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
         }
       } else {
         throw error
@@ -226,7 +233,7 @@ export const connect = async ({
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
     await disconnect(true)
-    onReconnect()
+    return onReconnect()
   }
 
   const disconnect = (reconnect: boolean) => {
@@ -239,18 +246,23 @@ export const connect = async ({
     return sock && sock.end(undefined)
   }
 
-  const exists = async (phone: string) => {
+  const exists: exists = async (phone: string) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.getJid(phone, sock!)
   }
 
-  const validateStatus = () => {
+  const validateStatus = async () => {
     if (status.disconnected || !status.connected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
       } else {
         throw new SendError(3, 'Disconnected number, please read qr code')
       }
+    }
+    if (!sock) {
+      await onStatus(`Socket connection is null`, true)
+      await reconnect()
+      throw new SendError(9, 'Connection lost, please retry connect')
     }
   }
 
@@ -259,25 +271,25 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    validateStatus()
+    await validateStatus()
     const id = isJidGroup(to) ? to : await exists(to)
-    if (sock && id) {
+    if (id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
         const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 100)
-        await sock.presenceSubscribe(id)
+        await sock?.presenceSubscribe(id)
         await delay(Math.floor(Math.random() * time) + 100)
-        await sock.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
+        await sock?.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
         await delay(Math.floor(Math.random() * time) + 200)
-        await sock.sendPresenceUpdate('paused', id)
+        await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
       const opts = { backgroundColor: '' }
       if (options.quoted) {
         opts['quoted'] = options.quoted
       }
-      return sock.sendMessage(id, message, opts)
+      return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
       throw new SendError(7, `The phone number ${to} is invalid!`)
@@ -286,21 +298,22 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
-    validateStatus()
-    return sock && sock.readMessages(keys)
+    await validateStatus()
+    return sock?.readMessages(keys)
   }
 
   if (config.autoRestartMs) {
+    await onStatus(`Config to auto restart in ${config.autoRestartMs} milliseconds.`, true)
     setInterval(reconnect, config.autoRestartMs)
   }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
     logger.info('Subscribe %s event:', phone, event)
-    sock && sock.ev.on(event, callback)
+    return sock?.ev?.on(event, callback)
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
-    return sock && sock.rejectCall(callId, callFrom)
+    return sock?.rejectCall(callId, callFrom)
   }
 
   const fetchImageUrl: fetchImageUrl = async (jid: string) => {
@@ -313,7 +326,11 @@ export const connect = async ({
     return dataStore.loadGroupMetada(jid, sock!)
   }
 
+  const close: close = async () => {
+    return sock?.end(undefined)
+  }
+
   connect()
 
-  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close }
 }

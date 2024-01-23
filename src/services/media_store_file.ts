@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage } from '@whiskeysockets/baileys'
-import { getMessageType } from './transformer'
+import { getBinMessage, getMessageType } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'
@@ -25,13 +25,11 @@ export const getMediaStoreFile: getMediaStore = (phone: string, config: Config, 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mediaStoreFile = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
-    const { message, key } = waMessage
-    if (message) {
-      const mediaMessage = getMediaValue(message)
-      if (mediaMessage?.mimetype) {
-        const extension = mime.extension(mediaMessage?.mimetype)
-        return `${phone}/${key.id}.${extension}`
-      }
+    const { key } = waMessage
+    const binMessage = getBinMessage(waMessage)
+    if (binMessage?.message?.mimetype) {
+      const extension = mime.extension(binMessage?.message?.mimetype)
+      return `${phone}/${key.id}.${extension}`
     }
     throw 'Not possible get file name'
   }
@@ -40,31 +38,14 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     return `${config.baseStore}${MEDIA_DIR}/${fileName}`
   }
 
-  const getMediaValue = (
-    message: proto.IMessage,
-  ):
-    | proto.Message.IImageMessage
-    | proto.Message.IVideoMessage
-    | proto.Message.IAudioMessage
-    | proto.Message.IDocumentMessage
-    | proto.Message.IStickerMessage
-    | undefined => {
-    return (
-      message?.stickerMessage ||
-      message?.imageMessage ||
-      message?.videoMessage ||
-      message?.audioMessage ||
-      message?.documentMessage ||
-      message?.stickerMessage ||
-      undefined
-    )
+  const getDownloadUrl = async (baseUrl: string, filePath: string) => {
+    return `${baseUrl}/v15.0/download/${filePath}`
   }
 
-  const saveMedia = async (messageType: string, waMessage: WAMessage) => {
+  const saveMedia = async (waMessage: WAMessage) => {
     let buffer
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyM: any = waMessage
-    const url = anyM.message[messageType].url
+    const binMessage = getBinMessage(waMessage)
+    const url = binMessage?.message?.url
     if (url.indexOf('base64') >= 0) {
       const parts = url.split(',')
       const base64 = parts[1]
@@ -74,7 +55,10 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
     const fileName = getFileName(phone, waMessage)
     await saveMediaBuffer(fileName, buffer)
-    return true
+    if (binMessage?.messageType && waMessage.message) {
+      waMessage.message[binMessage?.messageType]['url'] = await getFileUrl(fileName)
+    }
+    return waMessage
   }
 
   const saveMediaBuffer = async (fileName: string, content: Buffer) => {
@@ -132,18 +116,16 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
           const message: any = await store.loadMessage(remoteJid, id)
           logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
-            const messageType = getMessageType(message)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const binMessage: any = message.message && messageType && message.message[messageType]
+            const binMessage = getBinMessage(message)
             const filePath = await getFileName(phone, message)
             const mimeType = mime.lookup(filePath)
-            const url = `${baseUrl}/v15.0/download/${filePath}`
+            const url = await getDownloadUrl(baseUrl, filePath)
             return {
               messaging_product: 'whatsapp',
               url,
               mime_type: mimeType,
-              sha256: binMessage.fileSha256,
-              file_size: binMessage.fileLength,
+              sha256: binMessage?.message?.fileSha256,
+              file_size: binMessage?.message?.fileLength,
               id: `${phone}/${id}`,
             }
           }
@@ -151,5 +133,5 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       }
     }
   }
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl }
 }

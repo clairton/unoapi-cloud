@@ -3,7 +3,7 @@ version: '3.8'
 x-base: &base
   build:
     dockerfile: develop.Dockerfile
-  command: echo 'ok!'
+  entrypoint: echo 'ok!'
   tty: true
   stdin_open: true
   volumes:
@@ -39,14 +39,14 @@ x-minio: &minio
 services:
   web:
     <<: *base
-    command: yarn web-dev
+    entrypoint: yarn web-dev
     restart: on-failure
     ports:
       - 9876:9876
 
   worker:
     <<: *base
-    command: sh -c 'wait-for redis:6379 rabbitmq:5672 -- yarn worker-dev'
+    entrypoint: sh -c 'wait-for redis:6379 rabbitmq:5672 -- yarn worker-dev'
     restart: on-failure
 
   rabbitmq:
