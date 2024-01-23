@@ -24,7 +24,6 @@ describe('service config redis', () => {
   })
 
   // test('use env', async () => {
-  //   console.log('>>>>>>>>>>', JSON.stringify(process.env.IGNORE_GROUP_MESSAGES))
   //   const copy = process.env.IGNORE_GROUP_MESSAGES
   //   process.env['IGNORE_GROUP_MESSAGES'] = 'false'
   //   mockGetConfig.mockResolvedValue({})

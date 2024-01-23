@@ -1,7 +1,7 @@
 version: '3'
 
 x-base: &base
-  image: clairton/chatwoot:v3.4.4-uno
+  image: clairton/chatwoot:v3.5.2-uno
   restart: always
   env_file: .env
   links:
@@ -31,10 +31,17 @@ services:
       - --log.level=DEBUG
       - --entrypoints.web.http.redirections.entrypoint.to=https
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --certificatesresolvers.myresolver.acme.httpchallenge=true
-      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http
-      - --certificatesresolvers.myresolver.acme.email=${LETSECRYPT_EMAIL}
-      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.unocloud.acme.httpchallenge=true
+      - --certificatesresolvers.unocloud.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.unocloud.acme.email=${LETSECRYPT_EMAIL}
+      - --certificatesresolvers.unocloud.acme.storage=/letsencrypt/acme.json
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.chatwoot.loadbalancer.server.port=3000
+      - traefik.http.routers.chatwoot.rule=Host(`traefik.unocloud.app`)
+      - traefik.http.routers.chatwoot.entrypoints=http,https
+      - traefik.http.routers.chatwoot.service=chatwoot
+      - traefik.http.routers.chatwoot.tls.certresolver=unocloud
 
   chatwoot-web:
     <<: *base
@@ -84,7 +91,7 @@ services:
     restart: always
 
   unoapi:
-    image: clairton/unoapi-cloud:v1.12.4
+    image: clairton/unoapi-cloud:v1.13.0-dev
     env_file: .env
     depends_on:
       - redis
