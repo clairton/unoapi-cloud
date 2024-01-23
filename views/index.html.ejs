@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/unoapi_logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=0"/>
+    <title>UnoAPI Manager</title>
+    <% if (environment === 'production') { %>
+    <link rel="stylesheet" href="<%= manifest['ui/main.css'].file %>" />
+    <% } %>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript id="noscript">This app works best with JavaScript enabled.</noscript>
+    <% if (environment === 'production') { %>
+    <script type="module" src="<%= manifest['ui/main.js'].file %>"></script>
+    <% } else { %>
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/ui/main.js"></script>
+    <% } %>
+  </body>
+</html>

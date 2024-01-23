@@ -1,5 +1,6 @@
 import express, { Application } from 'express'
 import { Request, Response, NextFunction, Router } from 'express'
+import path from 'path'
 
 import { router } from './router'
 
@@ -10,6 +11,9 @@ import { Outgoing } from './services/outgoing'
 
 import middleware from './services/middleware'
 import injectRoute from './services/inject_route'
+
+import admin from './admin'
+import assets from './assets'
 
 export class App {
   public server: Application
@@ -42,6 +46,14 @@ export class App {
     middleware: middleware,
     injectRoute: injectRoute,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      this.server.use('/', express.static(path.join(path.resolve(), 'dist')))
+    } else {
+      this.server.use('/', express.static(path.join(path.resolve(), 'public')))
+      this.server.use('/ui/assets', assets)
+    }
+    this.server.use('/node_modules', express.static(path.join(path.resolve(), 'node_modules')))
+    this.server.use(admin)
     const roter = router(incoming, outgoing, baseUrl, getConfig, getClient, middleware, injectRoute)
     this.server.use(roter)
   }
