@@ -25,6 +25,7 @@ export type Config = {
   ignoreYourselfMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
+  notifyFailedMessages: boolean
   composingMessage: boolean
   autoRestartMs: number
   autoConnect: boolean
@@ -51,6 +52,7 @@ export const defaultConfig: Config = {
   ignoreOwnMessages: true,
   ignoreYourselfMessages: true,
   sendConnectionStatus: true,
+  notifyFailedMessages: true,
   composingMessage: false,
   rejectCalls: '',
   sessionWebhook: '',
