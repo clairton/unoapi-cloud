@@ -34,6 +34,8 @@ export const router = (
 
   //Routes
   router.get('/ping', indexController.ping)
+  router.get('/:version/debug_token', indexController.debugToken)
+  router.get('/:version/:phone', indexController.getPhoneNumber)
   router.get('/:phone/session', middleware, sessionController.info.bind(sessionController))
   router.post('/:phone/session', middleware, sessionController.create.bind(sessionController))
   router.delete('/:phone/session', middleware, sessionController.delete.bind(sessionController))
