@@ -969,4 +969,30 @@ describe('service transformer', () => {
   test('isSaveMedia documentMessage', async () => {
     expect(isSaveMedia(inputDocumentMessage)).toEqual(true)
   })
+
+  // test('toBaileysMessageContent interactive', async () => {
+  //   const body = `ladiuad87hodlnkd ${new Date().getTime()} askpdasioashfjh`
+  //   const input = {
+  //     type: 'interactive',
+  //     interactive: {
+  //       type: 'button',
+  //       body: { text: '*Ready?*' },
+  //       action: {
+  //         buttons: [
+  //           {
+  //             type: 'reply',
+  //             reply: {
+  //               id: 'cl1r176e9006a2e6dpvp0974z',
+  //               title: 'Go!',
+  //             },
+  //           },
+  //         ],
+  //       },
+  //     },
+  //   }
+  //   const output = {
+  //     text: body,
+  //   }
+  //   expect(toBaileysMessageContent(input)).toEqual(output)
+  // })
 })
