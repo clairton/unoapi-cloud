@@ -101,6 +101,9 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       response.text = payload.text.body
       break
 
+    // case 'interactive':
+    //  break
+
     case 'image':
     case 'audio':
     case 'document':
