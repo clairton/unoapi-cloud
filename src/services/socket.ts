@@ -232,7 +232,7 @@ export const connect = async ({
 
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
-    await disconnect(true)
+    await connect()
     return onReconnect()
   }
 
@@ -327,7 +327,9 @@ export const connect = async ({
   }
 
   const close: close = async () => {
-    return sock?.end(undefined)
+    try {
+      return sock?.end(undefined)
+    } catch (error) {}
   }
 
   connect()
