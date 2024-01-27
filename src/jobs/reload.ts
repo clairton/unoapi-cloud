@@ -30,7 +30,9 @@ export class ReloadJob {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    await currentClient.disconnect()
+    if (currentClient.getStatus().connected) {
+      await currentClient.disconnect()
+    }
     const newClient = await this.getClient({
       phone,
       incoming: this.incoming,
