@@ -23,6 +23,7 @@ import {
 import { Config } from './config'
 import logger from './logger'
 import { getDataStoreFile } from './data_store_file'
+import { defaultConfig } from './config'
 
 export const getDataStoreRedis: getDataStore = async (phone: string, config: Config): Promise<DataStore> => {
   if (!dataStores.has(phone)) {
@@ -162,6 +163,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         ],
       }
 
+      const parameters: object[] = []
       const config = {
         id: 4,
         name: 'unoapi-config',
@@ -170,68 +172,20 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         language: 'pt_BR',
         components: [
           {
-            text: `logLevel: {{logLevel}}\nrejectCallsWebhook: {{rejectCallsWebhook}}\nrejectCalls: {{rejectCalls}}\ncomposingMessage: {{composingMessage}}\nsendConnectionStatus: {{sendConnectionStatus}}\nignoreOwnMessages: {{ignoreOwnMessages}}\nignoreYourselfMessages: {{ignoreYourselfMessages}}\nignoreHistoryMessages: {{ignoreHistoryMessages}}\nignoreGroupMessages: {{ignoreGroupMessages}}\nignoreBroadcastStatuses: {{ignoreBroadcastStatuses}}`,
+            text: '',
             type: 'BODY',
-            parameters: [
-              {
-                type: 'text',
-                text: 'logLevel',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreGroupMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreBroadcastStatuses',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreBroadcastMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'ignoreHistoryMessages',
-              },
-              {
-                type: 'boolean',
-                text: 'sendConnectionStatus',
-              },
-              {
-                type: 'boolean',
-                text: 'autoConnect',
-              },
-              {
-                type: 'number',
-                text: 'autoRestartMs',
-              },
-              {
-                type: 'boolean',
-                text: 'composingMessage',
-              },
-              {
-                type: 'text',
-                text: 'rejectCalls',
-              },
-              {
-                type: 'text',
-                text: 'rejectCallsWebhook',
-              },
-              {
-                type: 'boolean',
-                text: 'throwWebhookError',
-              },
-              {
-                type: 'number',
-                text: 'retryRequestDelayMs',
-              },
-              {
-                type: 'text',
-                text: 'sessionWebhook',
-              },
-            ],
+            parameters,
           },
         ],
+      }
+      const keysToIgnore = ['getStore', 'baseStore', 'shouldIgnoreKey', 'shouldIgnoreJid', 'webhooks']
+      const keys = Object.keys(defaultConfig).filter((k) => !keysToIgnore.includes(k))
+      const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name]
+      for (const key of keys) {
+        const type = getTypeofProperty(defaultConfig, key as keyof Config)
+        const param: object = { type, text: key }
+        parameters.push(param)
+        config.components[0].text = `${key}: {{${key}}}\n${config.components[0].text}`
       }
 
       return [hello, bulkReport, webhook, config]
