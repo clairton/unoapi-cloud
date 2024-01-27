@@ -20,10 +20,9 @@ const security = async (req: Request, res: Response, next: NextFunction) => {
       })
     } else {
       logger.debug(`Retrieved http token ${httpAuthToken}`)
-      const config = (await getConfig(phone)) || {}
-      const authToken = (config && config.authToken) || UNOAPI_AUTH_TOKEN
+      const config = (await getConfig(phone)) || { authToken: UNOAPI_AUTH_TOKEN }
       logger.debug(`Retrieved auth token ${httpAuthToken}`)
-      if (httpAuthToken.trim() != authToken.trim()) {
+      if (httpAuthToken.trim() != config.authToken.trim() && httpAuthToken.trim() != UNOAPI_AUTH_TOKEN) {
         const message = `Invalid token value ${httpAuthToken}`
         logger.warn(message)
         res.status(403).json({
