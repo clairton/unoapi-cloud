@@ -54,6 +54,7 @@ export const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`
 export const IGNORE_CALLS = process.env.IGNORE_CALLS || ''
 export const REJECT_CALLS = process.env.REJECT_CALLS || ''
 export const REJECT_CALLS_WEBHOOK = process.env.REJECT_CALLS_WEBHOOK || ''
+export const MESSAGE_CALLS_WEBHOOK = process.env.MESSAGE_CALLS_WEBHOOK || ''
 export const AUTO_RESTART_MS = parseInt(process.env.AUTO_RESTART_MS || '0')
 export const UNOAPI_BASE_STORE = process.env.UNOAPI_BASE_STORE ? process.env.UNOAPI_BASE_STORE : './data'
 export const AUTO_CONNECT: boolean = process.env.AUTO_CONNECT === _undefined ? true : process.env.AUTO_CONNECT == 'true'
