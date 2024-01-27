@@ -4,9 +4,7 @@ import { Outgoing } from '../services/outgoing'
 import { Incoming } from '../services/incoming'
 
 import { getConfig } from '../services/config'
-import { Client, getClient } from '../services/client'
-
-import { clients } from '../services/client_baileys'
+import { Client, getClient, clients } from '../services/client'
 import { onNewLogin } from '../services/new_login'
 
 import logger from '../services/logger'

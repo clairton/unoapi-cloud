@@ -4,6 +4,8 @@ import { Incoming } from './incoming'
 import { Info, OnNewLogin, Status } from './socket'
 import { getConfig } from './config'
 
+export const clients: Map<string, Client> = new Map()
+
 export interface getClient {
   ({
     phone,

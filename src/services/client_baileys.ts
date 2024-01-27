@@ -19,7 +19,7 @@ import {
   exists,
   close,
 } from './socket'
-import { Client, getClient } from './client'
+import { Client, getClient, clients } from './client'
 import { Config, configs, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError } from './transformer'
 import { v1 as uuid } from 'uuid'
@@ -30,8 +30,6 @@ import { Template } from './template'
 import logger from './logger'
 import { FailedSend } from './outgoing_cloud_api'
 const attempts = 3
-
-export const clients: Map<string, Client> = new Map()
 
 interface Delay {
   (phone: string, to: string): Promise<void>
@@ -402,14 +400,16 @@ export class ClientBaileys implements Client {
   }
 
   async disconnect() {
-    logger.debug('Clean client store for %s', this.phone)
+    logger.debug('Disconnect client store for %s', this.phone)
     this.store = undefined
+
     // clean cache
     clients.delete(this.phone)
     stores.delete(this.phone)
     dataStores.delete(this.phone)
     mediaStores.delete(this.phone)
     configs.delete(this.phone)
+
     await this.close()
     this.status = statusDefault
     this.sendMessage = sendMessageDefault
@@ -419,6 +419,9 @@ export class ClientBaileys implements Client {
     this.fetchGroupMetadata = fetchGroupMetadataDefault
     this.exists = existsDefault
     this.close = closeDefault
+    this.config = defaultConfig
+    this.status = statusDefault
+    this.info = infoDefault
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
