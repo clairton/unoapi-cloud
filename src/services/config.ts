@@ -33,6 +33,7 @@ export type Config = {
   rejectCalls: string
   throwWebhookError: boolean
   rejectCallsWebhook: string
+  messageCallsWebhook: string
   sessionWebhook: string
   shouldIgnoreJid: (jid: string) => boolean | undefined
   shouldIgnoreKey: (key: WAMessageKey, messageType: string | undefined) => boolean | undefined
@@ -57,6 +58,7 @@ export const defaultConfig: Config = {
   rejectCalls: '',
   sessionWebhook: '',
   rejectCallsWebhook: '',
+  messageCallsWebhook: '',
   logLevel: undefined,
   autoConnect: true,
   autoRestartMs: 0,

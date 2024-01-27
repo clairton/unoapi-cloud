@@ -11,6 +11,7 @@ import {
   UNOAPI_RETRY_REQUEST_DELAY,
   IGNORE_CALLS,
   REJECT_CALLS_WEBHOOK,
+  MESSAGE_CALLS_WEBHOOK,
   WEBHOOK_SESSION,
   WEBHOOK_HEADER,
   WEBHOOK_URL,
@@ -46,6 +47,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.baseStore = UNOAPI_BASE_STORE
     config.rejectCalls = IGNORE_CALLS
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK
+    config.messageCallsWebhook = MESSAGE_CALLS_WEBHOOK
     config.throwWebhookError = THROW_WEBHOOK_ERROR
     config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
     config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY

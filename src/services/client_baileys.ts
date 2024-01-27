@@ -360,42 +360,38 @@ export class ClientBaileys implements Client {
         this.listener(messages, false)
       })
     }
-    if (this.config.rejectCalls) {
-      logger.info('Config to reject calls %s %s', this.phone, this.config.rejectCalls)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      event('call', async (events: any[]) => {
-        for (let i = 0; i < events.length; i++) {
-          const { from, id, status } = events[i]
-          if (status == 'ringing' && !this.calls.has(from)) {
-            this.calls.set(from, true)
-            this.rejectCall && (await this.rejectCall(id, from))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    event('call', async (events: any[]) => {
+      for (let i = 0; i < events.length; i++) {
+        const { from, id, status } = events[i]
+        if (status == 'ringing' && !this.calls.has(from)) {
+          this.calls.set(from, true)
+          if (this.config.rejectCalls && this.rejectCall) {
+            await this.rejectCall(id, from)
             await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } }, {})
-            if (this.config.rejectCallsWebhook) {
-              const message = {
-                key: {
-                  fromMe: false,
-                  id: uuid(),
-                  remoteJid: from,
-                },
-                message: {
-                  conversation: this.config.rejectCallsWebhook,
-                },
-              }
-              try {
-                await this.outgoing.sendOne(this.phone, message)
-              } catch (error) {
-                logger.error(error, 'Erro on reject call')
-                await this.onWebhookError(error)
-              }
-            }
-            setTimeout(() => {
-              logger.debug('Clean call rejecteds %s', from)
-              this.calls.delete(from)
-            }, 10_000)
+            logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
           }
+          const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
+          if (messageCallsWebhook) {
+            const message = {
+              key: {
+                fromMe: false,
+                id: uuid(),
+                remoteJid: from,
+              },
+              message: {
+                conversation: messageCallsWebhook,
+              },
+            }
+            await this.outgoing.sendOne(this.phone, message)
+          }
+          setTimeout(() => {
+            logger.debug('Clean call rejecteds %s', from)
+            this.calls.delete(from)
+          }, 10_000)
         }
-      })
-    }
+      }
+    })
     logger.debug('Client Baileys connected for %s', this.phone)
   }
 
