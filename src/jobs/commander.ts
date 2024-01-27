@@ -5,10 +5,18 @@ import { Outgoing } from '../services/outgoing'
 import { phoneNumberToJid } from '../services/transformer'
 import { Template } from '../services/template'
 import { getConfig } from '../services/config'
-import { parseDocument } from 'yaml'
+import { parseDocument, YAMLError } from 'yaml'
 import { setConfig } from '../services/redis'
 import { UNOAPI_JOB_BULK_REPORT } from '../defaults'
 import logger from '../services/logger'
+
+export class YamlParseError extends Error {
+  readonly errors: YAMLError[]
+  constructor(errors: YAMLError[]) {
+    super('')
+    this.errors = errors
+  }
+}
 
 export class CommanderJob {
   private outgoing: Outgoing
@@ -29,46 +37,41 @@ export class CommanderJob {
     logger.debug(
       `Commander type: ${payload.type} caption: ${payload?.document?.caption} link: ${payload?.document?.link} template: ${payload?.template?.name}`,
     )
-    if (payload.type === 'document' && payload?.document?.caption?.toLowerCase() == 'campanha') {
-      logger.debug(`Commander processing`)
-      const id = uuid()
-      await amqpEnqueue(this.queueBulkParser, phone, {
-        phone,
-        payload: {
-          id,
+
+    try {
+      if (payload.type === 'document' && payload?.document?.caption?.toLowerCase() == 'campanha') {
+        logger.debug(`Commander processing`)
+        const id = uuid()
+        await amqpEnqueue(this.queueBulkParser, phone, {
           phone,
-          template: 'sisodonto',
-          url: payload?.document?.link,
-        },
-      })
-      const message = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
-        },
-        message: {
-          conversation: `The bulk ${id} is created and wil be parsed!`,
-        },
-        messageTimestamp: new Date().getTime(),
-      }
-      this.outgoing.sendOne(phone, message)
-    } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-webhook') {
-      logger.debug('Parsing webhook template... %s', phone)
-      /**
-       * webhook config expected
-       * url:
-       * token:
-       * header:
-       */
-      try {
+          payload: {
+            id,
+            phone,
+            template: 'sisodonto',
+            url: payload?.document?.link,
+          },
+        })
+        const message = {
+          key: {
+            fromMe: true,
+            remoteJid: phoneNumberToJid(phone),
+            id: uuid(),
+          },
+          message: {
+            conversation: `The bulk ${id} is created and wil be parsed!`,
+          },
+          messageTimestamp: new Date().getTime(),
+        }
+        this.outgoing.sendOne(phone, message)
+      } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-webhook') {
+        logger.debug('Parsing webhook template... %s', phone)
         const service = new Template(this.getConfig)
         const { text } = await service.bind(phone, payload?.template.name, payload?.template.components)
         logger.debug('Template webhook content %s', text)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const doc = parseDocument(text)
         if (doc.errors.length) {
-          logger.error('Error os parse yml %s', doc.errors)
+          throw new YamlParseError(doc.errors)
         }
         const webhook = doc.toJS()
         const webhooks = [webhook]
@@ -76,33 +79,25 @@ export class CommanderJob {
         logger.debug('Template webhooks %s', phone, JSON.stringify(webhooks))
         await setConfig(phone, config)
         await amqpEnqueue(this.queueReload, '', { phone })
-      } catch (error) {
-        logger.error(error, 'Erro on parse to yml')
-      }
-    } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
-      logger.debug('Parsing bulk report template... %s', phone)
-      try {
+      } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
+        logger.debug('Parsing bulk report template... %s', phone)
         const service = new Template(this.getConfig)
         const { text } = await service.bind(phone, payload?.template.name, payload?.template.components)
         logger.debug('Template bulk report content %s', text)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const doc = parseDocument(text)
         if (doc.errors.length) {
-          logger.error('Error os parse yml %s', doc.errors)
+          throw new YamlParseError(doc.errors)
         }
         const { bulk } = doc.toJS()
         await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { phone, id: bulk, unverified: true } })
-      } catch (error) {
-        logger.error(error, 'Erro on parse to yml')
-      }
-    } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
-      logger.debug('Parsing config template... %s', phone)
-      try {
+      } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
+        logger.debug('Parsing config template... %s', phone)
         const service = new Template(this.getConfig)
         const { text } = await service.bind(phone, payload?.template.name, payload?.template.components)
         const doc = parseDocument(text)
         if (doc.errors.length) {
-          logger.error('Error os parse yml %s', doc.errors)
+          throw new YamlParseError(doc.errors)
         }
         const configParsed = doc.toJS() || {}
         logger.debug('Config template parsed %s', phone, JSON.stringify(configParsed))
@@ -116,11 +111,27 @@ export class CommanderJob {
         logger.debug('Config template to update %s', phone, JSON.stringify(configToUpdate))
         await setConfig(phone, configToUpdate)
         await amqpEnqueue(this.queueReload, '', { phone })
-      } catch (error) {
-        logger.error(error, 'Erro on parse to yml')
+      } else {
+        logger.debug(`Commander ignore`)
       }
-    } else {
-      logger.debug(`Commander ignore`)
+    } catch (error) {
+      if (error instanceof YamlParseError) {
+        const message = `Error os parse yml ${JSON.stringify(error.errors)}`
+        const payload = {
+          key: {
+            fromMe: true,
+            remoteJid: phoneNumberToJid(phone),
+            id: uuid(),
+          },
+          message: {
+            conversation: message,
+          },
+          messageTimestamp: new Date().getTime(),
+        }
+        await this.outgoing.sendOne(phone, payload)
+      } else {
+        throw error
+      }
     }
   }
 }
