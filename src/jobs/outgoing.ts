@@ -1,5 +1,5 @@
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_OUTGOING, UNOAPI_JOB_INCOMING } from '../defaults'
+import { UNOAPI_JOB_OUTGOING } from '../defaults'
 import { amqpEnqueue } from '../amqp'
 import { DecryptError, getMessageType } from '../services/transformer'
 import { getConfig } from '../services/config'
@@ -9,13 +9,11 @@ export class OutgoingJob {
   private service: Outgoing
   private getConfig: getConfig
   private queueOutgoing: string
-  private queueIncoming: string
 
-  constructor(service: Outgoing, getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING, queueIncoming: string = UNOAPI_JOB_INCOMING) {
+  constructor(service: Outgoing, getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING) {
     this.service = service
     this.getConfig = getConfig
     this.queueOutgoing = queueOutgoing
-    this.queueIncoming = queueIncoming
   }
 
   async consume(data: object, options?: { countRetries: number; maxRetries: number }) {
