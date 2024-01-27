@@ -201,7 +201,8 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 `yarn web` e `yarn worker` up a web and worker with redis and rabbitmq
 
 
-## Config Options with Environment Variables
+## Config Options
+### Config with Environment Variables
 
 Create a `.env`file and put configuration if you need change default value:
 
@@ -252,7 +253,7 @@ AMQP_URL
 REDIS_URL
 ```
 
-## Config with redis
+### Config with redis
 
 The `.env` can be save one configm, but on redis use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
 
@@ -286,6 +287,79 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
 ```
 
 PS: After update JSON, restart de docker container or service
+
+
+### Save config with http
+
+To create a session with http send a post with config in body to `http://localhost:9876/v15.0/:phone/register`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v17.0/5549988290955/register \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{ 
+  "ignoreOwnMessages": false
+}'
+```
+
+### Delete config and session with http
+
+To remover a session with http send a post to `http://localhost:9876/v15.0/:phone/deregister`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v17.0/5549988290955/deregister \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' 
+```
+
+### Get a session configs
+
+```sh
+curl -i -X GET \
+http://localhost:9876/v15.0/1/5549988290955 \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1'
+```
+
+### List as session configs
+
+```sh
+curl -i -X GET \
+http://localhost:9876/v15.0/1/phone_numbers \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1'
+```
+
+```json
+{
+  "authToken": "xpto",
+  "rejectCalls":"Reject Call Text do send do number calling to you",
+  "rejectCallsWebhook":"Message send to webhook when receive a call",
+  "ignoreGroupMessages": true,
+  "ignoreBroadcastStatuses": true,
+  "ignoreBroadcastMessages": false,
+  "ignoreHistoryMessages": true,
+  "ignoreOwnMessages": true,
+  "ignoreYourselfMessages": true,
+  "sendConnectionStatus": true,
+  "composingMessage": false,
+  "sessionWebhook": "",
+  "autoConnect": false,
+  "autoRestartMs": 3600000,
+  "retryRequestDelayMs": 1000,
+  "throwWebhookError": false,
+  "webhooks": [
+    {
+      "url": "http://localhost:3000/whatsapp/webhook",
+      "token": "kslflkhlkwq",
+      "header": "api_acess_token"
+    }
+  ],
+  "ignoreDataStore": false
+}
+```
 
 ## Templates
 

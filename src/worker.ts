@@ -8,7 +8,7 @@ import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 
 import { autoConnect } from './services/auto_connect'
-import { UNOAPI_JOB_BIND, UNOAPI_JOB_RELOAD } from './defaults'
+import { UNOAPI_JOB_BIND, UNOAPI_JOB_RELOAD, UNOAPI_JOB_DISCONNECT } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
 import { IncomingAmqp } from './services/incoming_amqp'
@@ -19,6 +19,7 @@ import { Incoming } from './services/incoming'
 import { OnNewLogin } from './services/on_new_login'
 import logger from './services/logger'
 import { ReloadJob } from './jobs/reload'
+import { DisconnectJob } from './jobs/disconnect'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -29,6 +30,7 @@ const onNewLogin = new OnNewLogin(outgoingAmqp)
 const bindJob = new BindJob()
 
 const reloadJob = new ReloadJob(getClientBaileys, getConfig, outgoingAmqp, incomingAmqp, onNewLogin.run.bind(onNewLogin))
+const disconnectJob = new DisconnectJob(getClientBaileys, getConfig, outgoingAmqp, incomingAmqp, onNewLogin.run.bind(onNewLogin))
 
 const startWorker = async () => {
   await startRedis()
@@ -42,6 +44,9 @@ const startWorker = async () => {
 
   logger.debug('Starting reload consumer')
   await amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))
+
+  logger.debug('Starting disconnect consumer')
+  await amqpConsume(UNOAPI_JOB_DISCONNECT, '', disconnectJob.consume.bind(disconnectJob))
 
   logger.debug('Started worker')
 

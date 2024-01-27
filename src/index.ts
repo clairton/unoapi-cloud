@@ -20,13 +20,13 @@ const port: number = parseInt(PORT || '9876')
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
 const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin(outgoingCloudApi))
+const sessionStore: SessionStore = new SessionStoreFile()
 
-const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv, getClientBaileys)
+const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv, sessionStore)
 
 app.server.listen(port, '0.0.0.0', async () => {
   logger.info(`Unoapi Cloud listening on port: ${port}`)
   logger.info('Successful started app!')
-  const sessionStore: SessionStore = new SessionStoreFile()
   autoConnect(sessionStore, incomingBaileys, outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin(outgoingCloudApi))
 })
 
