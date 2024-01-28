@@ -1,7 +1,7 @@
 import { getClient, ConnectionInProgress } from './client'
 import { getConfig } from './config'
 import { SessionStore } from './session_store'
-import { Outgoing } from './outgoing'
+import { Listener } from './listener'
 import { Incoming } from './incoming'
 import { OnNewLogin } from './socket'
 import logger from './logger'
@@ -9,7 +9,7 @@ import logger from './logger'
 export const autoConnect = async (
   sessionStore: SessionStore,
   incoming: Incoming,
-  outgoing: Outgoing,
+  listener: Listener,
   getConfig: getConfig,
   getClient: getClient,
   onNewLogin: OnNewLogin,
@@ -22,7 +22,7 @@ export const autoConnect = async (
       try {
         logger.info(`Auto connecting phone ${phone}...`)
         try {
-          getClient({ phone, incoming, outgoing, getConfig, onNewLogin })
+          getClient({ phone, incoming, listener, getConfig, onNewLogin })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {

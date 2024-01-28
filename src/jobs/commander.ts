@@ -2,7 +2,6 @@ import { UNOAPI_JOB_BULK_PARSER, UNOAPI_JOB_RELOAD } from '../defaults'
 import { amqpEnqueue } from '../amqp'
 import { v1 as uuid } from 'uuid'
 import { Outgoing } from '../services/outgoing'
-import { phoneNumberToJid } from '../services/transformer'
 import { Template } from '../services/template'
 import { getConfig } from '../services/config'
 import { parseDocument, YAMLError } from 'yaml'
@@ -52,17 +51,13 @@ export class CommanderJob {
           },
         })
         const message = {
-          key: {
-            fromMe: true,
-            remoteJid: phoneNumberToJid(phone),
-            id: uuid(),
-          },
-          message: {
-            conversation: `The bulk ${id} is created and wil be parsed!`,
+          type: 'text',
+          text: {
+            body: `The bulk ${id} is created and wil be parsed!`,
           },
           messageTimestamp: new Date().getTime(),
         }
-        this.outgoing.sendOne(phone, message)
+        this.outgoing.formatAndSend(phone, phone, message)
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-webhook') {
         logger.debug('Parsing webhook template... %s', phone)
         const service = new Template(this.getConfig)
@@ -118,17 +113,13 @@ export class CommanderJob {
       if (error instanceof YamlParseError) {
         const message = `Error os parse yml ${JSON.stringify(error.errors)}`
         const payload = {
-          key: {
-            fromMe: true,
-            remoteJid: phoneNumberToJid(phone),
-            id: uuid(),
+          type: 'text',
+          to: phone,
+          text: {
+            body: message,
           },
-          message: {
-            conversation: message,
-          },
-          messageTimestamp: new Date().getTime(),
         }
-        await this.outgoing.sendOne(phone, payload)
+        await this.outgoing.formatAndSend(phone, phone, payload)
       } else {
         throw error
       }

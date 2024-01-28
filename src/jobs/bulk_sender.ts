@@ -1,4 +1,4 @@
-import { phoneNumberToJid, jidToPhoneNumber } from '../services/transformer'
+import { jidToPhoneNumber } from '../services/transformer'
 import { amqpEnqueue } from '../amqp'
 import {
   UNOAPI_BULK_BATCH,
@@ -11,7 +11,6 @@ import {
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import { setMessageStatus, setbulkMessage } from '../services/redis'
-import { v1 as uuid } from 'uuid'
 import logger from '../services/logger'
 
 export class BulkSenderJob {
@@ -35,17 +34,12 @@ export class BulkSenderJob {
       logger.debug(statusMessage)
       let count = 0
       const message = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
+        type: 'text',
+        text: {
+          body: statusMessage,
         },
-        message: {
-          conversation: statusMessage,
-        },
-        messageTimestamp: new Date().getTime(),
       }
-      this.outgoing.sendOne(phone, message)
+      this.outgoing.formatAndSend(phone, phone, message)
       let delay = 0
       let totalDelay = 0
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,33 +118,23 @@ export class BulkSenderJob {
         await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { id, length } }, { delay: UNOAPI_BULK_DELAY * 1000 })
       }
       const messageUpdate = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
+        type: 'text',
+        text: {
+          body: statusMessage,
         },
-        message: {
-          conversation: statusMessage,
-        },
-        messageTimestamp: new Date().getTime(),
       }
       logger.debug(statusMessage)
-      await this.outgoing.sendOne(phone, messageUpdate)
+      await this.outgoing.formatAndSend(phone, phone, messageUpdate)
     } catch (error) {
       const text = `Error on send bulk ${phone}: ${JSON.stringify(error)}`
       logger.error(error, 'Error on send bulk')
       const messageError = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
+        type: 'text',
+        text: {
+          body: text,
         },
-        message: {
-          conversation: text,
-        },
-        messageTimestamp: new Date().getTime(),
       }
-      await this.outgoing.sendOne(phone, messageError)
+      await this.outgoing.formatAndSend(phone, phone, messageError)
       throw error
     }
   }

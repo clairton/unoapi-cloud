@@ -4,7 +4,7 @@ import axios from 'axios'
 import { v1 as uuid } from 'uuid'
 import { UNOAPI_JOB_BULK_SENDER } from '../defaults'
 import { Outgoing } from '../services/outgoing'
-import { jidToPhoneNumber, phoneNumberToJid } from '../services/transformer'
+import { jidToPhoneNumber } from '../services/transformer'
 import textToSpeech, { protos } from '@google-cloud/text-to-speech'
 import { getConfig } from '../services/config'
 import logger from '../services/logger'
@@ -228,17 +228,12 @@ export class BulkParserJob {
         messages.push(message)
       }
       const message = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
+        type: 'text',
+        text: {
+          body: `The bulk ${id} was parsed and found ${messages.length} message(s)!`,
         },
-        message: {
-          conversation: `The bulk ${id} was parsed and found ${messages.length} message(s)!`,
-        },
-        messageTimestamp: new Date().getTime(),
       }
-      this.outgoing.sendOne(phone, message)
+      this.outgoing.formatAndSend(phone, phone, message)
       await amqpEnqueue(this.queueBulkSender, phone, {
         phone,
         payload: { phone, messages, id, length: messages.length },
@@ -246,17 +241,12 @@ export class BulkParserJob {
     } catch (error) {
       logger.error(error, 'Error on parse bulk')
       const message = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
+        type: 'text',
+        text: {
+          body: `Error on parse bulk: ${error?.message}`,
         },
-        message: {
-          conversation: `Error on parse bulk: ${error?.message}`,
-        },
-        messageTimestamp: new Date().getTime(),
       }
-      this.outgoing.sendOne(phone, message)
+      this.outgoing.formatAndSend(phone, phone, message)
       throw error
     }
   }
