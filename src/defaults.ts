@@ -31,6 +31,7 @@ export const UNOAPI_X_MAX_RETRIES = process.env.UNOAPI_X_MAX_RETRIES || 'x-unoap
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
 export const UNOAPI_JOB_WEBHOOKER = `${UNOAPI_QUEUE_NAME}.webhooker`
 export const UNOAPI_JOB_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
+export const UNOAPI_JOB_LISTENER = `${UNOAPI_QUEUE_NAME}.listener`
 export const UNOAPI_JOB_BIND = `${UNOAPI_QUEUE_NAME}.bind`
 export const UNOAPI_JOB_OUTGOING = `${UNOAPI_QUEUE_NAME}.outgoing`
 export const UNOAPI_JOB_CONTACT = `${UNOAPI_QUEUE_NAME}.contact`

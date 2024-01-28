@@ -1,23 +1,19 @@
 import { mock } from 'jest-mock-extended'
-jest.mock('node-fetch')
-import { OutgoingCloudApi } from '../../src/services/outgoing_cloud_api'
-import { Outgoing } from '../../src/services/outgoing'
 import { Store, getStore } from '../../src/services/store'
-import fetch, { Response } from 'node-fetch'
 import { DataStore } from '../../src/services/data_store'
 import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig, getMessageMetadataDefault } from '../../src/services/config'
-import logger from '../../src/services/logger'
-
-const mockFetch = fetch as jest.MockedFunction<typeof fetch>
+import { Listener } from '../../src/services/listener'
+import { ListenerBaileys } from '../../src/services/listener_baileys'
+import { Outgoing } from '../../src/services/outgoing'
 
 let store: Store
 let getConfig: getConfig
 let config: Config
 let getStore: getStore
-const url = 'http://example.com'
 let phone
-let service: Outgoing
+let outgoing: Outgoing
+let service: ListenerBaileys
 
 const textPayload = {
   key: {
@@ -30,7 +26,7 @@ const textPayload = {
   },
 }
 
-describe('service outgoing whatsapp cloud api', () => {
+describe('service listener baileys', () => {
   beforeEach(() => {
     config = defaultConfig
     config.ignoreGroupMessages = true
@@ -43,20 +39,16 @@ describe('service outgoing whatsapp cloud api', () => {
       return config
     }
     store = mock<Store>()
+    outgoing = mock<Outgoing>()
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
     phone = `${new Date().getMilliseconds()}`
-    service = new OutgoingCloudApi(getConfig)
+    service = new ListenerBaileys(outgoing, getConfig)
   })
 
-  test('send text with success', async () => {
-    const mockUrl = `${url}/${phone}`
-    logger.debug(`Mock url ${mockUrl}`)
-    expect(fetch).toHaveBeenCalledTimes(0)
-    const response = new Response('ok', { status: 200 })
-    response.ok = true
-    mockFetch.mockResolvedValue(response)
-    await service.send(phone, textPayload)
-    expect(fetch).toHaveBeenCalledTimes(1)
+  test('send call sendOne when text', async () => {
+    const func = jest.spyOn(service, 'sendOne')
+    await service.process(phone, [textPayload], 'notify')
+    expect(func).toHaveBeenCalledTimes(1)
   })
 })

@@ -1,20 +1,20 @@
 import { getClient } from '../services/client'
 import { getConfig } from '../services/config'
 import { Incoming } from '../services/incoming'
-import { Outgoing } from '../services/outgoing'
+import { Listener } from '../services/listener'
 import { OnNewLogin } from '../services/socket'
 
 export class ReloadJob {
   private getClient: getClient
   private getConfig: getConfig
-  private outgoing: Outgoing
+  private listener: Listener
   private incoming: Incoming
   private onNewLogin: OnNewLogin
 
-  constructor(getClient: getClient, getConfig: getConfig, outgoing: Outgoing, incoming: Incoming, onNewLogin: OnNewLogin) {
+  constructor(getClient: getClient, getConfig: getConfig, listener: Listener, incoming: Incoming, onNewLogin: OnNewLogin) {
     this.getClient = getClient
     this.getConfig = getConfig
-    this.outgoing = outgoing
+    this.listener = listener
     this.incoming = incoming
     this.onNewLogin = onNewLogin
   }
@@ -26,7 +26,7 @@ export class ReloadJob {
     const currentClient = await this.getClient({
       phone,
       incoming: this.incoming,
-      outgoing: this.outgoing,
+      listener: this.listener,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
@@ -36,7 +36,7 @@ export class ReloadJob {
     const newClient = await this.getClient({
       phone,
       incoming: this.incoming,
-      outgoing: this.outgoing,
+      listener: this.listener,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })

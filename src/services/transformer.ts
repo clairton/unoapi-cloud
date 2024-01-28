@@ -91,6 +91,40 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
   }
 }
 
+export const completeCloudApiWebHook = (phone, to: string, message: object) => {
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: phone,
+        changes: [
+          {
+            value: {
+              messaging_product: 'whatsapp',
+              metadata: {
+                display_phone_number: phone,
+                phone_number_id: phone,
+              },
+              messages: [message],
+              contacts: [
+                {
+                  profile: {
+                    name: to,
+                  },
+                  wa_id: to,
+                },
+              ],
+              statuses: [],
+              errors: [],
+            },
+            field: 'messages',
+          },
+        ],
+      },
+    ],
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
   const { type } = payload
@@ -434,7 +468,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         } else {
           return
         }
-        break
 
       case 'update':
         const baileysStatus = payload.status || payload.update.status

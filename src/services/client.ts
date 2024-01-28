@@ -1,8 +1,8 @@
-import { Outgoing } from './outgoing'
 import { Response } from './response'
 import { Incoming } from './incoming'
 import { Info, OnNewLogin, Status } from './socket'
 import { getConfig } from './config'
+import { Listener } from './listener'
 
 export const clients: Map<string, Client> = new Map()
 
@@ -10,13 +10,13 @@ export interface getClient {
   ({
     phone,
     incoming,
-    outgoing,
+    listener,
     getConfig,
     onNewLogin,
   }: {
     phone: string
     incoming: Incoming
-    outgoing: Outgoing
+    listener: Listener
     getConfig: getConfig
     onNewLogin: OnNewLogin
   }): Promise<Client>

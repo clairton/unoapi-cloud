@@ -1,5 +1,6 @@
 import { AnyMessageContent, GroupMetadata, WAMessage, delay, isJidGroup } from '@whiskeysockets/baileys'
-import { Outgoing } from './outgoing'
+import { Incoming } from './incoming'
+import { Listener } from './listener'
 import { Store, stores } from './store'
 import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
@@ -21,14 +22,12 @@ import {
 } from './socket'
 import { Client, getClient, clients } from './client'
 import { Config, configs, defaultConfig, getConfig } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, DecryptError } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
-import { Incoming } from './incoming'
 import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
-import { FailedSend } from './outgoing_cloud_api'
 const attempts = 3
 
 interface Delay {
@@ -40,19 +39,19 @@ const delays: Map<string, Map<string, Delay>> = new Map()
 export const getClientBaileys: getClient = async ({
   phone,
   incoming,
-  outgoing,
+  listener,
   getConfig,
   onNewLogin,
 }: {
   phone: string
   incoming: Incoming
-  outgoing: Outgoing
+  listener: Listener
   getConfig: getConfig
   onNewLogin: OnNewLogin
 }): Promise<Client> => {
   if (!clients.has(phone)) {
     logger.info('Creating client baileys %s', phone)
-    const client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    const client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
     const config = await getConfig(phone)
     if (config.autoConnect) {
       logger.info('Connecting client baileys %s', phone)
@@ -117,8 +116,8 @@ export class ClientBaileys implements Client {
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
-  private outgoing: Outgoing
   private incoming: Incoming
+  private listener: Listener
   private store: Store | undefined
   private calls = new Map<string, boolean>()
   private getConfig: getConfig
@@ -140,20 +139,22 @@ export class ClientBaileys implements Client {
 
   private onStatus: OnStatus = async (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
+      const id = uuid()
+      const waMessageKey = {
+        fromMe: true,
+        remoteJid: phoneNumberToJid(this.phone),
+        id,
+      }
       const payload = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(this.phone),
-          id: uuid(),
-        },
+        key: waMessageKey,
         message: {
           conversation: text,
         },
         messageTimestamp: new Date().getTime(),
       }
       logger.debug('onStatus %s', JSON.stringify(payload))
-      try {
-        if (this.config.sessionWebhook) {
+      if (this.config.sessionWebhook) {
+        try {
           const body = JSON.stringify({ info: this.info, status: this.status, ...payload })
           const response = await fetch(this.config.sessionWebhook, {
             method: 'POST',
@@ -161,14 +162,14 @@ export class ClientBaileys implements Client {
             headers: { 'Content-Type': 'application/json' },
           })
           logger.debug('Response OnStatus Webhook Session', response)
-        } else {
-          const response = await this.outgoing.sendOne(this.phone, payload)
-          return response
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          logger.error(error, 'Erro on send status')
+          await this.store?.dataStore?.setKey(id, waMessageKey)
+          await this.onWebhookError(error)
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        logger.error(error, 'Erro on send status')
-        await this.onWebhookError(error)
+      } else {
+        await this.listener.process(this.phone, [payload], 'status')
       }
     }
   }
@@ -196,22 +197,22 @@ export class ClientBaileys implements Client {
       },
       messageTimestamp,
     }
-    try {
-      if (this.config.sessionWebhook) {
-        const body = JSON.stringify({ info: this.info, status: this.status, ...waMessage })
+    if (this.config.sessionWebhook) {
+      const body = JSON.stringify({ info: this.info, status: this.status, ...waMessage })
+      try {
         const response = await fetch(this.config.sessionWebhook, {
           method: 'POST',
           body: body,
           headers: { 'Content-Type': 'application/json' },
         })
         logger.debug('Response Webhook Session', response)
-      } else {
-        await this.store?.dataStore?.setKey(id, waMessageKey)
-        await this.outgoing.sendOne(this.phone, waMessage)
+      } catch (error) {
+        logger.error(error, 'Erro on send qrcode')
+        await this.onWebhookError(error)
       }
-    } catch (error) {
-      logger.error(error, 'Erro on send qrcode')
-      await this.onWebhookError(error)
+    } else {
+      await this.store?.dataStore?.setKey(id, waMessageKey)
+      await this.listener.process(this.phone, [waMessage], 'qrcode')
     }
   }
 
@@ -220,51 +221,10 @@ export class ClientBaileys implements Client {
     await getClientBaileys({
       phone: this.phone,
       incoming: this.incoming,
-      outgoing: this.outgoing,
+      listener: this.listener,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-  }
-
-  private listener = async (messages: object[], update = true) => {
-    logger.debug('Received %s %s', update ? 'update(s)' : 'message(s)', messages.length, this.phone)
-    try {
-      const resp = await this.outgoing.sendMany(this.phone, messages)
-      return resp
-    } catch (e) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const others: any[] = []
-      if (e instanceof FailedSend) {
-        const errors = e.getErrors()
-        for (let i = errors.length; i < errors.length; i++) {
-          const error = errors[i]
-          if (error instanceof DecryptError) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const message = (error.getContent() as any)?.entry[0]?.changes[0]?.value?.messages[0]
-            if (message.id) {
-              const payload = {
-                messaging_product: 'whatsapp',
-                context: {
-                  message_id: message.id,
-                },
-                to: message.to,
-                type: 'text',
-                text: {
-                  body: '.',
-                },
-              }
-              await this.incoming.send(this.phone, payload, {})
-              await this.outgoing.send(this.phone, error.getContent())
-            }
-          } else {
-            others.push(error)
-          }
-        }
-      }
-      if (others.length) {
-        await this.onWebhookError(e)
-      }
-    }
   }
 
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
@@ -277,12 +237,11 @@ export class ClientBaileys implements Client {
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   private continueAfterSecondMessage: Delay = async (_phone, _to) => {}
 
-  constructor(phone: string, incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, onNewLogin: OnNewLogin) {
+  constructor(phone: string, incoming: Incoming, listener: Listener, getConfig: getConfig, onNewLogin: OnNewLogin) {
     this.phone = phone
     this.info.phone = phone
-
-    this.outgoing = outgoing
     this.incoming = incoming
+    this.listener = listener
     this.getConfig = getConfig
     this.onNewLogin = onNewLogin
   }
@@ -319,45 +278,26 @@ export class ClientBaileys implements Client {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     event('messages.upsert', async (payload: any) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
-      if (payload.type === 'notify') {
-        this.listener(payload.messages, false)
-      } else if (payload.type === 'append' && !this.config.ignoreOwnMessages) {
-        // filter self message send with this session to not send same message many times
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ms = payload.messages.filter((m: any) => !['PENDING', 1, '1'].includes(m.status))
-        if (ms.length > 0) {
-          this.listener(ms, false)
-        } else {
-          logger.debug('ignore messages.upsert type append with status pending')
-        }
-      } else {
-        logger.error('Unknown type: %s', payload.type)
-      }
+      this.listener.process(this.phone, payload.messages, payload.type)
     })
     event('messages.update', (messages: object[]) => {
       logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
-      this.listener(messages)
+      this.listener.process(this.phone, messages, 'update')
     })
-    event('message-receipt.update', (messages: object[]) => {
-      logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(messages))
-      this.listener(messages)
+    event('message-receipt.update', (updates: object[]) => {
+      logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(updates))
+      this.listener.process(this.phone, updates, 'update')
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('messages.delete', (update: any) => {
-      logger.debug('messages.delete %s', this.phone, JSON.stringify(update))
-      const keys = update.keys || []
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const payload = keys.map((key: any) => {
-        return { key, update: { status: 'DELETED' } }
-      })
-      this.listener(payload)
+    event('messages.delete', (updates: any) => {
+      logger.debug('messages.delete %s', this.phone, JSON.stringify(updates))
+      this.listener.process(this.phone, updates, 'delete')
     })
-
     if (!this.config.ignoreHistoryMessages) {
       logger.info('Config import history messages %', this.phone)
       event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
         logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
-        this.listener(messages, false)
+        this.listener.process(this.phone, messages, 'history')
       })
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -373,17 +313,20 @@ export class ClientBaileys implements Client {
           }
           const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
           if (messageCallsWebhook) {
+            const id = uuid()
+            const waMessageKey = {
+              fromMe: false,
+              id: uuid(),
+              remoteJid: from,
+            }
             const message = {
-              key: {
-                fromMe: false,
-                id: uuid(),
-                remoteJid: from,
-              },
+              key: waMessageKey,
               message: {
                 conversation: messageCallsWebhook,
               },
             }
-            await this.outgoing.sendOne(this.phone, message)
+            await this.store?.dataStore?.setKey(id, waMessageKey)
+            await this.listener.process(this.phone, [message], 'notify')
           }
           setTimeout(() => {
             logger.debug('Clean call rejecteds %s', from)

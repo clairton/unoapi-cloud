@@ -3,7 +3,7 @@ jest.mock('../../src/services/socket')
 import { Client } from '../../src/services/client'
 import { Config, getConfig, defaultConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
-import { Outgoing } from '../../src/services/outgoing'
+import { Listener } from '../../src/services/listener'
 import { Store } from '../../src/services/store'
 import {
   connect,
@@ -38,7 +38,7 @@ const onNewLogin = async (phone: string) => {
 describe('service client baileys', () => {
   let client: Client
   let phone: string
-  let outgoing: Outgoing
+  let listener: Listener
   let incoming: Incoming
   let store: Store
   let dataStore: DataStore
@@ -56,7 +56,7 @@ describe('service client baileys', () => {
 
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
-    outgoing = mock<Outgoing>()
+    listener = mock<Listener>()
     incoming = mock<Incoming>()
     dataStore = mock<DataStore>()
     close = mock<close>()
@@ -72,7 +72,7 @@ describe('service client baileys', () => {
       }
       return config
     }
-    client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
     exists = mockFn<exists>()

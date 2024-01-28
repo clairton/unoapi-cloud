@@ -14,12 +14,16 @@ import { getClientBaileys } from './services/client_baileys'
 import { onNewLogin } from './services/new_login'
 
 import logger from './services/logger'
+import { Listener } from './services/listener'
+import { ListenerBaileys } from './services/listener_baileys'
 
 const { PORT, BASE_URL } = process.env
 const port: number = parseInt(PORT || '9876')
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
-const incomingBaileys: Incoming = new IncomingBaileys(outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin(outgoingCloudApi))
+
+const listenerBaileys: Listener = new ListenerBaileys(outgoingCloudApi, getConfigByEnv)
+const incomingBaileys: Incoming = new IncomingBaileys(listenerBaileys, getConfigByEnv, getClientBaileys, onNewLogin(listenerBaileys))
 const sessionStore: SessionStore = new SessionStoreFile()
 
 const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://localhost:${port}`, getConfigByEnv, sessionStore)
@@ -27,7 +31,7 @@ const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL || `http://
 app.server.listen(port, '0.0.0.0', async () => {
   logger.info(`Unoapi Cloud listening on port: ${port}`)
   logger.info('Successful started app!')
-  autoConnect(sessionStore, incomingBaileys, outgoingCloudApi, getConfigByEnv, getClientBaileys, onNewLogin(outgoingCloudApi))
+  autoConnect(sessionStore, incomingBaileys, listenerBaileys, getConfigByEnv, getClientBaileys, onNewLogin(listenerBaileys))
 })
 
 export default app
