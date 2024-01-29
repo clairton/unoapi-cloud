@@ -92,6 +92,7 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
 }
 
 export const completeCloudApiWebHook = (phone, to: string, message: object) => {
+  message['timestamp'] = message['timestamp'] || Math.floor(Date.now() / 1000)
   return {
     object: 'whatsapp_business_account',
     entry: [
