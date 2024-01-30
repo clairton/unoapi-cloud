@@ -220,6 +220,8 @@ export const connect = async ({
           await onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
         }
       } else {
+        logger.error(error, 'Error on socket')
+        await onStatus(`Error: ${error.message}.`, true)
         throw error
       }
     }
