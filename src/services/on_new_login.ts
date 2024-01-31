@@ -30,7 +30,6 @@ export class OnNewLogin {
       text: {
         body: message,
       },
-      messageTimestamp: new Date().getTime(),
     }
     return this.outgoing.formatAndSend(phone, phone, payload)
   }
