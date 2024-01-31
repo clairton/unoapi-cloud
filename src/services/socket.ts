@@ -149,7 +149,7 @@ export const connect = async ({
     logger.info(`${phone} connected`)
 
     const { version, isLatest } = await fetchLatestBaileysVersion()
-    const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
+    const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest} at ${new Date().toUTCString()}`
     await onStatus(message, false)
   }
 
