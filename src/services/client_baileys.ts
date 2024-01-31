@@ -150,7 +150,7 @@ export class ClientBaileys implements Client {
         message: {
           conversation: text,
         },
-        messageTimestamp: new Date().getTime(),
+        timestamp: new Date().getTime() / 1000,
       }
       logger.debug('onStatus %s', JSON.stringify(payload))
       if (this.config.sessionWebhook) {
