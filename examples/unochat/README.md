@@ -4,13 +4,16 @@ OBS:
   - vou utilizar meu dominio lvh.me e você deve trocar pelo seu.
   - use uma maquina ou vps limpa, pois temos uma serviço do traefik que vai utilizar a porta 80 e 443, se ja tiver um ngnix ou algum outro serviço rodando utilizando essa porta vai conflitar e não vai dar certo
   - essa versão do chatwoot que esta sendo usada aqui tem algumas customizações que ainda não foram aceitas pelo time do chatwoot:
-    - coloca o nome do agente na mensagem
-    - marca as mensagem no whatsapp como lido quando o agente visualiza a conversa
     - funciona as conversas em grupo
-    - trata a mensagem enviads por outras conexões, inclusive o aplicativo
-    - desabilita a janela de 24 horas do whatsapp cloud oficial
+    - trata a mensagem enviadas por outras conexões, inclusive o aplicativo
+    - desabilita a janela de 24 horas do whatsapp cloud oficial(usar a WHATSAPP_MESSAGE_WINDOW_ENABLED=false)
     - sincroniza as imagens de perfil dos grupos e usuarios
-    - possibilidade de editar o endereço da caixa de entrada do whatsapp, assim pode usar a oficial e a unoapi na mesma instalação
+    - possibilidade de editar o endereço da caixa de entrada do whatsapp, assim pode usar a oficial e a unoapi na mesma instalação(não usar a env WHATSAPP_CLOUD_BASE_URL)
+    - opção no superadmin de habilitar para colocar o nome do agente na mensagem
+    - opção no superadmin de habilitar para marcar as mensagem no whatsapp como lido quando o agente visualiza a conversa
+    - opção no superadmin de esconder para a aba de todas as conversas
+    - opção no superadmin de esconder para o filtro de conversas
+    - opção no superadmin de esconder a parte de contatos
 
 1 - Para iniciar você precisa apontar os DNS para o ip da sua VPS, isso deve ser feito no registro.br, cloudflare, ou no lugar onde você tem configurado o seu dominio:
   - chatwoot.lvh.me

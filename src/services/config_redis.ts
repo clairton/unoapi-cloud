@@ -8,9 +8,9 @@ import { MessageFilter } from './message_filter'
 export const getConfigRedis: getConfig = async (phone: string): Promise<Config> => {
   if (!configs.has(phone)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const configRedis: any = await getConfigCache(phone)
+    const configRedis: any = { ...(await getConfigCache(phone)) }
     logger.info('Retrieve config default for %s', phone)
-    const config: Config = await getConfigByEnv(phone)
+    const config: Config = { ...(await getConfigByEnv(phone)) }
     if (configRedis) {
       const keys = Object.keys(configRedis)
       for (let index = 0; index < keys.length; index++) {
