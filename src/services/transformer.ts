@@ -137,7 +137,31 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'text':
       response.text = payload.text.body
       break
+    case 'interactive':
+      const listMessage = {
+        title: payload.interactive.header.text,
+        description: payload.interactive.body.text,
+        buttonText: payload.interactive.action.button,
+        footerText: payload.interactive.footer.text,
+        sections: payload.interactive.action.sections.map(
+          (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
+            return {
+              title: section.title,
+              rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
+                return {
+                  title: row.title,
+                  rowId: row.rowId,
+                  description: row.description,
+                }
+              }),
+            }
+          },
+        ),
+        listType: 2,
+      }
 
+      response.listMessage = listMessage
+      break
     case 'image':
     case 'audio':
     case 'document':
