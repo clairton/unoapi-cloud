@@ -1,4 +1,4 @@
-import { AnyMessageContent, GroupMetadata, WAMessage, delay, isJidGroup } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessage, delay, isJidGroup, jidNormalizedUser } from '@whiskeysockets/baileys'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
 import { Store, stores } from './store'
@@ -392,8 +392,8 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message status ${status}`)
         }
       } else if (type) {
-        if (['text', 'image', 'audio', 'document', 'video', 'template'].includes(type)) {
-          let content: AnyMessageContent
+        if (['text', 'image', 'audio', 'document', 'video', 'template', 'interactive'].includes(type)) {
+          let content
           if ('template' === type) {
             const template = new Template(this.getConfig)
             content = await template.bind(this.phone, payload.template.name, payload.template.components)
@@ -427,12 +427,37 @@ export class ClientBaileys implements Client {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
           await toDelay(this.phone, to)
-          const response = await this.sendMessage(to, content, {
-            composing: this.config.composingMessage,
-            quoted,
-            disappearingMessagesInChat,
-            ...options,
-          })
+          let response
+          if (content?.listMessage) {
+            response = await this.sendMessage(
+              to,
+              {
+                forward: {
+                  key: {
+                    remoteJid: jidToPhoneNumber(jidNormalizedUser(this.store?.state.creds.me?.id)),
+                    fromMe: true,
+                  },
+                  message: {
+                    ...content,
+                  },
+                },
+              },
+              {
+                composing: this.config.composingMessage,
+                quoted,
+                disappearingMessagesInChat,
+                ...options,
+              },
+            )
+          } else {
+            response = await this.sendMessage(to, content, {
+              composing: this.config.composingMessage,
+              quoted,
+              disappearingMessagesInChat,
+              ...options,
+            })
+          }
+
           if (response) {
             logger.debug('Sent to baileys %s', JSON.stringify(response))
             const key = response.key
