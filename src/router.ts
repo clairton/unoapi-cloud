@@ -15,6 +15,7 @@ import { TemplatesController } from './controllers/templates_controller'
 import { MessagesController } from './controllers/messages_controller'
 import { MediaController } from './controllers/media_controller'
 import { SessionController } from './controllers/session_controller'
+import { ManagerController } from './controllers/manager_controller'
 
 export const router = (
   incoming: Incoming,
@@ -27,6 +28,7 @@ export const router = (
   injectRoute: injectRoute = async (router: Router) => {},
 ) => {
   const router: Router = Router()
+  const managerController = new ManagerController()
   const messagesController = new MessagesController(incoming, outgoing)
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
@@ -34,6 +36,7 @@ export const router = (
 
   //Routes
   router.get('/ping', indexController.ping)
+  router.get('/manager', middleware, managerController.info.bind(managerController))
   router.get('/:phone/session', middleware, sessionController.info.bind(sessionController))
   router.post('/:phone/session', middleware, sessionController.create.bind(sessionController))
   router.delete('/:phone/session', middleware, sessionController.delete.bind(sessionController))
