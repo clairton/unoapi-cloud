@@ -28,19 +28,6 @@ class IndexController {
       },
     })
   }
-
-  public getPhoneNumber(req: Request, res: Response) {
-    logger.debug('get phone number method %s', JSON.stringify(req.method))
-    logger.debug('get phone number headers %s', JSON.stringify(req.headers))
-    logger.debug('get phone number params %s', JSON.stringify(req.params))
-    logger.debug('get phone number query %s', JSON.stringify(req.query))
-    logger.debug('get phone number body %s', JSON.stringify(req.body))
-    res.set('Content-Type', 'application/json')
-    const { phone } = req.params
-    return res.status(200).send({
-      display_phone_number: phone,
-    })
-  }
 }
 
 export const indexController = new IndexController()
