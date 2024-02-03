@@ -157,7 +157,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
             }
           },
         ),
-        listType: 2,
+        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
       }
 
       response.listMessage = listMessage

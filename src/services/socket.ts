@@ -222,21 +222,6 @@ export const connect = async ({
         getMessage,
         shouldIgnoreJid: config.shouldIgnoreJid,
         retryRequestDelayMs: config.retryRequestDelayMs,
-        patchMessageBeforeSending(msg) {
-          const isProductList = (listMessage: proto.Message.IListMessage | null | undefined) =>
-            listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST
-
-          if (isProductList(msg.deviceSentMessage?.message?.listMessage) || isProductList(msg.listMessage)) {
-            msg = JSON.parse(JSON.stringify(msg))
-            if (msg.deviceSentMessage?.message?.listMessage) {
-              msg.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
-            }
-            if (msg.listMessage) {
-              msg.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
-            }
-          }
-          return msg
-        },
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

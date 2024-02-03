@@ -970,29 +970,79 @@ describe('service transformer', () => {
     expect(isSaveMedia(inputDocumentMessage)).toEqual(true)
   })
 
-  // test('toBaileysMessageContent interactive', async () => {
-  //   const body = `ladiuad87hodlnkd ${new Date().getTime()} askpdasioashfjh`
-  //   const input = {
-  //     type: 'interactive',
-  //     interactive: {
-  //       type: 'button',
-  //       body: { text: '*Ready?*' },
-  //       action: {
-  //         buttons: [
-  //           {
-  //             type: 'reply',
-  //             reply: {
-  //               id: 'cl1r176e9006a2e6dpvp0974z',
-  //               title: 'Go!',
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     },
-  //   }
-  //   const output = {
-  //     text: body,
-  //   }
-  //   expect(toBaileysMessageContent(input)).toEqual(output)
-  // })
+  test('toBaileysMessageContent interactive', async () => {
+    const input = {
+      type: 'interactive',
+      interactive: {
+        type: 'list',
+        header: {
+          type: 'text',
+          text: 'Title',
+        },
+        body: {
+          text: 'your-text-message-content',
+        },
+        footer: {
+          text: 'Cloud UnoApi',
+        },
+        action: {
+          button: 'sections',
+          sections: [
+            {
+              title: 'your-section-title-content',
+              rows: [
+                {
+                  id: 'unique-row-identifier',
+                  title: 'row-title-content',
+                  description: 'row-description-content',
+                },
+              ],
+            },
+            {
+              title: 'your-section-title-content',
+              rows: [
+                {
+                  id: 'unique-row-identifier',
+                  title: 'row-title-content',
+                  description: 'row-description-content',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    }
+    const output = {
+      listMessage: {
+        buttonText: 'sections',
+        description: 'your-text-message-content',
+        footerText: 'Cloud UnoApi',
+        listType: 1,
+        sections: [
+          {
+            rows: [
+              {
+                description: 'row-description-content',
+                rowId: undefined,
+                title: 'row-title-content',
+              },
+            ],
+            title: 'your-section-title-content',
+          },
+          {
+            rows: [
+              {
+                description: 'row-description-content',
+                rowId: undefined,
+                title: 'row-title-content',
+              },
+            ],
+            title: 'your-section-title-content',
+          },
+        ],
+        title: 'Title',
+      },
+    }
+    expect(toBaileysMessageContent(input)).toEqual(output)
+  })
 })
