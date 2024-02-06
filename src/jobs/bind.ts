@@ -25,6 +25,7 @@ import {
   UNOAPI_JOB_BULK_REPORT,
   UNOAPI_JOB_BULK_WEBHOOK,
   UNOAPI_JOB_LISTENER,
+  UNOAPI_JOB_NOTIFICATION,
 } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { IncomingAmqp } from '../services/incoming_amqp'
@@ -37,6 +38,7 @@ import logger from '../services/logger'
 import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
+import { NotificationJob } from '../jobs/notification'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -50,6 +52,7 @@ const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig)
 const onNewLogin = new OnNewLogin(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin.run.bind(onNewLogin))
 const incomingJob = new IncomingJob(incomingBaileys, outgoingCloudApi, getConfig, UNOAPI_JOB_COMMANDER)
+const notificationJob = new NotificationJob(incomingBaileys)
 
 const outgingJob = new OutgoingJob(outgoingCloudApi)
 const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi)
@@ -80,6 +83,11 @@ export class BindJob {
 
     logger.debug('Starting webhooker consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_WEBHOOKER, phone, webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages })
+
+    if (config.notifyFailedMessages) {
+      logger.debug('Starting notification consumer %s', phone)
+      await amqpConsume(UNOAPI_JOB_NOTIFICATION, phone, notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
+    }
 
     logger.debug('Starting media consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_MEDIA, phone, mediaJob.consume.bind(mediaJob), { notifyFailedMessages })
