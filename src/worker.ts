@@ -30,7 +30,6 @@ const getConfig: getConfig = getConfigRedis
 
 const onNewLogin = new OnNewLogin(outgoingAmqp)
 const bindJob = new BindJob()
-
 const reloadJob = new ReloadJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin.run.bind(onNewLogin))
 const disconnectJob = new DisconnectJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin.run.bind(onNewLogin))
 

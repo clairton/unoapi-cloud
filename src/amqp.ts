@@ -7,7 +7,7 @@ import {
   UNOAPI_MESSAGE_RETRY_DELAY,
   UNOAPI_JOB_BIND,
   NOTIFY_FAILED_MESSAGES,
-  // UNOAPI_JOB_INCOMING,
+  UNOAPI_JOB_NOTIFICATION,
 } from './defaults'
 import logger from './services/logger'
 
@@ -183,25 +183,25 @@ export const amqpConsume = async (
       logger.error(error)
       if (countRetries >= maxRetries) {
         logger.info('Reject %s retries', countRetries)
-        // if (options.notifyFailedMessages) {
-        //   logger.info('Sending error to whatsapp...')
-        //   await amqpEnqueue(
-        //     UNOAPI_JOB_INCOMING,
-        //     phone,
-        //     {
-        //       phone,
-        //       payload: {
-        //         to: phone,
-        //         type: 'text',
-        //         text: {
-        //           body: `Unoapi message failed\n\nerror: ${error.message}\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
-        //         },
-        //       },
-        //     },
-        //     {},
-        //   )
-        //   logger.info('Sent error to whatsapp!')
-        // }
+        if (options.notifyFailedMessages) {
+          logger.info('Sending error to whatsapp...')
+          await amqpEnqueue(
+            UNOAPI_JOB_NOTIFICATION,
+            phone,
+            {
+              phone,
+              payload: {
+                to: phone,
+                type: 'text',
+                text: {
+                  body: `Unoapi message failed\n\nerror: ${error.message}\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
+                },
+              },
+            },
+            { maxRetries: 0 },
+          )
+          logger.info('Sent error to whatsapp!')
+        }
         await amqpEnqueue(queue, phone, data, { dead: true })
       } else {
         logger.info('Enqueue retry %s of %s', countRetries, maxRetries)
