@@ -1,7 +1,6 @@
 <div align="center">
 
 [![Whatsapp Group](https://img.shields.io/badge/Group-WhatsApp-%2322BC18)](https://chat.whatsapp.com/CRBaGd850uB1QigKRcguJU)
-[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange)](https://www.postman.com/clairtonrodrigo/workspace/unoapi/collection/2340422-8951a202-9a18-42ea-b6be-42f57b4d768d?tab=variables) 
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](./LICENSE)
 [![Support](https://img.shields.io/badge/Donation-picpay-green)](https://app.picpay.com/user/clairton.rodrigo)
 [![Support](https://img.shields.io/badge/Buy%20me-coffe-orange)](https://www.buymeacoffee.com/clairton)
@@ -454,6 +453,10 @@ Run
 `systemctl daemon-reload && systemctl enable unoapi.service && systemctl start unoapi.service`
 
 To show logs `journalctl -u unoapi.service -f`
+
+## Postman collection
+
+[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange)](https://www.postman.com/clairtonrodrigo/workspace/unoapi/collection/2340422-8951a202-9a18-42ea-b6be-42f57b4d768d?tab=variables)
 
 ## Caution with whatsapp web connection
 More then 14 days without open app in smartphone, the connection with whatsapp web is invalidated and need to read a new qrcode.
