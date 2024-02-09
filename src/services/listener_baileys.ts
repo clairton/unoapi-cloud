@@ -36,7 +36,8 @@ export class ListenerBaileys implements Listener {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {
       return (
-        m?.key?.remoteJid && (type == 'qrcode' || (!config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))))
+        m?.key?.remoteJid &&
+        (['qrcode', 'status'].includes(type) || (!config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))))
       )
     })
     logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
