@@ -35,7 +35,9 @@ export class ListenerBaileys implements Listener {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {
-      return m.key && m.key.remoteJid && !config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))
+      return (
+        m?.key?.remoteJid && (type == 'qrcode' || (!config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))))
+      )
     })
     logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))
