@@ -30,9 +30,17 @@ export class ListenerJob {
         throw error
       }
     } else {
-      await Promise.all(
-        messages.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { phone, messages: [m], type, splited: true })),
-      )
+      if (type == 'delete' && messages.keys) {
+        await Promise.all(
+          messages.keys.map(
+            async (m: object) => await amqpEnqueue(this.queueListener, phone, { phone, messages: { keys: [m] }, type, splited: true }),
+          ),
+        )
+      } else {
+        await Promise.all(
+          messages.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { phone, messages: [m], type, splited: true })),
+        )
+      }
     }
   }
 }
