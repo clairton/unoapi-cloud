@@ -194,7 +194,9 @@ export const amqpConsume = async (
                 to: phone,
                 type: 'text',
                 text: {
-                  body: `Unoapi message failed\n\nerror: ${error.message}\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
+                  body: `Unoapi message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
+                    error.message
+                  }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
                 },
               },
             },
