@@ -3,6 +3,8 @@ import { getStoreFile } from './store_file'
 import { WAMessageKey } from '@whiskeysockets/baileys'
 import { Level } from 'pino'
 
+export const configs: Map<string, Config> = new Map()
+
 export interface GetMessageMetadata {
   <T>(message: T): Promise<T>
 }
@@ -23,6 +25,7 @@ export type Config = {
   ignoreYourselfMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
+  notifyFailedMessages: boolean
   composingMessage: boolean
   autoRestartMs: number
   autoConnect: boolean
@@ -30,6 +33,7 @@ export type Config = {
   rejectCalls: string
   throwWebhookError: boolean
   rejectCallsWebhook: string
+  messageCallsWebhook: string
   sessionWebhook: string
   shouldIgnoreJid: (jid: string) => boolean | undefined
   shouldIgnoreKey: (key: WAMessageKey, messageType: string | undefined) => boolean | undefined
@@ -49,10 +53,12 @@ export const defaultConfig: Config = {
   ignoreOwnMessages: true,
   ignoreYourselfMessages: true,
   sendConnectionStatus: true,
+  notifyFailedMessages: true,
   composingMessage: false,
   rejectCalls: '',
   sessionWebhook: '',
   rejectCallsWebhook: '',
+  messageCallsWebhook: '',
   logLevel: undefined,
   autoConnect: true,
   autoRestartMs: 0,

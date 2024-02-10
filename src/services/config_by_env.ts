@@ -1,5 +1,5 @@
 import { MessageFilter } from './message_filter'
-import { getConfig, defaultConfig, Config } from './config'
+import { getConfig, defaultConfig, Config, configs } from './config'
 import logger from './logger'
 import { Level } from 'pino'
 
@@ -11,6 +11,7 @@ import {
   UNOAPI_RETRY_REQUEST_DELAY,
   IGNORE_CALLS,
   REJECT_CALLS_WEBHOOK,
+  MESSAGE_CALLS_WEBHOOK,
   WEBHOOK_SESSION,
   WEBHOOK_HEADER,
   WEBHOOK_URL,
@@ -25,13 +26,12 @@ import {
   SEND_CONNECTION_STATUS,
   IGNORE_DATA_STORE,
   THROW_WEBHOOK_ERROR,
+  NOTIFY_FAILED_MESSAGES,
 } from '../defaults'
 
-let config: Config
-
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
-  if (!config) {
-    config = defaultConfig
+  if (!configs.has(phone)) {
+    const config: Config = defaultConfig
     config.logLevel = LOG_LEVEL as Level
     config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES
     config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES
@@ -46,8 +46,10 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.composingMessage = COMPOSING_MESSAGE
     config.baseStore = UNOAPI_BASE_STORE
     config.rejectCalls = IGNORE_CALLS
-    config.throwWebhookError = THROW_WEBHOOK_ERROR
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK
+    config.messageCallsWebhook = MESSAGE_CALLS_WEBHOOK
+    config.throwWebhookError = THROW_WEBHOOK_ERROR
+    config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
     config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY
     config.sessionWebhook = WEBHOOK_SESSION
     config.webhooks[0].url = WEBHOOK_URL
@@ -57,6 +59,8 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
     logger.info('Config by env: %s -> %s', phone, JSON.stringify(config))
+    configs.set(phone, config)
   }
-  return config
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return configs.get(phone)!
 }

@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, WAMessageContent, isJidUser, normalizeMessageContent, proto } from '@whiskeysockets/baileys'
+import { AnyMessageContent, WAMessage, isJidUser, normalizeMessageContent, proto } from '@whiskeysockets/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -91,6 +91,43 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
   }
 }
 
+export const completeCloudApiWebHook = (phone, to: string, message: object) => {
+  if (!message['timestamp']) {
+    message['timestamp'] = new Date().getTime() / 1000
+  }
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: phone,
+        changes: [
+          {
+            value: {
+              messaging_product: 'whatsapp',
+              metadata: {
+                display_phone_number: phone,
+                phone_number_id: phone,
+              },
+              messages: [message],
+              contacts: [
+                {
+                  profile: {
+                    name: to,
+                  },
+                  wa_id: to,
+                },
+              ],
+              statuses: [],
+              errors: [],
+            },
+            field: 'messages',
+          },
+        ],
+      },
+    ],
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
   const { type } = payload
@@ -100,7 +137,31 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'text':
       response.text = payload.text.body
       break
+    case 'interactive':
+      const listMessage = {
+        title: payload.interactive.header.text,
+        description: payload.interactive.body.text,
+        buttonText: payload.interactive.action.button,
+        footerText: payload.interactive.footer.text,
+        sections: payload.interactive.action.sections.map(
+          (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
+            return {
+              title: section.title,
+              rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
+                return {
+                  title: row.title,
+                  rowId: row.rowId,
+                  description: row.description,
+                }
+              }),
+            }
+          },
+        ),
+        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
+      }
 
+      response.listMessage = listMessage
+      break
     case 'image':
     case 'audio':
     case 'document':
@@ -434,7 +495,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         } else {
           return
         }
-        break
 
       case 'update':
         const baileysStatus = payload.status || payload.update.status
@@ -573,7 +633,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
             ${externalAdReply.body}
           
-            ${externalAdReply.mediaUrl}
+            ${externalAdReply.mediaUrl || externalAdReply.thumbnailUrl}
           `
         }
       }

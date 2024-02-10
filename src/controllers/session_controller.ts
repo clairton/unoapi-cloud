@@ -1,25 +1,20 @@
 import { Request, Response } from 'express'
-
-import { Outgoing } from '../services/outgoing'
 import { Incoming } from '../services/incoming'
-
 import { getConfig } from '../services/config'
-import { Client, getClient } from '../services/client'
-
-import { clients } from '../services/client_baileys'
+import { Client, getClient, clients } from '../services/client'
 import { onNewLogin } from '../services/new_login'
-
 import logger from '../services/logger'
+import { Listener } from '../services/listener'
 
 export class SessionController {
   private getConfig: getConfig
   private getClient: getClient
   private incoming: Incoming
-  private outgoing: Outgoing
+  private listener: Listener
 
-  constructor(incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, getClient: getClient) {
+  constructor(incoming: Incoming, listener: Listener, getConfig: getConfig, getClient: getClient) {
     this.incoming = incoming
-    this.outgoing = outgoing
+    this.listener = listener
     this.getConfig = getConfig
     this.getClient = getClient
   }
@@ -58,9 +53,9 @@ export class SessionController {
       const client: Client = await this.getClient({
         phone,
         incoming: this.incoming,
-        outgoing: this.outgoing,
+        listener: this.listener,
         getConfig: this.getConfig,
-        onNewLogin: onNewLogin(this.outgoing),
+        onNewLogin: onNewLogin(this.listener),
       })
       if (client) {
         return res.status(200).json({

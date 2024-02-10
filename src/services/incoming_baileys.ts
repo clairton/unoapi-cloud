@@ -1,17 +1,17 @@
 import { Incoming } from './incoming'
 import { Client, getClient } from './client'
 import { getConfig } from './config'
-import { Outgoing } from './outgoing'
 import { OnNewLogin } from './socket'
 import logger from './logger'
+import { Listener } from './listener'
 
 export class IncomingBaileys implements Incoming {
-  private service: Outgoing
+  private service: Listener
   private getClient: getClient
   private getConfig: getConfig
   private onNewLogin: OnNewLogin
 
-  constructor(service: Outgoing, getConfig: getConfig, getClient: getClient, onNewLogin: OnNewLogin) {
+  constructor(service: Listener, getConfig: getConfig, getClient: getClient, onNewLogin: OnNewLogin) {
     this.service = service
     this.getConfig = getConfig
     this.getClient = getClient
@@ -22,7 +22,7 @@ export class IncomingBaileys implements Incoming {
     const client: Client = await this.getClient({
       phone,
       incoming: this,
-      outgoing: this.service,
+      listener: this.service,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })

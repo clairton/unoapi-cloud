@@ -1,15 +1,17 @@
-import { phoneNumberToJid } from '../services/transformer'
 import { UNOAPI_JOB_BULK_REPORT, UNOAPI_BULK_DELAY } from '../defaults'
 import { Outgoing } from '../services/outgoing'
 import { getBulkReport } from '../services/redis'
 import { amqpEnqueue } from '../amqp'
 import { v1 as uuid } from 'uuid'
+import { getConfig } from '../services/config'
 
 export class BulkReportJob {
   private outgoing: Outgoing
+  private getConfig: getConfig
 
-  constructor(outgoing: Outgoing) {
+  constructor(outgoing: Outgoing, getConfig: getConfig) {
     this.outgoing = outgoing
+    this.getConfig = getConfig
   }
 
   async consume(data: object) {
@@ -23,7 +25,7 @@ export class BulkReportJob {
       let typeMessage
       let message
       if (!payload.unverified && status.scheduled) {
-        typeMessage = 'conversation'
+        typeMessage = 'text'
         if (count >= 10) {
           message = `Bulk ${id} phone ${phone} with ${length}, has retried generate ${count} and not retried more`
         } else {
@@ -34,41 +36,36 @@ export class BulkReportJob {
         const caption = `Bulk ${id} phone ${phone} with ${length} message(s) status -> ${JSON.stringify(status)}`
         const lines: string[] = Object.keys(report).map((key) => `${key};${report[key]}`)
         const file = lines.join('\n')
-        const base64 = `data:text/csv;base64,${Buffer.from(file).toString('base64')}`
-        typeMessage = 'documentMessage'
+        const buffer = Buffer.from(file)
+        const base64 = `data:text/csv;base64,${buffer.toString('base64')}`
+        typeMessage = 'document'
+        const mediaId = uuid().replaceAll('-', '')
+        const mediaKey = `${phone}/${mediaId}`
+        const filename = `${mediaKey}.csv`
+        const config = await this.getConfig(phone)
+        const store = await config.getStore(phone, config)
+        await store.mediaStore.saveMediaBuffer(filename, buffer)
         message = {
           url: base64,
-          mimetype: 'text/csv',
-          fileLength: base64.length,
-          fileName: `${phone}/${id}.csv`,
+          mime_type: 'text/csv',
+          filename,
           caption,
+          id: mediaKey,
         }
       }
       const update = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
-        },
-        message: {
-          [typeMessage]: message,
-        },
-        messageTimestamp: new Date().getTime(),
+        type: typeMessage,
+        [typeMessage]: message,
       }
-      this.outgoing.sendOne(phone, update)
+      this.outgoing.formatAndSend(phone, phone, update)
     } else {
       const message = {
-        key: {
-          fromMe: true,
-          remoteJid: phoneNumberToJid(phone),
-          id: uuid(),
+        type: 'text',
+        text: {
+          body: `Bulk id ${id} not found`,
         },
-        message: {
-          conversation: `Bulk id ${id} not found`,
-        },
-        messageTimestamp: new Date().getTime(),
       }
-      this.outgoing.sendOne(phone, message)
+      this.outgoing.formatAndSend(phone, phone, message)
     }
   }
 }

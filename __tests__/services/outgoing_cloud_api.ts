@@ -29,20 +29,8 @@ const textPayload = {
     conversation: 'skdfkdshf',
   },
 }
-const mediaPayload = {
-  key: {
-    remoteJid: 'askjhasd@kslkjasd.xom',
-    fromMe: false,
-    id: 'kasjhdkjhasjkshad',
-  },
-  message: {
-    imageMessage: {
-      mimetype: 'application/pdf',
-    },
-  },
-}
 
-describe('service incoming baileys', () => {
+describe('service outgoing whatsapp cloud api', () => {
   beforeEach(() => {
     config = defaultConfig
     config.ignoreGroupMessages = true
@@ -70,21 +58,5 @@ describe('service incoming baileys', () => {
     mockFetch.mockResolvedValue(response)
     await service.send(phone, textPayload)
     expect(fetch).toHaveBeenCalledTimes(1)
-  })
-
-  test('sendMany call sendOne when text', async () => {
-    const func = jest.spyOn(service, 'sendOne')
-    await service.sendMany(phone, [textPayload])
-    expect(func).toHaveBeenCalledTimes(1)
-  })
-
-  test('sendOne with media', async () => {
-    const saveMedia = jest.spyOn(store.mediaStore, 'saveMedia')
-    const send = jest.spyOn(service, 'send')
-    send.mockResolvedValue()
-    saveMedia.mockResolvedValue(true)
-    await service.sendOne(phone, mediaPayload)
-    expect(saveMedia).toHaveBeenCalledTimes(1)
-    expect(send).toHaveBeenCalledTimes(1)
   })
 })

@@ -1,7 +1,6 @@
 <div align="center">
 
 [![Whatsapp Group](https://img.shields.io/badge/Group-WhatsApp-%2322BC18)](https://chat.whatsapp.com/CRBaGd850uB1QigKRcguJU)
-[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange)](https://www.postman.com/clairtonrodrigo/workspace/unoapi/collection/2340422-8951a202-9a18-42ea-b6be-42f57b4d768d?tab=variables) 
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](./LICENSE)
 [![Support](https://img.shields.io/badge/Donation-picpay-green)](https://app.picpay.com/user/clairton.rodrigo)
 [![Support](https://img.shields.io/badge/Buy%20me-coffe-orange)](https://www.buymeacoffee.com/clairton)
@@ -154,6 +153,7 @@ with:
 * 6 - max qrcode generate 
 * 7 - invalid phone number
 * 8 - message not allowed
+* 9 - connection lost
 
 ## Up for development
 
@@ -200,7 +200,8 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 `yarn web` e `yarn worker` up a web and worker with redis and rabbitmq
 
 
-## Config Options with Environment Variables
+## Config Options
+### Config with Environment Variables
 
 Create a `.env`file and put configuration if you need change default value:
 
@@ -220,13 +221,15 @@ IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default tru
 IGNORE_YOURSELF_MESSAGES=true to ignore messages for yourself, default is true, possible loop if was false
 COMPOSING_MESSAGE=true enable composing before send message as text length, default false
 REJECT_CALLS=message to send when receive a call, default is empty and not reject
-REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
+REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send, is deprecated, use MESSAGE_CALLS_WEBHOOK
+MESSAGE_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
 SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
 UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
 IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
 AUTO_CONNECT=true, auto connect on start service
 AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto restart
-THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default id false
+THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default is false, if true throw exception
+NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message failed and enqueued in dead queue
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 UNOAPI_RETRY_REQUEST_DELAY=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
@@ -250,7 +253,7 @@ AMQP_URL
 REDIS_URL
 ```
 
-## Config with redis
+### Config with redis
 
 The `.env` can be save one configm, but on redis use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
 
@@ -285,6 +288,79 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
 
 PS: After update JSON, restart de docker container or service
 
+
+### Save config with http
+
+To create a session with http send a post with config in body to `http://localhost:9876/v15.0/:phone/register`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v17.0/5549988290955/register \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{ 
+  "ignoreOwnMessages": false
+}'
+```
+
+### Delete config and session with http
+
+To remover a session with http send a post to `http://localhost:9876/v15.0/:phone/deregister`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v17.0/5549988290955/deregister \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' 
+```
+
+### Get a session configs
+
+```sh
+curl -i -X GET \
+http://localhost:9876/v15.0/1/5549988290955 \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1'
+```
+
+### List as session configs
+
+```sh
+curl -i -X GET \
+http://localhost:9876/v15.0/1/phone_numbers \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1'
+```
+
+```json
+{
+  "authToken": "xpto",
+  "rejectCalls":"Reject Call Text do send do number calling to you",
+  "rejectCallsWebhook":"Message send to webhook when receive a call",
+  "ignoreGroupMessages": true,
+  "ignoreBroadcastStatuses": true,
+  "ignoreBroadcastMessages": false,
+  "ignoreHistoryMessages": true,
+  "ignoreOwnMessages": true,
+  "ignoreYourselfMessages": true,
+  "sendConnectionStatus": true,
+  "composingMessage": false,
+  "sessionWebhook": "",
+  "autoConnect": false,
+  "autoRestartMs": 3600000,
+  "retryRequestDelayMs": 1000,
+  "throwWebhookError": false,
+  "webhooks": [
+    {
+      "url": "http://localhost:3000/whatsapp/webhook",
+      "token": "kslflkhlkwq",
+      "header": "api_acess_token"
+    }
+  ],
+  "ignoreDataStore": false
+}
+```
+
 ## Templates
 
 The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-template:${PHONE_NUMBER}`. The json format is:
@@ -317,15 +393,11 @@ PS: After update JSON, restart de docker container or service
 
 ## Examples
 
-[Integration with Chatwoot](examples/chatwoot/README.md)
+### [Docker compose with chatwoot](examples/chatwoot/README.md)
 
-### Docker compose with chatwoot 
+### [Docker compose with unoapi](examples/docker-compose.yml)
 
-`https://github.com/clairton/unoapi-cloud/blob/main/examples/chatwoot/docker-compose.yml`
-
-### Docker compose with unoapi
-
-`https://github.com/clairton/unoapi-cloud/blob/main/examples/docker-compose.yml`
+### [Docker compose with chatwoot and unoapi together](examples/unochat/README.md)
 
 ## Install as Systemctl
 
@@ -382,6 +454,10 @@ Run
 
 To show logs `journalctl -u unoapi.service -f`
 
+## Postman collection
+
+[![Postman Collection](https://img.shields.io/badge/Postman-Collection-orange)](https://www.postman.com/clairtonrodrigo/workspace/unoapi/collection/2340422-8951a202-9a18-42ea-b6be-42f57b4d768d?tab=variables)
+
 ## Caution with whatsapp web connection
 More then 14 days without open app in smartphone, the connection with whatsapp web is invalidated and need to read a new qrcode.
 
@@ -402,6 +478,10 @@ using this software. WhatsApp does not allow bots using unofficial methods on
 their platform, so this shouldn't be considered totally safe.
 
 Released under the GPLv3 License.
+
+## WhatsApp Group
+
+https://chat.whatsapp.com/FZd0JyPVMLq94FHf59I8HU
 
 ## Need More
 

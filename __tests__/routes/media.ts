@@ -3,14 +3,15 @@ import request from 'supertest'
 import { App } from '../../src/app'
 import { Incoming } from '../../src/services/incoming'
 import { DataStore } from '../../src/services/data_store'
-import { getDataStore } from '../../src/services/data_store'
 import { defaultConfig, getConfig } from '../../src/services/config'
 import { mock } from 'jest-mock-extended'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
 import { Outgoing } from '../../src/services/outgoing'
-import { getMediaStore, MediaStore } from '../../src/services/media_store'
+import { MediaStore } from '../../src/services/media_store'
 import { getStore, Store } from '../../src/services/store'
-import { Client, getClient } from '../../src/services/client'
+import { SessionStore } from '../../src/services/session_store'
+
+const sessionStore = mock<SessionStore>()
 
 const phone = `${new Date().getTime()}`
 const messageId = `wa.${new Date().getTime()}`
@@ -18,7 +19,6 @@ const url = `http://somehost`
 const mimetype = 'text/plain'
 const extension = 'txt'
 
-const client = mock<Client>()
 const dataStore = mock<DataStore>()
 const store = mock<Store>()
 const mediaStore = mock<MediaStore>()
@@ -33,9 +33,6 @@ const getConfigTest: getConfig = async (_phone: string) => {
   defaultConfig.getStore = getTestStore
   return defaultConfig
 }
-const getClientTest: getClient = async ({}) => {
-  return client
-}
 
 describe('media routes', () => {
   let incoming: Incoming
@@ -45,7 +42,7 @@ describe('media routes', () => {
   beforeEach(() => {
     incoming = mock<Incoming>()
     outgoing = mock<Outgoing>()
-    app = new App(incoming, outgoing, url, getConfigTest, getClientTest)
+    app = new App(incoming, outgoing, url, getConfigTest, sessionStore)
   })
 
   test('index', async () => {

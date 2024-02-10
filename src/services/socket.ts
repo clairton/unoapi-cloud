@@ -62,6 +62,10 @@ export interface exists {
   (_jid: string): Promise<string | undefined>
 }
 
+export interface close {
+  (): Promise<void>
+}
+
 export type Status = {
   attempt: number
   connected: boolean
@@ -145,7 +149,7 @@ export const connect = async ({
     logger.info(`${phone} connected`)
 
     const { version, isLatest } = await fetchLatestBaileysVersion()
-    const message = `Connnected using Whatsapp Version v${version.join('.')}, is latest? ${isLatest}`
+    const message = `Connected with ${phone} using Whatsapp Version v${version.join('.')}, is latest? ${isLatest} at ${new Date().toUTCString()}`
     await onStatus(message, false)
   }
 
@@ -179,6 +183,22 @@ export const connect = async ({
     const message = await dataStore.loadMessage(remoteJid!, id!)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return message?.message ? new Promise((resolve) => resolve(message.message!)) : undefined
+  }
+
+  const patchMessageBeforeSending = (msg: proto.IMessage) => {
+    const isProductList = (listMessage: proto.Message.IListMessage | null | undefined) =>
+      listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST
+
+    if (isProductList(msg.deviceSentMessage?.message?.listMessage) || isProductList(msg.listMessage)) {
+      msg = JSON.parse(JSON.stringify(msg))
+      if (msg.deviceSentMessage?.message?.listMessage) {
+        msg.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
+      }
+      if (msg.listMessage) {
+        msg.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
+      }
+    }
+    return msg
   }
 
   const connect = async () => {
@@ -216,6 +236,8 @@ export const connect = async ({
           await onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
         }
       } else {
+        logger.error(error, 'Error on socket')
+        await onStatus(`Error: ${error.message}.`, true)
         throw error
       }
     }
@@ -228,8 +250,8 @@ export const connect = async ({
 
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
-    await disconnect(true)
-    onReconnect()
+    await connect()
+    return onReconnect()
   }
 
   const disconnect = (reconnect: boolean) => {
@@ -247,13 +269,18 @@ export const connect = async ({
     return dataStore.getJid(phone, sock!)
   }
 
-  const validateStatus = () => {
+  const validateStatus = async () => {
     if (status.disconnected || !status.connected) {
       if (status.connecting) {
         throw new SendError(5, 'Wait a moment, connecting process')
       } else {
         throw new SendError(3, 'Disconnected number, please read qr code')
       }
+    }
+    if (!sock) {
+      await onStatus(`Socket connection is null`, true)
+      await reconnect()
+      throw new SendError(9, 'Connection lost, please retry connect')
     }
   }
 
@@ -262,25 +289,25 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    validateStatus()
+    await validateStatus()
     const id = isJidGroup(to) ? to : await exists(to)
-    if (sock && id) {
+    if (id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
         const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 100)
-        await sock.presenceSubscribe(id)
+        await sock?.presenceSubscribe(id)
         await delay(Math.floor(Math.random() * time) + 100)
-        await sock.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
+        await sock?.sendPresenceUpdate(i?.text ? 'composing' : 'recording', id)
         await delay(Math.floor(Math.random() * time) + 200)
-        await sock.sendPresenceUpdate('paused', id)
+        await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
       const opts = { backgroundColor: '' }
       if (options.quoted) {
         opts['quoted'] = options.quoted
       }
-      return sock.sendMessage(id, message, opts)
+      return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
       throw new SendError(7, `The phone number ${to} is invalid!`)
@@ -289,8 +316,8 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
-    validateStatus()
-    return sock && sock.readMessages(keys)
+    await validateStatus()
+    return sock?.readMessages(keys)
   }
 
   if (config.autoRestartMs) {
@@ -299,12 +326,12 @@ export const connect = async ({
   }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
-    logger.info('Subscribe %s event:', phone, event)
-    sock && sock.ev.on(event, callback)
+    logger.info('Subscribe %s event: %s', phone, event)
+    return sock?.ev?.on(event, callback)
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
-    return sock && sock.rejectCall(callId, callFrom)
+    return sock?.rejectCall(callId, callFrom)
   }
 
   const fetchImageUrl: fetchImageUrl = async (jid: string) => {
@@ -317,7 +344,13 @@ export const connect = async ({
     return dataStore.loadGroupMetada(jid, sock!)
   }
 
+  const close: close = async () => {
+    try {
+      return sock?.end(undefined)
+    } catch (error) {}
+  }
+
   connect()
 
-  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close }
 }

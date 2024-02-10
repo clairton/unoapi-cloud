@@ -31,10 +31,14 @@ export const UNOAPI_X_MAX_RETRIES = process.env.UNOAPI_X_MAX_RETRIES || 'x-unoap
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
 export const UNOAPI_JOB_WEBHOOKER = `${UNOAPI_QUEUE_NAME}.webhooker`
 export const UNOAPI_JOB_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
+export const UNOAPI_JOB_NOTIFICATION = `${UNOAPI_QUEUE_NAME}.notification`
+export const UNOAPI_JOB_LISTENER = `${UNOAPI_QUEUE_NAME}.baileys.listener`
 export const UNOAPI_JOB_BIND = `${UNOAPI_QUEUE_NAME}.bind`
 export const UNOAPI_JOB_OUTGOING = `${UNOAPI_QUEUE_NAME}.outgoing`
 export const UNOAPI_JOB_CONTACT = `${UNOAPI_QUEUE_NAME}.contact`
 export const UNOAPI_JOB_BULK_PARSER = `${UNOAPI_QUEUE_NAME}.bulk.parser`
+export const UNOAPI_JOB_RELOAD = `${UNOAPI_QUEUE_NAME}.reload`
+export const UNOAPI_JOB_DISCONNECT = `${UNOAPI_QUEUE_NAME}.disconnect`
 export const UNOAPI_JOB_BULK_SENDER = `${UNOAPI_QUEUE_NAME}.bulk.sender`
 export const UNOAPI_JOB_BULK_STATUS = `${UNOAPI_QUEUE_NAME}.bulk.status`
 export const UNOAPI_JOB_BULK_REPORT = `${UNOAPI_QUEUE_NAME}.bulk.report`
@@ -52,6 +56,7 @@ export const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`
 export const IGNORE_CALLS = process.env.IGNORE_CALLS || ''
 export const REJECT_CALLS = process.env.REJECT_CALLS || ''
 export const REJECT_CALLS_WEBHOOK = process.env.REJECT_CALLS_WEBHOOK || ''
+export const MESSAGE_CALLS_WEBHOOK = process.env.MESSAGE_CALLS_WEBHOOK || ''
 export const AUTO_RESTART_MS = parseInt(process.env.AUTO_RESTART_MS || '0')
 export const UNOAPI_BASE_STORE = process.env.UNOAPI_BASE_STORE ? process.env.UNOAPI_BASE_STORE : './data'
 export const AUTO_CONNECT: boolean = process.env.AUTO_CONNECT === _undefined ? true : process.env.AUTO_CONNECT == 'true'
@@ -68,6 +73,7 @@ export const IGNORE_YOURSELF_MESSAGES: boolean =
   process.env.IGNORE_YOURSELF_MESSAGES === _undefined ? false : process.env.IGNORE_YOURSELF_MESSAGES == 'true'
 export const IGNORE_OWN_MESSAGES: boolean = process.env.IGNORE_OWN_MESSAGES === _undefined ? true : process.env.IGNORE_OWN_MESSAGES == 'true'
 export const SEND_CONNECTION_STATUS: boolean = process.env.SEND_CONNECTION_STATUS === _undefined ? true : process.env.SEND_CONNECTION_STATUS == 'true'
+export const NOTIFY_FAILED_MESSAGES: boolean = process.env.NOTIFY_FAILED_MESSAGES === _undefined ? true : process.env.NOTIFY_FAILED_MESSAGES == 'true'
 export const THROW_WEBHOOK_ERROR: boolean = process.env.THROW_WEBHOOK_ERROR === _undefined ? false : process.env.THROW_WEBHOOK_ERROR == 'true'
 
 export const STORAGE_BUCKET_NAME = process.env.STORAGE_BUCKET_NAME || 'unoapi'

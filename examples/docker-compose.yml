@@ -94,6 +94,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     restart: always

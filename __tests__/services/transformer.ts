@@ -11,7 +11,26 @@ import {
   isValidPhoneNumber,
   DecryptError,
   getNormalizedMessage,
+  isSaveMedia,
 } from '../../src/services/transformer'
+const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
+
+const documentMessage: proto.Message.IDocumentMessage = {
+  url: 'https://mmg.whatsapp.net/v/t62.7119-24/24248058_881769707068106_5138895532383847851_n.enc?ccb=11-4&oh=01_AdQM6YlfR3dW_UvRoLmPQeqOl08pdn8DNtTCTP1DMz4gcA&oe=65BCEDEA&_nc_sid=5e03e0&mms3=true',
+  mimetype: 'text/csv',
+  title: 'Clientes-03-01-2024-11-38-32.csv',
+  caption: 'pode subir essa campanha por favor',
+}
+const inputDocumentWithCaptionMessage: WAMessage = {
+  key,
+  message: {
+    documentWithCaptionMessage: { message: { documentMessage } },
+  },
+}
+const inputDocumentMessage: WAMessage = {
+  key,
+  message: { documentMessage },
+}
 
 describe('service transformer', () => {
   test('phoneNumberToJid with nine digit', async () => {
@@ -936,23 +955,94 @@ describe('service transformer', () => {
   })
 
   test('getNormalizedMessage documentWithCaptionMessage', async () => {
-    const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
-    const documentMessage: proto.Message.IDocumentMessage = {
-      url: 'https://mmg.whatsapp.net/v/t62.7119-24/24248058_881769707068106_5138895532383847851_n.enc?ccb=11-4&oh=01_AdQM6YlfR3dW_UvRoLmPQeqOl08pdn8DNtTCTP1DMz4gcA&oe=65BCEDEA&_nc_sid=5e03e0&mms3=true',
-      mimetype: 'text/csv',
-      title: 'Clientes-03-01-2024-11-38-32.csv',
-      caption: 'pode subir essa campanha por favor',
-    }
-    const input: WAMessage = {
-      key,
-      message: {
-        documentWithCaptionMessage: { message: { documentMessage } },
-      },
-    }
     const output = {
       key,
       message: { documentMessage },
     }
-    expect(getNormalizedMessage(input)).toEqual(output)
+    expect(getNormalizedMessage(inputDocumentWithCaptionMessage)).toEqual(output)
+  })
+
+  test('isSaveMedia documentWithCaptionMessage', async () => {
+    expect(isSaveMedia(inputDocumentWithCaptionMessage)).toEqual(true)
+  })
+
+  test('isSaveMedia documentMessage', async () => {
+    expect(isSaveMedia(inputDocumentMessage)).toEqual(true)
+  })
+
+  test('toBaileysMessageContent interactive', async () => {
+    const input = {
+      type: 'interactive',
+      interactive: {
+        type: 'list',
+        header: {
+          type: 'text',
+          text: 'Title',
+        },
+        body: {
+          text: 'your-text-message-content',
+        },
+        footer: {
+          text: 'Cloud UnoApi',
+        },
+        action: {
+          button: 'sections',
+          sections: [
+            {
+              title: 'your-section-title-content',
+              rows: [
+                {
+                  id: 'unique-row-identifier',
+                  title: 'row-title-content',
+                  description: 'row-description-content',
+                },
+              ],
+            },
+            {
+              title: 'your-section-title-content',
+              rows: [
+                {
+                  id: 'unique-row-identifier',
+                  title: 'row-title-content',
+                  description: 'row-description-content',
+                },
+              ],
+            },
+          ],
+        },
+      },
+    }
+    const output = {
+      listMessage: {
+        buttonText: 'sections',
+        description: 'your-text-message-content',
+        footerText: 'Cloud UnoApi',
+        listType: 1,
+        sections: [
+          {
+            rows: [
+              {
+                description: 'row-description-content',
+                rowId: undefined,
+                title: 'row-title-content',
+              },
+            ],
+            title: 'your-section-title-content',
+          },
+          {
+            rows: [
+              {
+                description: 'row-description-content',
+                rowId: undefined,
+                title: 'row-title-content',
+              },
+            ],
+            title: 'your-section-title-content',
+          },
+        ],
+        title: 'Title',
+      },
+    }
+    expect(toBaileysMessageContent(input)).toEqual(output)
   })
 })

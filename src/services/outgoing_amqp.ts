@@ -1,26 +1,20 @@
 import { getConfig } from './config'
 import { Outgoing } from './outgoing'
 import { amqpEnqueue } from '../amqp'
-import { UNOAPI_JOB_OUTGOING, UNOAPI_JOB_WEBHOOKER } from '../defaults'
+import { UNOAPI_JOB_WEBHOOKER } from '../defaults'
+import { completeCloudApiWebHook } from './transformer'
 
 export class OutgoingAmqp implements Outgoing {
-  private queueOutgoing: string
   private queueWebhooker: string
   private getConfig: getConfig
-
-  constructor(getConfig: getConfig, queueOutgoing: string = UNOAPI_JOB_OUTGOING, queueWebhooker = UNOAPI_JOB_WEBHOOKER) {
-    this.queueOutgoing = queueOutgoing
+  constructor(getConfig: getConfig, queueWebhooker = UNOAPI_JOB_WEBHOOKER) {
     this.queueWebhooker = queueWebhooker
     this.getConfig = getConfig
   }
 
-  public async sendMany(phone: string, payload: object[]) {
-    await amqpEnqueue(this.queueOutgoing, phone, { phone, payload, split: true })
-  }
-
-  public async sendOne(phone: string, payload: object) {
-    const config = await this.getConfig(phone)
-    await amqpEnqueue(this.queueOutgoing, phone, { phone, payload, webhooks: config.webhooks, split: false })
+  public async formatAndSend(phone: string, to: string, message: object) {
+    const data = completeCloudApiWebHook(phone, to, message)
+    return this.send(phone, data)
   }
 
   public async send(phone: string, payload: object) {
@@ -30,6 +24,6 @@ export class OutgoingAmqp implements Outgoing {
 
   public async sendHttp(phone: string, url: string, header: string, token: string, payload: object) {
     const webhook = { url, token, header }
-    await amqpEnqueue(this.queueWebhooker, phone, { phone, webhook, payload, split: true })
+    await amqpEnqueue(this.queueWebhooker, phone, { phone, webhook, payload, split: false })
   }
 }

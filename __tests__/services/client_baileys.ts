@@ -3,7 +3,7 @@ jest.mock('../../src/services/socket')
 import { Client } from '../../src/services/client'
 import { Config, getConfig, defaultConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
-import { Outgoing } from '../../src/services/outgoing'
+import { Listener } from '../../src/services/listener'
 import { Store } from '../../src/services/store'
 import {
   connect,
@@ -15,6 +15,7 @@ import {
   fetchImageUrl,
   fetchGroupMetadata,
   exists,
+  close,
 } from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
 import { proto } from '@whiskeysockets/baileys'
@@ -37,7 +38,7 @@ const onNewLogin = async (phone: string) => {
 describe('service client baileys', () => {
   let client: Client
   let phone: string
-  let outgoing: Outgoing
+  let listener: Listener
   let incoming: Incoming
   let store: Store
   let dataStore: DataStore
@@ -49,14 +50,16 @@ describe('service client baileys', () => {
   let fetchGroupMetadata
   let getConfig: getConfig
   let config: Config
+  let close: close
 
   const status: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
 
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
-    outgoing = mock<Outgoing>()
+    listener = mock<Listener>()
     incoming = mock<Incoming>()
     dataStore = mock<DataStore>()
+    close = mock<close>()
     store = mock<Store>()
     store.dataStore = dataStore
     config = defaultConfig
@@ -69,14 +72,14 @@ describe('service client baileys', () => {
       }
       return config
     }
-    client = new ClientBaileys(phone, incoming, outgoing, getConfig, onNewLogin)
+    client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>()
     exists = mockFn<exists>()
     rejectCall = mockFn<rejectCall>()
     fetchImageUrl = mockFn<fetchImageUrl>()
     fetchGroupMetadata = mockFn<fetchGroupMetadata>()
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close })
   })
 
   test('call send with unknown status', async () => {
@@ -130,7 +133,7 @@ describe('service client baileys', () => {
     send = async () => {
       throw new SendError(1, '')
     }
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists })
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close })
     await client.connect()
     const response = await client.send(payload, {})
     expect(response.error.entry.length).toBe(1)

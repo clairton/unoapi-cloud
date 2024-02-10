@@ -30,7 +30,7 @@ const IgnoreOwnKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefi
     return false
   } else {
     const filter = key && !!key.fromMe
-    logger.debug('IgnoreOwnKey: %s => %s', key, filter)
+    logger.debug('IgnoreOwnKey: %s => %s', JSON.stringify(key), filter)
     return filter
   }
 }
@@ -73,7 +73,7 @@ export class MessageFilter {
     }
     if (config.ignoreYourselfMessages) {
       logger.info('Config to ignore key yourself messages')
-      const IgnoreYourSelfKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
+      const IgnoreYourselfKey: IgnoreKey = (key: WAMessageKey, messageType: string | undefined) => {
         if (!messageType) {
           return true
         } else if (['update', 'receipt'].includes(messageType)) {
@@ -82,11 +82,11 @@ export class MessageFilter {
         } else {
           const senderPhone = jidToPhoneNumber(key.remoteJid, '')
           const filter = phone == senderPhone
-          logger.debug('IgnoreYourSelfKey: %s === %s => %s', phone, senderPhone, filter)
+          logger.debug('IgnoreYourselfKey: %s === %s => %s', phone, senderPhone, filter)
           return filter
         }
       }
-      ignoresKey.push(IgnoreYourSelfKey)
+      ignoresKey.push(IgnoreYourselfKey)
     }
 
     const ignoreJid = (jid: string) => {

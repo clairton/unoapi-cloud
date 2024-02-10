@@ -1,6 +1,6 @@
 import { IncomingBaileys } from '../../src/services/incoming_baileys'
 import { Incoming } from '../../src/services/incoming'
-import { Outgoing } from '../../src/services/outgoing'
+import { Listener } from '../../src/services/listener'
 import { getClient, Client } from '../../src/services/client'
 import { Config, defaultConfig, getConfig, getConfigDefault } from '../../src/services/config'
 import { Info, Status } from '../../src/services/socket'
@@ -45,13 +45,13 @@ const getClientDummy: getClient = async ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   incoming,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  outgoing,
+  listener,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getConfig,
 }: {
   phone: string
   incoming: Incoming
-  outgoing: Outgoing
+  listener: Listener
   getConfig: getConfig
 }): Promise<Client> => {
   return dummyClient
@@ -64,7 +64,7 @@ const onNewLogin = async (phone: string) => {
 describe('service incoming baileys', () => {
   test('send', async () => {
     const phone = `${new Date().getTime()}`
-    const service: Outgoing = mock<Outgoing>()
+    const service: Listener = mock<Listener>()
     const baileys: Incoming = new IncomingBaileys(service, getConfigDefault, getClientDummy, onNewLogin)
     const payload: object = { humm: new Date().getTime() }
     const send = jest.spyOn(dummyClient, 'send')
