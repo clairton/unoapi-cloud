@@ -16,5 +16,6 @@ export class FailedSend extends Error {
 export interface Outgoing {
   formatAndSend(phone: string, to: string, message: object): Promise<void>
   send(phone: string, message: object): Promise<void>
-  sendHttp(phone: string, url: string, header: string, token: string, message: object): Promise<void>
+  sendHttp(phone: string, url: string, header: string, token: string, message: object, addPhoneNumberEndUrl? :boolean): Promise<void>
+
 }

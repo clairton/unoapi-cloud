@@ -18,17 +18,17 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async send(phone: string, message: object) {
     const config = await this.getConfig(phone)
-    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.url, w.header, w.token, message))
+    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.url, w.header, w.token ,message, w.addPhoneNumberEndUrl))
     await Promise.all(promises)
   }
 
-  public async sendHttp(phone: string, url: string, header: string, token: string, message: object) {
+  public async sendHttp(phone: string, url: string, header: string, token: string, message: object, addPhoneNumberEndUrl:boolean) {
     const body = JSON.stringify(message)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
       [header]: token,
     }
-    const uri = this.uri(url, phone)
+    const uri = !!addPhoneNumberEndUrl ? this.uri(url, phone) : url
     logger.debug(`Send url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
     let response: Response
     try {

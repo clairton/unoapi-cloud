@@ -13,6 +13,7 @@ export const getMessageMetadataDefault: GetMessageMetadata = async <T>(data: T) 
 
 export type Webhook = {
   url: string
+  addPhoneNumberEndUrl: boolean
   token: string
   header: string
 }
@@ -75,6 +76,7 @@ export const defaultConfig: Config = {
       url: '',
       token: '',
       header: '',
+      addPhoneNumberEndUrl: true
     },
   ],
   getMessageMetadata: getMessageMetadataDefault,
