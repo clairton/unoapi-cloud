@@ -10,6 +10,7 @@ import {
   UNOAPI_JOB_NOTIFICATION,
 } from './defaults'
 import logger from './services/logger'
+import { version } from '../package.json'
 
 const queueDelay = (queue: string) => `${queue}.delayed`
 const queueDead = (queue: string) => `${queue}.dead`
@@ -194,7 +195,7 @@ export const amqpConsume = async (
                 to: phone,
                 type: 'text',
                 text: {
-                  body: `Unoapi message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
+                  body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
                     error.message
                   }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
                 },
