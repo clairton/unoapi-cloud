@@ -6,7 +6,7 @@ OBS:
   - essa versão do chatwoot que esta sendo usada aqui tem algumas customizações que ainda não foram aceitas pelo time do chatwoot:
     - funciona as conversas em grupo
     - trata a mensagem enviadas por outras conexões, inclusive o aplicativo
-    - desabilita a janela de 24 horas do whatsapp cloud oficial(usar a WHATSAPP_MESSAGE_WINDOW_ENABLED=false)
+    - desabilita a janela de 24 horas do whatsapp cloud oficial
     - sincroniza as imagens de perfil dos grupos e usuarios
     - possibilidade de editar o endereço da caixa de entrada do whatsapp, assim pode usar a oficial e a unoapi na mesma instalação(não usar a env WHATSAPP_CLOUD_BASE_URL)
     - opção no superadmin de habilitar para colocar o nome do agente na mensagem

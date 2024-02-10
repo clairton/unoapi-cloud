@@ -27,7 +27,6 @@ x-base: &base
     NODE_ENV: production
     RAILS_ENV: production
     WHATSAPP_CLOUD_BASE_URL: https://unoapi.cloud
-    WHATSAPP_MESSAGE_WINDOW_ENABLED: false
     MAILER_INBOUND_EMAIL_DOMAIN: $DOMAIN
     RAILS_INBOUND_EMAIL_SERVICE: relay
     SMTP_ADDRESS: ${SMTP_ADDRESS}
