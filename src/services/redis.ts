@@ -100,7 +100,7 @@ const redisSet = async function (key: string, value: any) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const redisSetAndExpire = async function (key: string, value: any, ttl: number) {
-  logger.debug(`Setting ${key} => ${(value + '').substring(0, 10)}...`)
+  logger.debug(`Setting ttl: ${ttl} ${key} -> ${(value + '').substring(0, 10)}...`)
   if (ttl < 0) {
     return redisSet(key, value)
   }
