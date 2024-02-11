@@ -169,7 +169,7 @@ export const amqpConsume = async (
   if (!channel) {
     throw `Not create channel for queue ${queue}`
   }
-  logger.info('Waiting for messages in queue %s', queue)
+  logger.info('Waiting for message %s in queue %s', phone, queue)
   const fn = async (payload: ConsumeMessage | null) => {
     if (!payload) {
       throw `payload not be null `
@@ -180,7 +180,7 @@ export const amqpConsume = async (
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
     const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
-      logger.debug('Received queue %s message %s with headers %s', queue, content, JSON.stringify(payload.properties.headers))
+      logger.debug('Received queue %s phone %s message %s with headers %s', queue, phone, content, JSON.stringify(payload.properties.headers))
       await callback(phone, data, { countRetries, maxRetries })
       logger.debug('Ack message!')
       await channel.ack(payload)

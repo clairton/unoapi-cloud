@@ -418,7 +418,7 @@ export class ClientBaileys implements Client {
               logger.debug('Quoted message %s!', JSON.stringify(quoted))
             }
           }
-          logger.debug('Send to baileys', to, content)
+          logger.debug('Send baileys from %s to %s -> %s', this.phone, to, content)
           if (payload?.ttl) {
             disappearingMessagesInChat = payload.ttl
           }
