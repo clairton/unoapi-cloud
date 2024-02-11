@@ -224,7 +224,7 @@ REJECT_CALLS=message to send when receive a call, default is empty and not rejec
 REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send, is deprecated, use MESSAGE_CALLS_WEBHOOK
 MESSAGE_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
 SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
-UNOAPI_BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
+BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
 IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
 AUTO_CONNECT=true, auto connect on start service
 AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto restart
@@ -232,7 +232,7 @@ THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default is false,
 NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message failed and enqueued in dead queue
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
-UNOAPI_RETRY_REQUEST_DELAY=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
@@ -363,7 +363,7 @@ http://localhost:9876/v15.0/1/phone_numbers \
 
 ## Templates
 
-The templates will be customized, saving in `${UNOAPI_BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-template:${PHONE_NUMBER}`. The json format is:
+The templates will be customized, saving in `${BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-template:${PHONE_NUMBER}`. The json format is:
 
 ```json
 [
@@ -417,7 +417,7 @@ Install nodejs 21 as https://nodejs.org/en/download/package-manager and Git
 WEBHOOK_URL=http://chatwoot_addres/webhooks/whatsapp
 WEBHOOK_TOKEN=chatwoot token
 BASE_URL=https://unoapi_address
-UNOAPI_BASE_STORE=/opt/unoapi/data
+BASE_STORE=/opt/unoapi/data
 WEBHOOK_HEADER=api_access_token
 ```
 

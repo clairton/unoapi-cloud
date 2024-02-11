@@ -7,8 +7,8 @@ import {
   AUTO_RESTART_MS,
   AUTO_CONNECT,
   COMPOSING_MESSAGE,
-  UNOAPI_BASE_STORE,
-  UNOAPI_RETRY_REQUEST_DELAY,
+  BASE_STORE,
+  UNOAPI_RETRY_REQUEST_DELAY_MS,
   IGNORE_CALLS,
   REJECT_CALLS_WEBHOOK,
   MESSAGE_CALLS_WEBHOOK,
@@ -44,13 +44,13 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.autoConnect = AUTO_CONNECT
     config.autoRestartMs = AUTO_RESTART_MS
     config.composingMessage = COMPOSING_MESSAGE
-    config.baseStore = UNOAPI_BASE_STORE
+    config.baseStore = BASE_STORE
     config.rejectCalls = IGNORE_CALLS
     config.rejectCallsWebhook = REJECT_CALLS_WEBHOOK
     config.messageCallsWebhook = MESSAGE_CALLS_WEBHOOK
     config.throwWebhookError = THROW_WEBHOOK_ERROR
     config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
-    config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY
+    config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY_MS
     config.sessionWebhook = WEBHOOK_SESSION
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].token = WEBHOOK_TOKEN

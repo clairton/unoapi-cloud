@@ -19,7 +19,7 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 
 // behavior of unoapi
 export const CONNECTION_TIMEOUT = process.env.CONNECTION_TIMEOUT || 140_000
-export const UNOAPI_RETRY_REQUEST_DELAY = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || '1_000')
+export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '1_000')
 export const QR_TIMEOUT = process.env.QR_TIMEOUT || 30_000
 export const SLEEP_TIME = process.env.SLEEP_TIME || 500
 export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6
@@ -58,7 +58,7 @@ export const REJECT_CALLS = process.env.REJECT_CALLS || ''
 export const REJECT_CALLS_WEBHOOK = process.env.REJECT_CALLS_WEBHOOK || ''
 export const MESSAGE_CALLS_WEBHOOK = process.env.MESSAGE_CALLS_WEBHOOK || ''
 export const AUTO_RESTART_MS = parseInt(process.env.AUTO_RESTART_MS || '0')
-export const UNOAPI_BASE_STORE = process.env.UNOAPI_BASE_STORE ? process.env.UNOAPI_BASE_STORE : './data'
+export const BASE_STORE = process.env.UNOAPI_BASE_STORE || process.env.BASE_STORE || './data'
 export const AUTO_CONNECT: boolean = process.env.AUTO_CONNECT === _undefined ? true : process.env.AUTO_CONNECT == 'true'
 export const COMPOSING_MESSAGE: boolean = process.env.COMPOSING_MESSAGE === _undefined ? false : process.env.COMPOSING_MESSAGE == 'true'
 export const IGNORE_GROUP_MESSAGES: boolean = process.env.IGNORE_GROUP_MESSAGES == _undefined ? true : process.env.IGNORE_GROUP_MESSAGES == 'true'
