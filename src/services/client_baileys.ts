@@ -524,7 +524,7 @@ export class ClientBaileys implements Client {
                         id,
                         recipient_id: jidToPhoneNumber(to, ''),
                         status: 'failed',
-                        timestamp: Math.floor(Date.now() / 1000).toString(),
+                        timestamp: Math.floor(Date.now() / 1000),
                         errors: [
                           {
                             code,

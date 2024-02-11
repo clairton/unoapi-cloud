@@ -75,7 +75,7 @@ export class BulkSenderJob {
                       {
                         from: phone,
                         id: response.ok.messages[0].id,
-                        timestamp: new Date().getTime.toString(),
+                        timestamp: new Date().getTime,
                         [messageType]: m.payload[messageType],
                         type: m.payload.type,
                       },
