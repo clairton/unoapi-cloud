@@ -69,6 +69,8 @@ const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 
 export class BindJob {
   async consume(_: string, { phone }: { phone: string }) {
+    logger.info('Binding queues consumer for %s', phone)
+
     const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
 
