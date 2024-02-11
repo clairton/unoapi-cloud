@@ -8,9 +8,9 @@ export class BulkWebhookJob {
     this.outgoing = outgoing
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { phone, payload } = data as any
+    const { payload } = data as any
     const messageId = payload?.entry[0]?.changes[0]?.value?.messages[0]?.id
     const key = await getKey(phone, messageId)
     if (key) {

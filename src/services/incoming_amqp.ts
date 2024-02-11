@@ -16,14 +16,14 @@ export class IncomingAmqp implements Incoming {
     const { status, type, to } = payload as any
     if (status) {
       options['priority'] = 3 // update status is always middle important
-      await amqpEnqueue(this.queueName, phone, { phone, payload, options }, options)
+      await amqpEnqueue(this.queueName, phone, { payload, options }, options)
       return { ok: { success: true } }
     } else if (type) {
       const id = uuid()
       if (!options['priority']) {
         options['priority'] = 5 // send message without bulk is very important
       }
-      await amqpEnqueue(this.queueName, phone, { phone, payload, id, options }, options)
+      await amqpEnqueue(this.queueName, phone, { payload, id, options }, options)
       const ok = {
         messaging_product: 'whatsapp',
         contacts: [

@@ -68,7 +68,7 @@ const bulkReportJob = new BulkReportJob(outgoingCloudApi, getConfigRedis)
 const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 
 export class BindJob {
-  async consume({ phone }: { phone: string }) {
+  async consume(_: string, { phone }: { phone: string }) {
     const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
 

@@ -15,10 +15,10 @@ export class ListenerJob {
     this.queueListener = queueListener
   }
 
-  async consume(data: object, options?: { countRetries: number; maxRetries: number }) {
+  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
-    const { phone, messages, type } = a
+    const { messages, type } = a
     if (a.splited) {
       try {
         await this.listener.process(phone, messages, type)
@@ -32,14 +32,10 @@ export class ListenerJob {
     } else {
       if (type == 'delete' && messages.keys) {
         await Promise.all(
-          messages.keys.map(
-            async (m: object) => await amqpEnqueue(this.queueListener, phone, { phone, messages: { keys: [m] }, type, splited: true }),
-          ),
+          messages.keys.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { messages: { keys: [m] }, type, splited: true })),
         )
       } else {
-        await Promise.all(
-          messages.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { phone, messages: [m], type, splited: true })),
-        )
+        await Promise.all(messages.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { messages: [m], type, splited: true })))
       }
     }
   }

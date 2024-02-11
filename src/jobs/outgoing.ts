@@ -11,14 +11,13 @@ export class OutgoingJob {
     this.queueOutgoing = queueOutgoing
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
-    const phone: string = a.phone
     if (a.split) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = a.payload
-      await Promise.all(messages.map(async (m) => amqpEnqueue(this.queueOutgoing, phone, { phone, payload: m, split: false })))
+      await Promise.all(messages.map(async (m) => amqpEnqueue(this.queueOutgoing, phone, { payload: m, split: false })))
     } else {
       await this.service.send(phone, a.payload)
     }

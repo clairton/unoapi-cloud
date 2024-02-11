@@ -32,6 +32,10 @@ export type EnqueueOption = CreateOption & {
   countRetries: number
 }
 
+export interface ConsumeCallback {
+  (phone: string, data: object, options?: { countRetries: number; maxRetries: number }): Promise<void>
+}
+
 export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   if (!amqpConnection) {
     logger.info(`Connecting RabbitMQ at ${amqpUrl}...`)
@@ -158,7 +162,7 @@ export const amqpEnqueue = async (
 export const amqpConsume = async (
   queue: string,
   phone: string,
-  callback: (data: object, options?: { countRetries: number; maxRetries: number }) => Promise<void>,
+  callback: ConsumeCallback,
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0, notifyFailedMessages: NOTIFY_FAILED_MESSAGES },
 ) => {
   const channel = await amqpGetChannel(queue, phone, AMQP_URL, options)
@@ -177,7 +181,7 @@ export const amqpConsume = async (
     const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
       logger.debug('Received queue %s message %s with headers %s', queue, content, JSON.stringify(payload.properties.headers))
-      await callback(data, { countRetries, maxRetries })
+      await callback(phone, data, { countRetries, maxRetries })
       logger.debug('Ack message!')
       await channel.ack(payload)
     } catch (error) {
@@ -188,11 +192,11 @@ export const amqpConsume = async (
           logger.info('Sending error to whatsapp...')
           await amqpEnqueue(
             UNOAPI_JOB_NOTIFICATION,
-            data?.phone,
+            phone,
             {
-              phone: data?.phone,
+              phone,
               payload: {
-                to: data?.phone,
+                to: phone,
                 type: 'text',
                 text: {
                   body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${

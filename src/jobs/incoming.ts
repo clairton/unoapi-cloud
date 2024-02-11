@@ -19,10 +19,9 @@ export class IncomingJob {
     this.queueCommander = queueCommander
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
-    const phone: string = a.phone
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = a.payload
     const options: object = a.options
@@ -34,7 +33,7 @@ export class IncomingJob {
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
       logger.debug(`Enqueue in commmander...`)
-      await amqpEnqueue(this.queueCommander, phone, { phone, payload })
+      await amqpEnqueue(this.queueCommander, phone, { payload })
     }
     const { ok, error } = response
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {

@@ -14,6 +14,6 @@ export class ListenerAmqp implements Listener {
     messages: object[],
     type: 'qrcode' | 'status' | 'history' | 'append' | 'notify' | 'message' | 'update' | 'delete',
   ) {
-    await amqpEnqueue(this.queueListener, phone, { phone, messages, type })
+    await amqpEnqueue(this.queueListener, phone, { messages, type })
   }
 }

@@ -19,10 +19,7 @@ export class ReloadJob {
     this.onNewLogin = onNewLogin
   }
 
-  async consume(data: object) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = data as any
-    const phone: string = a.phone
+  async consume(_: string, { phone }: { phone: string }) {
     const currentClient = await this.getClient({
       phone,
       incoming: this.incoming,

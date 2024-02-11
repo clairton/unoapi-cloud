@@ -2,9 +2,9 @@ import { setMessageStatus } from '../services/redis'
 import logger from '../services/logger'
 
 export class BulkStatusJob {
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { phone, payload } = data as any
+    const { payload } = data as any
     const state = payload.entry[0].changes[0].value.statuses[0]
     logger.debug(`State: ${JSON.stringify(state)}`)
     const messageId = state.id

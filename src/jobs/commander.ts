@@ -30,9 +30,9 @@ export class CommanderJob {
     this.queueReload = queueReload
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { phone, payload } = data as any
+    const { payload } = data as any
     logger.debug(
       `Commander type: ${payload.type} caption: ${payload?.document?.caption} link: ${payload?.document?.link} template: ${payload?.template?.name}`,
     )
@@ -45,7 +45,6 @@ export class CommanderJob {
           phone,
           payload: {
             id,
-            phone,
             template: 'sisodonto',
             url: payload?.document?.link,
           },
@@ -85,7 +84,7 @@ export class CommanderJob {
           throw new YamlParseError(doc.errors)
         }
         const { bulk } = doc.toJS()
-        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { phone, id: bulk, unverified: true } })
+        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
         logger.debug('Parsing config template... %s', phone)
         const service = new Template(this.getConfig)

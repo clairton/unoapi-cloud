@@ -22,9 +22,9 @@ export class BulkSenderJob {
     this.outgoing = outgoing
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { phone, payload } = data as any
+    const { payload } = data as any
     const { id, messages, length } = payload
     try {
       const batch = Math.floor(Math.random() * UNOAPI_BULK_BATCH) + 1
@@ -107,7 +107,6 @@ export class BulkSenderJob {
           UNOAPI_JOB_BULK_SENDER,
           phone,
           {
-            phone,
             payload: { phone, messages: messagesToRenqueue, id, length },
           },
           { delay: delayToResend },
@@ -115,7 +114,7 @@ export class BulkSenderJob {
         statusMessage = `Bulk ${id} phone ${phone} reenqueuing ${messagesToRenqueue.length} message(s) with delay ${delayToResend}...`
       } else {
         statusMessage = `Bulk ${id} phone ${phone} is finished with ${messagesToSend.length} message(s)!`
-        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { id, length } }, { delay: UNOAPI_BULK_DELAY * 1000 })
+        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { payload: { id, length } }, { delay: UNOAPI_BULK_DELAY * 1000 })
       }
       const messageUpdate = {
         type: 'text',

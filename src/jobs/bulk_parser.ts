@@ -173,9 +173,9 @@ export class BulkParserJob {
     this.queueBulkSender = queueBulkSender
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { phone, payload } = data as any
+    const { payload } = data as any
     const { template: defaultTemplate, url, id } = payload
     try {
       logger.debug(`Bulk parser phone ${phone}`)
@@ -235,8 +235,7 @@ export class BulkParserJob {
       }
       this.outgoing.formatAndSend(phone, phone, message)
       await amqpEnqueue(this.queueBulkSender, phone, {
-        phone,
-        payload: { phone, messages, id, length: messages.length },
+        payload: { messages, id, length: messages.length },
       })
     } catch (error) {
       logger.error(error, 'Error on parse bulk')

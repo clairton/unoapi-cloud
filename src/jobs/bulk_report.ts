@@ -14,9 +14,9 @@ export class BulkReportJob {
     this.getConfig = getConfig
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { phone, payload } = data as any
+    const { payload } = data as any
     const { id, length } = payload
     const count = payload.count ? payload.count + 1 : 1
     const bulk = await getBulkReport(phone, id)
@@ -30,7 +30,7 @@ export class BulkReportJob {
           message = `Bulk ${id} phone ${phone} with ${length}, has retried generate ${count} and not retried more`
         } else {
           message = `Bulk ${id} phone ${phone} with ${length}, some messages is already scheduled status, try again later, this is ${count} try...`
-          await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { phone, payload: { id, length, count } }, { delay: UNOAPI_BULK_DELAY * 1000 })
+          await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { payload: { id, length, count } }, { delay: UNOAPI_BULK_DELAY * 1000 })
         }
       } else {
         const caption = `Bulk ${id} phone ${phone} with ${length} message(s) status -> ${JSON.stringify(status)}`

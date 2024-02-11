@@ -8,10 +8,9 @@ export class MediaJob {
     this.getConfig = getConfig
   }
 
-  async consume(data: object) {
+  async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
-    const phone: string = a.phone
     const fileName: string = a.fileName
     const config = await this.getConfig(phone)
     const { mediaStore } = await config.getStore(phone, config)
