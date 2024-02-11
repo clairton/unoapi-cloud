@@ -315,6 +315,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
     }
     let cloudApiStatus
     let messageTimestamp = payload.messageTimestamp
+    if(!messageTimestamp) {
+      messageTimestamp =  Math.floor(Date.now() / 1000)
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupMetadata: any = {}
     if (payload.groupMetadata) {
@@ -584,7 +587,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
         id: messageId,
         recipient_id: senderPhone.replace('+', ''),
         status: cloudApiStatus,
-        timestamp: messageTimestamp.toString() || Math.floor(Date.now() / 1000).toString(),
+        timestamp: messageTimestamp.toString(),
       }
       if (cloudApiStatus == 'failed') {
         // https://github.com/tawn33y/whatsapp-cloud-api/issues/40#issuecomment-1290036629
