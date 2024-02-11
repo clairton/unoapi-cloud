@@ -225,10 +225,10 @@ export const amqpConsume = async (
   const channelQueue = await channel.assertQueue(queue, {
     durable: true,
     // exclusive: true,
-    arguments: {
-      'x-dead-letter-exchange': queueDeadd,
-      // 'x-dead-letter-routing-key': phone,
-    },
+    // arguments: {
+    //   'x-dead-letter-exchange': queueDeadd,
+    //   // 'x-dead-letter-routing-key': phone,
+    // },
   })
   await channel.bindQueue(channelQueue.queue, queue, phone)
 
