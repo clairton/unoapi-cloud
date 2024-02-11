@@ -188,11 +188,11 @@ export const amqpConsume = async (
           logger.info('Sending error to whatsapp...')
           await amqpEnqueue(
             UNOAPI_JOB_NOTIFICATION,
-            phone,
+            data?.phone,
             {
-              phone,
+              phone: data?.phone,
               payload: {
-                to: phone,
+                to: data?.phone,
                 type: 'text',
                 text: {
                   body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
