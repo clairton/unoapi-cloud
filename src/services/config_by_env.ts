@@ -31,7 +31,7 @@ import {
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
   if (!configs.has(phone)) {
-    const config: Config = defaultConfig
+    const config: Config = { ...defaultConfig }
     config.logLevel = LOG_LEVEL as Level
     config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES
     config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES
