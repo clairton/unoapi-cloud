@@ -176,7 +176,7 @@ export class ClientBaileys implements Client {
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
     logger.debug('Received qrcode %s %s', this.phone, qrCode)
-    const messageTimestamp = new Date().getTime()
+    const messageTimestamp = new Date().getTime() / 1000
     const id = uuid()
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
     const remoteJid = phoneNumberToJid(this.phone)
