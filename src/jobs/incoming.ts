@@ -87,7 +87,7 @@ export class IncomingJob {
                       id: idUno,
                       recipient_id: payload?.to,
                       status: 'sent',
-                      timestamp: new Date().getTime(),
+                      timestamp: new Date().getTime() / 1000,
                     },
                   ],
                 },
