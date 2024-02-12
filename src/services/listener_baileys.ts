@@ -102,7 +102,7 @@ export class ListenerBaileys implements Listener {
 
     let data
     try {
-      data = fromBaileysMessageContent(phone, i)
+      data = fromBaileysMessageContent(phone, i, config)
     } catch (error) {
       if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)

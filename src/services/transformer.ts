@@ -3,6 +3,7 @@ import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
 import logger from './logger'
+import { Config } from './config'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
 
@@ -296,7 +297,7 @@ export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string =
  }
 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const fromBaileysMessageContent = (phone: string, payload: any): any => {
+export const fromBaileysMessageContent = (phone: string, payload: any, config?: Partial<Config>): any => {
   try {
     const {
       key: { remoteJid, id: whatsappMessageId, participant, fromMe },
@@ -446,11 +447,23 @@ export const fromBaileysMessageContent = (phone: string, payload: any): any => {
 
       case 'reactionMessage':
         // {"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3ABBD003E80C199C7BF6"},"messageTimestamp":1676631873,"pushName":"Clairton Rodrigo Heinzen","message":{"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"31S8mj42p3wLiQ==","senderTimestamp":"1676571145","recipientKeyHash":"tz8qTGvqyPjOUw==","recipientTimestamp":"1675040504"},"deviceListMetadataVersion":2},"reactionMessage":{"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3A51A48E269AFFF123FB"},"text":"👍","senderTimestampMs":"1676631872443"}}
-        message.reaction = {
-          message_id: whatsappMessageId,
-          emoji: binMessage.text,
+        const reactionId = binMessage.key.id
+        if (config?.sendReactionAsReply) {
+          message.text = {
+            body: binMessage.text,
+          }
+          message.type = 'text'
+          message.context = {
+            message_id: reactionId,
+            id: reactionId,
+          }
+        } else {
+          message.reaction = {
+            message_id: reactionId,
+            emoji: binMessage.text,
+          }
+          message.type = 'reaction'
         }
-        message.type = 'reaction'
         break
 
       case 'locationMessage':

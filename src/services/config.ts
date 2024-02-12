@@ -43,6 +43,7 @@ export type Config = {
   logLevel: Level | undefined
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
+  sendReactionAsReply: boolean
 }
 
 export const defaultConfig: Config = {
@@ -79,6 +80,7 @@ export const defaultConfig: Config = {
   ],
   getMessageMetadata: getMessageMetadataDefault,
   ignoreDataStore: false,
+  sendReactionAsReply: false,
 }
 
 export interface getConfig {

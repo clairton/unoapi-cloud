@@ -27,6 +27,7 @@ import {
   IGNORE_DATA_STORE,
   THROW_WEBHOOK_ERROR,
   NOTIFY_FAILED_MESSAGES,
+  SEND_REACTION_AS_REPLY,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -51,6 +52,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.throwWebhookError = THROW_WEBHOOK_ERROR
     config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
     config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY_MS
+    config.sendReactionAsReply = SEND_REACTION_AS_REPLY
     config.sessionWebhook = WEBHOOK_SESSION
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].token = WEBHOOK_TOKEN
