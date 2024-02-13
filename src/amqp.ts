@@ -175,6 +175,7 @@ export const amqpConsume = async (
       throw `payload not be null `
     }
     const content: string = payload.content.toString()
+    const phone = payload.fields.routingKey
     const data = JSON.parse(content)
     const headers = payload.properties.headers || {}
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
@@ -194,7 +195,6 @@ export const amqpConsume = async (
             UNOAPI_JOB_NOTIFICATION,
             phone,
             {
-              phone,
               payload: {
                 to: phone,
                 type: 'text',
