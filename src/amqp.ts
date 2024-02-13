@@ -36,75 +36,6 @@ export interface ConsumeCallback {
   (phone: string, data: object, options?: { countRetries: number; maxRetries: number }): Promise<void>
 }
 
-class ConsumerControl {
-  private channel
-  private queue
-  private phone
-  private callback
-  private options
-
-  constructor(channel: Channel, queue: string, phone: string, callback: ConsumeCallback, options: Partial<CreateOption>) {
-    this.channel = channel
-    this.queue = queue
-    this.phone = phone
-    this.callback = callback
-    this.options = options
-  }
-
-  public async perform(payload: ConsumeMessage | null) {
-    if (!payload) {
-      throw `payload not be null `
-    }
-    const content: string = payload.content.toString()
-    const data = JSON.parse(content)
-    const headers = payload.properties.headers || {}
-    const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
-    const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
-    try {
-      logger.debug(
-        'Received queue %s phone %s message %s with headers %s',
-        this.queue,
-        this.phone,
-        content,
-        JSON.stringify(payload.properties.headers),
-      )
-      await this.callback(this.phone, data, { countRetries, maxRetries })
-      logger.debug('Ack message!')
-      await this.channel.ack(payload)
-    } catch (error) {
-      logger.error(error)
-      if (countRetries >= maxRetries) {
-        logger.info('Reject %s retries', countRetries)
-        if (this.options.notifyFailedMessages) {
-          logger.info('Sending error to whatsapp...')
-          await amqpEnqueue(
-            UNOAPI_JOB_NOTIFICATION,
-            this.phone,
-            {
-              payload: {
-                to: this.phone,
-                type: 'text',
-                text: {
-                  body: `Unoapi version ${version} message failed in queue ${this.queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
-                    error.message
-                  }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
-                },
-              },
-            },
-            { maxRetries: 0 },
-          )
-          logger.info('Sent error to whatsapp!')
-        }
-        await amqpEnqueue(this.queue, this.phone, data, { dead: true })
-      } else {
-        logger.info('Enqueue retry %s of %s', countRetries, maxRetries)
-        await amqpEnqueue(this.queue, this.phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY, maxRetries, countRetries })
-      }
-      await this.channel.ack(payload)
-    }
-  }
-}
-
 export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   if (!amqpConnection) {
     logger.info(`Connecting RabbitMQ at ${amqpUrl}...`)
@@ -225,7 +156,7 @@ export const amqpEnqueue = async (
     queueName = queue
   }
   await channel.publish(queueName, phone, Buffer.from(JSON.stringify(payload)), properties)
-  logger.info('Enqueued at %s with phone: %s, payload: %s, properties: %s', queueName, phone, JSON.stringify(payload), JSON.stringify(properties))
+  logger.info('Enqueued at %s with phone: %, payload: %s, properties: %s', queueName, phone, JSON.stringify(payload), JSON.stringify(properties))
 }
 
 export const amqpConsume = async (
@@ -239,8 +170,53 @@ export const amqpConsume = async (
     throw `Not create channel for queue ${queue}`
   }
   logger.info('Waiting for message %s in queue %s', phone, queue)
-
-  const fn = new ConsumerControl(channel, queue, phone, callback, options)
+  const fn = async (payload: ConsumeMessage | null) => {
+    if (!payload) {
+      throw `payload not be null `
+    }
+    const content: string = payload.content.toString()
+    const data = JSON.parse(content)
+    const headers = payload.properties.headers || {}
+    const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
+    const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
+    try {
+      logger.debug('Received queue %s phone %s message %s with headers %s', queue, phone, content, JSON.stringify(payload.properties.headers))
+      await callback(phone, data, { countRetries, maxRetries })
+      logger.debug('Ack message!')
+      await channel.ack(payload)
+    } catch (error) {
+      logger.error(error)
+      if (countRetries >= maxRetries) {
+        logger.info('Reject %s retries', countRetries)
+        if (options.notifyFailedMessages) {
+          logger.info('Sending error to whatsapp...')
+          await amqpEnqueue(
+            UNOAPI_JOB_NOTIFICATION,
+            phone,
+            {
+              phone,
+              payload: {
+                to: phone,
+                type: 'text',
+                text: {
+                  body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
+                    error.message
+                  }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
+                },
+              },
+            },
+            { maxRetries: 0 },
+          )
+          logger.info('Sent error to whatsapp!')
+        }
+        await amqpEnqueue(queue, phone, data, { dead: true })
+      } else {
+        logger.info('Enqueue retry %s of %s', countRetries, maxRetries)
+        await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY, maxRetries, countRetries })
+      }
+      await channel.ack(payload)
+    }
+  }
 
   const queueDeadd = queueDead(queue)
   const channelQueueDead = await channel.assertQueue(queueDeadd, { durable: true })
@@ -266,5 +242,5 @@ export const amqpConsume = async (
   })
   await channel.bindQueue(channelQueueDelayed.queue, queueDelayed, phone)
 
-  return channel.consume(channelQueue.queue, fn.perform.bind(fn))
+  channel.consume(channelQueue.queue, fn)
 }
