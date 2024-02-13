@@ -15,6 +15,7 @@ import {
   WEBHOOK_SESSION,
   WEBHOOK_HEADER,
   WEBHOOK_URL,
+  WEBHOOK_URL_ABSOLUTE,
   WEBHOOK_TOKEN,
   LOG_LEVEL,
   IGNORE_GROUP_MESSAGES,
@@ -55,6 +56,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.sendReactionAsReply = SEND_REACTION_AS_REPLY
     config.sessionWebhook = WEBHOOK_SESSION
     config.webhooks[0].url = WEBHOOK_URL
+    config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
     config.webhooks[0].token = WEBHOOK_TOKEN
     config.webhooks[0].header = WEBHOOK_HEADER
     const filter: MessageFilter = new MessageFilter(phone, config)

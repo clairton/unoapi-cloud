@@ -18,32 +18,27 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async send(phone: string, message: object) {
     const config = await this.getConfig(phone)
-    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.url, w.header, w.token, message))
+    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.urlAbsolute || `${w.url}/${phone}`, w.header, w.token, message))
     await Promise.all(promises)
   }
 
-  public async sendHttp(phone: string, url: string, header: string, token: string, message: object) {
+  public async sendHttp(_phone: string, url: string, header: string, token: string, message: object) {
     const body = JSON.stringify(message)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
       [header]: token,
     }
-    const uri = this.uri(url, phone)
-    logger.debug(`Send url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
+    logger.debug(`Send url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
     let response: Response
     try {
-      response = await fetch(uri, { method: 'POST', body, headers })
+      response = await fetch(url, { method: 'POST', body, headers })
     } catch (error) {
-      logger.error(error, `Error on send to url ${uri} with headers %s and body %s`, JSON.stringify(headers), body)
+      logger.error(error, `Error on send to url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
     }
     logger.debug('Response: %s', response?.status)
     if (!response?.ok) {
       throw await response?.text()
     }
-  }
-
-  private uri(url: string, phone: string) {
-    return `${url}/${phone}`
   }
 }

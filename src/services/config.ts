@@ -13,6 +13,7 @@ export const getMessageMetadataDefault: GetMessageMetadata = async <T>(data: T) 
 
 export type Webhook = {
   url: string
+  urlAbsolute: string
   token: string
   header: string
 }
@@ -74,6 +75,7 @@ export const defaultConfig: Config = {
   webhooks: [
     {
       url: '',
+      urlAbsolute: '',
       token: '',
       header: '',
     },

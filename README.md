@@ -206,7 +206,8 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 Create a `.env`file and put configuration if you need change default value:
 
 ```env
-WEBHOOK_URL=the webhook url
+WEBHOOK_URL_ABSOLUTE=the webhook absolute url, not use this if already use WEBHOOK_URL
+WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, no use if use WEBHOOK_URL_ABSOLUTE
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode

@@ -11,6 +11,7 @@ export const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || LOG_LEVEL
 // comunication
 export const UNOAPI_URL = process.env.UNOAPI_URL || 'http://localhost:6789'
 export const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:6789/webhooks/whatsapp'
+export const WEBHOOK_URL_ABSOLUTE = process.env.WEBHOOK_URL_ABSOLUTE || ''
 export const WEBHOOK_HEADER = process.env.WEBHOOK_HEADER || 'Authorization'
 export const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN || '123abc'
 export const WEBHOOK_SESSION = process.env.WEBHOOK_SESSION || ''
