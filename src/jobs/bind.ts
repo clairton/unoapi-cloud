@@ -52,7 +52,7 @@ const getConfig: getConfig = getConfigRedis
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig)
 const onNewLogin = new OnNewLogin(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin.run.bind(onNewLogin))
-const incomingJob = new IncomingJob(incomingBaileys, outgoingCloudApi, getConfig, UNOAPI_JOB_COMMANDER)
+const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)
 const notificationJob = new NotificationJob(incomingBaileys)
 
 const outgingJob = new OutgoingJob(outgoingCloudApi)

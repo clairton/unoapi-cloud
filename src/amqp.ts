@@ -213,7 +213,7 @@ export const amqpConsume = async (
         await amqpEnqueue(queue, phone, data, { dead: true })
       } else {
         logger.info('Enqueue retry %s of %s', countRetries, maxRetries)
-        await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY, maxRetries, countRetries })
+        await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
     }

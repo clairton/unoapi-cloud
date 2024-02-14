@@ -17,6 +17,7 @@ export type Webhook = {
   token: string
   header: string
   timeoutMs: number
+  sendNewMessages: boolean
 }
 
 export type Config = {
@@ -80,6 +81,7 @@ export const defaultConfig: Config = {
       token: '',
       header: '',
       timeoutMs: 5_000,
+      sendNewMessages: false,
     },
   ],
   getMessageMetadata: getMessageMetadataDefault,
