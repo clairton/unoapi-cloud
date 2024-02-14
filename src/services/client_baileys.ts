@@ -88,9 +88,7 @@ const rejectCallDefault: rejectCall = async (_keys) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const fetchImageUrlDefault: fetchImageUrl = async (_jid: string) => {
-  throw sendError
-}
+const fetchImageUrlDefault: fetchImageUrl = async (_jid: string) => ''
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fetchGroupMetadataDefault: fetchGroupMetadata = async (_jid: string) => {
@@ -271,7 +269,7 @@ export class ClientBaileys implements Client {
     this.sendMessage = send
     this.readMessages = read
     this.rejectCall = rejectCall
-    this.fetchImageUrl = fetchImageUrl
+    this.fetchImageUrl = this.config.sendProfilePicture ? fetchImageUrl : fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadata
     this.close = close
     this.exists = exists

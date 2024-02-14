@@ -235,6 +235,7 @@ NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message f
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
+SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
 UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 

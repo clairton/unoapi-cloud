@@ -30,6 +30,7 @@ import {
   NOTIFY_FAILED_MESSAGES,
   SEND_REACTION_AS_REPLY,
   WEBHOOK_TIMEOUT_MS,
+  SEND_PROFILE_PICTURE,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -55,6 +56,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
     config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY_MS
     config.sendReactionAsReply = SEND_REACTION_AS_REPLY
+    config.sendProfilePicture = SEND_PROFILE_PICTURE
     config.sessionWebhook = WEBHOOK_SESSION
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE

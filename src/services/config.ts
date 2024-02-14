@@ -47,6 +47,7 @@ export type Config = {
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
   sendReactionAsReply: boolean
+  sendProfilePicture: boolean
 }
 
 export const defaultConfig: Config = {
@@ -87,6 +88,7 @@ export const defaultConfig: Config = {
   getMessageMetadata: getMessageMetadataDefault,
   ignoreDataStore: false,
   sendReactionAsReply: false,
+  sendProfilePicture: false,
 }
 
 export interface getConfig {
