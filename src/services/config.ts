@@ -16,6 +16,7 @@ export type Webhook = {
   urlAbsolute: string
   token: string
   header: string
+  timeoutMs: number
 }
 
 export type Config = {
@@ -78,6 +79,7 @@ export const defaultConfig: Config = {
       urlAbsolute: '',
       token: '',
       header: '',
+      timeoutMs: 5_000,
     },
   ],
   getMessageMetadata: getMessageMetadataDefault,

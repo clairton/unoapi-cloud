@@ -39,7 +39,7 @@ export class IncomingAmqp implements Incoming {
       }
       return { ok }
     } else {
-      throw `Unknown ${JSON.stringify(payload)}`
+      throw `Unknown incoming message ${JSON.stringify(payload)}`
     }
   }
 }

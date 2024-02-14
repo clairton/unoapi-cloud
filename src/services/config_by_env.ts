@@ -29,6 +29,7 @@ import {
   THROW_WEBHOOK_ERROR,
   NOTIFY_FAILED_MESSAGES,
   SEND_REACTION_AS_REPLY,
+  WEBHOOK_TIMEOUT_MS,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -59,6 +60,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
     config.webhooks[0].token = WEBHOOK_TOKEN
     config.webhooks[0].header = WEBHOOK_HEADER
+    config.webhooks[0].timeoutMs = WEBHOOK_TIMEOUT_MS
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)

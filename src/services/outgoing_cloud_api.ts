@@ -1,6 +1,6 @@
 import { Outgoing } from './outgoing'
-import fetch, { Response } from 'node-fetch'
-import { getConfig } from './config'
+import fetch, { Response, RequestInit } from 'node-fetch'
+import { Webhook, getConfig } from './config'
 import logger from './logger'
 import { completeCloudApiWebHook } from './transformer'
 
@@ -18,20 +18,25 @@ export class OutgoingCloudApi implements Outgoing {
 
   public async send(phone: string, message: object) {
     const config = await this.getConfig(phone)
-    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w.urlAbsolute || `${w.url}/${phone}`, w.header, w.token, message))
+    const promises = config.webhooks.map(async (w) => this.sendHttp(phone, w, message))
     await Promise.all(promises)
   }
 
-  public async sendHttp(_phone: string, url: string, header: string, token: string, message: object) {
+  public async sendHttp(phone: string, webhook: Webhook, message: object) {
     const body = JSON.stringify(message)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
-      [header]: token,
+      [webhook.header]: webhook.token,
     }
+    const url = webhook.urlAbsolute || `${webhook.url}/${phone}`
     logger.debug(`Send url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
     let response: Response
     try {
-      response = await fetch(url, { method: 'POST', body, headers })
+      const options: RequestInit = { method: 'POST', body, headers }
+      if (webhook.timeoutMs) {
+        options.signal = AbortSignal.timeout(webhook.timeoutMs)
+      }
+      response = await fetch(url, options)
     } catch (error) {
       logger.error(error, `Error on send to url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
