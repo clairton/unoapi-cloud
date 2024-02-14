@@ -80,6 +80,11 @@ export class IncomingJob {
                   contacts: [
                     {
                       wa_id: jidToPhoneNumber(payload?.to, ''),
+                      profile: {
+                        name: '',
+                        picture: '',
+                      },
+
                     },
                   ],
                   statuses: [
@@ -87,7 +92,7 @@ export class IncomingJob {
                       id: idUno,
                       recipient_id: payload?.to,
                       status: 'sent',
-                      timestamp: new Date().getTime() / 1000,
+                      timestamp: Math.floor(new Date().getTime() / 1000).toString(),
                     },
                   ],
                 },

@@ -94,7 +94,7 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
 
 export const completeCloudApiWebHook = (phone, to: string, message: object) => {
   if (!message['timestamp']) {
-    message['timestamp'] = new Date().getTime() / 1000
+    message['timestamp'] = (new Date().getTime() / 1000).toString()
   }
   return {
     object: 'whatsapp_business_account',
@@ -316,6 +316,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     }
     let cloudApiStatus
     let messageTimestamp = payload.messageTimestamp
+    if(!messageTimestamp) {
+      messageTimestamp =  Math.floor(Date.now() / 1000)
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupMetadata: any = {}
     if (payload.groupMetadata) {
@@ -365,7 +368,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     const message: any = {
       from: (fromMe ? phone : senderPhone).replace('+', ''),
       id: whatsappMessageId,
-      timestamp: messageTimestamp,
+      timestamp: messageTimestamp.toString(),
     }
     switch (messageType) {
       case 'imageMessage':
@@ -597,7 +600,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         id: messageId,
         recipient_id: senderPhone.replace('+', ''),
         status: cloudApiStatus,
-        timestamp: messageTimestamp || Math.floor(Date.now() / 1000),
+        timestamp: messageTimestamp.toString(),
       }
       if (cloudApiStatus == 'failed') {
         // https://github.com/tawn33y/whatsapp-cloud-api/issues/40#issuecomment-1290036629
