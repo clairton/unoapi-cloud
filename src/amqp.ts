@@ -24,6 +24,7 @@ export type CreateOption = {
   delay: number
   priority: number
   notifyFailedMessages: boolean
+  prefetch: number
 }
 
 export type EnqueueOption = CreateOption & {
@@ -94,7 +95,7 @@ export const amqpCreateChannel = async (
 ) => {
   logger.info('Creating channel %s...', queue)
   const channel: Channel = await connection.createChannel()
-  channel.prefetch(1)
+  channel.prefetch(options.prefetch || 1)
   const queueDeadd = queueDead(queue)
   logger.info('Creating queue %s...', queueDeadd)
   await channel.assertExchange(queueDeadd, 'direct', {
