@@ -14,6 +14,7 @@ export const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:6789/web
 export const WEBHOOK_URL_ABSOLUTE = process.env.WEBHOOK_URL_ABSOLUTE || ''
 export const WEBHOOK_HEADER = process.env.WEBHOOK_HEADER || 'Authorization'
 export const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN || '123abc'
+export const WEBHOOK_TIMEOUT_MS = parseInt(process.env.WEBHOOK_TIMEOUT_MS || '5000')
 export const WEBHOOK_SESSION = process.env.WEBHOOK_SESSION || ''
 export const AMQP_URL = process.env.AMQP_URL || 'amqp://guest:guest@localhost:5672'
 export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
@@ -31,6 +32,7 @@ export const UNOAPI_X_COUNT_RETRIES = process.env.UNOAPI_X_COUNT_RETRIES || 'x-u
 export const UNOAPI_X_MAX_RETRIES = process.env.UNOAPI_X_MAX_RETRIES || 'x-unoapi-max-retries'
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
 export const UNOAPI_JOB_WEBHOOKER = `${UNOAPI_QUEUE_NAME}.webhooker`
+export const UNOAPI_JOB_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_JOB_OUTGOING_PREFETCH || '5')
 export const UNOAPI_JOB_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
 export const UNOAPI_JOB_NOTIFICATION = `${UNOAPI_QUEUE_NAME}.notification`
 export const UNOAPI_JOB_LISTENER = `${UNOAPI_QUEUE_NAME}.baileys.listener`
@@ -85,6 +87,7 @@ export const STORAGE_REGION = process.env.STORAGE_REGION || 'us-east-1'
 export const STORAGE_ENDPOINT = process.env.STORAGE_ENDPOINT || 'http://localhost:9000'
 export const STORAGE_FORCE_PATH_STYLE: boolean =
   process.env.STORAGE_FORCE_PATH_STYLE === _undefined ? false : process.env.STORAGE_FORCE_PATH_STYLE == 'true'
+export const SEND_PROFILE_PICTURE: boolean = process.env.SEND_PROFILE_PICTURE === _undefined ? true : process.env.SEND_PROFILE_PICTURE == 'true'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {

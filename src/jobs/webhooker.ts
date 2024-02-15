@@ -21,9 +21,7 @@ export class WebhookerJob {
         }),
       )
     } else if (a.webhook) {
-      const webhook: Webhook = a.webhook
-      const url = webhook.urlAbsolute || `${webhook.url}/${phone}`
-      await this.service.sendHttp(phone, url, webhook.header, webhook.token, payload)
+      await this.service.sendHttp(phone, a.webhook, payload)
     } else {
       await this.service.send(phone, payload)
     }

@@ -24,6 +24,7 @@ export type CreateOption = {
   delay: number
   priority: number
   notifyFailedMessages: boolean
+  prefetch: number
 }
 
 export type EnqueueOption = CreateOption & {
@@ -94,7 +95,7 @@ export const amqpCreateChannel = async (
 ) => {
   logger.info('Creating channel %s...', queue)
   const channel: Channel = await connection.createChannel()
-  channel.prefetch(1)
+  channel.prefetch(options.prefetch || 1)
   const queueDeadd = queueDead(queue)
   logger.info('Creating queue %s...', queueDeadd)
   await channel.assertExchange(queueDeadd, 'direct', {
@@ -181,7 +182,7 @@ export const amqpConsume = async (
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
     const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
-      logger.debug('Received queue %s phone %s message %s with headers %s', queue, phone, content, JSON.stringify(payload.properties.headers))
+      logger.debug('Received in %s with phone: %s, message: %s with headers: %s', queue, phone, content, JSON.stringify(payload.properties.headers))
       await callback(phone, data, { countRetries, maxRetries })
       logger.debug('Ack message!')
       await channel.ack(payload)
@@ -212,7 +213,7 @@ export const amqpConsume = async (
         await amqpEnqueue(queue, phone, data, { dead: true })
       } else {
         logger.info('Enqueue retry %s of %s', countRetries, maxRetries)
-        await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY, maxRetries, countRetries })
+        await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
     }

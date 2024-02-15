@@ -26,6 +26,7 @@ import {
   UNOAPI_JOB_BULK_WEBHOOK,
   UNOAPI_JOB_LISTENER,
   UNOAPI_JOB_NOTIFICATION,
+  UNOAPI_JOB_OUTGOING_PREFETCH,
 } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { IncomingAmqp } from '../services/incoming_amqp'
@@ -51,7 +52,7 @@ const getConfig: getConfig = getConfigRedis
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig)
 const onNewLogin = new OnNewLogin(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin.run.bind(onNewLogin))
-const incomingJob = new IncomingJob(incomingBaileys, outgoingCloudApi, getConfig, UNOAPI_JOB_COMMANDER)
+const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)
 const notificationJob = new NotificationJob(incomingBaileys)
 
 const outgingJob = new OutgoingJob(outgoingCloudApi)
@@ -69,22 +70,27 @@ const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 
 export class BindJob {
   async consume(_: string, { phone }: { phone: string }) {
+    const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
     logger.info('Binding queues consumer for %s', phone)
 
     const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
 
     logger.debug('Starting outgoing consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_OUTGOING, phone, outgingJob.consume.bind(outgingJob), { notifyFailedMessages })
-
-    logger.debug('Starting incoming consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_INCOMING, phone, incomingJob.consume.bind(incomingJob), { priority: 5, notifyFailedMessages })
+    await amqpConsume(UNOAPI_JOB_OUTGOING, phone, outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
 
     logger.debug('Starting listener consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_LISTENER, phone, listenerJob.consume.bind(listenerJob), { notifyFailedMessages })
+    await amqpConsume(UNOAPI_JOB_LISTENER, phone, listenerJob.consume.bind(listenerJob), { notifyFailedMessages, prefetch })
 
     logger.debug('Starting webhooker consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_WEBHOOKER, phone, webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages })
+    await amqpConsume(UNOAPI_JOB_WEBHOOKER, phone, webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
+
+    logger.debug('Starting incoming consumer %s', phone)
+    await amqpConsume(UNOAPI_JOB_INCOMING, phone, incomingJob.consume.bind(incomingJob), {
+      priority: 5,
+      notifyFailedMessages,
+      prefetch: 1 /* allways 1 */,
+    })
 
     if (config.notifyFailedMessages) {
       logger.debug('Starting notification consumer %s', phone)

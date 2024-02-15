@@ -26,9 +26,11 @@ export class IncomingJob {
     const payload: any = a.payload
     const options: object = a.options
     const idUno: string = a.id
+    const waId = jidToPhoneNumber(payload.to, '')
+    const timestamp = Math.floor(new Date().getTime() / 1000).toString()
     const retries: number = a.retries ? a.retries + 1 : 1
     const response = await this.incoming.send(phone, payload, options)
-    logger.debug('Baileys response %s', phone, JSON.stringify(response))
+    logger.debug('Baileys response %s -> %s', phone, JSON.stringify(response))
     const channelNumber = phone.replace('+', '')
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
@@ -47,6 +49,41 @@ export class IncomingJob {
         dataStore.setKey(idBaileys, key)
         dataStore.setKey(idUno, key)
       }
+      const webhookMessage = {
+        object: 'whatsapp_business_account',
+        entry: [
+          {
+            id: phone,
+            changes: [
+              {
+                value: {
+                  messaging_product: 'whatsapp',
+                  metadata: {
+                    display_phone_number: phone,
+                    phone_number_id: phone,
+                  },
+                  contacts: [
+                    {
+                      wa_id: waId,
+                    },
+                  ],
+                  messages: [
+                    {
+                      from: phone,
+                      id: idUno,
+                      timestamp,
+                      [payload.type]: payload[payload.type],
+                      type: payload.type,
+                    },
+                  ],
+                },
+                field: 'messages',
+              },
+            ],
+          },
+        ],
+      }
+      await Promise.all(config.webhooks.filter((w) => w.sendNewMessages).map((w) => this.outgoing.sendHttp(phone, w, webhookMessage)))
     } else if (!ok.success) {
       throw `Unknow response ${JSON.stringify(response)}`
     } else if (ok.success) {
@@ -79,12 +116,11 @@ export class IncomingJob {
                   },
                   contacts: [
                     {
-                      wa_id: jidToPhoneNumber(payload?.to, ''),
+                      wa_id: waId,
                       profile: {
                         name: '',
                         picture: '',
                       },
-
                     },
                   ],
                   statuses: [
@@ -92,7 +128,7 @@ export class IncomingJob {
                       id: idUno,
                       recipient_id: payload?.to,
                       status: 'sent',
-                      timestamp: Math.floor(new Date().getTime() / 1000).toString(),
+                      timestamp,
                     },
                   ],
                 },
@@ -103,7 +139,8 @@ export class IncomingJob {
         ],
       }
     }
-    amqpEnqueue(UNOAPI_JOB_BULK_STATUS, phone, { phone, payload: outgingPayload, type: 'whatsapp' })
+    await amqpEnqueue(UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
     await this.outgoing.send(phone, outgingPayload)
+    return response
   }
 }

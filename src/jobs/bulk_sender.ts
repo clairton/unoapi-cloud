@@ -1,13 +1,5 @@
-import { jidToPhoneNumber } from '../services/transformer'
 import { amqpEnqueue } from '../amqp'
-import {
-  UNOAPI_BULK_BATCH,
-  UNOAPI_BULK_DELAY,
-  UNOAPI_JOB_BULK_SENDER,
-  UNOAPI_JOB_BULK_REPORT,
-  UNOAPI_BULK_MESSAGE_DELAY,
-  UNOAPI_JOB_BULK_WEBHOOK,
-} from '../defaults'
+import { UNOAPI_BULK_BATCH, UNOAPI_BULK_DELAY, UNOAPI_JOB_BULK_SENDER, UNOAPI_JOB_BULK_REPORT, UNOAPI_BULK_MESSAGE_DELAY } from '../defaults'
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import { setMessageStatus, setbulkMessage } from '../services/redis'
@@ -46,55 +38,9 @@ export class BulkSenderJob {
       const promises = messagesToSend.map(async (m: any) => {
         delay = Math.floor(Math.random() * count++) * (UNOAPI_BULK_MESSAGE_DELAY * 1000)
         totalDelay = totalDelay + delay
-        const options = { delay, composing: true, priority: 1 } // low priority, send where not has agent message is queue
+        const options = { delay, composing: true, priority: 1, sendMessageToWebhooks: true } // low priority, send where not has agent message is queue
         const response = await this.incoming.send(phone, m.payload, options)
         const messageId = response.ok.messages[0].id
-        const messageType = m.payload.type
-        const webhookMessage = {
-          object: 'whatsapp_business_account',
-          entry: [
-            {
-              id: phone,
-              changes: [
-                {
-                  value: {
-                    messaging_product: 'whatsapp',
-                    metadata: {
-                      display_phone_number: phone,
-                      phone_number_id: phone,
-                    },
-                    contacts: [
-                      {
-                        profile: {
-                          name: m.payload.to,
-                        },
-                        wa_id: jidToPhoneNumber(m.payload.to, ''),
-                      },
-                    ],
-                    messages: [
-                      {
-                        from: phone,
-                        id: response.ok.messages[0].id,
-                        timestamp: new Date().getTime() / 1000,
-                        [messageType]: m.payload[messageType],
-                        type: m.payload.type,
-                      },
-                    ],
-                  },
-                  field: 'messages',
-                },
-              ],
-            },
-          ],
-        }
-        let f = async () => {
-          return this.outgoing.send(phone, webhookMessage)
-        }
-        if (['audio', 'image', 'video', 'document'].includes(messageType)) {
-          webhookMessage.entry[0].changes[0].value.messages[0][messageType].id = `${phone}/${messageId}`
-          f = () => amqpEnqueue(UNOAPI_JOB_BULK_WEBHOOK, phone, { phone, payload: webhookMessage })
-        }
-        await f()
         await setbulkMessage(phone, id, messageId, m.payload.to)
         await setMessageStatus(phone, messageId, 'scheduled')
         return response
@@ -122,7 +68,6 @@ export class BulkSenderJob {
           body: statusMessage,
         },
       }
-      logger.debug(statusMessage)
       await this.outgoing.formatAndSend(phone, phone, messageUpdate)
     } catch (error) {
       const text = `Error on send bulk ${phone}: ${JSON.stringify(error)}`

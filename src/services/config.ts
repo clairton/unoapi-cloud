@@ -16,6 +16,8 @@ export type Webhook = {
   urlAbsolute: string
   token: string
   header: string
+  timeoutMs: number
+  sendNewMessages: boolean
 }
 
 export type Config = {
@@ -45,6 +47,7 @@ export type Config = {
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
   sendReactionAsReply: boolean
+  sendProfilePicture: boolean
 }
 
 export const defaultConfig: Config = {
@@ -78,11 +81,14 @@ export const defaultConfig: Config = {
       urlAbsolute: '',
       token: '',
       header: '',
+      timeoutMs: 5_000,
+      sendNewMessages: false,
     },
   ],
   getMessageMetadata: getMessageMetadataDefault,
   ignoreDataStore: false,
   sendReactionAsReply: false,
+  sendProfilePicture: false,
 }
 
 export interface getConfig {

@@ -211,6 +211,7 @@ WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, 
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
+WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
 BASE_URL=current base url to download medias
 PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
@@ -234,6 +235,7 @@ NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message f
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
+SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
 UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 ```
 
