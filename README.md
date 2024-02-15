@@ -212,6 +212,7 @@ WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
 WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
+WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 BASE_URL=current base url to download medias
 PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true

@@ -31,6 +31,7 @@ import {
   SEND_REACTION_AS_REPLY,
   WEBHOOK_TIMEOUT_MS,
   SEND_PROFILE_PICTURE,
+  WEBHOOK_SEND_NEW_MESSAGES,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -63,6 +64,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].token = WEBHOOK_TOKEN
     config.webhooks[0].header = WEBHOOK_HEADER
     config.webhooks[0].timeoutMs = WEBHOOK_TIMEOUT_MS
+    config.webhooks[0].sendNewMessages = WEBHOOK_SEND_NEW_MESSAGES
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
