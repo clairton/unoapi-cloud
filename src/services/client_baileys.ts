@@ -575,7 +575,10 @@ export class ClientBaileys implements Client {
       message['groupMetadata'] = groupMetadata
       logger.debug(`Retrieving group profile picture...`)
       try {
-        groupMetadata['profilePicture'] = await this.fetchImageUrl(key.remoteJid)
+        const profilePictureGroup = await this.fetchImageUrl(key.remoteJid)
+        if (profilePictureGroup) {
+          groupMetadata['profilePicture'] = profilePictureGroup
+        }
       } catch (error) {
         logger.warn(error, 'Ignore error on retrieve group profile picture')
       }
@@ -586,8 +589,11 @@ export class ClientBaileys implements Client {
       const jid = await this.exists(remoteJid)
       if (jid) {
         try {
+          const profilePicture = await this.fetchImageUrl(jid)
           logger.debug(`Retrieving user picture...`)
-          message['profilePicture'] = await this.fetchImageUrl(jid)
+          if (profilePicture) {
+            message['profilePicture'] = profilePicture
+          }
         } catch (error) {
           logger.warn(error, 'Ignore error on retrieve user profile picture')
         }
