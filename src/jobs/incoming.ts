@@ -27,7 +27,7 @@ export class IncomingJob {
     const options: object = a.options
     const idUno: string = a.id
     const waId = jidToPhoneNumber(payload.to, '')
-    const timestamp = new Date().getTime() / 1000
+    const timestamp = Math.floor(new Date().getTime() / 1000).toString()
     const retries: number = a.retries ? a.retries + 1 : 1
     const response = await this.incoming.send(phone, payload, options)
     logger.debug('Baileys response %s -> %s', phone, JSON.stringify(response))
@@ -117,6 +117,10 @@ export class IncomingJob {
                   contacts: [
                     {
                       wa_id: waId,
+                      profile: {
+                        name: '',
+                        picture: '',
+                      },
                     },
                   ],
                   statuses: [
