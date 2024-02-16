@@ -139,28 +139,50 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       response.text = payload.text.body
       break
     case 'interactive':
-      const listMessage = {
-        title: payload.interactive.header.text,
-        description: payload.interactive.body.text,
-        buttonText: payload.interactive.action.button,
-        footerText: payload.interactive.footer.text,
-        sections: payload.interactive.action.sections.map(
-          (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
-            return {
-              title: section.title,
-              rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
+      let listMessage = {}
+        if (payload.interactive.header) {
+          listMessage = { 
+            title: payload.interactive.header.text,
+            description: payload.interactive.body.text,
+            buttonText: payload.interactive.action.button,
+            footerText: payload.interactive.footer.text,
+            sections: payload.interactive.action.sections.map(
+              (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
                 return {
-                  title: row.title,
-                  rowId: row.rowId,
-                  description: row.description,
+                  title: section.title,
+                  rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
+                    return {
+                      title: row.title,
+                      rowId: row.rowId,
+                      description: row.description,
+                    }
+                  }),
                 }
-              }),
-            }
-          },
-        ),
-        listType: proto.Message.ListMessage.ListType.SINGLE_SELECT,
+              },
+            ),
+            listType: 2,
+          }
+      }else {
+        listMessage = {
+          title: '',
+          description: payload.interactive.body.text || 'Nenhuma descriçao encontrada',
+          buttonText: 'Selecione',
+          footerText: '',
+          sections: [{
+            title : 'Opcões',
+            rows: payload.interactive.action.buttons.map(
+              (button: { reply: {title: string; id: string; description: string }}) => {
+                return {                  
+                    title: button.reply.title,
+                    rowId: button.reply.id,
+                    description: ''
+                  }               
+              },
+            )
+            }],
+          listType: 2,
+        }
       }
-
       response.listMessage = listMessage
       break
     case 'image':
@@ -572,10 +594,15 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             }
         }
         break
+      case 'messageContextInfo':
+        message.text = {
+          body: payload.message.listResponseMessage.title
+        }
+        message.type = 'text'
+      break
 
       case 'protocolMessage':
       case 'senderKeyDistributionMessage':
-      case 'messageContextInfo':
         logger.debug(`Ignore message type ${messageType}`)
         return
 

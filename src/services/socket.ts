@@ -189,6 +189,22 @@ export const connect = async ({
     return message?.message ? new Promise((resolve) => resolve(message.message!)) : undefined
   }
 
+  const patchMessageBeforeSending = (msg: proto.IMessage) => {
+    const isProductList = (listMessage: proto.Message.IListMessage | null | undefined) =>
+      listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST
+
+    if (isProductList(msg.deviceSentMessage?.message?.listMessage) || isProductList(msg.listMessage)) {
+      msg = JSON.parse(JSON.stringify(msg))
+      if (msg.deviceSentMessage?.message?.listMessage) {
+        msg.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
+      }
+      if (msg.listMessage) {
+        msg.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
+      }
+    }
+    return msg
+  }
+
   const connect = async () => {
     if (status.connected || status.connecting) return
     logger.debug('Connecting %s', phone)
@@ -210,6 +226,7 @@ export const connect = async ({
         getMessage,
         shouldIgnoreJid: config.shouldIgnoreJid,
         retryRequestDelayMs: config.retryRequestDelayMs,
+        patchMessageBeforeSending,
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
