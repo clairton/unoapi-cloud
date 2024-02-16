@@ -135,7 +135,8 @@ describe('service transformer', () => {
 
   test('fromBaileysMessageContent with messageContextInfo', async () => {
     const phoneNumer = '5549998360838'
-    const remoteJid = '554988290955@s.whatsapp.net'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Mary ${new Date().getTime()}`
@@ -148,11 +149,42 @@ describe('service transformer', () => {
       },
       message: {
         messageContextInfo: body,
+        listResponseMessage: {
+          title:body
+        }
       },
       pushName,
       messageTimestamp,
     }
-    const output = undefined
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    from: '5549988290955',
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body },
+                    type: 'text',
+                  },
+                ],
+                contacts: [{ profile: { name: pushName }, wa_id: '5549988290955' }],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
     expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
   })
 
@@ -1017,7 +1049,7 @@ describe('service transformer', () => {
         buttonText: 'sections',
         description: 'your-text-message-content',
         footerText: 'Cloud UnoApi',
-        listType: 1,
+        listType: 2,
         sections: [
           {
             rows: [
