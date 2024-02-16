@@ -68,8 +68,14 @@ const bulkStatusJob = new BulkStatusJob()
 const bulkReportJob = new BulkReportJob(outgoingCloudApi, getConfigRedis)
 const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 
+const processeds = new Map<string, boolean>()
+
 export class BindJob {
   async consume(_: string, { phone }: { phone: string }) {
+    if (processeds.get(phone)) {
+      return
+    }
+    processeds.set(phone, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
     logger.info('Binding queues consumer for %s', phone)
 

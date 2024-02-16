@@ -18,7 +18,7 @@ const queueDead = (queue: string) => `${queue}.dead`
 let amqpConnection: Connection | undefined
 
 const channels = new Map<string, Channel>()
-const routes = new Map<string, boolean>()
+export const routes = new Map<string, boolean>()
 
 export type CreateOption = {
   delay: number
