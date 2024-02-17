@@ -8,6 +8,7 @@ import {
   UNOAPI_JOB_BIND,
   NOTIFY_FAILED_MESSAGES,
   UNOAPI_JOB_NOTIFICATION,
+  IGNORED_CONNECTIONS_NUMBERS,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -18,7 +19,7 @@ const queueDead = (queue: string) => `${queue}.dead`
 let amqpConnection: Connection | undefined
 
 const channels = new Map<string, Channel>()
-export const routes = new Map<string, boolean>()
+const routes = new Map<string, boolean>()
 
 export type CreateOption = {
   delay: number
@@ -177,6 +178,9 @@ export const amqpConsume = async (
     }
     const content: string = payload.content.toString()
     const phone = payload.fields.routingKey
+    if (IGNORED_CONNECTIONS_NUMBERS.includes(phone)) {
+      logger.info(`Ignore messages from ${phone}`)
+    }
     const data = JSON.parse(content)
     const headers = payload.properties.headers || {}
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)

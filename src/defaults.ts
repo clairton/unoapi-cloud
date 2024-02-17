@@ -89,6 +89,7 @@ export const STORAGE_ENDPOINT = process.env.STORAGE_ENDPOINT || 'http://localhos
 export const STORAGE_FORCE_PATH_STYLE: boolean =
   process.env.STORAGE_FORCE_PATH_STYLE === _undefined ? false : process.env.STORAGE_FORCE_PATH_STYLE == 'true'
 export const SEND_PROFILE_PICTURE: boolean = process.env.SEND_PROFILE_PICTURE === _undefined ? true : process.env.SEND_PROFILE_PICTURE == 'true'
+export const IGNORED_CONNECTIONS_NUMBERS = JSON.parse(process.env.IGNORED_CONNECTIONS_NUMBERS || '[]')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {
