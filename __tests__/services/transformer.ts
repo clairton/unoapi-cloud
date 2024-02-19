@@ -140,7 +140,7 @@ describe('service transformer', () => {
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Mary ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -195,7 +195,7 @@ describe('service transformer', () => {
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Mary ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -247,7 +247,7 @@ describe('service transformer', () => {
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Mary ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const stanzaId = `${new Date().getTime()}`
     const input = {
       key: {
@@ -310,7 +310,7 @@ describe('service transformer', () => {
     const link = `${text}.pdf`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Jhon ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 100).toString()
     const mimetype = 'application/pdf'
     const fileSha256 = `fileSha256 ${new Date().getTime()}`
     const filename = `${id}.pdf`
@@ -376,7 +376,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Forrest Gump ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -440,7 +440,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Forrest Gump ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -494,7 +494,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Forrest Gump ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const body = `${new Date().getTime()}`
     const input = {
       key: {
@@ -552,7 +552,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Peter ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -606,7 +606,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Forrest Gump ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -660,7 +660,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Forrest Gump ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -720,7 +720,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Forrest Gump ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -774,7 +774,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Patricia ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid,
@@ -909,7 +909,7 @@ describe('service transformer', () => {
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const pushName = `Fernanda ${new Date().getTime()}`
-    const messageTimestamp = new Date().getTime().toString()
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const input = {
       key: {
         remoteJid: remoteJid,

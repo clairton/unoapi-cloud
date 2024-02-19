@@ -4,7 +4,6 @@ import { defaultConfig } from '../../src/services/config'
 import { Store, getStore } from '../../src/services/store'
 import { mock } from 'jest-mock-extended'
 import { DataStore } from '../../src/services/data_store'
-import { connect } from 'http2'
 
 describe('template', () => {
   const config = { ...defaultConfig }
