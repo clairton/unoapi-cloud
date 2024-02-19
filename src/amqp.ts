@@ -180,6 +180,7 @@ export const amqpConsume = async (
     const phone = payload.fields.routingKey
     if (IGNORED_CONNECTIONS_NUMBERS.includes(phone)) {
       logger.info(`Ignore messages from ${phone}`)
+      await channel.ack(payload)
       return
     }
     const data = JSON.parse(content)
