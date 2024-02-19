@@ -173,7 +173,7 @@ export const connect = async ({
       return onStatus(message, true)
     } else if (statusCode === DisconnectReason.unavailableService) {
       disconnect(false)
-      const message = `The service is unavailable, please open the whastapp app to verify!`
+      const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
       return onStatus(message, true)
     } else {
       return reconnect()
