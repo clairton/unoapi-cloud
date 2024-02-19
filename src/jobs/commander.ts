@@ -54,7 +54,7 @@ export class CommanderJob {
           text: {
             body: `The bulk ${id} is created and wil be parsed!`,
           },
-          messageTimestamp: new Date().getTime() / 1000,
+          messageTimestamp: Math.floor(new Date().getTime() / 1000),
         }
         this.outgoing.formatAndSend(phone, phone, message)
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-webhook') {

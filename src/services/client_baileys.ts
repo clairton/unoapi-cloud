@@ -148,7 +148,7 @@ export class ClientBaileys implements Client {
         message: {
           conversation: text,
         },
-        timestamp: new Date().getTime() / 1000,
+        messageTimestamp: Math.floor(new Date().getTime() / 1000),
       }
       logger.debug('onStatus %s', JSON.stringify(payload))
       if (this.config.sessionWebhook) {
@@ -174,7 +174,7 @@ export class ClientBaileys implements Client {
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
     logger.debug('Received qrcode %s %s', this.phone, qrCode)
-    const messageTimestamp = new Date().getTime() / 1000
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000)
     const id = uuid()
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
     const remoteJid = phoneNumberToJid(this.phone)
