@@ -32,6 +32,7 @@ import {
   WEBHOOK_TIMEOUT_MS,
   SEND_PROFILE_PICTURE,
   WEBHOOK_SEND_NEW_MESSAGES,
+  PROXY_URL,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -59,6 +60,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.sendReactionAsReply = SEND_REACTION_AS_REPLY
     config.sendProfilePicture = SEND_PROFILE_PICTURE
     config.sessionWebhook = WEBHOOK_SESSION
+    config.proxyUrl = PROXY_URL
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
     config.webhooks[0].token = WEBHOOK_TOKEN

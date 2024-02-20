@@ -19,6 +19,7 @@ import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
+import { SocksProxyAgent } from 'socks-proxy-agent'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnStatus = (text: string, important: boolean) => Promise<void>
@@ -213,7 +214,12 @@ export const connect = async ({
     const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
 
     const loggerBaileys = MAIN_LOGGER.child({})
-    logger.level = (config.logLevel || process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
+    logger.level = config.logLevel as Level
+
+    let agent
+    if (config.proxyUrl) {
+      agent = new SocksProxyAgent(config.proxyUrl)
+    }
 
     try {
       sock = makeWASocket({
@@ -227,6 +233,7 @@ export const connect = async ({
         shouldIgnoreJid: config.shouldIgnoreJid,
         retryRequestDelayMs: config.retryRequestDelayMs,
         patchMessageBeforeSending,
+        agent,
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

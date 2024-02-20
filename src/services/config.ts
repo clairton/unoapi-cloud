@@ -37,13 +37,14 @@ export type Config = {
   throwWebhookError: boolean
   rejectCallsWebhook: string
   messageCallsWebhook: string
+  proxyUrl: string | undefined
   sessionWebhook: string
   shouldIgnoreJid: (jid: string) => boolean | undefined
   shouldIgnoreKey: (key: WAMessageKey, messageType: string | undefined) => boolean | undefined
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
-  logLevel: Level | undefined
+  logLevel: Level
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
   sendReactionAsReply: boolean
@@ -64,7 +65,7 @@ export const defaultConfig: Config = {
   sessionWebhook: '',
   rejectCallsWebhook: '',
   messageCallsWebhook: '',
-  logLevel: undefined,
+  logLevel: 'fatal',
   autoConnect: true,
   autoRestartMs: 0,
   retryRequestDelayMs: 1_000,
@@ -89,6 +90,7 @@ export const defaultConfig: Config = {
   ignoreDataStore: false,
   sendReactionAsReply: false,
   sendProfilePicture: false,
+  proxyUrl: undefined,
 }
 
 export interface getConfig {
