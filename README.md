@@ -238,6 +238,7 @@ UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
 SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
 UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+PROXY_URL the socks proxy url, default not use
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:

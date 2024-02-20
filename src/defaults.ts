@@ -19,6 +19,7 @@ export const WEBHOOK_SEND_NEW_MESSAGES = process.env.WEBHOOK_SEND_NEW_MESSAGES =
 export const WEBHOOK_SESSION = process.env.WEBHOOK_SESSION || ''
 export const AMQP_URL = process.env.AMQP_URL || 'amqp://guest:guest@localhost:5672'
 export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
+export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
 export const CONNECTION_TIMEOUT = process.env.CONNECTION_TIMEOUT || 140_000
