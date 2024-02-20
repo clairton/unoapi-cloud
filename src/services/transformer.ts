@@ -140,46 +140,46 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
       break
     case 'interactive':
       let listMessage = {}
-        if (payload.interactive.header) {
-          listMessage = { 
-            title: payload.interactive.header.text,
-            description: payload.interactive.body.text,
-            buttonText: payload.interactive.action.button,
-            footerText: payload.interactive.footer.text,
-            sections: payload.interactive.action.sections.map(
-              (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
-                return {
-                  title: section.title,
-                  rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
-                    return {
-                      title: row.title,
-                      rowId: row.rowId,
-                      description: row.description,
-                    }
-                  }),
-                }
-              },
-            ),
-            listType: 2,
-          }
-      }else {
+      if (payload.interactive.header) {
+        listMessage = {
+          title: payload.interactive.header.text,
+          description: payload.interactive.body.text,
+          buttonText: payload.interactive.action.button,
+          footerText: payload.interactive.footer.text,
+          sections: payload.interactive.action.sections.map(
+            (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
+              return {
+                title: section.title,
+                rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
+                  return {
+                    title: row.title,
+                    rowId: row.rowId,
+                    description: row.description,
+                  }
+                }),
+              }
+            },
+          ),
+          listType: 2,
+        }
+      } else {
         listMessage = {
           title: '',
           description: payload.interactive.body.text || 'Nenhuma descriçao encontrada',
           buttonText: 'Selecione',
           footerText: '',
-          sections: [{
-            title : 'Opcões',
-            rows: payload.interactive.action.buttons.map(
-              (button: { reply: {title: string; id: string; description: string }}) => {
-                return {                  
-                    title: button.reply.title,
-                    rowId: button.reply.id,
-                    description: ''
-                  }               
-              },
-            )
-            }],
+          sections: [
+            {
+              title: 'Opcões',
+              rows: payload.interactive.action.buttons.map((button: { reply: { title: string; id: string; description: string } }) => {
+                return {
+                  title: button.reply.title,
+                  rowId: button.reply.id,
+                  description: '',
+                }
+              }),
+            },
+          ],
           listType: 2,
         }
       }
@@ -596,10 +596,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         break
       case 'messageContextInfo':
         message.text = {
-          body: payload.message.listResponseMessage.title
+          body: payload.message.listResponseMessage.title,
         }
         message.type = 'text'
-      break
+        break
 
       case 'protocolMessage':
       case 'senderKeyDistributionMessage':
