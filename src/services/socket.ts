@@ -10,6 +10,7 @@ import makeWASocket, {
   AnyMessageContent,
   BaileysEventMap,
   GroupMetadata,
+  Browsers,
 } from '@whiskeysockets/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
@@ -162,7 +163,7 @@ export const connect = async ({
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     onDisconnected(phone, payload)
-    if ([DisconnectReason.loggedOut, DisconnectReason.badSession].includes(statusCode)) {
+    if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       disconnect(false)
       logger.info(`${phone} destroyed`)
       dataStore.cleanSession()
@@ -211,7 +212,7 @@ export const connect = async ({
     logger.debug('Connecting %s', phone)
     status.connecting = true
 
-    const browser: WABrowserDescription = ['Unoapi', 'Chrome', release()]
+    const browser: WABrowserDescription = config.ignoreHistoryMessages ? Browsers.windows('Desktop') : ['Unoapi', 'Chrome', release()]
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
