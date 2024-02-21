@@ -83,7 +83,9 @@ export class IncomingJob {
           },
         ],
       }
-      await Promise.all(config.webhooks.filter((w) => w.sendNewMessages).map((w) => this.outgoing.sendHttp(phone, w, webhookMessage)))
+      const webhooks = config.webhooks.filter((w) => w.sendNewMessages)
+      logger.debug('%s webhooks with sendNewMessages', webhooks.length)
+      await Promise.all(webhooks.map((w) => this.outgoing.sendHttp(phone, w, webhookMessage)))
     } else if (!ok.success) {
       throw `Unknow response ${JSON.stringify(response)}`
     } else if (ok.success) {
