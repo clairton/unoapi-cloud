@@ -14,7 +14,7 @@ ADD ./src ./src
 ADD ./tsconfig.json ./tsconfig.json
 RUN yarn build
 
-FROM node:20-alpine
+FROM node:21-alpine
 
 LABEL \
   maintainer="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
