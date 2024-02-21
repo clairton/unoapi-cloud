@@ -43,6 +43,7 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'reactionMessage',
   'locationMessage',
   'liveLocationMessage',
+  'listResponseMessage',
   'conversation',
   'protocolMessage',
   'senderKeyDistributionMessage',
@@ -594,13 +595,14 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             }
         }
         break
-      case 'messageContextInfo':
+      case 'listResponseMessage':
         message.text = {
           body: payload.message.listResponseMessage.title,
         }
         message.type = 'text'
         break
 
+      case 'messageContextInfo':
       case 'protocolMessage':
       case 'senderKeyDistributionMessage':
         logger.debug(`Ignore message type ${messageType}`)

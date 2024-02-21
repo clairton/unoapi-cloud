@@ -150,8 +150,8 @@ describe('service transformer', () => {
       message: {
         messageContextInfo: body,
         listResponseMessage: {
-          title:body
-        }
+          title: body,
+        },
       },
       pushName,
       messageTimestamp,
