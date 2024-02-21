@@ -49,6 +49,7 @@ export type Config = {
   ignoreDataStore: boolean
   sendReactionAsReply: boolean
   sendProfilePicture: boolean
+  cleanConfigOnDisconnect: boolean
 }
 
 export const defaultConfig: Config = {
@@ -91,6 +92,7 @@ export const defaultConfig: Config = {
   sendReactionAsReply: false,
   sendProfilePicture: false,
   proxyUrl: undefined,
+  cleanConfigOnDisconnect: false,
 }
 
 export interface getConfig {

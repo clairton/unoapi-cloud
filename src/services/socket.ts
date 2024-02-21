@@ -162,7 +162,7 @@ export const connect = async ({
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     onDisconnected(phone, payload)
-    if (statusCode === DisconnectReason.loggedOut) {
+    if ([DisconnectReason.loggedOut, DisconnectReason.badSession].includes(statusCode)) {
       disconnect(false)
       logger.info(`${phone} destroyed`)
       dataStore.cleanSession()

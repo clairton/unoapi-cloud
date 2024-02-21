@@ -19,6 +19,7 @@ import {
   setProfilePicture,
   setGroup,
   getGroup,
+  delConfig,
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -80,6 +81,9 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     return setMessage(phone, newJid, message.key.id!, message)
   }
   store.cleanSession = async () => {
+    if (config.cleanConfigOnDisconnect) {
+      await delConfig(phone)
+    }
     await delAuth(phone)
   }
   store.setStatus = async (
