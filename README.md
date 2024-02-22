@@ -321,20 +321,20 @@ http://localhost:9876/v17.0/5549988290955/deregister \
 -H 'Authorization: 1' 
 ```
 
-### Get a session configs
+### Get a session config
 
 ```sh
 curl -i -X GET \
-http://localhost:9876/v15.0/1/5549988290955 \
+http://localhost:9876/v15.0/5549988290955 \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1'
 ```
 
-### List as session configs
+### List the sessions configs
 
 ```sh
 curl -i -X GET \
-http://localhost:9876/v15.0/1/phone_numbers \
+http://localhost:9876/v15.0/phone_numbers \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1'
 ```
