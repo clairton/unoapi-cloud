@@ -178,6 +178,8 @@ export const connect = async ({
       const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
       return onStatus(message, true)
     } else {
+      const message = `The connection is closed with status ${statusCode}!`
+      await onStatus(message, true)
       return reconnect()
     }
   }
