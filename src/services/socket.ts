@@ -160,9 +160,10 @@ export const connect = async ({
     const { lastDisconnect } = payload
     status.connected = false
     status.connecting = false
+    status.disconnected = true
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
-    onDisconnected(phone, payload)
+    await onDisconnected(phone, payload)
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       disconnect(false)
       logger.info(`${phone} destroyed`)
@@ -178,7 +179,8 @@ export const connect = async ({
       const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
       return onStatus(message, true)
     } else {
-      const message = `The connection is closed with status ${statusCode}!`
+      const detail = lastDisconnect?.error?.output?.payload?.error
+      const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
       await onStatus(message, true)
       return reconnect()
     }
@@ -214,7 +216,7 @@ export const connect = async ({
     logger.debug('Connecting %s', phone)
     status.connecting = true
 
-    const browser: WABrowserDescription = config.ignoreHistoryMessages ? Browsers.windows('Desktop') : ['Unoapi', 'Chrome', release()]
+    const browser: WABrowserDescription = config.ignoreHistoryMessages ? ['Unoapi', 'Chrome', release()] : Browsers.windows('Desktop')
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
@@ -241,17 +243,9 @@ export const connect = async ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error && error.isBoom && !error.isServer) {
-        const statusCode = error?.output?.statusCode
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut
-        if (shouldReconnect) {
-          disconnect(true)
-          connect()
-        } else {
-          const message = error?.output?.payload?.error
-          await onStatus(`Error status code: ${statusCode}, error: ${message}.`, true)
-        }
+        await onDisconnect({ lastDisconnect: { error } })
       } else {
-        logger.error(error, 'Error on socket')
+        logger.error('Baileys Socket error: %s %s', error, error.stack)
         await onStatus(`Error: ${error.message}.`, true)
         throw error
       }
