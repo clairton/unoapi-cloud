@@ -133,11 +133,23 @@ export const connect = async ({
         status.attempt++
       }
     }
-    if (event.connection === 'open') onConnected()
-    else if (event.connection === 'close') onDisconnect(event)
-    else if (event.connection === 'connecting') await onStatus(`Connnecting...`, false)
-    else if (event.isNewLogin) {
+
+    if (event.isNewLogin) {
       onNewLogin(phone)
+    }
+
+    switch (event.connection) {
+      case 'open':
+        await onConnected()
+        break
+
+      case 'close':
+        await onDisconnect(event)
+        break
+
+      case 'connecting':
+        await onStatus(`Connnecting...`, false)
+        break
     }
   }
 
