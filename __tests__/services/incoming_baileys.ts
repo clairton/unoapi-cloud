@@ -3,7 +3,6 @@ import { Incoming } from '../../src/services/incoming'
 import { Listener } from '../../src/services/listener'
 import { getClient, Client } from '../../src/services/client'
 import { Config, defaultConfig, getConfig, getConfigDefault } from '../../src/services/config'
-import { Info, Status } from '../../src/services/socket'
 import { mock } from 'jest-mock-extended'
 import logger from '../../src/services/logger'
 
@@ -26,13 +25,6 @@ class DummyClient implements Client {
   }
   async getMessageMetadata<T>(data: T) {
     return data
-  }
-
-  getStatus(): Status {
-    return mock<Status>()
-  }
-  getInfo(): Info {
-    return mock<Info>()
   }
 }
 

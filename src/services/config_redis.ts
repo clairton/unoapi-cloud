@@ -16,6 +16,7 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
       for (let index = 0; index < keys.length; index++) {
         const key = keys[index]
         if (key in configRedis) {
+          logger.debug('Override env config by redis config in %s: %s => %s', phone, key, JSON.stringify(configRedis[key]))
           config[key] = configRedis[key]
         }
       }

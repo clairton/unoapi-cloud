@@ -34,7 +34,6 @@ export type OnNotification = (text: string, important: boolean) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type OnDisconnected = (phone: string, payload: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
-export type OnStatus = (phone: string, status: string) => Promise<void>
 
 export class SendError extends Error {
   readonly code: number
@@ -126,6 +125,11 @@ export const connect = async ({
 
     if (event.isNewLogin) {
       await onNewLogin(phone)
+      await setSessionStatus(phone, 'online')
+    }
+
+    if (event.receivedPendingNotifications) {
+      await onNotification('Received pending notifications', true)
     }
 
     switch (event.connection) {
@@ -146,9 +150,7 @@ export const connect = async ({
   const onOpen = async () => {
     status.attempt = 0
     await setSessionStatus(phone, 'online')
-
     logger.info(`${phone} connected`)
-
     const { version, isLatest } = await fetchLatestBaileysVersion()
     const message = `Connected with ${phone} using Whatsapp Version v${version.join('.')}, is latest? ${isLatest} at ${new Date().toUTCString()}`
     await onNotification(message, false)

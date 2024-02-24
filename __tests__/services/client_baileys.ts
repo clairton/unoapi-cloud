@@ -52,7 +52,7 @@ describe('service client baileys', () => {
   let config: Config
   let close: close
 
-  const status: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
+  const status: Status = { attempt: 0 }
 
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
