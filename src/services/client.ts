@@ -1,6 +1,6 @@
 import { Response } from './response'
 import { Incoming } from './incoming'
-import { Info, OnNewLogin, Status } from './socket'
+import { OnNewLogin } from './socket'
 import { getConfig } from './config'
 import { Listener } from './listener'
 
@@ -37,8 +37,4 @@ export interface Client {
   send(payload: any, options: any): Promise<Response>
 
   getMessageMetadata<T>(message: T): Promise<T>
-
-  getStatus(): Status
-
-  getInfo(): Info
 }

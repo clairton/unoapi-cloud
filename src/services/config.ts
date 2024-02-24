@@ -50,6 +50,8 @@ export type Config = {
   sendReactionAsReply: boolean
   sendProfilePicture: boolean
   cleanConfigOnDisconnect: boolean
+  authToken: string | undefined
+  authHeader: string | undefined
 }
 
 export const defaultConfig: Config = {
@@ -93,6 +95,8 @@ export const defaultConfig: Config = {
   sendProfilePicture: false,
   proxyUrl: undefined,
   cleanConfigOnDisconnect: false,
+  authToken: undefined,
+  authHeader: undefined,
 }
 
 export interface getConfig {

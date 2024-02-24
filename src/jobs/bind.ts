@@ -40,6 +40,7 @@ import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
 import { NotificationJob } from '../jobs/notification'
+import { isSessionStatusOnline } from '../services/session_store'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -72,7 +73,7 @@ const processeds = new Map<string, boolean>()
 
 export class BindJob {
   async consume(_: string, { phone }: { phone: string }) {
-    if (processeds.get(phone)) {
+    if (!(await isSessionStatusOnline(phone)) && processeds.get(phone)) {
       return
     }
     processeds.set(phone, true)

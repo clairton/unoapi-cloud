@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { Config, getConfig } from '../services/config'
-import { SessionStore } from '../services/session_store'
+import { SessionStore, getSessionStatus } from '../services/session_store'
 import logger from '../services/logger'
 
 export class PhoneNumberController {
@@ -23,6 +23,7 @@ export class PhoneNumberController {
       const config: Config = await this.getConfig(phone)
       return res.status(200).json({
         display_phone_number: phone,
+        status: getSessionStatus(phone),
         ...config,
       })
     } catch (e) {
@@ -43,7 +44,7 @@ export class PhoneNumberController {
       for (let i = 0, j = phones.length; i < j; i++) {
         const phone = phones[i]
         const config = await this.getConfig(phone)
-        configs.push({ ...config, display_phone_number: phone })
+        configs.push({ ...config, display_phone_number: phone, status: getSessionStatus(phone) })
       }
       return res.status(200).json(configs)
     } catch (e) {

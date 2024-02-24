@@ -2,6 +2,7 @@ import { getClient } from '../services/client'
 import { getConfig } from '../services/config'
 import { Incoming } from '../services/incoming'
 import { Listener } from '../services/listener'
+import { isSessionStatusOnline } from '../services/session_store'
 import { OnNewLogin } from '../services/socket'
 
 export class ReloadJob {
@@ -27,7 +28,7 @@ export class ReloadJob {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    if (currentClient.getStatus().connected) {
+    if (await isSessionStatusOnline(phone)) {
       await currentClient.disconnect()
     }
     const newClient = await this.getClient({

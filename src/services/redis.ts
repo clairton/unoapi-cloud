@@ -226,11 +226,6 @@ export const delConfig = async (phone: string) => {
   await redisDel(key)
 }
 
-export const isConnected = async (phone: string) => {
-  const config = await getConfig(phone)
-  return config?.connected
-}
-
 export const delAuth = async (phone: string) => {
   const key = authKey(phone)
   logger.debug(`Deleting key ${key}...`)

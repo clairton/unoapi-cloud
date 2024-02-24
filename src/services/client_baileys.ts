@@ -6,17 +6,15 @@ import { dataStores } from './data_store'
 import { mediaStores } from './media_store'
 import {
   connect,
-  Status,
   SendError,
   sendMessage,
   readMessages,
   rejectCall,
   OnQrCode,
-  OnStatus,
+  OnNotification,
   OnNewLogin,
   fetchImageUrl,
   fetchGroupMetadata,
-  Info,
   exists,
   close,
 } from './socket'
@@ -28,6 +26,7 @@ import { Response } from './response'
 import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
+import { getSessionStatus, isSessionStatusOnline } from './session_store'
 const attempts = 3
 
 interface Delay {
@@ -67,10 +66,7 @@ export const getClientBaileys: getClient = async ({
   return clients.get(phone) as Client
 }
 
-const sendError = new SendError(3, 'disconnect number, please read qr code')
-
-const statusDefault: Status = { connected: false, disconnected: true, connecting: false, attempt: 0, reconnecting: false }
-const infoDefault: Info = { phone: '' }
+const sendError = new SendError(3, 'disconnect number, please send a message do try reconnect and read qr code if necessary')
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sendMessageDefault: sendMessage = async (_phone, _message) => {
@@ -105,9 +101,7 @@ const closeDefault = async () => logger.info(`Close connection`)
 export class ClientBaileys implements Client {
   private phone: string
   private config: Config = defaultConfig
-  private status: Status = statusDefault
   private close: close = closeDefault
-  private info: Info = infoDefault
   private sendMessage = sendMessageDefault
   private fetchImageUrl = fetchImageUrlDefault
   private exists = existsDefault
@@ -123,7 +117,7 @@ export class ClientBaileys implements Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private onWebhookError = async (error: any) => {
-    if (!this.config.throwWebhookError && error.name === 'FetchError' && this.status.connected) {
+    if (!this.config.throwWebhookError && error.name === 'FetchError' && (await isSessionStatusOnline(this.phone))) {
       return this.incoming.send(
         this.phone,
         { to: this.phone, type: 'text', text: { body: `Error on send message to webhook: ${error.message}` } },
@@ -135,7 +129,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onStatus: OnStatus = async (text: string, important) => {
+  private onNotification: OnNotification = async (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
       const id = uuid()
       const waMessageKey = {
@@ -150,16 +144,16 @@ export class ClientBaileys implements Client {
         },
         messageTimestamp: Math.floor(new Date().getTime() / 1000),
       }
-      logger.debug('onStatus %s', JSON.stringify(payload))
+      logger.debug('onNotification %s', JSON.stringify(payload))
       if (this.config.sessionWebhook) {
         try {
-          const body = JSON.stringify({ info: this.info, status: this.status, ...payload })
+          const body = JSON.stringify({ info: { phone: this.phone }, status: await getSessionStatus(this.phone), ...payload })
           const response = await fetch(this.config.sessionWebhook, {
             method: 'POST',
             body: body,
             headers: { 'Content-Type': 'application/json' },
           })
-          logger.debug('Response OnStatus Webhook Session', response)
+          logger.debug('Response OnNotification Webhook Session', response)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           logger.error(error, 'Erro on send status')
@@ -196,7 +190,7 @@ export class ClientBaileys implements Client {
       messageTimestamp,
     }
     if (this.config.sessionWebhook) {
-      const body = JSON.stringify({ info: this.info, status: this.status, ...waMessage })
+      const body = JSON.stringify({ info: { phone: this.phone }, status: await getSessionStatus(this.phone), ...waMessage })
       try {
         const response = await fetch(this.config.sessionWebhook, {
           method: 'POST',
@@ -214,17 +208,6 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onReconnect = async () => {
-    await this.disconnect()
-    await getClientBaileys({
-      phone: this.phone,
-      incoming: this.incoming,
-      listener: this.listener,
-      getConfig: this.getConfig,
-      onNewLogin: this.onNewLogin,
-    })
-  }
-
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
     logger.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
@@ -237,7 +220,6 @@ export class ClientBaileys implements Client {
 
   constructor(phone: string, incoming: Incoming, listener: Listener, getConfig: getConfig, onNewLogin: OnNewLogin) {
     this.phone = phone
-    this.info.phone = phone
     this.incoming = incoming
     this.listener = listener
     this.getConfig = getConfig
@@ -252,20 +234,18 @@ export class ClientBaileys implements Client {
       return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { status, send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
+    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
       attempts,
       onQrCode: this.onQrCode,
-      onStatus: this.onStatus,
+      onNotification: this.onNotification,
       onNewLogin: this.onNewLogin,
       config: this.config,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
       onDisconnected: async (_phone: string, _payload: any) => this.disconnect(),
-      onReconnect: this.onReconnect,
     })
-    this.status = status
     this.sendMessage = send
     this.readMessages = read
     this.rejectCall = rejectCall
@@ -348,7 +328,7 @@ export class ClientBaileys implements Client {
     configs.delete(this.phone)
 
     await this.close()
-    this.status = statusDefault
+
     this.sendMessage = sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
@@ -357,8 +337,6 @@ export class ClientBaileys implements Client {
     this.exists = existsDefault
     this.close = closeDefault
     this.config = defaultConfig
-    this.status = statusDefault
-    this.info = infoDefault
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -490,7 +468,7 @@ export class ClientBaileys implements Client {
       if (e instanceof SendError) {
         const code = e.code
         const title = e.title
-        await this.onStatus(title, true)
+        await this.onNotification(title, true)
         if ([3, '3'].includes(code)) {
           this.connect()
         }
@@ -552,7 +530,7 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
-    if (!this.status.connected) {
+    if (!(await isSessionStatusOnline(this.phone))) {
       return message
     }
     const key = message && message['key']
@@ -604,13 +582,5 @@ export class ClientBaileys implements Client {
       }
     }
     return message
-  }
-
-  getStatus(): Status {
-    return this.status
-  }
-
-  getInfo(): Info {
-    return this.info
   }
 }

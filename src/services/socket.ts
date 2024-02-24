@@ -21,13 +21,20 @@ import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
+import {
+  isSessionStatusConnecting,
+  isSessionStatusIsDisconnect,
+  isSessionStatusOffline,
+  isSessionStatusOnline,
+  setSessionStatus,
+} from './session_store'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
-export type OnStatus = (text: string, important: boolean) => Promise<void>
+export type OnNotification = (text: string, important: boolean) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type OnDisconnected = (phone: string, payload: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
-export type OnReconnect = () => Promise<void>
+export type OnStatus = (phone: string, status: string) => Promise<void>
 
 export class SendError extends Error {
   readonly code: number
@@ -70,23 +77,14 @@ export interface close {
 
 export type Status = {
   attempt: number
-  connected: boolean
-  disconnected: boolean
-  reconnecting: boolean
-  connecting: boolean | undefined
-}
-
-export type Info = {
-  phone: string
 }
 
 export const connect = async ({
   phone,
   store,
   onQrCode,
-  onStatus,
+  onNotification,
   onDisconnected,
-  onReconnect,
   onNewLogin,
   attempts = Infinity,
   config = defaultConfig,
@@ -94,9 +92,8 @@ export const connect = async ({
   phone: string
   store: Store
   onQrCode: OnQrCode
-  onStatus: OnStatus
+  onNotification: OnNotification
   onDisconnected: OnDisconnected
-  onReconnect: OnReconnect
   onNewLogin: OnNewLogin
   attempts: number
   config: Partial<Config>
@@ -107,25 +104,18 @@ export const connect = async ({
 
   const status: Status = {
     attempt: 1,
-    connected: false,
-    disconnected: false,
-    reconnecting: false,
-    connecting: undefined,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onConnectionUpdate = async (event: any) => {
     logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
-      logger.debug('QRCode generate....... %s of %s', status.attempt, attempts)
-      if (status.attempt > attempts) {
+      logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
+      if (status.attempt >= attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
-        await onStatus(message, true)
-        status.reconnecting = false
-        status.connecting = false
-        status.connected = false
-        status.disconnected = true
-        status.attempt = 1
+        await onNotification(message, true)
+        await setSessionStatus(phone, 'disconnected')
+        status.attempt = 0
         sock && sock.logout()
         dataStore.cleanSession()
       } else {
@@ -135,65 +125,59 @@ export const connect = async ({
     }
 
     if (event.isNewLogin) {
-      onNewLogin(phone)
+      await onNewLogin(phone)
     }
 
     switch (event.connection) {
       case 'open':
-        await onConnected()
+        await onOpen()
         break
 
       case 'close':
-        await onDisconnect(event)
+        await onClose(event)
         break
 
       case 'connecting':
-        await onStatus(`Connnecting...`, false)
+        await onNotification(`Connnecting...`, false)
         break
     }
   }
 
-  const onConnected = async () => {
+  const onOpen = async () => {
     status.attempt = 0
-    status.connected = true
-    status.disconnected = false
-    status.reconnecting = false
-    status.connecting = false
+    await setSessionStatus(phone, 'online')
 
     logger.info(`${phone} connected`)
 
     const { version, isLatest } = await fetchLatestBaileysVersion()
     const message = `Connected with ${phone} using Whatsapp Version v${version.join('.')}, is latest? ${isLatest} at ${new Date().toUTCString()}`
-    await onStatus(message, false)
+    await onNotification(message, false)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onDisconnect = async (payload: any) => {
+  const onClose = async (payload: any) => {
     const { lastDisconnect } = payload
-    status.connected = false
-    status.connecting = false
-    status.disconnected = true
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     await onDisconnected(phone, payload)
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
-      disconnect(false)
-      logger.info(`${phone} destroyed`)
-      dataStore.cleanSession()
+      await logout()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      await onStatus(message, true)
+      await onNotification(message, true)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
-      disconnect(false)
+      await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
-      return onStatus(message, true)
+      return onNotification(message, true)
     } else if (statusCode === DisconnectReason.unavailableService) {
-      disconnect(false)
+      await close()
       const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
-      return onStatus(message, true)
+      return onNotification(message, true)
     } else {
-      const detail = lastDisconnect?.error?.output?.payload?.error
-      const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
-      await onStatus(message, true)
+      if (status.attempt == 0) {
+        const detail = lastDisconnect?.error?.output?.payload?.error
+        const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
+        await onNotification(message, true)
+      }
       return reconnect()
     }
   }
@@ -224,9 +208,9 @@ export const connect = async ({
   }
 
   const connect = async () => {
-    if (status.connected || status.connecting) return
+    if ((await isSessionStatusOnline(phone)) || (await isSessionStatusConnecting(phone))) return
     logger.debug('Connecting %s', phone)
-    status.connecting = true
+    await setSessionStatus(phone, 'connecting')
 
     const browser: WABrowserDescription = config.ignoreHistoryMessages ? ['Unoapi', 'Chrome', release()] : Browsers.windows('Desktop')
 
@@ -255,10 +239,10 @@ export const connect = async ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error && error.isBoom && !error.isServer) {
-        await onDisconnect({ lastDisconnect: { error } })
+        await onClose({ lastDisconnect: { error } })
       } else {
         logger.error('Baileys Socket error: %s %s', error, error.stack)
-        await onStatus(`Error: ${error.message}.`, true)
+        await onNotification(`Error: ${error.message}.`, true)
         throw error
       }
     }
@@ -271,18 +255,40 @@ export const connect = async ({
 
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
-    await connect()
-    return onReconnect()
+    if (status.attempt >= attempts) {
+      const message = `The ${attempts} times of try connect is exceded!`
+      await onNotification(message, true)
+      status.attempt = 0
+      return close()
+    } else {
+      status.attempt++
+      await onNotification(`Try connnecting time ${status.attempt} of ${attempts}...`, false)
+      await close()
+      return connect()
+    }
   }
 
-  const disconnect = (reconnect: boolean) => {
-    if (status.disconnected) return
+  const close = async () => {
+    if (await isSessionStatusOffline(phone)) return
 
-    status.connected = false
-    status.disconnected = !reconnect
-    status.reconnecting = !!reconnect
-    logger.info(`${phone} disconnecting`)
-    return sock && sock.end(undefined)
+    await setSessionStatus(phone, 'offline')
+    logger.info(`${phone} close`)
+    return sock && (await sock.end(undefined))
+  }
+
+  const logout = async () => {
+    if (await isSessionStatusIsDisconnect(phone)) return
+    await close()
+    logger.info(`${phone} destroyed`)
+    dataStore.cleanSession()
+
+    logger.info(`${phone} disconnected`)
+    await setSessionStatus(phone, 'disconnected')
+    try {
+      return sock && (await sock.logout())
+    } catch (_error) {
+      // ignore de unique error if already diconected session
+    }
   }
 
   const exists: exists = async (phone: string) => {
@@ -291,17 +297,12 @@ export const connect = async ({
   }
 
   const validateStatus = async () => {
-    if (status.disconnected || !status.connected) {
-      if (status.connecting) {
-        throw new SendError(5, 'Wait a moment, connecting process')
-      } else {
-        throw new SendError(3, 'Disconnected number, please read qr code')
-      }
-    }
-    if (!sock) {
-      await onStatus(`Socket connection is null`, true)
-      await reconnect()
-      throw new SendError(9, 'Connection lost, please retry connect')
+    if (await isSessionStatusConnecting(phone)) {
+      throw new SendError(5, 'Wait a moment, connecting process')
+    } else if (await isSessionStatusIsDisconnect(phone)) {
+      throw new SendError(3, 'Disconnected number, please read qr code')
+    } else if (await isSessionStatusOffline(phone)) {
+      connect()
     }
   }
 
@@ -342,7 +343,7 @@ export const connect = async ({
   }
 
   if (config.autoRestartMs) {
-    await onStatus(`Config to auto restart in ${config.autoRestartMs} milliseconds.`, true)
+    await onNotification(`Config to auto restart in ${config.autoRestartMs} milliseconds.`, true)
     setInterval(reconnect, config.autoRestartMs)
   }
 
@@ -363,12 +364,6 @@ export const connect = async ({
   const fetchGroupMetadata: fetchGroupMetadata = async (jid: string) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.loadGroupMetada(jid, sock!)
-  }
-
-  const close: close = async () => {
-    try {
-      return sock?.end(undefined)
-    } catch (error) {}
   }
 
   connect()

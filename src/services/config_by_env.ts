@@ -34,6 +34,8 @@ import {
   WEBHOOK_SEND_NEW_MESSAGES,
   PROXY_URL,
   CLEAN_CONFIG_ON_DISCONNECT,
+  UNOAPI_AUTH_TOKEN,
+  UNOAPI_HEADER_NAME,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -62,6 +64,8 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.sendProfilePicture = SEND_PROFILE_PICTURE
     config.sessionWebhook = WEBHOOK_SESSION
     config.proxyUrl = PROXY_URL
+    config.authToken = UNOAPI_AUTH_TOKEN
+    config.authHeader = UNOAPI_HEADER_NAME
     config.cleanConfigOnDisconnect = CLEAN_CONFIG_ON_DISCONNECT
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
