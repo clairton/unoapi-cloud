@@ -13,6 +13,7 @@ import { getConfigRedis } from './services/config_redis'
 import security from './services/security'
 import { amqpGetChannel } from './amqp'
 import logger from './services/logger'
+import { version } from '../package.json'
 
 const incoming: Incoming = new IncomingAmqp()
 const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
@@ -22,5 +23,5 @@ const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionSt
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   await amqpGetChannel(UNOAPI_JOB_INCOMING, '', AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 5 }) // create a channel with priority
-  logger.info('Unoapi Cloud listening on port: %s', PORT)
+  logger.info('Unoapi Cloud version: %s, listening on port: %s', version, PORT)
 })
