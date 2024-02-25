@@ -23,7 +23,7 @@ export class PhoneNumberController {
       const config: Config = await this.getConfig(phone)
       return res.status(200).json({
         display_phone_number: phone,
-        status: getSessionStatus(phone),
+        status: await getSessionStatus(phone),
         ...config,
       })
     } catch (e) {
@@ -44,7 +44,7 @@ export class PhoneNumberController {
       for (let i = 0, j = phones.length; i < j; i++) {
         const phone = phones[i]
         const config = await this.getConfig(phone)
-        configs.push({ ...config, display_phone_number: phone, status: getSessionStatus(phone) })
+        configs.push({ ...config, display_phone_number: phone, status: await getSessionStatus(phone) })
       }
       return res.status(200).json(configs)
     } catch (e) {

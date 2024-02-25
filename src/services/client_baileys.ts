@@ -243,8 +243,7 @@ export class ClientBaileys implements Client {
       onNotification: this.onNotification,
       onNewLogin: this.onNewLogin,
       config: this.config,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-      onDisconnected: async (_phone: string, _payload: any) => this.disconnect(),
+      onDisconnected: async () => this.disconnect(),
     })
     this.sendMessage = send
     this.readMessages = read
@@ -253,8 +252,7 @@ export class ClientBaileys implements Client {
     this.fetchGroupMetadata = fetchGroupMetadata
     this.close = close
     this.exists = exists
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('messages.upsert', async (payload: any) => {
+    event('messages.upsert', async (payload: { messages: []; type }) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
       this.listener.process(this.phone, payload.messages, payload.type)
     })

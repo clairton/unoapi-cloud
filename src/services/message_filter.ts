@@ -47,7 +47,7 @@ export class MessageFilter {
       logger.info('Config to ignore jid group messages')
       ignoresJid.push((jid) => {
         const is = isJidGroup(jid)
-        logger.debug(`${jid} is group ${is}`)
+        logger.trace(`${jid} is group ${is}`)
         return is
       })
     }
@@ -55,7 +55,7 @@ export class MessageFilter {
       logger.info('Config to ignore jid broadcast statuses')
       ignoresJid.push((jid) => {
         const is = isJidStatusBroadcast(jid)
-        logger.debug(`${jid} is status broadcast ${is}`)
+        logger.trace(`${jid} is status broadcast ${is}`)
         return is
       })
     }
@@ -63,7 +63,7 @@ export class MessageFilter {
       logger.info('Config to ignore jid broadcast messages')
       ignoresJid.push((jid) => {
         const is = isJidBroadcast(jid)
-        logger.debug(`${jid} is message broadcast ${is}`)
+        logger.trace(`${jid} is message broadcast ${is}`)
         return is
       })
     }
@@ -82,7 +82,7 @@ export class MessageFilter {
         } else {
           const senderPhone = jidToPhoneNumber(key.remoteJid, '')
           const filter = phone == senderPhone
-          logger.debug('IgnoreYourselfKey: %s === %s => %s', phone, senderPhone, filter)
+          logger.trace('IgnoreYourselfKey: %s === %s => %s', phone, senderPhone, filter)
           return filter
         }
       }
@@ -94,7 +94,7 @@ export class MessageFilter {
         return f(jid) ? ++acc : acc
       }
       const sum: number = ignoresJid.reduce(fn, 0)
-      logger.debug(`${jid} ignore by jid sum is ${sum}`)
+      logger.trace(`${jid} ignore by jid sum is ${sum}`)
       return sum > 0
     }
     logger.info('%s Configs to ignore by jid', phone, ignoresJid.length)

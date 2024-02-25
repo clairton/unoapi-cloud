@@ -34,15 +34,15 @@ export const getRedis = async (redisUrl = REDIS_URL) => {
 }
 
 export const redisConnect = async (redisUrl = REDIS_URL) => {
-  logger.debug(`Connecting redis at ${redisUrl}....`)
+  logger.info(`Connecting redis at ${redisUrl}....`)
   const redisClient = await createClient({ url: redisUrl })
   await redisClient.connect()
-  logger.debug(`Connected redis!`)
+  logger.info(`Connected redis!`)
   return redisClient
 }
 
 export const redisGet = async (key: string) => {
-  logger.debug(`Getting ${key}`)
+  logger.trace(`Getting ${key}`)
   try {
     return client.get(key)
   } catch (error) {
@@ -56,7 +56,7 @@ export const redisGet = async (key: string) => {
 }
 
 const redisDel = async (key: string) => {
-  logger.debug(`Deleting ${key}`)
+  logger.trace(`Deleting ${key}`)
   try {
     return client.del(key)
   } catch (error) {
@@ -70,7 +70,7 @@ const redisDel = async (key: string) => {
 }
 
 export const redisKeys = async (pattern: string) => {
-  logger.debug(`Keys ${pattern}`)
+  logger.trace(`Keys ${pattern}`)
   try {
     return client.keys(pattern)
   } catch (error) {
@@ -85,7 +85,7 @@ export const redisKeys = async (pattern: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const redisSet = async function (key: string, value: any) {
-  logger.debug(`Setting ${key} => ${(value + '').substring(0, 10)}...`)
+  logger.trace(`Setting ${key} => ${(value + '').substring(0, 10)}...`)
   try {
     return client.set(key, value)
   } catch (error) {
@@ -100,7 +100,7 @@ const redisSet = async function (key: string, value: any) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const redisSetAndExpire = async function (key: string, value: any, ttl: number) {
-  logger.debug(`Setting ttl: ${ttl} ${key} -> ${(value + '').substring(0, 10)}...`)
+  logger.trace(`Setting ttl: ${ttl} ${key} -> ${(value + '').substring(0, 10)}...`)
   if (ttl < 0) {
     return redisSet(key, value)
   }
@@ -228,17 +228,17 @@ export const delConfig = async (phone: string) => {
 
 export const delAuth = async (phone: string) => {
   const key = authKey(phone)
-  logger.debug(`Deleting key ${key}...`)
+  logger.trace(`Deleting key ${key}...`)
   await redisDel(key)
   logger.debug(`Deleted key ${key}!`)
   const pattern = authKey(`${phone}:*`)
   const keys = await redisKeys(pattern)
-  logger.info(`${keys.length} keys to delete auth for ${phone}`)
+  logger.debug(`${keys.length} keys to delete auth for ${phone}`)
   for (let i = 0, j = keys.length; i < j; i++) {
     const key = keys[i]
-    logger.debug(`Deleting key ${key}...`)
+    logger.trace(`Deleting key ${key}...`)
     await redisDel(key)
-    logger.debug(`Deleted key ${key}!`)
+    logger.trace(`Deleted key ${key}!`)
   }
 }
 

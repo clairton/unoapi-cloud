@@ -132,6 +132,10 @@ export const connect = async ({
       await onNotification('Received pending notifications', true)
     }
 
+    if (event.isOnline) {
+      await onNotification('Online session', true)
+    }
+
     switch (event.connection) {
       case 'open':
         await onOpen()
@@ -209,50 +213,9 @@ export const connect = async ({
     return msg
   }
 
-  const connect = async () => {
-    if ((await isSessionStatusOnline(phone)) || (await isSessionStatusConnecting(phone))) return
-    logger.debug('Connecting %s', phone)
-    await setSessionStatus(phone, 'connecting')
-
-    const browser: WABrowserDescription = config.ignoreHistoryMessages ? ['Unoapi', 'Chrome', release()] : Browsers.windows('Desktop')
-
-    const loggerBaileys = MAIN_LOGGER.child({})
-    logger.level = config.logLevel as Level
-
-    let agent
-    if (config.proxyUrl) {
-      agent = new SocksProxyAgent(config.proxyUrl)
-    }
-
-    try {
-      sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true,
-        browser,
-        msgRetryCounterCache,
-        syncFullHistory: !config.ignoreHistoryMessages,
-        logger: loggerBaileys,
-        getMessage,
-        shouldIgnoreJid: config.shouldIgnoreJid,
-        retryRequestDelayMs: config.retryRequestDelayMs,
-        patchMessageBeforeSending,
-        agent,
-      })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      if (error && error.isBoom && !error.isServer) {
-        await onClose({ lastDisconnect: { error } })
-      } else {
-        logger.error('Baileys Socket error: %s %s', error, error.stack)
-        await onNotification(`Error: ${error.message}.`, true)
-        throw error
-      }
-    }
-    if (sock) {
-      dataStore.bind(sock.ev)
-      sock.ev.on('creds.update', saveCreds)
-      sock.ev.on('connection.update', onConnectionUpdate)
-    }
+  const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
+    logger.info('Subscribe %s event: %s', phone, event)
+    return sock?.ev?.on(event, callback)
   }
 
   const reconnect = async () => {
@@ -349,11 +312,6 @@ export const connect = async ({
     setInterval(reconnect, config.autoRestartMs)
   }
 
-  const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
-    logger.info('Subscribe %s event: %s', phone, event)
-    return sock?.ev?.on(event, callback)
-  }
-
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
     return sock?.rejectCall(callId, callFrom)
   }
@@ -368,7 +326,54 @@ export const connect = async ({
     return dataStore.loadGroupMetada(jid, sock!)
   }
 
-  connect()
+  const connect = async () => {
+    if ((await isSessionStatusOnline(phone)) || (await isSessionStatusConnecting(phone))) return
+    logger.debug('Connecting %s', phone)
+    // await setSessionStatus(phone, 'connecting')
+
+    const browser: WABrowserDescription = config.ignoreHistoryMessages ? ['Unoapi', 'Chrome', release()] : Browsers.windows('Desktop')
+
+    const loggerBaileys = MAIN_LOGGER.child({})
+    logger.level = config.logLevel as Level
+    loggerBaileys.level = config.logLevel as Level
+
+    let agent
+    if (config.proxyUrl) {
+      agent = new SocksProxyAgent(config.proxyUrl)
+    }
+
+    try {
+      sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true,
+        browser,
+        msgRetryCounterCache,
+        syncFullHistory: !config.ignoreHistoryMessages,
+        logger: loggerBaileys,
+        getMessage,
+        shouldIgnoreJid: config.shouldIgnoreJid,
+        retryRequestDelayMs: config.retryRequestDelayMs,
+        patchMessageBeforeSending,
+        agent,
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error && error.isBoom && !error.isServer) {
+        await onClose({ lastDisconnect: { error } })
+      } else {
+        logger.error('Baileys Socket error: %s %s', error, error.stack)
+        await onNotification(`Error: ${error.message}.`, true)
+        throw error
+      }
+    }
+    if (sock) {
+      dataStore.bind(sock.ev)
+      event('creds.update', saveCreds)
+      event('connection.update', onConnectionUpdate)
+    }
+  }
+
+  await connect()
 
   return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close }
 }

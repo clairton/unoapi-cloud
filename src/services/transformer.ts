@@ -211,7 +211,6 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
         response[type] = { url }
         break
       }
-      throw new Error(`Unknow message type ${type}`)
 
     case 'template':
       throw new BindTemplateError()
