@@ -335,7 +335,7 @@ export const connect = async ({
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
-    loggerBaileys.level = config.logLevel as Level
+    loggerBaileys.level = (process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
 
     let agent
     if (config.proxyUrl) {
