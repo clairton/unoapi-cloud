@@ -406,6 +406,8 @@ PS: After update JSON, restart de docker container or service
 
 ### [Docker compose with chatwoot and unoapi together](examples/unochat/README.md)
 
+### [Typebot](examples/typebot/README.md)
+
 ## Install as Systemctl
 
 Install nodejs 21 as https://nodejs.org/en/download/package-manager and Git
