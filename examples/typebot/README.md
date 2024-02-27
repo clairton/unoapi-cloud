@@ -36,6 +36,13 @@ After, enable the integration on typebot and click in Publish. ![image](prints/p
 
 # Lists with typebot
 
+### Some observations before using list on Typebot, by default Typebot is not ready to work with lists, so has some limitations. 
+
+* Use max of 3 itens in the list, if you use more will be send another list
+
+## How to use
+
+
 To use lists, you need to use the text bubble followed by button input. ![image](prints/lists.png)
 
 ![image](prints/exemple_list_typebot.png)
