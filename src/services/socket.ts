@@ -265,10 +265,8 @@ export const connect = async ({
   const validateStatus = async () => {
     if (await isSessionStatusConnecting(phone)) {
       throw new SendError(5, 'Wait a moment, connecting process')
-    } else if (await isSessionStatusIsDisconnect(phone)) {
+    } else if ((await isSessionStatusIsDisconnect(phone)) || (await isSessionStatusOffline(phone)) || !sock) {
       throw new SendError(3, 'Disconnected number, please read qr code')
-    } else if ((await isSessionStatusOffline(phone)) || !sock) {
-      connect()
     }
   }
 
