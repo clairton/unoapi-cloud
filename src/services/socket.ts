@@ -267,7 +267,7 @@ export const connect = async ({
       throw new SendError(5, 'Wait a moment, connecting process')
     } else if (await isSessionStatusIsDisconnect(phone)) {
       throw new SendError(3, 'Disconnected number, please read qr code')
-    } else if (await isSessionStatusOffline(phone)) {
+    } else if ((await isSessionStatusOffline(phone)) || !sock) {
       connect()
     }
   }
