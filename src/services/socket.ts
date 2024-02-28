@@ -214,7 +214,7 @@ export const connect = async ({
   }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
-    logger.info('Subscribe %s event: %s', phone, event)
+    logger.info('Subscribe %s event: %s sock: %s', phone, event, sock?.user?.id)
     return sock?.ev?.on(event, callback)
   }
 
