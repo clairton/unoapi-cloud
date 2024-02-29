@@ -1,5 +1,5 @@
 jest.mock('@whiskeysockets/baileys')
-import { OnDisconnected, OnQrCode, OnNotification, connect } from '../../src/services/socket'
+import { OnDisconnected, OnQrCode, OnReconnect, OnNotification, connect } from '../../src/services/socket'
 import makeWASocket, { WASocket } from '@whiskeysockets/baileys'
 import { mock } from 'jest-mock-extended'
 import { Store } from '../../src/services/store'
@@ -16,6 +16,7 @@ describe('service socket', () => {
   let onQrCode: OnQrCode
   let onNotification: OnNotification
   let onDisconnected: OnDisconnected
+  let onReconnect: OnReconnect
   const onNewLogin = async (phone: string) => {
     logger.info('New login', phone)
   }
@@ -31,15 +32,26 @@ describe('service socket', () => {
     onQrCode = jest.fn()
     onNotification = jest.fn()
     onDisconnected = jest.fn()
+    onReconnect = jest.fn()
   })
 
   test('call connect status connected false', async () => {
-    const response = await connect({ phone, store, onQrCode, onNotification, onDisconnected, onNewLogin, attempts: 1, config: defaultConfig })
+    const response = await connect({
+      phone,
+      store,
+      onQrCode,
+      onNotification,
+      onDisconnected,
+      onReconnect,
+      onNewLogin,
+      attempts: 1,
+      config: defaultConfig,
+    })
     expect(response.status.attempt).toBe(1)
   })
 
   test('call connect and subscribe 2 events', async () => {
-    await connect({ phone, store, onQrCode, onNotification, onDisconnected, onNewLogin, attempts: 1, config: defaultConfig })
+    await connect({ phone, store, onQrCode, onNotification, onDisconnected, onReconnect, onNewLogin, attempts: 1, config: defaultConfig })
     expect(mockOn).toBeCalledTimes(2)
   })
 })

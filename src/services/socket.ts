@@ -34,6 +34,7 @@ export type OnNotification = (text: string, important: boolean) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type OnDisconnected = (phone: string, payload: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
+export type OnReconnect = () => Promise<void>
 
 export class SendError extends Error {
   readonly code: number
@@ -84,6 +85,7 @@ export const connect = async ({
   onQrCode,
   onNotification,
   onDisconnected,
+  onReconnect,
   onNewLogin,
   attempts = Infinity,
   config = defaultConfig,
@@ -93,6 +95,7 @@ export const connect = async ({
   onQrCode: OnQrCode
   onNotification: OnNotification
   onDisconnected: OnDisconnected
+  onReconnect: OnReconnect
   onNewLogin: OnNewLogin
   attempts: number
   config: Partial<Config>
@@ -229,7 +232,7 @@ export const connect = async ({
       status.attempt++
       await onNotification(`Try connnecting time ${status.attempt} of ${attempts}...`, false)
       await close()
-      return connect()
+      return onReconnect()
     }
   }
 

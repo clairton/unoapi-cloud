@@ -17,6 +17,7 @@ import {
   fetchGroupMetadata,
   exists,
   close,
+  OnReconnect,
 } from './socket'
 import { Client, getClient, clients } from './client'
 import { Config, configs, defaultConfig, getConfig } from './config'
@@ -208,6 +209,17 @@ export class ClientBaileys implements Client {
     }
   }
 
+  private onReconnect: OnReconnect = async () => {
+    await this.disconnect()
+    await getClientBaileys({
+      phone: this.phone,
+      incoming: this.incoming,
+      listener: this.listener,
+      getConfig: this.getConfig,
+      onNewLogin: this.onNewLogin,
+    })
+  }
+
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
     logger.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
@@ -244,6 +256,7 @@ export class ClientBaileys implements Client {
       onNewLogin: this.onNewLogin,
       config: this.config,
       onDisconnected: async () => this.disconnect(),
+      onReconnect: this.onReconnect,
     })
     this.sendMessage = send
     this.readMessages = read
@@ -468,7 +481,7 @@ export class ClientBaileys implements Client {
         const title = e.title
         await this.onNotification(title, true)
         if ([3, '3'].includes(code)) {
-          this.connect()
+          await this.connect()
         }
         const id = uuid()
         const ok = {
