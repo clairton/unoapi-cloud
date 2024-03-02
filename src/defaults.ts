@@ -93,6 +93,7 @@ export const SEND_PROFILE_PICTURE: boolean = process.env.SEND_PROFILE_PICTURE ==
 export const IGNORED_CONNECTIONS_NUMBERS = JSON.parse(process.env.IGNORED_CONNECTIONS_NUMBERS || '[]')
 export const CLEAN_CONFIG_ON_DISCONNECT =
   process.env.CLEAN_CONFIG_ON_DISCONNECT === _undefined ? false : process.env.CLEAN_CONFIG_ON_DISCONNECT == 'true'
+export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefined ? false : process.env.VALIDATE_ROUTING_KEY == 'true'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {

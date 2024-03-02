@@ -9,6 +9,7 @@ import {
   NOTIFY_FAILED_MESSAGES,
   UNOAPI_JOB_NOTIFICATION,
   IGNORED_CONNECTIONS_NUMBERS,
+  VALIDATE_ROUTING_KEY,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -20,6 +21,13 @@ let amqpConnection: Connection | undefined
 
 const channels = new Map<string, Channel>()
 const routes = new Map<string, boolean>()
+
+const validateFormatNumber = (v: string) => {
+  if ('' != v && !/^\d+$/.test(v)) {
+    throw `${v} is not a number`
+  }
+}
+const validateRoutingKey = VALIDATE_ROUTING_KEY ? validateFormatNumber : (_) => _
 
 export type CreateOption = {
   delay: number
@@ -69,6 +77,7 @@ export const amqpGetChannel = async (
   amqpUrl = AMQP_URL,
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0 },
 ) => {
+  validateRoutingKey(phone)
   if (!channels.has(queue)) {
     const connection = await amqpConnect(amqpUrl)
     const channel = await amqpCreateChannel(connection, queue, options)
@@ -130,6 +139,7 @@ export const amqpEnqueue = async (
   payload: object,
   options: Partial<EnqueueOption> = { delay: 0, dead: false, maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT, countRetries: 0, priority: 0 },
 ) => {
+  validateRoutingKey(phone)
   const channel: Channel | undefined = await amqpGetChannel(queue, phone, AMQP_URL, options)
   if (!channel) {
     throw `Not create channel for queue ${queue}`
@@ -167,6 +177,7 @@ export const amqpConsume = async (
   callback: ConsumeCallback,
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0, notifyFailedMessages: NOTIFY_FAILED_MESSAGES },
 ) => {
+  validateRoutingKey(phone)
   const channel = await amqpGetChannel(queue, phone, AMQP_URL, options)
   if (!channel) {
     throw `Not create channel for queue ${queue}`
