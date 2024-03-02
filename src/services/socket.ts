@@ -113,7 +113,7 @@ export const connect = async ({
     logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
       logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
-      if (status.attempt >= attempts) {
+      if (status.attempt > attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
         await onNotification(message, true)
         await setSessionStatus(phone, 'disconnected')
