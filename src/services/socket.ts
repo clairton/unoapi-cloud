@@ -241,7 +241,9 @@ export const connect = async ({
 
     await setSessionStatus(phone, 'offline')
     logger.info(`${phone} close`)
-    return sock && (await sock.end(undefined))
+    try {
+      return sock && sock.ws.close()
+    } catch (error) {}
   }
 
   const logout = async () => {
@@ -268,7 +270,11 @@ export const connect = async ({
   const validateStatus = async () => {
     if (await isSessionStatusConnecting(phone)) {
       throw new SendError(5, 'Wait a moment, connecting process')
-    } else if ((await isSessionStatusIsDisconnect(phone)) || (await isSessionStatusOffline(phone)) || !sock) {
+    } else if (
+      (await isSessionStatusIsDisconnect(phone)) ||
+      (await isSessionStatusOffline(phone)) ||
+      (!sock && (await isSessionStatusConnecting(phone)))
+    ) {
       throw new SendError(3, 'Disconnected number, please read qr code')
     }
   }
