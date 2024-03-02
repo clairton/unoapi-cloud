@@ -16,7 +16,7 @@ export const autoConnect = async (
 ) => {
   try {
     const phones = await sessionStore.getPhones()
-    logger.info(`${phones.length} phones to verify is auto connect`)
+    logger.info(`${phones.length} phones to verify if is auto connect`)
     for (let i = 0, j = phones.length; i < j; i++) {
       const phone = phones[i]
       try {

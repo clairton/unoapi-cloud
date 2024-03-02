@@ -34,7 +34,7 @@ export type OnNotification = (text: string, important: boolean) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type OnDisconnected = (phone: string, payload: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
-export type OnReconnect = () => Promise<void>
+export type OnReconnect = (time: number) => Promise<void>
 
 export class SendError extends Error {
   readonly code: number
@@ -88,6 +88,7 @@ export const connect = async ({
   onReconnect,
   onNewLogin,
   attempts = Infinity,
+  time,
   config = defaultConfig,
 }: {
   phone: string
@@ -98,6 +99,7 @@ export const connect = async ({
   onReconnect: OnReconnect
   onNewLogin: OnNewLogin
   attempts: number
+  time: number
   config: Partial<Config>
 }) => {
   let sock: WASocket | undefined = undefined
@@ -105,7 +107,7 @@ export const connect = async ({
   const { dataStore, state, saveCreds } = store
 
   const status: Status = {
-    attempt: 1,
+    attempt: time,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,7 +119,7 @@ export const connect = async ({
         const message = `The ${attempts} times of generate qrcode is exceded!`
         await onNotification(message, true)
         await setSessionStatus(phone, 'disconnected')
-        status.attempt = 0
+        status.attempt = 1
         sock && sock.logout()
         dataStore.cleanSession()
       } else {
@@ -168,11 +170,11 @@ export const connect = async ({
     const { lastDisconnect } = payload
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
-    await onDisconnected(phone, payload)
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       await logout()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
       await onNotification(message, true)
+      await onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
       await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
@@ -182,7 +184,7 @@ export const connect = async ({
       const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
       return onNotification(message, true)
     } else {
-      if (status.attempt == 0) {
+      if (status.attempt == 1) {
         const detail = lastDisconnect?.error?.output?.payload?.error
         const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
         await onNotification(message, true)
@@ -223,16 +225,16 @@ export const connect = async ({
 
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
-    if (status.attempt >= attempts) {
+    if (status.attempt > attempts) {
       const message = `The ${attempts} times of try connect is exceded!`
       await onNotification(message, true)
-      status.attempt = 0
+      status.attempt = 1
       return close()
     } else {
-      status.attempt++
       await onNotification(`Try connnecting time ${status.attempt} of ${attempts}...`, false)
+      status.attempt++
       await close()
-      return onReconnect()
+      return onReconnect(status.attempt)
     }
   }
 

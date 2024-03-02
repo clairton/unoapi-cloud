@@ -38,6 +38,6 @@ export class ReloadJob {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    await newClient.connect()
+    await newClient.connect(1)
   }
 }

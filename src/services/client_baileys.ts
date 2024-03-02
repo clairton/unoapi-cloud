@@ -55,7 +55,7 @@ export const getClientBaileys: getClient = async ({
     const config = await getConfig(phone)
     if (config.autoConnect) {
       logger.info('Connecting client baileys %s', phone)
-      await client.connect()
+      await client.connect(1)
       logger.info('Created and connected client baileys %s', phone)
     } else {
       logger.info('Config client baileys to not auto connect %s', phone)
@@ -209,16 +209,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onReconnect: OnReconnect = async () => {
-    await this.disconnect()
-    await getClientBaileys({
-      phone: this.phone,
-      incoming: this.incoming,
-      listener: this.listener,
-      getConfig: this.getConfig,
-      onNewLogin: this.onNewLogin,
-    })
-  }
+  private onReconnect: OnReconnect = async (time: number) => this.connect(time)
 
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
@@ -238,7 +229,7 @@ export class ClientBaileys implements Client {
     this.onNewLogin = onNewLogin
   }
 
-  async connect() {
+  async connect(time: number) {
     logger.debug('Client Baileys connecting for %s', this.phone)
     this.config = await this.getConfig(this.phone)
     this.config.getMessageMetadata = async <T>(data: T) => {
@@ -251,6 +242,7 @@ export class ClientBaileys implements Client {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
       attempts,
+      time,
       onQrCode: this.onQrCode,
       onNotification: this.onNotification,
       onNewLogin: this.onNewLogin,
@@ -482,7 +474,7 @@ export class ClientBaileys implements Client {
         await this.onNotification(title, true)
         if ([3, '3'].includes(code)) {
           await this.close()
-          await this.connect()
+          await this.connect(1)
         }
         const id = uuid()
         const ok = {
