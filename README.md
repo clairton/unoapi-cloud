@@ -240,6 +240,8 @@ SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is t
 UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
 PROXY_URL the socks proxy url, default not use
 CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
+CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
+CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
