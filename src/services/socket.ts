@@ -341,7 +341,7 @@ export const connect = async ({
     logger.debug('Connecting %s', phone)
     // await setSessionStatus(phone, 'connecting')
 
-    const browser: WABrowserDescription = config.ignoreHistoryMessages ? ['Unoapi', 'Chrome', release()] : Browsers.windows('Desktop')
+    const browser: WABrowserDescription = config.ignoreHistoryMessages ? [(process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi'), (process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome'), release()] : Browsers.windows('Desktop')
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
