@@ -21,6 +21,7 @@ import { Listener } from './services/listener'
 import { ListenerAmqp } from './services/listener_amqp'
 import { OutgoingAmqp } from './services/outgoing_amqp'
 import { Outgoing } from './services/outgoing'
+import { version } from '../package.json'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -36,20 +37,20 @@ const disconnectJob = new DisconnectJob(getClientBaileys, getConfig, listenerAmq
 const startWorker = async () => {
   await startRedis()
 
-  logger.debug('Starting Worker')
+  logger.info('Unoapi Cloud version %s starting worker...', version)
 
   const sessionStore: SessionStore = new SessionStoreRedis()
 
-  logger.debug('Starting bind consumer')
+  logger.info('Starting bind consumer')
   await amqpConsume(UNOAPI_JOB_BIND, '', bindJob.consume.bind(bindJob))
 
-  logger.debug('Starting reload consumer')
+  logger.info('Starting reload consumer')
   await amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))
 
-  logger.debug('Starting disconnect consumer')
+  logger.info('Starting disconnect consumer')
   await amqpConsume(UNOAPI_JOB_DISCONNECT, '', disconnectJob.consume.bind(disconnectJob))
 
-  logger.debug('Started worker')
+  logger.info('Unoapi Cloud version %s started worker!', version)
 
   await autoConnect(sessionStore, incomingAmqp, listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin.run.bind(onNewLogin))
 }
