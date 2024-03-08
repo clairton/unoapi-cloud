@@ -74,7 +74,7 @@ describe('service client baileys', () => {
     }
     client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
-    read = mockFn<readMessages>()
+    read = mockFn<readMessages>().mockResolvedValue(true)
     exists = mockFn<exists>()
     rejectCall = mockFn<rejectCall>()
     fetchImageUrl = mockFn<fetchImageUrl>()
