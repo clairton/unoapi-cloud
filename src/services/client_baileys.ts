@@ -358,9 +358,13 @@ export class ClientBaileys implements Client {
                   logger.debug('Ignore read message for %s with key id %s reading message key %s...', this.phone, key?.id)
                 } else {
                   logger.debug('Baileys %s reading message key %s...', this.phone, JSON.stringify(key))
-                  await this.readMessages([key])
-                  await this.store?.dataStore?.setStatus(payload?.message_id, status)
-                  logger.debug('Baileys %s read message key %s!', this.phone, JSON.stringify(key))
+                  if (await this.readMessages([key])) {
+                    await this.store?.dataStore?.setStatus(payload?.message_id, status)
+                    logger.debug('Baileys %s read message key %s!', this.phone, JSON.stringify(key))
+                  } else {
+                    logger.debug('Baileys %s not read message key %s!', this.phone, JSON.stringify(key))
+                    throw `not online session ${this.phone}`
+                  }
                 }
               }
             } else {

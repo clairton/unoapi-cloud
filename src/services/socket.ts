@@ -46,7 +46,7 @@ export interface sendMessage {
 }
 
 export interface readMessages {
-  (_keys: WAMessageKey[]): Promise<void>
+  (_keys: WAMessageKey[]): Promise<boolean>
 }
 
 export interface rejectCall {
@@ -301,8 +301,10 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
-    await validateStatus()
-    return sock?.readMessages(keys)
+    if (!(await isSessionStatusOnline(phone))) return false
+
+    await sock?.readMessages(keys)
+    return true
   }
 
   if (config.autoRestartMs) {
