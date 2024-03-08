@@ -473,7 +473,6 @@ export class ClientBaileys implements Client {
         const title = e.title
         await this.onNotification(title, true)
         if ([3, '3'].includes(code)) {
-          await this.close()
           await this.connect(1)
         }
         const id = uuid()

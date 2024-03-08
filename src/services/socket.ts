@@ -21,13 +21,7 @@ import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
-import {
-  isSessionStatusConnecting,
-  isSessionStatusIsDisconnect,
-  isSessionStatusOffline,
-  isSessionStatusOnline,
-  setSessionStatus,
-} from './session_store'
+import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus } from './session_store'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -118,10 +112,7 @@ export const connect = async ({
       if (status.attempt > attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
         await onNotification(message, true)
-        await setSessionStatus(phone, 'disconnected')
-        status.attempt = 1
-        sock && sock.logout()
-        dataStore.cleanSession()
+        await logout()
       } else {
         onQrCode(event.qr, status.attempt, attempts)
         status.attempt++
@@ -138,6 +129,7 @@ export const connect = async ({
     }
 
     if (event.isOnline) {
+      await setSessionStatus(phone, 'online')
       await onNotification('Online session', true)
     }
 
@@ -157,7 +149,7 @@ export const connect = async ({
   }
 
   const onOpen = async () => {
-    status.attempt = 0
+    status.attempt = 1
     await setSessionStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version, isLatest } = await fetchLatestBaileysVersion()
@@ -198,8 +190,7 @@ export const connect = async ({
     logger.debug('load message for jid %s id %s', remoteJid, id)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const message = await dataStore.loadMessage(remoteJid!, id!)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return message?.message ? new Promise((resolve) => resolve(message.message!)) : undefined
+    return message?.message || undefined
   }
 
   const patchMessageBeforeSending = (msg: proto.IMessage) => {
@@ -239,20 +230,20 @@ export const connect = async ({
   }
 
   const close = async () => {
-    if (await isSessionStatusOffline(phone)) return
+    if (!(await isSessionStatusOnline(phone)) && !(await isSessionStatusConnecting(phone))) return
 
     await setSessionStatus(phone, 'offline')
     logger.info(`${phone} close`)
     try {
-      return sock && sock.ws.close()
+      await sock?.ws?.close()
     } catch (error) {}
   }
 
   const logout = async () => {
-    if (await isSessionStatusIsDisconnect(phone)) return
+    if (!(await isSessionStatusOnline(phone)) && !(await isSessionStatusConnecting(phone))) return
     await close()
     logger.info(`${phone} destroyed`)
-    dataStore.cleanSession()
+    await dataStore.cleanSession()
 
     logger.info(`${phone} disconnected`)
     await setSessionStatus(phone, 'disconnected')
@@ -272,11 +263,7 @@ export const connect = async ({
   const validateStatus = async () => {
     if (await isSessionStatusConnecting(phone)) {
       throw new SendError(5, 'Wait a moment, connecting process')
-    } else if (
-      (await isSessionStatusIsDisconnect(phone)) ||
-      (await isSessionStatusOffline(phone)) ||
-      (!sock && (await isSessionStatusConnecting(phone)))
-    ) {
+    } else if (!(await isSessionStatusOnline(phone))) {
       throw new SendError(3, 'Disconnected number, please read qr code')
     }
   }
@@ -286,7 +273,8 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    await validateStatus()
+    if (!(await isSessionStatusOnline(phone))) return
+
     const id = isJidGroup(to) ? to : await exists(to)
     if (id) {
       if (options.composing) {
@@ -339,7 +327,7 @@ export const connect = async ({
   const connect = async () => {
     if ((await isSessionStatusOnline(phone)) || (await isSessionStatusConnecting(phone))) return
     logger.debug('Connecting %s', phone)
-    // await setSessionStatus(phone, 'connecting')
+    await setSessionStatus(phone, 'connecting')
 
     const browser: WABrowserDescription = config.ignoreHistoryMessages
       ? [process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi', process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome', release()]
