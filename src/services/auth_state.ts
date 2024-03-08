@@ -1,4 +1,4 @@
-import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds } from '@whiskeysockets/baileys'
+import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds, makeCacheableSignalKeyStore } from '@whiskeysockets/baileys'
 import { session } from './session'
 import logger from './logger'
 
@@ -41,11 +41,11 @@ export const authState = async (session: session, phone: string) => {
 
   const state: AuthenticationState = {
     creds,
-    keys,
+    keys: makeCacheableSignalKeyStore(keys, logger),
   }
 
   const saveCreds: () => Promise<void> = async () => {
-    logger.debug('save creds')
+    logger.debug('save creds %', phone)
     await writeData('', creds)
   }
 
