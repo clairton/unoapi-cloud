@@ -2,15 +2,10 @@ import { Outgoing } from './outgoing'
 import { v1 as uuid } from 'uuid'
 import { getConfigRedis } from './config_redis'
 import { getConfig, setConfig } from './redis'
+import { OnNewLogin } from './socket'
 
-export class OnNewLogin {
-  private outgoing: Outgoing
-
-  constructor(outgoing: Outgoing) {
-    this.outgoing = outgoing
-  }
-
-  public async run(phone: string) {
+export const onNewLoginGenerateToken = (outgoing: Outgoing): OnNewLogin => {
+  return async (phone: string) => {
     let authToken = `${uuid()}${uuid()}`.replaceAll('-', '')
     const config = await getConfig(phone)
     if (!config) {
@@ -31,6 +26,6 @@ export class OnNewLogin {
         body: message,
       },
     }
-    return this.outgoing.formatAndSend(phone, phone, payload)
+    return outgoing.formatAndSend(phone, phone, payload)
   }
 }

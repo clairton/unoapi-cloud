@@ -3,10 +3,8 @@ import { Listener } from './listener'
 import { OnNewLogin } from './socket'
 import { phoneNumberToJid } from './transformer'
 
-/* eslint-disable */
-export const onNewLogin =
-  (listener: Listener): OnNewLogin =>
-  (phone: string): Promise<void> => {
+export const onNewLoginAlert = (listener: Listener): OnNewLogin => {
+  return async (phone: string) => {
     const message = `Please be careful, the http endpoint is unprotected and if it is exposed in the network, someone else can send message as you!`
     const payload = {
       key: {
@@ -20,4 +18,4 @@ export const onNewLogin =
     }
     return listener.process(phone, [payload], 'notify')
   }
-/* eslint-enable */
+}

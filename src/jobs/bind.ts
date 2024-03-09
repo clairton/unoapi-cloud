@@ -34,7 +34,7 @@ import { getConfig } from '../services/config'
 import { getConfigRedis } from '../services/config_redis'
 import { getClientBaileys } from '../services/client_baileys'
 import { Incoming } from '../services/incoming'
-import { OnNewLogin } from '../services/on_new_login'
+import { onNewLoginGenerateToken } from '../services/on_new_login_generate_token'
 import logger from '../services/logger'
 import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
@@ -51,8 +51,8 @@ const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, getConfigRed
 const getConfig: getConfig = getConfigRedis
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig)
-const onNewLogin = new OnNewLogin(outgoingCloudApi)
-const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin.run.bind(onNewLogin))
+const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
+const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
 const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)
 const notificationJob = new NotificationJob(incomingBaileys)
 

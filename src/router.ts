@@ -12,6 +12,9 @@ import { MessagesController } from './controllers/messages_controller'
 import { MediaController } from './controllers/media_controller'
 import { PhoneNumberController } from './controllers/phone_number_controller'
 import { RegistrationController } from './controllers/registration_controller'
+import { SessionController } from './controllers/session_controller'
+import { Server } from 'socket.io'
+import { OnNewLogin } from './services/socket'
 
 export const router = (
   incoming: Incoming,
@@ -19,6 +22,8 @@ export const router = (
   baseUrl: string,
   getConfig: getConfig,
   sessionStore: SessionStore,
+  socket: Server,
+  onNewLogin: OnNewLogin,
   middleware: middleware = async (req: Request, res: Response, next: NextFunction) => next(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   injectRoute: injectRoute = async (router: Router) => {},
@@ -29,10 +34,12 @@ export const router = (
   const templatesController = new TemplatesController(getConfig)
   const registrationController = new RegistrationController(getConfig)
   const phoneNumberController = new PhoneNumberController(getConfig, sessionStore)
+  const sessionController = new SessionController(getConfig, onNewLogin, socket)
 
   //Routes
   router.get('/ping', indexController.ping)
   router.get('/:version/debug_token', indexController.debugToken)
+  router.get('/session/:phone', sessionController.index.bind(sessionController))
   router.post('/:version/:phone/register', middleware, registrationController.register.bind(registrationController))
   router.post('/:version/:phone/deregister', middleware, registrationController.deregister.bind(registrationController))
   router.get('/:version/:phone', middleware, phoneNumberController.get.bind(phoneNumberController))

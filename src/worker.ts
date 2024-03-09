@@ -13,7 +13,7 @@ import { getConfig } from './services/config'
 import { getConfigRedis } from './services/config_redis'
 import { getClientBaileys } from './services/client_baileys'
 import { Incoming } from './services/incoming'
-import { OnNewLogin } from './services/on_new_login'
+import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import logger from './services/logger'
 import { ReloadJob } from './jobs/reload'
 import { DisconnectJob } from './jobs/disconnect'
@@ -29,10 +29,10 @@ const listenerAmqp: Listener = new ListenerAmqp()
 
 const getConfig: getConfig = getConfigRedis
 
-const onNewLogin = new OnNewLogin(outgoingAmqp)
+const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindJob()
-const reloadJob = new ReloadJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin.run.bind(onNewLogin))
-const disconnectJob = new DisconnectJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin.run.bind(onNewLogin))
+const reloadJob = new ReloadJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
+const disconnectJob = new DisconnectJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
 
 const startWorker = async () => {
   await startRedis()
@@ -52,7 +52,7 @@ const startWorker = async () => {
 
   logger.info('Unoapi Cloud version %s started worker!', version)
 
-  await autoConnect(sessionStore, incomingAmqp, listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin.run.bind(onNewLogin))
+  await autoConnect(sessionStore, incomingAmqp, listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
 }
 startWorker()
 

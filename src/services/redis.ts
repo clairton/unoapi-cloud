@@ -2,6 +2,7 @@ import { createClient } from '@redis/client'
 import { REDIS_URL, DATA_JID_TTL, DATA_TTL, SESSION_TTL } from '../defaults'
 import logger from './logger'
 import { GroupMetadata } from '@whiskeysockets/baileys'
+import { configs } from './config'
 
 export const BASE_KEY = 'unoapi-'
 
@@ -218,6 +219,7 @@ export const setConfig = async (phone: string, value: any) => {
   const key = configKey(phone)
   const config = { ...currentConfig, ...value }
   await redisSetAndExpire(key, JSON.stringify(config), SESSION_TTL)
+  configs.delete(phone)
   return config
 }
 

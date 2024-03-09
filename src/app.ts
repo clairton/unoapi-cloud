@@ -1,4 +1,5 @@
-import express, { Application } from 'express'
+import express from 'express'
+import { createServer, Server as HttpServer } from 'http'
 import { Request, Response, NextFunction, Router } from 'express'
 import { router } from './router'
 import { getConfig } from './services/config'
@@ -7,9 +8,12 @@ import { Outgoing } from './services/outgoing'
 import { SessionStore } from './services/session_store'
 import middleware from './services/middleware'
 import injectRoute from './services/inject_route'
+import { OnNewLogin } from './services/socket'
+import { Server } from 'socket.io'
 
 export class App {
-  public server: Application
+  public readonly server: HttpServer
+  private app
 
   constructor(
     incoming: Incoming,
@@ -17,17 +21,17 @@ export class App {
     baseUrl: string,
     getConfig: getConfig,
     sessionStore: SessionStore,
+    onNewLogin: OnNewLogin,
     middleware: middleware = async (req: Request, res: Response, next: NextFunction) => next(),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     injectRoute: injectRoute = async (router: Router) => {},
   ) {
-    this.server = express()
-    this.middleware()
-    this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, middleware, injectRoute)
-  }
-
-  private middleware() {
-    this.server.use(express.json())
+    this.app = express()
+    this.app.use(express.json())
+    this.app.use(express.urlencoded({ extended: true }))
+    this.server = createServer(this.app)
+    const socket: Server = new Server(this.server)
+    this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, middleware, injectRoute)
   }
 
   private router(
@@ -36,10 +40,12 @@ export class App {
     baseUrl: string,
     getConfig: getConfig,
     sessionStore: SessionStore,
+    socket: Server,
+    onNewLogin: OnNewLogin,
     middleware: middleware,
     injectRoute: injectRoute,
   ) {
-    const roter = router(incoming, outgoing, baseUrl, getConfig, sessionStore, middleware, injectRoute)
-    this.server.use(roter)
+    const roter = router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, middleware, injectRoute)
+    this.app.use(roter)
   }
 }

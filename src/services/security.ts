@@ -49,6 +49,7 @@ const getAuthHeaderToken = (req: Request) => {
     req.query['access_token'] ||
     req.headers['Authorization'] ||
     req.body['auth_token'] ||
+    req.body['authToken'] ||
     ''
   ).replace('Bearer ', '')
 }

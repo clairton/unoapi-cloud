@@ -154,6 +154,7 @@ with:
 * 7 - invalid phone number
 * 8 - message not allowed
 * 9 - connection lost
+* 10 - Invalid token value
 
 ## Up for development
 
