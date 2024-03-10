@@ -12,7 +12,14 @@ An implementation of Baileys(`https://github.com/WhiskeySockets/Baileys`) as
 RESTful API service with multi device support with a Whatsapp Cloud API format
 `https://developers.facebook.com/docs/whatsapp/cloud-api`.
 
-The media files are saved in file system at folder data with the session or in redis.
+The media files are saved in file system at folder data with the session or in s3 or compatible and redis.
+
+
+## Read qrcode or config
+
+Go to `http://localhost:9876/session/XXX`, when XXX is your phone number, by example `http://localhost:9876/session/5549988290955`. When disconnect whatsapp number this show the qrcode, read to connect, unoapi response with auth token, save him. When already connect, they show the number config saved in redis, you cloud update, put the auth token and save.
+
+The qrcode is send to configured webhook to, you can read in chatwoot inbox, in created chat with de same number of connection.
 
 ## Send a Message
 
