@@ -1,4 +1,4 @@
-import { isSessionStatusIsDisconnect } from '../services/session_store'
+import { getSessionStatus, isSessionStatusIsDisconnect, isSessionStatusOffline } from '../services/session_store'
 import { Request, Response } from 'express'
 import { Server } from 'socket.io'
 import { Config, defaultConfig, getConfig } from '../services/config'
@@ -7,7 +7,8 @@ import { Store } from '../services/store'
 import QRCode from 'qrcode'
 import { OnDisconnected, OnNewLogin, OnNotification, OnQrCode, OnReconnect, connect } from '../services/socket'
 
-const configuration = async (phone: string, config: Config) => {
+const configuration = async (phone: string, getConfig: getConfig) => {
+  const config = await getConfig(phone)
   const keysToIgnore = ['getStore', 'baseStore', 'shouldIgnoreKey', 'shouldIgnoreJid', 'webhooks', 'getMessageMetadata', 'authToken', 'proxyUrl']
   const keys = Object.keys(defaultConfig).filter((k) => !keysToIgnore.includes(k))
   const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name]
@@ -16,6 +17,7 @@ const configuration = async (phone: string, config: Config) => {
     <body>
       <div id="content">
         <form method="POST" action="/v15.0/${phone}/register">
+          ${await getSessionStatus(phone)}
           <label for="authToken">authToken</label><input type="text" name="authToken" id="authToken" value="" required="true"/><br/>
           <label for="proxyUrl">proxyUrl</label><input type="text" name="proxyUrl" id="proxyUrl" value=""/><br/><!--not show by security question-->
           ${keys
@@ -45,6 +47,7 @@ const configuration = async (phone: string, config: Config) => {
 
 const qrcode = async (phone: string, getConfig: getConfig, onNewLogin: OnNewLogin, socket: Server) => {
   const onQrCode: OnQrCode = async (qrCode: string) => {
+    logger.debug('Reveived qrcode', qrCode)
     socket.emit('onQrCode', await QRCode.toString(qrCode))
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -79,12 +82,12 @@ const qrcode = async (phone: string, getConfig: getConfig, onNewLogin: OnNewLogi
     <script>
       var socket = io();
       socket.on('onNewLogin', function(msg){
-        document.getElementById('qrcode').innerHTML = 'Pronto, seu token para autheticar é ' + msg.authToken;
+        document.getElementById('qrcode').innerHTML = 'Pronto, seu token para authenticar é ' + msg.authToken;
         socket.on('onQrCode', function() {})
         socket.on('onNewLogin', function() {})
       });
       socket.on('onQrCode', function(qrcode){
-        document.getElementById('qrcode').innerHTML = qrcode
+        document.getElementById('qrcode').innerHTML = qrcode;
       });
     </script>
     <body>
@@ -111,11 +114,8 @@ export class SessionController {
     logger.debug('session body %s', JSON.stringify(req.body))
     const { phone } = req.params
 
-    const config = await this.getConfig(phone)
-
-    const html = (await isSessionStatusIsDisconnect(phone))
-      ? qrcode(phone, this.getConfig, this.onNewLogin, this.socket)
-      : await configuration(phone, config)
+    const generateQrcode = (await isSessionStatusIsDisconnect(phone)) || (await isSessionStatusOffline(phone))
+    const html = generateQrcode ? await qrcode(phone, this.getConfig, this.onNewLogin, this.socket) : await configuration(phone, this.getConfig)
     return res.send(html)
   }
 }
