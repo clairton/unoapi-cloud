@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.15.39-dev",
+  "version": "1.15.39",
   "description": "Unoapi Cloud",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -74,7 +74,6 @@
     "pino": "^8.14.1",
     "qrcode": "^1.5.1",
     "qrcode-terminal": "^0.12.0",
-    "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4",
     "socks-proxy-agent": "^8.0.2",
     "uuid": "^9.0.0",
