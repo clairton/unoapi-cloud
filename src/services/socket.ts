@@ -22,6 +22,7 @@ import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus } from './session_store'
+import { AuthError } from './auth_state'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
