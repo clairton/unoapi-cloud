@@ -10,6 +10,7 @@ import { Outgoing } from '../../src/services/outgoing'
 import { MediaStore } from '../../src/services/media_store'
 import { getStore, Store } from '../../src/services/store'
 import { SessionStore } from '../../src/services/session_store'
+import { OnNewLogin } from '../../src/services/socket'
 
 const sessionStore = mock<SessionStore>()
 
@@ -42,7 +43,8 @@ describe('media routes', () => {
   beforeEach(() => {
     incoming = mock<Incoming>()
     outgoing = mock<Outgoing>()
-    app = new App(incoming, outgoing, url, getConfigTest, sessionStore)
+    const onNewLogin = mock<OnNewLogin>()
+    app = new App(incoming, outgoing, url, getConfigTest, sessionStore, onNewLogin)
   })
 
   test('index', async () => {

@@ -8,6 +8,7 @@ import { defaultConfig, getConfig } from '../../src/services/config'
 import { Response } from '../../src/services/response'
 import { getStore, Store } from '../../src/services/store'
 import { SessionStore } from '../../src/services/session_store'
+import { OnNewLogin } from '../../src/services/socket'
 
 const sessionStore = mock<SessionStore>()
 const store = mock<Store>()
@@ -34,7 +35,8 @@ describe('messages routes', () => {
     json = { data: `${new Date().getTime()}` }
     outgoing = mock<Outgoing>()
     incoming = mock<Incoming>()
-    app = new App(incoming, outgoing, '', getConfigTest, sessionStore)
+    const onNewLogin = mock<OnNewLogin>()
+    app = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin)
   })
 
   test('whatsapp with sucess', async () => {

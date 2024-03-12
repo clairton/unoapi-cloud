@@ -6,6 +6,7 @@ import { Incoming } from '../../src/services/incoming'
 import { getConfig } from '../../src/services/config'
 import { Outgoing } from '../../src/services/outgoing'
 import { SessionStore } from '../../src/services/session_store'
+import { OnNewLogin } from '../../src/services/socket'
 const sessionStore = mock<SessionStore>()
 
 describe('index routes', () => {
@@ -13,7 +14,8 @@ describe('index routes', () => {
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
     const getConfig = mock<getConfig>()
-    const app: App = new App(incoming, outgoing, '', getConfig, sessionStore)
+    const onNewLogin = mock<OnNewLogin>()
+    const app: App = new App(incoming, outgoing, '', getConfig, sessionStore, onNewLogin)
     const res = await request(app.server).get('/ping')
     expect(res.text).toEqual('pong!')
   })

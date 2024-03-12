@@ -8,12 +8,14 @@ import { getStore, Store } from '../../src/services/store'
 import { Config, getConfig } from '../../src/services/config'
 import { DataStore } from '../../src/services/data_store'
 import { SessionStore } from '../../src/services/session_store'
+import { OnNewLogin } from '../../src/services/socket'
 
 const sessionStore = mock<SessionStore>()
 const store = mock<Store>()
 const config = mock<Config>()
 const dataStore = mock<DataStore>()
 const getConfig = mock<getConfig>()
+const onNewLogin = mock<OnNewLogin>()
 
 const loadTemplates = jest.spyOn(dataStore, 'loadTemplates')
 loadTemplates.mockResolvedValue([])
@@ -29,7 +31,7 @@ describe('templates routes', () => {
   test('index', async () => {
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore)
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin)
     const res = await request(app.server).get('/v15.0/123/message_templates')
     expect(res.status).toEqual(200)
   })
