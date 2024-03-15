@@ -213,6 +213,45 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 
 Create a `.env`file and put configuration if you need change default value:
 
+#### Main Configs
+
+Main configs to unoapi run:
+
+```env
+BASE_URL=current base url to download medias
+PORT=the http port
+CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
+CONNECTING_TIMEOUT_MS=60000 timeout milliseconds to session connect
+CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
+CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
+LOG_LEVEL=log level, default warn
+UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
+RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+PROXY_URL=the socks proxy url, default is null
+CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
+CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
+```
+
+Config connection to redis to temp save messages and rabbitmq broker.
+
+```env
+AMQP_URL
+REDIS_URL
+```
+
+Bucket env to config assets media compatible with S3:
+
+```env
+STORAGE_BUCKET_NAME
+STORAGE_ACCESS_KEY_ID
+STORAGE_SECRET_ACCESS_KEY
+STORAGE_REGION
+STORAGE_ENDPOINT
+STORAGE_FORCE_PATH_STYLE
+STORAGE_TIMEOUT_MS
+```
+
+#### Session Configs
 ```env
 WEBHOOK_URL_ABSOLUTE=the webhook absolute url, not use this if already use WEBHOOK_URL
 WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, no use if use WEBHOOK_URL_ABSOLUTE
@@ -221,8 +260,6 @@ WEBHOOK_HEADER=the webhook header name
 WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
 WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
-BASE_URL=current base url to download medias
-PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
 IGNORE_STATUS_MESSAGE=false to send stories in socket to webhook, default true
@@ -241,34 +278,9 @@ AUTO_CONNECT=true, auto connect on start service
 AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto restart
 THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default is false, if true throw exception
 NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message failed and enqueued in dead queue
-LOG_LEVEL=log level, default warn
-UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
 SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
-UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
-PROXY_URL the socks proxy url, default not use
 CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
-CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
-CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
-```
-
-Bucket env to config assets media compatible with S3, this config can't save in redis:
-
-```env
-STORAGE_BUCKET_NAME
-STORAGE_ACCESS_KEY_ID
-STORAGE_SECRET_ACCESS_KEY
-STORAGE_REGION
-STORAGE_ENDPOINT
-STORAGE_FORCE_PATH_STYLE
-STORAGE_TIMEOUT_MS
-```
-
-Config connection to redis to temp save messages and rabbitmq broker, this config can't save in redis too.
-
-```env
-AMQP_URL
-REDIS_URL
 ```
 
 ### Config with redis
@@ -277,30 +289,17 @@ The `.env` can be save one configm, but on redis use different webhook by sessio
 
 ```json
 {
-  "authToken": "xpto",
+  "authToken": "the auth token to send messagens in this session",
   "rejectCalls":"Reject Call Text do send do number calling to you",
   "rejectCallsWebhook":"Message send to webhook when receive a call",
   "ignoreGroupMessages": true,
-  "ignoreBroadcastStatuses": true,
-  "ignoreBroadcastMessages": false,
-  "ignoreHistoryMessages": true,
-  "ignoreOwnMessages": true,
-  "ignoreYourselfMessages": true,
-  "sendConnectionStatus": true,
-  "composingMessage": false,
-  "sessionWebhook": "",
-  "autoConnect": false,
-  "autoRestartMs": 3600000,
-  "retryRequestDelayMs": 1000,
-  "throwWebhookError": false,
   "webhooks": [
     {
       "url": "http://localhost:3000/whatsapp/webhook",
       "token": "kslflkhlkwq",
       "header": "api_acess_token"
     }
-  ],
-  "ignoreDataStore": false
+  ]
 }
 ```
 
@@ -505,7 +504,7 @@ https://chat.whatsapp.com/FZd0JyPVMLq94FHf59I8HU
 
 ## Need More
 
-Mail to comercial@unoapi.cloud
+Mail to sales@unoapi.cloud
 
 ## Donate to the project.
 

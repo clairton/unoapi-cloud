@@ -1,10 +1,6 @@
 {
   "name": "unoapi-cloud",
-<<<<<<< HEAD
-  "version": "1.15.40",
-=======
   "version": "1.16.0-dev",
->>>>>>> 83ec03e (timeout to session state connecting)
   "description": "Unoapi Cloud",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
