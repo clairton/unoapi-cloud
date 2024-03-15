@@ -1,8 +1,19 @@
+import { CONNECTING_TIMEOUT_MS } from '../defaults'
+
 const statuses: Map<string, string> = new Map<string, string>()
 
 export const getSessionStatus = async (phone: string) => statuses.get(phone) || 'disconnected'
 
-export const setSessionStatus = async (phone: string, status: 'offline' | 'online' | 'disconnected' | 'connecting') => statuses.set(phone, status)
+export const setSessionStatus = async (phone: string, status: 'offline' | 'online' | 'disconnected' | 'connecting') => {
+  if (status == 'connecting') {
+    setTimeout(() => {
+      if (statuses.get(phone) == 'connecting') {
+        statuses.set(phone, 'disconnected')
+      }
+    }, CONNECTING_TIMEOUT_MS)
+  }
+  statuses.set(phone, status)
+}
 
 export const isSessionStatusOnline = async (phone: string) => (await getSessionStatus(phone)) == 'online'
 export const isSessionStatusConnecting = async (phone: string) => (await getSessionStatus(phone)) == 'connecting'

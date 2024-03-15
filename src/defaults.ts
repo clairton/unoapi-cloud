@@ -22,7 +22,6 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
-export const CONNECTION_TIMEOUT = process.env.CONNECTION_TIMEOUT || 140_000
 export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '1_000')
 export const QR_TIMEOUT = process.env.QR_TIMEOUT || 30_000
 export const SLEEP_TIME = process.env.SLEEP_TIME || 500
@@ -94,6 +93,7 @@ export const IGNORED_CONNECTIONS_NUMBERS = JSON.parse(process.env.IGNORED_CONNEC
 export const CLEAN_CONFIG_ON_DISCONNECT =
   process.env.CLEAN_CONFIG_ON_DISCONNECT === _undefined ? false : process.env.CLEAN_CONFIG_ON_DISCONNECT == 'true'
 export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefined ? false : process.env.VALIDATE_ROUTING_KEY == 'true'
+export const CONNECTING_TIMEOUT_MS = parseInt(process.env.CONNECTING_TIMEOUT_MS || '60_000')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {
