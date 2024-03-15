@@ -238,7 +238,6 @@ export const connect = async ({
   const close = async () => {
     await setSessionStatus(phone, 'offline')
     logger.info(`${phone} close`)
-    status.attempt = 1
     try {
       await sock?.ws?.close()
     } catch (error) {}
