@@ -8,7 +8,7 @@ import {
   AUTO_CONNECT,
   COMPOSING_MESSAGE,
   BASE_STORE,
-  UNOAPI_RETRY_REQUEST_DELAY_MS,
+  RETRY_REQUEST_DELAY_MS,
   IGNORE_CALLS,
   REJECT_CALLS_WEBHOOK,
   MESSAGE_CALLS_WEBHOOK,
@@ -59,7 +59,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.messageCallsWebhook = MESSAGE_CALLS_WEBHOOK
     config.throwWebhookError = THROW_WEBHOOK_ERROR
     config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
-    config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY_MS
+    config.retryRequestDelayMs = RETRY_REQUEST_DELAY_MS
     config.sendReactionAsReply = SEND_REACTION_AS_REPLY
     config.sendProfilePicture = SEND_PROFILE_PICTURE
     config.sessionWebhook = WEBHOOK_SESSION
