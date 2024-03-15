@@ -5,7 +5,7 @@ const statuses: Map<string, string> = new Map<string, string>()
 
 export const getSessionStatus = async (phone: string) => statuses.get(phone) || 'disconnected'
 
-export const setSessionStatus = async (phone: string, status: 'offline' | 'online' | 'disconnected' | 'connecting') => {
+export const setSessionStatus = async (phone: string, status: 'offline' | 'online' | 'disconnected' | 'connecting' | 'qrcode') => {
   logger.info(`Session status ${phone} change from ${await getSessionStatus(phone)} to ${status}`)
   if (status == 'connecting') {
     setTimeout(() => {
