@@ -10,10 +10,12 @@ export const setSessionStatus = async (phone: string, status: 'offline' | 'onlin
   if (status == 'connecting') {
     setTimeout(() => {
       if (statuses.get(phone) == 'connecting') {
+        logger.info('Session %s status connecting timeout config to %s', phone, CONNECTING_TIMEOUT_MS)
         statuses.set(phone, 'disconnected')
       }
     }, CONNECTING_TIMEOUT_MS)
   }
+  logger.debug('Session %s status set to %s', phone, status)
   statuses.set(phone, status)
 }
 
