@@ -112,6 +112,7 @@ export const connect = async ({
       if (status.attempt > attempts) {
         const message = `The ${attempts} times of generate qrcode is exceded!`
         await onNotification(message, true)
+        status.attempt = 1
         await logout()
       } else {
         onQrCode(event.qr, status.attempt, attempts)
