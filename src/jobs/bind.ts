@@ -27,6 +27,7 @@ import {
   UNOAPI_JOB_LISTENER,
   UNOAPI_JOB_NOTIFICATION,
   UNOAPI_JOB_OUTGOING_PREFETCH,
+  DATA_TTL,
 } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { IncomingAmqp } from '../services/incoming_amqp'
@@ -104,8 +105,10 @@ export class BindJob {
       await amqpConsume(UNOAPI_JOB_NOTIFICATION, phone, notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
     }
 
-    logger.debug('Starting media consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_MEDIA, phone, mediaJob.consume.bind(mediaJob), { notifyFailedMessages })
+    if (DATA_TTL > 0) {
+      logger.debug('Starting media consumer %s', phone)
+      await amqpConsume(UNOAPI_JOB_MEDIA, phone, mediaJob.consume.bind(mediaJob), { notifyFailedMessages })
+    }
 
     logger.debug('Starting commander consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_COMMANDER, phone, commanderJob.consume.bind(commanderJob), { notifyFailedMessages })
