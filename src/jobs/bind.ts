@@ -58,7 +58,7 @@ const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UN
 const notificationJob = new NotificationJob(incomingBaileys)
 
 const outgingJob = new OutgoingJob(outgoingCloudApi)
-const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi)
+const listenerJob = new ListenerJob(listenerBaileys)
 
 const mediaJob = new MediaJob(getConfig)
 const webhookerJob = new WebhookerJob(outgoingCloudApi)
