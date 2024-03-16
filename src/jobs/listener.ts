@@ -1,18 +1,19 @@
 import { amqpEnqueue } from '../amqp'
-import { UNOAPI_JOB_LISTENER } from '../defaults'
+import { SEND_REPLAY_MESSAGE_TO_DECRYPT, UNOAPI_JOB_INCOMING, UNOAPI_JOB_LISTENER, UNOAPI_JOB_OUTGOING } from '../defaults'
 import { Listener } from '../services/listener'
-import { Outgoing } from '../services/outgoing'
 import { DecryptError } from '../services/transformer'
 
 export class ListenerJob {
   private listener: Listener
-  private outgoing: Outgoing
   private queueListener: string
+  private queueOutgoing: string
+  private queueIncoming: string
 
-  constructor(listener: Listener, outgoing: Outgoing, queueListener = UNOAPI_JOB_LISTENER) {
+  constructor(listener: Listener, queueOutgoing = UNOAPI_JOB_OUTGOING, queueIncoming = UNOAPI_JOB_INCOMING, queueListener = UNOAPI_JOB_LISTENER) {
     this.listener = listener
-    this.outgoing = outgoing
     this.queueListener = queueListener
+    this.queueOutgoing = queueOutgoing
+    this.queueIncoming = queueIncoming
   }
 
   async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number }) {
@@ -23,9 +24,31 @@ export class ListenerJob {
       try {
         await this.listener.process(phone, messages, type)
       } catch (error) {
-        if (error instanceof DecryptError && options && options?.countRetries >= options?.maxRetries) {
-          // send message asking to open whatsapp to see
-          await this.outgoing.send(phone, error.getContent())
+        if (error instanceof DecryptError && options) {
+          // send message . to get key do decrypt message if already
+          if (SEND_REPLAY_MESSAGE_TO_DECRYPT && options?.countRetries === 2) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const content: any = error.getContent() as any
+            const message = content?.entry?.changes[0]?.value?.messages[0]
+            const contact = content?.entry?.changes[0]?.value?.contacts[0]
+            if (message.id && contact.wa_id) {
+              const payload = {
+                messaging_product: 'whatsapp',
+                context: {
+                  message_id: message.id,
+                },
+                to: contact.wa_id,
+                type: 'text',
+                text: {
+                  body: SEND_REPLAY_MESSAGE_TO_DECRYPT,
+                },
+              }
+              await amqpEnqueue(this.queueIncoming, phone, { payload })
+            }
+          } else if (options?.countRetries >= options?.maxRetries) {
+            // send message asking to open whatsapp to see
+            await amqpEnqueue(this.queueOutgoing, phone, { payload: error.getContent(), split: false })
+          }
         }
         throw error
       }
