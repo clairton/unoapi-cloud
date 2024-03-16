@@ -226,6 +226,12 @@ CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone con
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
 LOG_LEVEL=log level, default warn
 UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
+UNOAPI_JOB_OUTGOING_PREFETCH=number of messages prefetch by number, default is 1 and for send message job is allways 1
+UNOAPI_MESSAGE_RETRY_LIMIT=quantity of retry failed job, default is 5
+UNOAPI_MESSAGE_RETRY_DELAY=delay between retry, default is 10000 milliseconds
+DATA_TTL=seconds of live messages in redis default is a month: 60 * 60 * 24 * 30, put -1 to never expire
+DATA_JID_TTL=seconds of live jid in redis default is a week: 60 * 60 * 24 * 7, put -1 to neve expire
+SESSION_TTL=seconds on live encrypt keys, default is -1 to never expire
 ```
 
 Config connection to redis to temp save messages and rabbitmq broker.
