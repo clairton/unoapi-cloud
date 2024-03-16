@@ -11,6 +11,7 @@ import makeWASocket, {
   BaileysEventMap,
   GroupMetadata,
   Browsers,
+  ConnectionState,
 } from '@whiskeysockets/baileys'
 import { release } from 'os'
 import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
@@ -104,8 +105,7 @@ export const connect = async ({
     attempt: time,
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onConnectionUpdate = async (event: any) => {
+  const onConnectionUpdate = async (event: Partial<ConnectionState>) => {
     logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
       logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
