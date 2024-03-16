@@ -23,9 +23,6 @@ export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
 export const RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.RETRY_REQUEST_DELAY_MS || '1_000')
-export const QR_TIMEOUT = process.env.QR_TIMEOUT || 30_000
-export const SLEEP_TIME = process.env.SLEEP_TIME || 500
-export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6
 export const DATA_TTL: number = parseInt(process.env.DATA_TTL || `${60 * 60 * 24 * 30}`) // a month
 export const DATA_JID_TTL: number = parseInt(process.env.DATA_JID_TTL || `${60 * 60 * 24 * 7}`) // a week
 export const SESSION_TTL: number = parseInt(process.env.SESSION_TTL || '-1')
