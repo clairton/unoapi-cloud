@@ -1,8 +1,7 @@
-import P, { Level } from 'pino'
+import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
 
 import { UNO_LOG_LEVEL } from '../defaults'
 
-const logger = P({ timestamp: () => `,"time":"${new Date().toJSON()}"` })
-logger.level = UNO_LOG_LEVEL as Level
+MAIN_LOGGER.level = UNO_LOG_LEVEL
 
-export default logger
+export default MAIN_LOGGER
