@@ -108,9 +108,12 @@ export const amqpCreateChannel = async (
   channel.prefetch(options.prefetch || 1)
   const queueDeadd = queueDead(queue)
   logger.info('Creating queue %s...', queueDeadd)
+
   await channel.assertExchange(queueDeadd, 'direct', {
     durable: true,
+    arguments: { 'x-dead-letter-exchange': queue },
   })
+
   const parameters = { 'x-dead-letter-exchange': queueDeadd }
   if (options.priority) {
     parameters['x-max-priority'] = options.priority
@@ -120,7 +123,7 @@ export const amqpCreateChannel = async (
     arguments: parameters,
   })
   logger.info('Created queue %s!', queueDeadd)
-  // if (options.delay) {
+
   const queueDelayed = queueDelay(queue)
   logger.info('Creating queue %s...', queueDelayed)
   await channel.assertExchange(queueDelayed, 'direct', {
@@ -128,7 +131,7 @@ export const amqpCreateChannel = async (
     arguments: { 'x-dead-letter-exchange': queue },
   })
   logger.info('Created queue %s!', queueDelayed)
-  // }
+
   logger.info('Created channel %s!', queue)
   return channel
 }
@@ -236,15 +239,18 @@ export const amqpConsume = async (
   }
 
   const queueDeadd = queueDead(queue)
-  const channelQueueDead = await channel.assertQueue(queueDeadd, { durable: true })
+  const channelQueueDead = await channel.assertQueue(queueDeadd, {
+    durable: true,
+    arguments: {
+      'x-dead-letter-exchange': queue,
+    },
+  })
   await channel.bindQueue(channelQueueDead.queue, queueDeadd, phone)
 
   const channelQueue = await channel.assertQueue(queue, {
     durable: true,
-    // exclusive: true,
     arguments: {
       'x-dead-letter-exchange': queueDeadd,
-      // 'x-dead-letter-routing-key': phone,
     },
   })
   await channel.bindQueue(channelQueue.queue, queue, phone)
@@ -254,10 +260,9 @@ export const amqpConsume = async (
     durable: true,
     arguments: {
       'x-dead-letter-exchange': queue,
-      // 'x-dead-letter-routing-key': phone,
     },
   })
   await channel.bindQueue(channelQueueDelayed.queue, queueDelayed, phone)
 
-  channel.consume(channelQueue.queue, fn)
+  return channel.consume(channelQueue.queue, fn)
 }
