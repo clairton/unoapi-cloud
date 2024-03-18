@@ -173,6 +173,7 @@ export const connect = async ({
       await logout()
       return onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
+      status.attempt = 1
       await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
       return onNotification(message, true)
