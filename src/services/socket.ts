@@ -165,17 +165,20 @@ export const connect = async ({
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     let reconnectSession = true
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
+      status.attempt = 1
       reconnectSession = false
       await logout()
       const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
       await onNotification(message, true)
       await onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
+      status.attempt = 1
       reconnectSession = false
       await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
       return onNotification(message, true)
     } else if (statusCode === DisconnectReason.unavailableService) {
+      status.attempt = 1
       await close()
       const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
       return onNotification(message, true)
