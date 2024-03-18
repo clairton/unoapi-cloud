@@ -10,7 +10,6 @@ import middleware from './services/middleware'
 import injectRoute from './services/inject_route'
 import { OnNewLogin } from './services/socket'
 import { Server } from 'socket.io'
-import path from 'path'
 
 export class App {
   public readonly server: HttpServer
@@ -30,11 +29,6 @@ export class App {
     this.app = express()
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
-    // this.app.use(express.static(path.join(__dirname, '..', 'dist')))
-    // this.app.use(express.static('public'))
-    // this.app.get('*', (_req: Request, res: Response) => {
-    //   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'))
-    // })
     this.server = createServer(this.app)
     const socket: Server = new Server(this.server)
     this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, middleware, injectRoute)
