@@ -259,26 +259,26 @@ export class ClientBaileys implements Client {
     this.exists = exists
     event('messages.upsert', async (payload: { messages: []; type }) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
-      this.listener.process(this.phone, payload.messages, payload.type)
+      await this.listener.process(this.phone, payload.messages, payload.type)
     })
-    event('messages.update', (messages: object[]) => {
+    event('messages.update', async (messages: object[]) => {
       logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
-      this.listener.process(this.phone, messages, 'update')
+      await this.listener.process(this.phone, messages, 'update')
     })
-    event('message-receipt.update', (updates: object[]) => {
+    event('message-receipt.update', async (updates: object[]) => {
       logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(updates))
-      this.listener.process(this.phone, updates, 'update')
+      await this.listener.process(this.phone, updates, 'update')
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('messages.delete', (updates: any) => {
+    event('messages.delete', async (updates: any) => {
       logger.debug('messages.delete %s', this.phone, JSON.stringify(updates))
-      this.listener.process(this.phone, updates, 'delete')
+      await this.listener.process(this.phone, updates, 'delete')
     })
     if (!this.config.ignoreHistoryMessages) {
       logger.info('Config import history messages %', this.phone)
       event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
         logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
-        this.listener.process(this.phone, messages, 'history')
+        await this.listener.process(this.phone, messages, 'history')
       })
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
