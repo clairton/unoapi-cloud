@@ -27,7 +27,7 @@ import logger from '../../src/services/logger'
 const mockConnect = connect as jest.MockedFunction<typeof connect>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const event = (event, _callback) => {
+const event = async (event, _callback) => {
   logger.info('subscribe event: %s', event)
 }
 
