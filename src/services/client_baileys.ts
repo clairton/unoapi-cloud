@@ -257,20 +257,20 @@ export class ClientBaileys implements Client {
     this.fetchGroupMetadata = fetchGroupMetadata
     this.close = close
     this.exists = exists
-    event('messages.upsert', async (payload: { messages: []; type }) => {
+    await event('messages.upsert', async (payload: { messages: []; type }) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
       await this.listener.process(this.phone, payload.messages, payload.type)
     })
-    event('messages.update', async (messages: object[]) => {
+    await event('messages.update', async (messages: object[]) => {
       logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
       await this.listener.process(this.phone, messages, 'update')
     })
-    event('message-receipt.update', async (updates: object[]) => {
+    await event('message-receipt.update', async (updates: object[]) => {
       logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(updates))
       await this.listener.process(this.phone, updates, 'update')
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('messages.delete', async (updates: any) => {
+    await event('messages.delete', async (updates: any) => {
       logger.debug('messages.delete %s', this.phone, JSON.stringify(updates))
       await this.listener.process(this.phone, updates, 'delete')
     })
@@ -282,7 +282,7 @@ export class ClientBaileys implements Client {
       })
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('call', async (events: any[]) => {
+    await event('call', async (events: any[]) => {
       for (let i = 0; i < events.length; i++) {
         const { from, id, status } = events[i]
         if (status == 'ringing' && !this.calls.has(from)) {
