@@ -209,7 +209,7 @@ export const connect = async ({
     return msg
   }
 
-  const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
+  const event = async <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
     logger.info('Subscribe %s event: %s sock: %s', phone, event, sock?.user?.id)
     return sock?.ev?.on(event, callback)
   }
@@ -370,8 +370,8 @@ export const connect = async ({
     }
     if (sock) {
       dataStore.bind(sock.ev)
-      event('creds.update', saveCreds)
-      event('connection.update', onConnectionUpdate)
+      await event('creds.update', saveCreds)
+      await event('connection.update', onConnectionUpdate)
     }
   }
 
