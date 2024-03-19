@@ -28,6 +28,7 @@ import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
 import { getSessionStatus, isSessionStatusOnline } from './session_store'
+import { AuthError } from './auth_state'
 const attempts = 3
 
 interface Delay {
@@ -237,85 +238,94 @@ export class ClientBaileys implements Client {
       return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
-      phone: this.phone,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      store: this.store!,
-      attempts,
-      time,
-      onQrCode: this.onQrCode,
-      onNotification: this.onNotification,
-      onNewLogin: this.onNewLogin,
-      config: this.config,
-      onDisconnected: async () => this.disconnect(),
-      onReconnect: this.onReconnect,
-    })
-    this.sendMessage = send
-    this.readMessages = read
-    this.rejectCall = rejectCall
-    this.fetchImageUrl = this.config.sendProfilePicture ? fetchImageUrl : fetchImageUrlDefault
-    this.fetchGroupMetadata = fetchGroupMetadata
-    this.close = close
-    this.exists = exists
-    event('messages.upsert', async (payload: { messages: []; type }) => {
-      logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
-      this.listener.process(this.phone, payload.messages, payload.type)
-    })
-    event('messages.update', (messages: object[]) => {
-      logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
-      this.listener.process(this.phone, messages, 'update')
-    })
-    event('message-receipt.update', (updates: object[]) => {
-      logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(updates))
-      this.listener.process(this.phone, updates, 'update')
-    })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('messages.delete', (updates: any) => {
-      logger.debug('messages.delete %s', this.phone, JSON.stringify(updates))
-      this.listener.process(this.phone, updates, 'delete')
-    })
-    if (!this.config.ignoreHistoryMessages) {
-      logger.info('Config import history messages %', this.phone)
-      event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
-        logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
-        this.listener.process(this.phone, messages, 'history')
+    try {
+      const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
+        phone: this.phone,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        store: this.store!,
+        attempts,
+        time,
+        onQrCode: this.onQrCode,
+        onNotification: this.onNotification,
+        onNewLogin: this.onNewLogin,
+        config: this.config,
+        onDisconnected: async () => this.disconnect(),
+        onReconnect: this.onReconnect,
       })
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    event('call', async (events: any[]) => {
-      for (let i = 0; i < events.length; i++) {
-        const { from, id, status } = events[i]
-        if (status == 'ringing' && !this.calls.has(from)) {
-          this.calls.set(from, true)
-          if (this.config.rejectCalls && this.rejectCall) {
-            await this.rejectCall(id, from)
-            await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } }, {})
-            logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
-          }
-          const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
-          if (messageCallsWebhook) {
-            const id = uuid()
-            const waMessageKey = {
-              fromMe: false,
-              id: uuid(),
-              remoteJid: from,
-            }
-            const message = {
-              key: waMessageKey,
-              message: {
-                conversation: messageCallsWebhook,
-              },
-            }
-            await this.store?.dataStore?.setKey(id, waMessageKey)
-            await this.listener.process(this.phone, [message], 'notify')
-          }
-          setTimeout(() => {
-            logger.debug('Clean call rejecteds %s', from)
-            this.calls.delete(from)
-          }, 10_000)
-        }
+      this.sendMessage = send
+      this.readMessages = read
+      this.rejectCall = rejectCall
+      this.fetchImageUrl = this.config.sendProfilePicture ? fetchImageUrl : fetchImageUrlDefault
+      this.fetchGroupMetadata = fetchGroupMetadata
+      this.close = close
+      this.exists = exists
+      event('messages.upsert', async (payload: { messages: []; type }) => {
+        logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
+        this.listener.process(this.phone, payload.messages, payload.type)
+      })
+      event('messages.update', (messages: object[]) => {
+        logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
+        this.listener.process(this.phone, messages, 'update')
+      })
+      event('message-receipt.update', (updates: object[]) => {
+        logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(updates))
+        this.listener.process(this.phone, updates, 'update')
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      event('messages.delete', (updates: any) => {
+        logger.debug('messages.delete %s', this.phone, JSON.stringify(updates))
+        this.listener.process(this.phone, updates, 'delete')
+      })
+      if (!this.config.ignoreHistoryMessages) {
+        logger.info('Config import history messages %', this.phone)
+        event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
+          logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
+          this.listener.process(this.phone, messages, 'history')
+        })
       }
-    })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      event('call', async (events: any[]) => {
+        for (let i = 0; i < events.length; i++) {
+          const { from, id, status } = events[i]
+          if (status == 'ringing' && !this.calls.has(from)) {
+            this.calls.set(from, true)
+            if (this.config.rejectCalls && this.rejectCall) {
+              await this.rejectCall(id, from)
+              await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } }, {})
+              logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
+            }
+            const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
+            if (messageCallsWebhook) {
+              const id = uuid()
+              const waMessageKey = {
+                fromMe: false,
+                id: uuid(),
+                remoteJid: from,
+              }
+              const message = {
+                key: waMessageKey,
+                message: {
+                  conversation: messageCallsWebhook,
+                },
+              }
+              await this.store?.dataStore?.setKey(id, waMessageKey)
+              await this.listener.process(this.phone, [message], 'notify')
+            }
+            setTimeout(() => {
+              logger.debug('Clean call rejecteds %s', from)
+              this.calls.delete(from)
+            }, 10_000)
+          }
+        }
+      })
+    } catch (error) {
+      if (error instanceof AuthError) {
+        await this.onNotification(error.message, true)
+        await this.disconnect()
+      } else {
+        throw error
+      }
+    }
     logger.debug('Client Baileys connected for %s', this.phone)
   }
 

@@ -1,6 +1,17 @@
 import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds, makeCacheableSignalKeyStore } from '@whiskeysockets/baileys'
 import { session } from './session'
 import logger from './logger'
+import { jidToPhoneNumber } from './transformer'
+
+export class AuthError extends Error {
+  readonly code: number
+  readonly title: string
+  constructor(code: number, title: string) {
+    super(`${code}: ${title}`)
+    this.code = code
+    this.title = title
+  }
+}
 
 export const authState = async (session: session, phone: string) => {
   const { readData, writeData, removeData, getKey } = await session(phone)
@@ -45,7 +56,13 @@ export const authState = async (session: session, phone: string) => {
   }
 
   const saveCreds: () => Promise<void> = async () => {
-    logger.debug('save creds %', phone)
+    logger.debug('save creds %s', phone)
+    if (creds?.me?.id) {
+      const phoneCreds = jidToPhoneNumber(creds?.me?.id)
+      if (phoneCreds != phone) {
+        throw new AuthError(11, `The read qrcode number is ${phoneCreds} but the configured number is ${phone}`)
+      }
+    }
     await writeData('', creds)
   }
 
