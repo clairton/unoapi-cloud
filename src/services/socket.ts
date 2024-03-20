@@ -241,8 +241,6 @@ export const connect = async ({
   }
 
   const close = async () => {
-    if (!(await isSessionStatusOnline(phone)) && !(await isSessionStatusConnecting(phone))) return
-
     await setSessionStatus(phone, 'offline')
     logger.info(`${phone} close`)
     try {
@@ -251,11 +249,9 @@ export const connect = async ({
   }
 
   const logout = async () => {
-    if (!(await isSessionStatusOnline(phone)) && !(await isSessionStatusConnecting(phone))) return
     await close()
     logger.info(`${phone} destroyed`)
     await dataStore.cleanSession()
-
     logger.info(`${phone} disconnected`)
     await setSessionStatus(phone, 'disconnected')
     try {
