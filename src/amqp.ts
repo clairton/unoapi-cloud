@@ -197,7 +197,12 @@ export const amqpConsume = async (
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
     const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
-      logger.debug('Received in %s with phone: %s, message: %s with headers: %s', queue, phone, content, JSON.stringify(payload.properties.headers))
+      logger.debug(
+        `Received in %s ${phone ? `with phone: ${phone},` : 'without phone,'} message: %s with headers: %s`,
+        queue,
+        content,
+        JSON.stringify(payload.properties.headers),
+      )
       if (IGNORED_CONNECTIONS_NUMBERS.includes(phone)) {
         logger.info(`Ignore messages from ${phone}`)
       } else {
