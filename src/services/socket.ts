@@ -241,7 +241,6 @@ export const connect = async ({
     await close()
     logger.info(`${phone} destroyed`)
     await dataStore.cleanSession()
-
     logger.info(`${phone} disconnected`)
     await setSessionStatus(phone, 'disconnected')
     try {
