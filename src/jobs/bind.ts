@@ -41,7 +41,6 @@ import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
 import { NotificationJob } from '../jobs/notification'
-import { isSessionStatusOnline } from '../services/session_store'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -70,14 +69,15 @@ const bulkStatusJob = new BulkStatusJob()
 const bulkReportJob = new BulkReportJob(outgoingCloudApi, getConfigRedis)
 const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 
-const processeds = new Map<string, boolean>()
+const bindeds = new Map<string, boolean>()
 
 export class BindJob {
   async consume(_: string, { phone }: { phone: string }) {
-    if (!(await isSessionStatusOnline(phone)) && processeds.get(phone)) {
+    // verify if already binded for this phone because could be restarted before consume this message and enqueue again when start
+    if (bindeds.get(phone)) {
+      logger.info('Already Bindeb queues consumer for %s', phone)
       return
     }
-    processeds.set(phone, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
     logger.info('Binding queues consumer for %s', phone)
 
@@ -127,5 +127,7 @@ export class BindJob {
 
     logger.debug('Starting bulk webhook consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_WEBHOOK, phone, bulkWebhookJob.consume.bind(bulkWebhookJob), { notifyFailedMessages })
+
+    bindeds.set(phone, true)
   }
 }

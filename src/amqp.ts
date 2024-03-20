@@ -10,6 +10,8 @@ import {
   UNOAPI_JOB_NOTIFICATION,
   IGNORED_CONNECTIONS_NUMBERS,
   VALIDATE_ROUTING_KEY,
+  UNOAPI_JOB_LISTENER,
+  UNOAPI_JOB_INCOMING,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -20,7 +22,7 @@ const queueDead = (queue: string) => `${queue}.dead`
 let amqpConnection: Connection | undefined
 
 const channels = new Map<string, Channel>()
-const routes = new Map<string, boolean>()
+const binds = new Map<string, boolean>()
 
 const validateFormatNumber = (v: string) => {
   if ('' != v && !/^\d+$/.test(v)) {
@@ -91,9 +93,10 @@ export const amqpGetChannel = async (
       channels.delete(queue)
     })
   }
-  if (phone && !routes.get(phone)) {
+  if (phone && [UNOAPI_JOB_LISTENER, UNOAPI_JOB_INCOMING].includes(queue) && !binds.get(phone)) {
+    // enqueue bind for this phone on first message on listener enqueued by phone
     await amqpEnqueue(UNOAPI_JOB_BIND, '', { phone })
-    routes.set(phone, true)
+    binds.set(phone, true)
   }
   return channels.get(queue)
 }
