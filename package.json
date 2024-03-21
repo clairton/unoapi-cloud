@@ -59,7 +59,7 @@
     "@aws-sdk/s3-request-presigner": "^3.341.0",
     "@google-cloud/text-to-speech": "^4.2.2",
     "@redis/client": "^1.5.6",
-    "@whiskeysockets/baileys": "^6.6.0",
+    "@whiskeysockets/baileys": "github:WhiskeySockets/Baileys",
     "amqplib": "^0.10.3",
     "awesome-phonenumber": "^6.2.0",
     "dotenv": "^16.0.3",
