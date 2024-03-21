@@ -20,7 +20,6 @@ import { Store } from './store'
 import NodeCache from 'node-cache'
 import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
-import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus } from './session_store'
 import { LOG_LEVEL } from '../defaults'
@@ -84,7 +83,7 @@ export const connect = async ({
   onReconnect,
   onNewLogin,
   attempts = Infinity,
-  time,
+  attempt,
   config = defaultConfig,
 }: {
   phone: string
@@ -95,30 +94,19 @@ export const connect = async ({
   onReconnect: OnReconnect
   onNewLogin: OnNewLogin
   attempts: number
-  time: number
+  attempt: number
   config: Partial<Config>
 }) => {
   let sock: WASocket | undefined = undefined
   const msgRetryCounterCache = new NodeCache()
   const { dataStore, state, saveCreds } = store
 
-  const status: Status = {
-    attempt: time,
-  }
+  const status: Status = { attempt }
 
   const onConnectionUpdate = async (event: Partial<ConnectionState>) => {
     logger.info('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
-      await setSessionStatus(phone, 'qrcode')
-      logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
-      if (status.attempt > attempts) {
-        const message = `The ${attempts} times of generate qrcode is exceded!`
-        await onNotification(message, true)
-        status.attempt = 1
-        return logout()
-      } else {
-        return onQrCode(event.qr, status.attempt++, attempts)
-      }
+      await onQr(event.qr)
     }
 
     if (event.isNewLogin) {
@@ -158,6 +146,19 @@ export const connect = async ({
     await onNotification(message, false)
   }
 
+  const onQr = async (qr) => {
+    await setSessionStatus(phone, 'qrcode')
+    logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
+    if (status.attempt > attempts) {
+      const message = `The ${attempts} times of generate qrcode is exceded!`
+      await onNotification(message, true)
+      status.attempt = 1
+      await logout()
+    } else {
+      return onQrCode(qr, status.attempt++, attempts)
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClose = async (payload: any) => {
     const { lastDisconnect } = payload
@@ -177,7 +178,7 @@ export const connect = async ({
     }
     if (status.attempt == 1) {
       const detail = lastDisconnect?.error?.output?.payload?.error
-      const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
+      const message = `The session is closed with status: ${statusCode}, detail: ${detail}!`
       await onNotification(message, true)
     }
     return reconnect()
@@ -213,9 +214,9 @@ export const connect = async ({
   }
 
   const reconnect = async () => {
-    logger.info(`${phone} reconnecting`, status.attempt)
+    logger.info('Reconnecting phone %s attempt %s', phone, status.attempt)
     if (status.attempt > attempts) {
-      const message = `The ${attempts} times of try connect is exceded!`
+      const message = `The ${attempts} times of try reconnect is exceded!`
       await onNotification(message, true)
       status.attempt = 1
       return close()
@@ -228,7 +229,7 @@ export const connect = async ({
 
   const close = async () => {
     await setSessionStatus(phone, 'offline')
-    logger.info(`${phone} close`)
+    logger.info('Close session %s', phone)
     try {
       await sock?.ws?.close()
     } catch (error) {}
@@ -236,9 +237,9 @@ export const connect = async ({
 
   const logout = async () => {
     await close()
-    logger.info(`${phone} destroyed`)
+    logger.info('Logout session %s', phone)
     await dataStore.cleanSession()
-    logger.info(`${phone} disconnected`)
+    logger.info(`Removed ${phone}`)
     await setSessionStatus(phone, 'disconnected')
     try {
       return sock && (await sock.logout())

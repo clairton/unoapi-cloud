@@ -45,7 +45,7 @@ export class ListenerBaileys implements Listener {
   }
 
   public async sendOne(phone: string, message: object) {
-    logger.debug(`Receive message %s`, JSON.stringify(message))
+    logger.trace(`Receive message %s`, JSON.stringify(message))
     let i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
     logger.debug(`messageType %s...`, messageType)
@@ -69,7 +69,7 @@ export class ListenerBaileys implements Listener {
     // possible update message
     if (key?.fromMe && key?.id) {
       const idUno = await store.dataStore.loadUnoId(key.id)
-      logger.debug('Unoapi id %s to Baileys id %s', idUno, key.id)
+      logger.trace('Unoapi id %s to Baileys id %s', idUno, key.id)
       if (idUno) {
         i.key.id = idUno
       }

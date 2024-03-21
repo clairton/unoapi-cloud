@@ -68,7 +68,7 @@ const qrcode = async (phone: string, getConfig: getConfig, onNewLogin: OnNewLogi
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     store: store!,
     attempts: 3,
-    time: 0,
+    attempt: 0,
     onQrCode,
     onNotification,
     onNewLogin: onNewLoginLocal,
