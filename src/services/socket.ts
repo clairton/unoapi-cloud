@@ -123,7 +123,6 @@ export const connect = async ({
 
     if (event.isNewLogin) {
       await onNewLogin(phone)
-      await setSessionStatus(phone, 'online')
     }
 
     if (event.receivedPendingNotifications) {
@@ -131,7 +130,6 @@ export const connect = async ({
     }
 
     if (event.isOnline) {
-      await setSessionStatus(phone, 'online')
       await onNotification('Online session', true)
     }
 
@@ -166,17 +164,15 @@ export const connect = async ({
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
-      status.attempt = 1
-      if (!(await isSessionStatusConnecting(phone))) {
-        const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-        await onNotification(message, true)
-      }
       await logout()
+      const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
+      await onNotification(message, true)
+      status.attempt = 1
       return onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
-      status.attempt = 1
       await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
+      status.attempt = 1
       return onNotification(message, true)
     }
     if (status.attempt == 1) {
