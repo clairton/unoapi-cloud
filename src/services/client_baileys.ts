@@ -239,8 +239,7 @@ export class ClientBaileys implements Client {
     this.store = await this.config.getStore(this.phone, this.config)
     const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
       phone: this.phone,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      store: this.store!,
+      store: this.store,
       attempts,
       time,
       onQrCode: this.onQrCode,
