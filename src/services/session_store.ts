@@ -9,11 +9,11 @@ export const getSessionStatus = async (phone: string) => statuses.get(phone) || 
 
 export const setSessionStatus = async (phone: string, status: 'offline' | 'online' | 'disconnected' | 'connecting' | 'qrcode') => {
   if (TIMEOUT_STATUSES.includes(status)) {
-    setTimeout(() => {
+    setTimeout(async () => {
       const s = statuses.get(phone)
       if (s && TIMEOUT_STATUSES.includes(s)) {
         logger.info('Session %s status connecting timeout config to %s', phone, CONNECTING_TIMEOUT_MS)
-        statuses.set(phone, 'disconnected')
+        await setSessionStatus(phone, 'disconnected')
       }
     }, CONNECTING_TIMEOUT_MS)
   }
