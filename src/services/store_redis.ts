@@ -13,11 +13,11 @@ import logger from './logger'
 
 export const getStoreRedis: getStore = async (phone: string, config: Config): Promise<Store> => {
   if (!stores.has(phone)) {
-    logger.debug('Creating redis store %s', phone)
+    logger.trace('Creating redis store %s', phone)
     const fstore: Store = await storeRedis(phone, config)
     stores.set(phone, fstore)
   } else {
-    logger.debug('Retrieving redis store %s', phone)
+    logger.trace('Retrieving redis store %s', phone)
   }
   return stores.get(phone) as Store
 }

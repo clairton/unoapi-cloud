@@ -2591,9 +2591,10 @@
     "@wasm-audio-decoders/common" "9.0.1"
     codec-parser "2.4.2"
 
-"@whiskeysockets/baileys@github:WhiskeySockets/Baileys":
+"@whiskeysockets/baileys@@WhiskeySockets/Baileys":
   version "6.6.0"
-  resolved "https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/1896ebe0ea524c617ad5a5dbdb2e7e1a6f18978a"
+  resolved "https://registry.yarnpkg.com/@whiskeysockets/baileys/-/baileys-6.6.0.tgz#072925bd0d948b6b2bc50a630043c0bd51352651"
+  integrity sha512-4aIPHztdLZP24Qac7mudZTMR7qIsEDQxlpCBJE4atYHFAa5tlwCGPcUy249q3aaayxYtQAwheVG42L6AkRxAwg==
   dependencies:
     "@adiwajshing/keyed-db" "^0.2.4"
     "@hapi/boom" "^9.1.3"

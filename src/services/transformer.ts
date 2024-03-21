@@ -227,14 +227,14 @@ export const phoneNumberToJid = (phoneNumber: string) => {
     return phoneNumber
   } else {
     const jid = `${jidToPhoneNumber(phoneNumber, '')}@s.whatsapp.net`
-    logger.debug('transform %s to %s', phoneNumber, jid)
+    logger.trace('transform %s to %s', phoneNumber, jid)
     return jid
   }
 }
 
 export const isIndividualJid = (jid: string) => {
   const isIndividual = isJidUser(jid)
-  logger.debug('jid %s is individual? %s', jid, isIndividual)
+  logger.trace('jid %s is individual? %s', jid, isIndividual)
   return isIndividual
 }
 
@@ -683,7 +683,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       }
       change.value.messages.push(message)
     }
-    logger.debug('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
+    logger.trace('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
     return data
   } catch (e) {
     logger.error(e, 'Error on convert baileys to cloud-api')

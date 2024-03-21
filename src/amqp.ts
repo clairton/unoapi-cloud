@@ -174,7 +174,7 @@ export const amqpEnqueue = async (
     queueName = queue
   }
   await channel.publish(queueName, phone, Buffer.from(JSON.stringify(payload)), properties)
-  logger.info('Enqueued at %s with phone: %s, payload: %s, properties: %s', queueName, phone, JSON.stringify(payload), JSON.stringify(properties))
+  logger.debug('Enqueued at %s with phone: %s, payload: %s, properties: %s', queueName, phone, JSON.stringify(payload), JSON.stringify(properties))
 }
 
 export const amqpConsume = async (

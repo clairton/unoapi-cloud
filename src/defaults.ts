@@ -92,7 +92,7 @@ export const IGNORED_CONNECTIONS_NUMBERS = JSON.parse(process.env.IGNORED_CONNEC
 export const CLEAN_CONFIG_ON_DISCONNECT =
   process.env.CLEAN_CONFIG_ON_DISCONNECT === _undefined ? false : process.env.CLEAN_CONFIG_ON_DISCONNECT == 'true'
 export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefined ? false : process.env.VALIDATE_ROUTING_KEY == 'true'
-export const CONNECTING_TIMEOUT_MS = parseInt(process.env.CONNECTING_TIMEOUT_MS || '60_000')
+export const CONNECTING_TIMEOUT_MS = parseInt(process.env.CONNECTING_TIMEOUT_MS || '60000')
 export const SEND_REPLAY_MESSAGE_TO_DECRYPT = process.env.SEND_REPLAY_MESSAGE_TO_DECRYPT || ''
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
