@@ -29,7 +29,7 @@ export class OutgoingCloudApi implements Outgoing {
       [webhook.header]: webhook.token,
     }
     const url = webhook.urlAbsolute || `${webhook.url}/${phone}`
-    logger.debug(`Send url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
+    logger.trace(`Send url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
     let response: Response
     try {
       const options: RequestInit = { method: 'POST', body, headers }
@@ -41,7 +41,7 @@ export class OutgoingCloudApi implements Outgoing {
       logger.error(error, `Error on send to url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
     }
-    logger.debug('Response: %s', response?.status)
+    logger.trace('Response: %s', response?.status)
     if (!response?.ok) {
       throw await response?.text()
     }

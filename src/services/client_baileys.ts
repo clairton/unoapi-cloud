@@ -145,7 +145,7 @@ export class ClientBaileys implements Client {
         },
         messageTimestamp: Math.floor(new Date().getTime() / 1000),
       }
-      logger.debug('onNotification %s', JSON.stringify(payload))
+      logger.trace('onNotification %s', JSON.stringify(payload))
       if (this.config.sessionWebhook) {
         try {
           const body = JSON.stringify({ info: { phone: this.phone }, status: await getSessionStatus(this.phone), ...payload })
@@ -167,7 +167,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
+  private onQrCode: OnQrCode = async (qrCode: string, attempt, limit) => {
     logger.debug('Received qrcode %s %s', this.phone, qrCode)
     const messageTimestamp = Math.floor(new Date().getTime() / 1000)
     const id = uuid()
@@ -185,7 +185,7 @@ export class ClientBaileys implements Client {
           url: qrCodeUrl,
           mimetype: 'image/png',
           fileLength: qrCode.length,
-          caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${time} of ${limit}`,
+          caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${attempt} of ${limit}`,
         },
       },
       messageTimestamp,
@@ -209,7 +209,10 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onReconnect: OnReconnect = async (time: number) => this.connect(time)
+  private onReconnect: OnReconnect = async (attempt: number) => {
+    logger.debug('Reconnecting %s attempt %s...', this.phone, attempt)
+    return this.connect(attempt)
+  }
 
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
@@ -229,11 +232,11 @@ export class ClientBaileys implements Client {
     this.onNewLogin = onNewLogin
   }
 
-  async connect(time: number) {
-    logger.debug('Client Baileys connecting for %s', this.phone)
+  async connect(attempt: number) {
+    logger.debug('Client Baileys start socket for %s', this.phone)
     this.config = await this.getConfig(this.phone)
     this.config.getMessageMetadata = async <T>(data: T) => {
-      logger.debug(data, 'Put metadata in message')
+      logger.trace(data, 'Put metadata in message')
       return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
@@ -241,12 +244,12 @@ export class ClientBaileys implements Client {
       phone: this.phone,
       store: this.store,
       attempts,
-      time,
+      attempt,
       onQrCode: this.onQrCode,
       onNotification: this.onNotification,
       onNewLogin: this.onNewLogin,
       config: this.config,
-      onDisconnected: async () => this.disconnect(),
+      onDisconnected: this.disconnect,
       onReconnect: this.onReconnect,
     })
     this.sendMessage = send
@@ -315,7 +318,7 @@ export class ClientBaileys implements Client {
         }
       }
     })
-    logger.debug('Client Baileys connected for %s', this.phone)
+    logger.debug('Client Baileys started socket for %s', this.phone)
   }
 
   async disconnect() {

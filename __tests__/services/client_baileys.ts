@@ -96,7 +96,7 @@ describe('service client baileys', () => {
   test('call send with read status', async () => {
     const loadKey = jest.spyOn(store?.dataStore, 'loadKey')
     loadKey.mockReturnValue(new Promise((resolve) => resolve({ id: `${new Date().getMilliseconds()}` })))
-    await client.connect(0)
+    await client.connect(1)
     const response: Response = await client.send({ status: 'read', to: `${new Date().getMilliseconds()}` }, {})
     expect(loadKey).toHaveBeenCalledTimes(1)
     expect(read).toHaveBeenCalledTimes(1)
@@ -110,7 +110,7 @@ describe('service client baileys', () => {
     const id = `${new Date().getMilliseconds()}`
     send.mockResolvedValue({ key: { id } })
     const payload = { to, type: 'text', text: { body: `${new Date().getMilliseconds()}` } }
-    await client.connect(0)
+    await client.connect(1)
     const response: Response = await client.send(payload, {})
     expect(send).toHaveBeenCalledTimes(1)
     expect(response.ok.messages[0].id).toBe(id)
@@ -119,7 +119,7 @@ describe('service client baileys', () => {
   test('call send with message type unknown', async () => {
     const type = `${new Date().getMilliseconds()}`
     try {
-      await client.connect(0)
+      await client.connect(1)
       await client.send({ type }, {})
       expect(true).toBe(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,7 +134,7 @@ describe('service client baileys', () => {
       throw new SendError(1, '')
     }
     mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close })
-    await client.connect(0)
+    await client.connect(1)
     const response = await client.send(payload, {})
     expect(response.error.entry.length).toBe(1)
   })
