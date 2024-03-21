@@ -1,3 +1,4 @@
+import { Level } from 'pino'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const _undefined: any = undefined
 
@@ -5,8 +6,8 @@ const _undefined: any = undefined
 export const UNOAPI_AUTH_TOKEN = process.env.UNOAPI_AUTH_TOKEN
 export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorization'
 
-export const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
-export const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || LOG_LEVEL
+export const LOG_LEVEL = (process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
+export const UNO_LOG_LEVEL = (process.env.UNO_LOG_LEVEL || LOG_LEVEL) as Level
 
 // comunication
 export const UNOAPI_URL = process.env.UNOAPI_URL || 'http://localhost:6789'
