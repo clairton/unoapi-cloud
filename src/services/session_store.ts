@@ -18,7 +18,7 @@ export const setSessionStatus = async (phone: string, status: 'offline' | 'onlin
       }
     }, CONNECTING_TIMEOUT_MS)
   }
-  logger.debug('Session %s status set to %s', phone, status)
+  logger.info('Session %s status set to %s', phone, status)
   statuses.set(phone, status)
 }
 

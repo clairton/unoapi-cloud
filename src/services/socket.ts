@@ -23,6 +23,7 @@ import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus } from './session_store'
+import { LOG_LEVEL } from '../defaults'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -106,7 +107,7 @@ export const connect = async ({
   }
 
   const onConnectionUpdate = async (event: Partial<ConnectionState>) => {
-    logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
+    logger.info('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
       await setSessionStatus(phone, 'qrcode')
       logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
@@ -344,8 +345,7 @@ export const connect = async ({
       : Browsers.windows('Desktop')
 
     const loggerBaileys = MAIN_LOGGER.child({})
-    // logger.level = config.logLevel as Level
-    loggerBaileys.level = (process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
+    loggerBaileys.level = LOG_LEVEL
 
     let agent
     if (config.proxyUrl) {
@@ -377,7 +377,7 @@ export const connect = async ({
       }
     }
     if (sock) {
-      dataStore.bind(sock.ev)
+      await dataStore.bind(sock.ev)
       await event('creds.update', saveCreds)
       await event('connection.update', onConnectionUpdate)
     }
