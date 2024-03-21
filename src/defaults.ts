@@ -23,7 +23,7 @@ export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
 export const CONNECTION_TIMEOUT = process.env.CONNECTION_TIMEOUT || 140_000
-export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '1_000')
+export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '5000')
 export const QR_TIMEOUT = process.env.QR_TIMEOUT || 30_000
 export const SLEEP_TIME = process.env.SLEEP_TIME || 500
 export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6

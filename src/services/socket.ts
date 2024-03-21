@@ -113,10 +113,9 @@ export const connect = async ({
         const message = `The ${attempts} times of generate qrcode is exceded!`
         await onNotification(message, true)
         status.attempt = 1
-        await logout()
+        return logout()
       } else {
-        onQrCode(event.qr, status.attempt, attempts)
-        status.attempt++
+        return onQrCode(event.qr, status.attempt++, attempts)
       }
     }
 
@@ -144,6 +143,7 @@ export const connect = async ({
         break
 
       case 'connecting':
+        await setSessionStatus(phone, 'connecting')
         await onNotification(`Connnecting...`, false)
         break
     }
@@ -172,13 +172,11 @@ export const connect = async ({
       await onNotification(message, true)
       await onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
-      status.attempt = 1
       reconnectSession = false
       await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
       return onNotification(message, true)
     } else if (statusCode === DisconnectReason.unavailableService) {
-      status.attempt = 1
       await close()
       const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
       return onNotification(message, true)
@@ -231,15 +229,12 @@ export const connect = async ({
       return close()
     } else {
       await onNotification(`Try connnecting time ${status.attempt} of ${attempts}...`, false)
-      status.attempt++
       await close()
-      return onReconnect(status.attempt)
+      return onReconnect(++status.attempt)
     }
   }
 
   const close = async () => {
-    if (!(await isSessionStatusOnline(phone)) && !(await isSessionStatusConnecting(phone))) return
-
     await setSessionStatus(phone, 'offline')
     logger.info(`${phone} close`)
     try {
@@ -248,7 +243,6 @@ export const connect = async ({
   }
 
   const logout = async () => {
-    if (!(await isSessionStatusOnline(phone)) && !(await isSessionStatusConnecting(phone))) return
     await close()
     logger.info(`${phone} destroyed`)
     await dataStore.cleanSession()
@@ -281,7 +275,12 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    if (!(await isSessionStatusOnline(phone))) return
+    if (!(await isSessionStatusOnline(phone))) {
+      if (!(await isSessionStatusConnecting(phone))) {
+        reconnect()
+      }
+      return
+    }
 
     const id = isJidGroup(to) ? to : await exists(to)
     if (id) {
@@ -337,14 +336,13 @@ export const connect = async ({
   const connect = async () => {
     if ((await isSessionStatusOnline(phone)) || (await isSessionStatusConnecting(phone))) return
     logger.debug('Connecting %s', phone)
-    await setSessionStatus(phone, 'connecting')
 
     const browser: WABrowserDescription = config.ignoreHistoryMessages
       ? [process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi', process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome', release()]
       : Browsers.windows('Desktop')
 
     const loggerBaileys = MAIN_LOGGER.child({})
-    logger.level = config.logLevel as Level
+    // logger.level = config.logLevel as Level
     loggerBaileys.level = (process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
 
     let agent

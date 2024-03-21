@@ -96,12 +96,12 @@ export class IncomingJob {
     if (error) {
       error.entry[0].changes[0].value.statuses[0].id = idUno
       outgingPayload = error
-      const status = error.entry[0].changes[0].value.statuses[0]
-      const code = status?.errors[0]?.code
+      // const status = error.entry[0].changes[0].value.statuses[0]
+      // const code = status?.errors[0]?.code
       // retry when error: 5 - Wait a moment, connecting process
-      if (retries < UNOAPI_MESSAGE_RETRY_LIMIT && ['5', 5].includes(code)) {
-        await amqpEnqueue(UNOAPI_JOB_INCOMING, phone, { ...data, retries }, options)
-      }
+      // if (retries < UNOAPI_MESSAGE_RETRY_LIMIT && ['5', 5].includes(code)) {
+      //   await amqpEnqueue(UNOAPI_JOB_INCOMING, phone, { ...data, retries }, options)
+      // }
     } else {
       outgingPayload = {
         object: 'whatsapp_business_account',
