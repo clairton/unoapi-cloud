@@ -320,7 +320,7 @@ export class ClientBaileys implements Client {
   }
 
   async disconnect() {
-    logger.debug('Disconnect client store for %s', this.phone)
+    logger.debug('Disconnect client store for %s', this?.phone)
     this.store = undefined
 
     // clean cache
