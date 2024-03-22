@@ -163,32 +163,25 @@ export const connect = async ({
     const { lastDisconnect } = payload
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
-    let reconnectSession = true
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       status.attempt = 1
-      reconnectSession = false
+      if (!(await isSessionStatusConnecting(phone))) {
+        const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
+        await onNotification(message, true)
+      }
       await logout()
-      const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
-      await onNotification(message, true)
-      await onDisconnected(phone, payload)
+      return onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
-      reconnectSession = false
       await close()
       const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
       return onNotification(message, true)
-    } else if (statusCode === DisconnectReason.unavailableService) {
-      await close()
-      const message = `The service is unavailable, please open the whastapp app to verify and after send a message again!`
-      return onNotification(message, true)
     }
-    if (reconnectSession) {
-      if (status.attempt == 1) {
-        const detail = lastDisconnect?.error?.output?.payload?.error
-        const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
-        await onNotification(message, true)
-      }
-      return reconnect()
+    if (status.attempt == 1) {
+      const detail = lastDisconnect?.error?.output?.payload?.error
+      const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
+      await onNotification(message, true)
     }
+    return reconnect()
   }
 
   const getMessage = async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
