@@ -22,11 +22,12 @@ const mediaStoreFileWithTTL = (phone: string, config: Config, getDataStore: getD
   const mediaStore = mediaStoreFile(phone, config, getDataStore)
   const saveMedia = mediaStore.saveMedia
   mediaStore.saveMedia = async (waMessage: WAMessage) => {
-    if (await saveMedia(waMessage)) {
+    const i = await saveMedia(waMessage)
+    if (i) {
       const fileName = mediaStore.getFileName(phone, waMessage)
       await amqpEnqueue(UNOAPI_JOB_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000 })
     }
-    return waMessage
+    return i
   }
   return mediaStore
 }
