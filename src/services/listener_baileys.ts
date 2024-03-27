@@ -63,6 +63,7 @@ export class ListenerBaileys implements Listener {
     if (isSaveMedia(i)) {
       logger.debug(`Saving media...`)
       i = await store?.mediaStore.saveMedia(i)
+      logger.debug(`Saved media!`)
     }
 
     const key = i.key
