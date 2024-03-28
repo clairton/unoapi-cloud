@@ -46,7 +46,7 @@ export const authState = async (session: session, phone: string) => {
 
   const saveCreds: () => Promise<void> = async () => {
     logger.debug('save creds %s', phone)
-    await writeData('', creds)
+    return writeData('', creds)
   }
 
   return {
