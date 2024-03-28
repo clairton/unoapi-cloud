@@ -86,6 +86,7 @@ export const STORAGE_BUCKET_NAME = process.env.STORAGE_BUCKET_NAME || 'unoapi'
 export const STORAGE_ACCESS_KEY_ID = process.env.STORAGE_ACCESS_KEY_ID || 'my-minio'
 export const STORAGE_SECRET_ACCESS_KEY = process.env.STORAGE_SECRET_ACCESS_KEY || '2NVQWHTTT3asdasMgqapGchy6yAMZn'
 export const STORAGE_REGION = process.env.STORAGE_REGION || 'us-east-1'
+export const STORAGE_TIMEOUT_MS = parseInt(process.env.STORAGE_TIMEOUT_MS || '30000')
 export const STORAGE_ENDPOINT = process.env.STORAGE_ENDPOINT || 'http://localhost:9000'
 export const STORAGE_FORCE_PATH_STYLE: boolean =
   process.env.STORAGE_FORCE_PATH_STYLE === _undefined ? false : process.env.STORAGE_FORCE_PATH_STYLE == 'true'
@@ -109,6 +110,7 @@ export const STORAGE_OPTIONS = (storage: any) => {
     },
     bucket: storage?.bucket || STORAGE_BUCKET_NAME,
     signatureVersion: 's3v4',
+    timeoutMs: STORAGE_TIMEOUT_MS,
   }
   if (forcePathStyle) {
     options.forcePathStyle = forcePathStyle

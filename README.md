@@ -261,6 +261,7 @@ STORAGE_SECRET_ACCESS_KEY
 STORAGE_REGION
 STORAGE_ENDPOINT
 STORAGE_FORCE_PATH_STYLE
+STORAGE_TIMEOUT_MS
 ```
 
 Config connection to redis to temp save messages and rabbitmq broker, this config can't save in redis too.
