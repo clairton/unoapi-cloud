@@ -2591,7 +2591,7 @@
     "@wasm-audio-decoders/common" "9.0.1"
     codec-parser "2.4.2"
 
-"@whiskeysockets/baileys@^6.7.0":
+"@whiskeysockets/baileys@^6.7.1":
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/@whiskeysockets/baileys/-/baileys-6.7.1.tgz#67a217da522ef2c897751450403832bb5142c156"
   integrity sha512-O4YHVNwDmIfFeakbo8uGuOG6r148++1A+fPec2/5L+gyD9Bq1kqMJN8H+hp6YkVLIYQc6UHbG+J7+5dzDcLMfQ==
