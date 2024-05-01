@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_LIMIT } from '../defaults'
+import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS /*, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_LIMIT*/ } from '../defaults'
 import { amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber } from '../services/transformer'
@@ -28,7 +28,7 @@ export class IncomingJob {
     const idUno: string = a.id
     const waId = jidToPhoneNumber(payload.to, '')
     const timestamp = Math.floor(new Date().getTime() / 1000).toString()
-    const retries: number = a.retries ? a.retries + 1 : 1
+    // const retries: number = a.retries ? a.retries + 1 : 1
     const response = await this.incoming.send(phone, payload, options)
     logger.debug('Baileys response %s -> %s', phone, JSON.stringify(response))
     const channelNumber = phone.replace('+', '')
