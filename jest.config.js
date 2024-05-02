@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-require('dotenv').config({ path: '.env.test' })
+import dotenv from 'dotenv'
 
-module.exports = {
+dotenv.config({ path: '.env.test' })
+
+export default {
   preset: 'ts-jest',
-  testEnvironment: 'node',
+  testEnvironment: 'node'
 }
