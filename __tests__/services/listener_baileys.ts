@@ -3,7 +3,6 @@ import { Store, getStore } from '../../src/services/store'
 import { DataStore } from '../../src/services/data_store'
 import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig, getMessageMetadataDefault } from '../../src/services/config'
-import { Listener } from '../../src/services/listener'
 import { ListenerBaileys } from '../../src/services/listener_baileys'
 import { Outgoing } from '../../src/services/outgoing'
 
