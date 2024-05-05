@@ -25,6 +25,7 @@ import { Config } from './config'
 import logger from './logger'
 import { getDataStoreFile } from './data_store_file'
 import { defaultConfig } from './config'
+import { CLEAN_CONFIG_ON_DISCONNECT } from '../defaults'
 
 export const getDataStoreRedis: getDataStore = async (phone: string, config: Config): Promise<DataStore> => {
   if (!dataStores.has(phone)) {
@@ -81,7 +82,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     return setMessage(phone, newJid, message.key.id!, message)
   }
   store.cleanSession = async () => {
-    if (config.cleanConfigOnDisconnect) {
+    if (CLEAN_CONFIG_ON_DISCONNECT) {
       await delConfig(phone)
     }
     await delAuth(phone)
@@ -184,7 +185,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
       }
       const keysToIgnore = ['getStore', 'baseStore', 'shouldIgnoreKey', 'shouldIgnoreJid', 'webhooks']
       const keys = Object.keys(defaultConfig).filter((k) => !keysToIgnore.includes(k))
-      const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name]
+      const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name] || 'string'
       for (const key of keys) {
         const type = getTypeofProperty(defaultConfig, key as keyof Config)
         const param: object = { type, text: key }

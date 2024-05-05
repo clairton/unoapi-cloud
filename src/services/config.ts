@@ -49,7 +49,6 @@ export type Config = {
   ignoreDataStore: boolean
   sendReactionAsReply: boolean
   sendProfilePicture: boolean
-  cleanConfigOnDisconnect: boolean
   authToken: string | undefined
   authHeader: string | undefined
 }
@@ -94,7 +93,6 @@ export const defaultConfig: Config = {
   sendReactionAsReply: false,
   sendProfilePicture: false,
   proxyUrl: undefined,
-  cleanConfigOnDisconnect: false,
   authToken: undefined,
   authHeader: undefined,
 }

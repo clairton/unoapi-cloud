@@ -66,7 +66,6 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.proxyUrl = PROXY_URL
     config.authToken = UNOAPI_AUTH_TOKEN
     config.authHeader = UNOAPI_HEADER_NAME
-    config.cleanConfigOnDisconnect = CLEAN_CONFIG_ON_DISCONNECT
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
     config.webhooks[0].token = WEBHOOK_TOKEN
