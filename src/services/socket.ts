@@ -22,7 +22,7 @@ import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
-import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus } from './session_store'
+import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline } from './session_store'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -160,6 +160,9 @@ export const connect = async ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClose = async (payload: any) => {
+    if ((await isSessionStatusOffline(phone))) {
+      return
+    }
     const { lastDisconnect } = payload
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
