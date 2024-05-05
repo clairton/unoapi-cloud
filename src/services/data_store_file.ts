@@ -37,6 +37,8 @@ export const getDataStoreFile: getDataStore = async (phone: string, config: Conf
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> => {
+  const assign = Object.assign
+  Object.assign = (target, source) => assign(target || {}, source)
   const keys: Map<string, proto.IMessageKey> = new Map()
   const jids: Map<string, string> = new Map()
   const ids: Map<string, string> = new Map()
