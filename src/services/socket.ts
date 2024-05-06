@@ -22,7 +22,7 @@ import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
-import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline } from './session_store'
+import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline, isSessionStatusIsDisconnect } from './session_store'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -160,7 +160,7 @@ export const connect = async ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClose = async (payload: any) => {
-    if ((await isSessionStatusOffline(phone))) {
+    if ((await isSessionStatusOffline(phone)) || (await isSessionStatusIsDisconnect(phone))) {
       return
     }
     const { lastDisconnect } = payload
@@ -226,7 +226,7 @@ export const connect = async ({
     } else {
       await onNotification(`Try connnecting time ${status.attempt} of ${attempts}...`, false)
       await close()
-      return onReconnect(++status.attempt)
+      return onReconnect(status.attempt++)
     }
   }
 
