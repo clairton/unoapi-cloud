@@ -9,6 +9,7 @@ WORKDIR /app
 ADD ./src ./src
 ADD ./package.json ./package.json
 ADD ./tsconfig.json ./tsconfig.json
+ADD ./nodemon.json ./nodemon.json
 ADD ./yarn.lock ./yarn.lock
 
 RUN yarn
