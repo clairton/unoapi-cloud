@@ -23,6 +23,7 @@ import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline, isSessionStatusIsDisconnect } from './session_store'
+import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, LOG_LEVEL } from '../defaults'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -334,12 +335,12 @@ export const connect = async ({
     logger.debug('Connecting %s', phone)
 
     const browser: WABrowserDescription = config.ignoreHistoryMessages
-      ? [process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi', process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome', release()]
+      ? [CONFIG_SESSION_PHONE_CLIENT || 'Unoapi', CONFIG_SESSION_PHONE_NAME || 'Chrome', release()]
       : Browsers.windows('Desktop')
 
     const loggerBaileys = MAIN_LOGGER.child({})
     // logger.level = config.logLevel as Level
-    loggerBaileys.level = (process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')) as Level
+    loggerBaileys.level = (LOG_LEVEL) as Level
 
     let agent
     if (config.proxyUrl) {
