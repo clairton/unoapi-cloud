@@ -1,5 +1,6 @@
 {
   "watch": ["src"],
   "ext": ".ts",
-  "ignore": ["./coverage", "./dist", "__tests__", "jest.config.js"]
+  "ignore": ["./coverage", "./dist", "__tests__", "jest.config.js"],
+  "legacyWatch": true
 }
