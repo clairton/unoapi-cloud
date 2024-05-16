@@ -8,7 +8,15 @@ import { Outgoing } from './services/outgoing'
 import { OutgoingAmqp } from './services/outgoing_amqp'
 import { SessionStore } from './services/session_store'
 import { SessionStoreRedis } from './services/session_store_redis'
-import { BASE_URL, PORT, AMQP_URL, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_DELAY } from './defaults'
+import { 
+  BASE_URL, 
+  PORT, 
+  AMQP_URL, 
+  UNOAPI_JOB_INCOMING, 
+  UNOAPI_MESSAGE_RETRY_DELAY,
+  CONFIG_SESSION_PHONE_CLIENT,
+  CONFIG_SESSION_PHONE_NAME
+} from './defaults'
 import { getConfigRedis } from './services/config_redis'
 import security from './services/security'
 import { amqpGetChannel } from './amqp'
@@ -25,5 +33,5 @@ const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionSt
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   await amqpGetChannel(UNOAPI_JOB_INCOMING, '', AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 5 }) // create a channel with priority
-  logger.info('Unoapi Cloud version: %s, listening on port: %s', version, PORT)
+  logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
 })
