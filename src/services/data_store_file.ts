@@ -13,7 +13,7 @@ import {
   isJidGroup,
 } from '@whiskeysockets/baileys'
 import makeOrderedDictionary from '@whiskeysockets/baileys/lib/Store/make-ordered-dictionary'
-import { waMessageID } from '@whiskeysockets/baileys/lib/Store/make-in-memory-store'
+import { BaileysInMemoryStoreConfig, waMessageID } from '@whiskeysockets/baileys/lib/Store/make-in-memory-store'
 import { isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync } from 'fs'
 import { DataStore } from './data_store'
@@ -43,7 +43,8 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   const statuses: Map<string, string> = new Map()
   const groups: Map<string, GroupMetadata> = new Map()
   const images: Map<string, string> = new Map()
-  const store = makeInMemoryStore(config as object)
+  const baileysInMemoryStoreConfig: BaileysInMemoryStoreConfig = { logger }
+  const store = makeInMemoryStore(baileysInMemoryStoreConfig)
   const dataStore = store as DataStore
   const { bind, toJSON, fromJSON } = store
   store.toJSON = () => {
