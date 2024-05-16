@@ -15,7 +15,7 @@ export class ListenerJob {
     this.queueListener = queueListener
   }
 
-  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number }) {
+  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number, priority: 0 }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
     const { messages, type } = a

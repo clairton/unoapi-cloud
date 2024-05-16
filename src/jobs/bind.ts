@@ -87,7 +87,11 @@ export class BindJob {
     await amqpConsume(UNOAPI_JOB_OUTGOING, phone, outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
 
     logger.debug('Starting listener consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_LISTENER, phone, listenerJob.consume.bind(listenerJob), { notifyFailedMessages, prefetch })
+    await amqpConsume(UNOAPI_JOB_LISTENER, phone, listenerJob.consume.bind(listenerJob), { 
+      notifyFailedMessages,
+      prefetch,
+      priority: 5,
+    })
 
     logger.debug('Starting webhooker consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_WEBHOOKER, phone, webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
