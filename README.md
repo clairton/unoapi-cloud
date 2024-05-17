@@ -408,7 +408,7 @@ The templates will be customized, saving in `${BASE_STORE}/${PHONE_NUMBER}/templ
 
 ### Save templates with http
 
-To Reset (delete the olders and save the new one(s)) with http send a post with templates in body to `http://localhost:9876/v15.0/:phone/templates`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
+To reset (delete the olders and save the new one(s)) with http send a post with templates in body to `http://localhost:9876/v15.0/:phone/templates`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
 
 ```sh
 curl -i -X POST \
