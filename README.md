@@ -406,6 +406,18 @@ The templates will be customized, saving in `${BASE_STORE}/${PHONE_NUMBER}/templ
 ]
 ```
 
+### Save templates with http
+
+To Reset (delete the olders and save the new one(s)) with http send a post with templates in body to `http://localhost:9876/v15.0/:phone/templates`, change :phone by your phone session number and put content of env UNOAPI_AUTH_TOKEN in Authorization header:
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v17.0/5549988290955/templates \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '[{"id":1,"name":"hello","status":"APPROVED","category":"UTILITY","components":[{"text":"{{hello}}","type":"BODY","parameters":[{"type":"text","text":"hello"}]}]}]'
+```
+
 PS: After update JSON, restart de docker container or service
 
 
