@@ -45,6 +45,7 @@ export const router = (
   router.get('/:version/:phone', middleware, phoneNumberController.get.bind(phoneNumberController))
   router.get('/:version/:phone/phone_numbers', middleware, phoneNumberController.list.bind(phoneNumberController))
   router.get('/:version/:phone/message_templates', middleware, templatesController.index.bind(templatesController))
+  router.post('/:version/:phone/templates', middleware, templatesController.templates.bind(templatesController))
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))
   router.get('/:version/download/:phone/:file', middleware, mediaController.download.bind(mediaController))
