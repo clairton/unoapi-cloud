@@ -20,6 +20,7 @@ import {
   setGroup,
   getGroup,
   delConfig,
+  setTemplates,
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -95,6 +96,9 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   }
   store.loadStatus = async (id: string) => {
     return getMessageStatus(phone, id)
+  }
+  store.setTemplates = async (templates: string) => {
+    return setTemplates(phone, templates)
   }
   store.loadTemplates = async () => {
     const templates = await getTemplates(phone)

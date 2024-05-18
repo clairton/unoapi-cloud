@@ -15,7 +15,7 @@ import {
 import makeOrderedDictionary from '@whiskeysockets/baileys/lib/Store/make-ordered-dictionary'
 import { BaileysInMemoryStoreConfig, waMessageID } from '@whiskeysockets/baileys/lib/Store/make-in-memory-store'
 import { isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
-import { existsSync, readFileSync, rmSync } from 'fs'
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
@@ -231,6 +231,10 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     } else {
       logger.info(`Already empty session phone %s dir %s`, phone, sessionDir)
     }
+  }
+  dataStore.setTemplates = async (templates: string) => {
+    const templateFile = `${SESSION_DIR}/${phone}/templates.json`
+    return writeFileSync(templateFile, templates)
   }
   dataStore.loadTemplates = async () => {
     const templateFile = `${SESSION_DIR}/${phone}/templates.json`

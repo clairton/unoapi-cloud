@@ -41,4 +41,5 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   setMessage: (jid: string, message: WAMessage) => Promise<void>
   cleanSession: () => Promise<void>
   loadTemplates(): Promise<object[]>
+  setTemplates(templates: string): Promise<void>
 }

@@ -33,9 +33,9 @@ export class TemplatesController {
     logger.debug('templates query %s', JSON.stringify(req.query))
     const { phone } = req.params
     try {
-      await setTemplates(phone, req.body)
       const config = await this.getConfig(phone)
       const store = await config.getStore(phone, config)
+      await store.dataStore.setTemplates(req.body)
       const templates = await store.dataStore.loadTemplates()
       return res.status(200).json({ data: templates })
     } catch (e) {
