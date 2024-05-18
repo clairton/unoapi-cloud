@@ -3,12 +3,27 @@ import logger from './logger'
 import { Outgoing } from './outgoing'
 import { getConfig } from './config'
 import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
-import { WAMessage } from '@whiskeysockets/baileys'
+import { WAMessage, delay } from '@whiskeysockets/baileys'
 import { Template } from './template'
+
+interface Delay {
+  (phone: string, to: string): Promise<void>
+}
 
 export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
   private getConfig: getConfig
+  private delays: Map<string, Map<string, Delay>> = new Map()
+
+  private delayBeforeSecondMessage: Delay = async (phone, to) => {
+    const time = 2000
+    logger.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
+    this.delays && (this.delays.get(phone) || new Map()).set(to, this.continueAfterSecondMessage)
+    return delay(time)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  private continueAfterSecondMessage: Delay = async (_phone, _to) => {}
 
   constructor(outgoing: Outgoing, getConfig: getConfig) {
     this.outgoing = outgoing
@@ -122,6 +137,12 @@ export class ListenerBaileys implements Listener {
       }
     }
     if (data) {
+      const to = i?.key?.remoteJid
+      if (to) {
+        const sockDelays = this.delays.get(phone) || (this.delays.set(phone, new Map<string, Delay>()) && this.delays.get(phone)!)
+        const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
+        await toDelay(phone, to)
+      }
       return this.outgoing.send(phone, data)
     } else {
       logger.debug(`Not send message type ${messageType} to http phone %s message id %s`, phone, i?.key?.id)
