@@ -26,8 +26,9 @@ export class ListenerJob {
         if (error instanceof DecryptError && options && options?.countRetries >= options?.maxRetries) {
           // send message asking to open whatsapp to see
           await this.outgoing.send(phone, error.getContent())
+        } else {
+          throw error
         }
-        throw error
       }
     } else {
       if (type == 'delete' && messages.keys) {
