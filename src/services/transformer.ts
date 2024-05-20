@@ -196,6 +196,8 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
         if (type == 'audio') {
           if (mimetype == 'audio/ogg') {
             mimetype = 'audio/ogg; codecs=opus'
+          } else if (!mimetype) {
+            mimetype = 'audio/mpeg'
           }
           response.ptt = true
         }
