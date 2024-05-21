@@ -37,11 +37,6 @@ COPY --from=builder /app/yarn.lock ./yarn.lock
 
 RUN apk --update --no-cache add git ffmpeg
 RUN yarn
-RUN cat <<EOF > ./node_modules/@whiskeysockets/baileys/lib/Defaults/baileys-version.json
-{
-	"version": [2, 2413, 1]
-}
-EOF
 RUN apk del git
 
 ENTRYPOINT yarn start

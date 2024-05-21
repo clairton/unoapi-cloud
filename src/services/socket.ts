@@ -23,7 +23,7 @@ import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline, isSessionStatusIsDisconnect } from './session_store'
-import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, LOG_LEVEL } from '../defaults'
+import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL } from '../defaults'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -343,6 +343,7 @@ export const connect = async ({
     loggerBaileys.level = (LOG_LEVEL) as Level
 
     let agent
+    let fetchAgent
     if (config.proxyUrl) {
       agent = new SocksProxyAgent(config.proxyUrl)
     }
@@ -360,6 +361,7 @@ export const connect = async ({
         retryRequestDelayMs: config.retryRequestDelayMs,
         patchMessageBeforeSending,
         agent,
+        version: WHATSAPP_VERSION,
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

@@ -250,6 +250,7 @@ PROXY_URL the socks proxy url, default not use
 CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
 CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
+WHATSAPP_VERSION=Version of whatsapp, default is [2, 2413, 1]
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
