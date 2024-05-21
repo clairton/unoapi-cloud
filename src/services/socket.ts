@@ -22,6 +22,7 @@ import { isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline, isSessionStatusIsDisconnect } from './session_store'
 import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL } from '../defaults'
 
@@ -346,6 +347,7 @@ export const connect = async ({
     let fetchAgent
     if (config.proxyUrl) {
       agent = new SocksProxyAgent(config.proxyUrl)
+      fetchAgent = new HttpsProxyAgent(config.proxyUrl)
     }
 
     try {
@@ -361,6 +363,7 @@ export const connect = async ({
         retryRequestDelayMs: config.retryRequestDelayMs,
         patchMessageBeforeSending,
         agent,
+        fetchAgent,
         version: WHATSAPP_VERSION,
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
