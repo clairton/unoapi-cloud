@@ -278,6 +278,13 @@ export class ClientBaileys implements Client {
       logger.info('Config import history messages %', this.phone)
       event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
         logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
+        if(!this.config.dateHistoryMessages) {
+          messages = messages.map(message => {
+            const messageTimestamp:number = parseInt(message.messageTimestamp.toString());
+            const isTimestampInRange:boolean = messageTimestamp >= parseInt(new Date(this.config.dateHistoryMessages).toTimeString());
+            return isTimestampInRange ? message : null;
+          }).filter(Boolean) as WAMessage[]
+        }
         this.listener.process(this.phone, messages, 'history')
       })
     }
