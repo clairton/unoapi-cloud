@@ -65,6 +65,10 @@ export class IncomingJob {
                   contacts: [
                     {
                       wa_id: waId,
+                      profile: {
+                        name: '',
+                        picture: '',
+                      },
                     },
                   ],
                   messages: [
