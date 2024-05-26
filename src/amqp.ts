@@ -187,6 +187,7 @@ export const amqpConsume = async (
     if (!payload) {
       throw `payload not be null `
     }
+    const timeoutId = setTiemout(() => throw new Error('timeout consume'), 5000)
     const content: string = payload.content.toString()
     const phone = payload.fields.routingKey
     const data = JSON.parse(content)
@@ -232,6 +233,8 @@ export const amqpConsume = async (
         await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
