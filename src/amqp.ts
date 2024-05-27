@@ -188,7 +188,7 @@ export const amqpConsume = async (
     if (!payload) {
       throw `payload not be null `
     }
-    const timeoutId = setTimeout(() => { throw new Error('timeout consume') }, CONSUMER_TIMEOUT_MS)
+    const timeoutId = setTimeout(() => { throw new Error(`timeout ${CONSUMER_TIMEOUT_MS} is exceeded consume queue: ${queue}, phone: ${phone}`) }, CONSUMER_TIMEOUT_MS)
     const content: string = payload.content.toString()
     const phone = payload.fields.routingKey
     const data = JSON.parse(content)
@@ -204,6 +204,7 @@ export const amqpConsume = async (
       }
       logger.debug('Ack message!')
       await channel.ack(payload)
+      clearTimeout(timeoutId)
     } catch (error) {
       logger.error(error)
       if (countRetries >= maxRetries) {
@@ -234,7 +235,6 @@ export const amqpConsume = async (
         await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
-    } finally {
       clearTimeout(timeoutId)
     }
   }

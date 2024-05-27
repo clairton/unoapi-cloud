@@ -17,7 +17,7 @@ export const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:6789/web
 export const WEBHOOK_HEADER = process.env.WEBHOOK_HEADER || 'Authorization'
 export const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN || '123abc'
 export const WEBHOOK_TIMEOUT_MS = parseInt(process.env.WEBHOOK_TIMEOUT_MS || '5000')
-export const CONSUMER_TIMEOUT_MS = parseInt(process.env.CONSUMER_TIMEOUT_MS || '5000')
+export const CONSUMER_TIMEOUT_MS = parseInt(process.env.CONSUMER_TIMEOUT_MS || '30000')
 export const WEBHOOK_SEND_NEW_MESSAGES = process.env.WEBHOOK_SEND_NEW_MESSAGES == _undefined ? false : process.env.WEBHOOK_SEND_NEW_MESSAGES == 'true'
 export const WEBHOOK_SESSION = process.env.WEBHOOK_SESSION || ''
 export const AMQP_URL = process.env.AMQP_URL || 'amqp://guest:guest@localhost:5672'
@@ -25,10 +25,10 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
-export const CONNECTION_TIMEOUT = process.env.CONNECTION_TIMEOUT || 140_000
+export const CONNECTION_TIMEOUT = parseInt(process.env.CONNECTION_TIMEOUT || '140000')
 export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '5000')
-export const QR_TIMEOUT = process.env.QR_TIMEOUT || 30_000
-export const SLEEP_TIME = process.env.SLEEP_TIME || 500
+export const QR_TIMEOUT = parseInt(process.env.QR_TIMEOUT || '30000')
+export const SLEEP_TIME = parseInt(process.env.SLEEP_TIME || '5000')
 export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6
 export const DATA_TTL: number = parseInt(process.env.DATA_TTL || `${60 * 60 * 24 * 30}`) // a month
 export const DATA_JID_TTL: number = parseInt(process.env.DATA_JID_TTL || `${60 * 60 * 24 * 7}`) // a week
