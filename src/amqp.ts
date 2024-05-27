@@ -10,6 +10,7 @@ import {
   UNOAPI_JOB_NOTIFICATION,
   IGNORED_CONNECTIONS_NUMBERS,
   VALIDATE_ROUTING_KEY,
+  CONSUMER_TIMEOUT_MS,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -187,6 +188,7 @@ export const amqpConsume = async (
     if (!payload) {
       throw `payload not be null `
     }
+    const timeoutId = setTimeout(() => { throw new Error('timeout consume') }, CONSUMER_TIMEOUT_MS)
     const content: string = payload.content.toString()
     const phone = payload.fields.routingKey
     const data = JSON.parse(content)
@@ -232,6 +234,8 @@ export const amqpConsume = async (
         await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
