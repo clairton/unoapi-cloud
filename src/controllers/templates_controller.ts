@@ -1,7 +1,6 @@
 // https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates/
 
 import { Request, Response } from 'express'
-import { setTemplates } from '../services/redis'
 import { getConfig } from '../services/config'
 import logger from '../services/logger'
 
@@ -35,8 +34,7 @@ export class TemplatesController {
     try {
       const config = await this.getConfig(phone)
       const store = await config.getStore(phone, config)
-      await store.dataStore.setTemplates(req.body)
-      const templates = await store.dataStore.loadTemplates()
+      const templates = await store.dataStore.setTemplates(req.body)
       return res.status(200).json({ data: templates })
     } catch (e) {
       return res.status(400).json({ status: 'error', message: `${phone} could not create template, error: ${e.message}` })
