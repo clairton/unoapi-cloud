@@ -256,7 +256,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       const currentTemplates = dataStore.loadTemplates()
       newTemplates = deepMerge(currentTemplates, templates)
     }
-    return writeFileSync(templateFile, newTemplates)
+    return writeFileSync(templateFile, JSON.stringify(newTemplates))
   }
   dataStore.loadTemplates = async () => {
     const templateFile = `${SESSION_DIR}/${phone}/templates.json`
