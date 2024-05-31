@@ -22,7 +22,7 @@ x-base: &base
 
 x-minio: &minio
   image: quay.io/minio/minio:latest
-  command: server --console-address ":9001" --address ":9000" http://minio1/data http://minio2/data http://minio3/data
+  command: server --console-address ":9001" --address ":9000" /data
   env_file: .env
   environment:
     MINIO_SERVER_URL: http://localhost:9000
@@ -68,42 +68,10 @@ services:
       - 6379:6379
     restart: on-failure
 
-  minio1:
+  minio:
     <<: *minio
     volumes:
       - storage1:/data
-
-  minio2:
-    <<: *minio
-    volumes:
-      - storage2:/data
-
-  minio3:
-    <<: *minio
-    volumes:
-      - storage3:/data
-
-  minio:
-    image: caddy
-    ports:
-      - 9000:80
-    command: caddy reverse-proxy --insecure -v 
-              --from :80 --to minio1:9000,minio2:9000,minio3:9000
-    depends_on:
-      - minio1
-      - minio2
-      - minio3
-
-  minio-console:
-    image: caddy
-    ports:
-      - 9001:80
-    command: caddy reverse-proxy --insecure -v 
-              --from :80 --to minio1:9001,minio2:9001,minio3:9001
-    depends_on:
-      - minio1
-      - minio2
-      - minio3
 
   minio-mc:
     image: quay.io/minio/mc:latest
@@ -120,5 +88,3 @@ volumes:
   rabbitmq:
   redis:
   storage1:
-  storage2:
-  storage3:
