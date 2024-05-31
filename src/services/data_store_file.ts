@@ -244,7 +244,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         return JSON.parse(string.toString())
       }
     }
-    const template = {
+    const hello = {
       id: 1,
       name: 'hello',
       status: 'APPROVED',
@@ -263,7 +263,55 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       ],
     }
 
-    return [template]
+    const bulkReport = {
+      id: 2,
+      name: 'unoapi-bulk-report',
+      status: 'APPROVED',
+      category: 'UTILITY',
+      language: 'pt_BR',
+      components: [
+        {
+          text: `bulk: {{bulk}}`,
+          type: 'BODY',
+          parameters: [
+            {
+              type: 'text',
+              text: 'bulk',
+            },
+          ],
+        },
+      ],
+    }
+
+    const webhook = {
+      id: 3,
+      name: 'unoapi-webhook',
+      status: 'APPROVED',
+      category: 'UTILITY',
+      language: 'pt_BR',
+      components: [
+        {
+          text: `url: {{url}}\nheader: {{header}}\ntoken: {{token}}`,
+          type: 'BODY',
+          parameters: [
+            {
+              type: 'text',
+              text: 'url',
+            },
+            {
+              type: 'text',
+              text: 'header',
+            },
+            {
+              type: 'text',
+              text: 'token',
+            },
+          ],
+        },
+      ],
+    }
+
+    return [hello, bulkReport, webhook]
   }
   return dataStore
 }
