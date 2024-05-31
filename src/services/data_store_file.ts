@@ -15,7 +15,7 @@ import {
 import makeOrderedDictionary from '@whiskeysockets/baileys/lib/Store/make-ordered-dictionary'
 import { BaileysInMemoryStoreConfig, waMessageID } from '@whiskeysockets/baileys/lib/Store/make-in-memory-store'
 import { isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
 import { DataStore } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
@@ -33,6 +33,20 @@ export const getDataStoreFile: getDataStore = async (phone: string, config: Conf
     logger.debug('Retrieving data store file %s', phone)
   }
   return dataStores.get(phone) as DataStore
+}
+
+const deepMerge = (obj1, obj2) => {
+  const result = { ...obj1 };
+  for (let key in obj2) {
+    if (obj2.hasOwnProperty(key)) {
+      if (obj2[key] instanceof Object && obj1[key] instanceof Object) {
+        result[key] = deepMerge(obj1[key], obj2[key]);
+      } else {
+        result[key] = obj2[key];
+      }
+    }
+  }
+  return result;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -233,8 +247,16 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     }
   }
   dataStore.setTemplates = async (templates: string) => {
-    const templateFile = `${SESSION_DIR}/${phone}/templates.json`
-    return writeFileSync(templateFile, templates)
+    const sessionDir = `${SESSION_DIR}/${phone}`
+    const templateFile = `${sessionDir}/templates.json`
+    let newTemplates = templates
+    if (!existsSync(sessionDir)) {
+      mkdirSync(sessionDir, { recursive: true })
+    } else {
+      const currentTemplates = dataStore.loadTemplates()
+      newTemplates = deepMerge(currentTemplates, templates)
+    }
+    return writeFileSync(templateFile, newTemplates)
   }
   dataStore.loadTemplates = async () => {
     const templateFile = `${SESSION_DIR}/${phone}/templates.json`
