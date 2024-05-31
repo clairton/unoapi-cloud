@@ -1,0 +1,219 @@
+x-environment-uno: &env-uno
+  AMQP_URL: amqp://ppproject:sdhgjfhdoiuwoiutghf465uiywiu@rabbitmq:5672
+  AUTO_CONNECT: true
+  AUTO_RESTART_MS: 0
+  BASE_STORE: './data'
+  BASE_URL: http://uno-web:9876
+  CLEAN_CONFIG_ON_DISCONNECT: false
+  CONFIG_SESSION_PHONE_CLIENT: Windows
+  CONFIG_SESSION_PHONE_NAME: Opera
+  IGNORE_BROADCAST_MESSAGES: false
+  IGNORE_BROADCAST_STATUSES: true
+  IGNORE_GROUP_MESSAGES: false
+  IGNORE_HISTORY_MESSAGES: true
+  IGNORE_OWN_MESSAGES: false
+  IGNORE_YOURSELF_MESSAGES: true
+  LOG_LEVEL: debug
+  MESSAGE_CALLS_WEBHOOK: 'Chamada de voz perdida'
+  NODE_ENV: development
+  NOTIFY_FAILED_MESSAGES: false
+  PORT: 9876
+  REDIS_URL: redis://default:password@redis-uno:6379
+  REJECT_CALLS: ''
+  REJECT_CALLS_WEBHOOK: 'Chamada de voz perdida'
+  SEND_CONNECTION_STATUS: true
+  SEND_PROFILE_PICTURE: true
+  SEND_REACTION_AS_REPLY: true
+  STORAGE_ACCESS_KEY_ID: jpWvHxRy2WWPglCojkyi
+  STORAGE_BUCKET_NAME: unoapidev
+  STORAGE_ENDPOINT: https://wiseteam-storage.g9.pt
+  STORAGE_FORCE_PATH_STYLE: true
+  STORAGE_REGION: nyc3
+  STORAGE_SECRET_ACCESS_KEY: 25bxSY7GnRr3fR7p40KdJM7sGStXI0I2fMqzN3Sl
+  UNO_LOG_LEVEL: debug
+  UNOAPI_AUTH_TOKEN: 78wewiuugDIwgfiuggwuigwgYUFFwfiwhfoihwfioho86734GFJgsfgsf
+  WEB_CONCURRENCY: 5
+  WEBHOOK_SEND_NEW_MESSAGES: false
+  WEBHOOK_TIMEOUT_MS: 5000
+  WEBHOOK_URL: http://chatwoot-web:3000/webhooks/whatsapp
+  WHATSAPP_VERSION: '[2, 2413, 1]'
+  DATA_TTL: 604800
+
+x-base-uno: &base-uno
+  build:
+    dockerfile: develop.Dockerfile
+  entrypoint: echo 'ok!'
+  tty: true
+  stdin_open: true
+  volumes:
+    - ./src:/app/src
+  working_dir: /app
+  environment:
+    <<: *env-uno
+  depends_on:
+    - redis-uno
+    - rabbitmq
+
+x-environment-chatwoot: &env-chatwoot
+  COMPOSE_PROJECT_NAME: chatwoot
+  ENABLE_ACCOUNT_SIGNUP: false
+  REDIS_PASSWORD: password
+  REDIS_URL: redis://default:password@redis-chatwoot:6379
+  DATABASE_URL: postgresql://postgres:password@postgres:5432/chatwoot_db_iufueiw
+  ACTIVE_STORAGE_SERVICE: s3_compatible
+  STORAGE_BUCKET_NAME: chatwootdev
+  STORAGE_ACCESS_KEY_ID: dXNoD4CQ1X8BLhLktoIh
+  STORAGE_SECRET_ACCESS_KEY: asuq4TIKokxrynf3s7RKml9LhbTn5QKvL6HakBfT
+  STORAGE_REGION: nyc3
+  STORAGE_ENDPOINT: https://wiseteam-storage.g9.pt
+  STORAGE_FORCE_PATH_STYLE: true
+  SECRET_KEY_BASE: 7ergw7e96rgheiofohawogha78gh87tUGIehiugwiuegheghiuGeghewuighe
+  FRONTEND_URL: http://127.0.0.1:3000
+  DEFAULT_LOCALE: pt
+  MAILER_INBOUND_EMAIL_DOMAIN: g9.pt
+  RAILS_INBOUND_EMAIL_SERVICE: relay
+  SMTP_ADDRESS: mail.g9.pt
+  SMTP_PASSWORD: N7vu.u59Sz5
+  SMTP_PORT: 587
+  SMTP_USERNAME: wiseteam
+  SMTP_AUTHENTICATION: plain
+  SMTP_ENABLE_STARTTLS_AUTO: true
+  RAILS_MASTER_KEY: e7gr8wgh7gGigifwufgwiughGUFGuigig7f88wgfwfuguwg
+  WEB_CONCURRENCY: 5
+  RAILS_MAX_THREADS: 5
+  SIDEKIQ_CONCURRENCY: 5
+  LOG_LEVEL: debug
+  MAILER_SENDER_EMAIL: Wiseteam <wiseteam@g9.pt>
+  SMTP_DOMAIN: wiseteam.g9.pt
+  ENABLE_RACK_ATTACK: false
+  ENABLE_RACK_ATTACK_WIDGET_API: false
+  RACK_ATTACK_LIMIT: 900
+
+x-base-chatwoot: &base-chatwoot
+  image: clairton/chatwoot:v3.9.0-uno
+  restart: 'no'
+  command: echo 'ok'
+  environment:
+    <<: *env-chatwoot
+  volumes:
+    - C:/Users/Utilizador/dockervolumes/chatwootimages:/app/public/brand-assets
+
+services:
+  uno-web:
+    <<: *base-uno
+    entrypoint: sh -c 'wait-for redis-uno:6379 rabbitmq:5672 -- yarn web-dev'
+    restart: on-failure
+    ports:
+      - 9876:9876
+
+  uno-worker:
+    <<: *base-uno
+    entrypoint: sh -c 'wait-for redis-uno:6379 rabbitmq:5672 -- yarn worker-dev'
+    restart: on-failure
+
+  chatwoot-web:
+    <<: *base-chatwoot
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    ports:
+      - 3000:3000
+    restart: always
+
+  chatwoot-worker:
+    <<: *base-chatwoot
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    restart: always
+
+  chatwoot-migrate:
+    <<: *base-chatwoot
+    restart: 'no'
+    command: ['bundle', 'exec', 'rails', 'db:chatwoot_prepare']
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    volumes:
+      - C:/Users/Utilizador/dockervolumes/rabbitmq:/var/lib/rabbitmq
+    restart: always
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: ppproject
+      RABBITMQ_DEFAULT_PASS: sdhgjfhdoiuwoiutghf465uiywiu
+
+  redis-chatwoot:
+    image: redis:7-alpine
+    volumes:
+      - C:/Users/Utilizador/dockervolumes/redis-chatwoot:/data
+    command: redis-server --appendonly yes --requirepass password
+    restart: always
+    environment:
+      REDIS_PASSWORD: password
+    #ports:
+    #  - 6379:6379
+  
+  redis-uno:
+    image: redis:7-alpine
+    volumes:
+      - C:/Users/Utilizador/dockervolumes/redis-uno:/data
+    command: redis-server --appendonly yes --requirepass password
+    restart: always
+    environment:
+      REDIS_PASSWORD: password
+      
+  redisweb:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    ports:
+      - 8082:8082
+    environment:
+      PORT: 8082
+      HTTP_USER: default
+      #REDIS_HOST: redis
+      #REDIS_PASSWORD: password
+      HTTP_PASSWORD: password
+      REDIS_LABEL: unoAPIeChatwoot
+      REDIS_HOSTS: 
+        chatWoot:redis-chatwoot:6379:0:password,
+        unoAPI:redis-uno:6379:0:password
+    depends_on:
+      - redis-uno
+      - redis-chatwoot
+    
+  postgres:
+    image: postgres:12
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - C:/Users/Utilizador/dockervolumes/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=chatwoot_db_iufueiw
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+
+  pgweb:
+    restart: always
+    image: sosedoff/pgweb
+    ports:
+      - 8081:8081
+    depends_on:
+      - postgres
+    environment:
+      PGWEB_DATABASE_URL: postgresql://postgres:password@postgres:5432/chatwoot_db_iufueiw?sslmode=disable
+      PGWEB_AUTH_USER: default
+      PGWEB_AUTH_PASS: password
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.10'
+          memory: 64M
+
+volumes:
+  postgres:
+  rabbitmq:
+  redis-uno:
+  redis-chatwoot:
