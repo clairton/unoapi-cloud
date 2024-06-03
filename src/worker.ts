@@ -5,7 +5,12 @@ import { BindJob } from './jobs/bind'
 import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
-import { UNOAPI_JOB_BIND, UNOAPI_JOB_RELOAD, UNOAPI_JOB_DISCONNECT } from './defaults'
+import { 
+  UNOAPI_JOB_BIND, 
+  UNOAPI_JOB_RELOAD,
+  UNOAPI_JOB_BLACKLIST_ADD,
+  UNOAPI_JOB_DISCONNECT 
+} from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
 import { IncomingAmqp } from './services/incoming_amqp'
@@ -22,6 +27,7 @@ import { ListenerAmqp } from './services/listener_amqp'
 import { OutgoingAmqp } from './services/outgoing_amqp'
 import { Outgoing } from './services/outgoing'
 import { version } from '../package.json'
+import { addToBlacklist } from './jobs/add_to_blacklist'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -43,6 +49,9 @@ const startWorker = async () => {
 
   logger.info('Starting bind consumer')
   await amqpConsume(UNOAPI_JOB_BIND, '', bindJob.consume.bind(bindJob))
+
+  logger.info('Starting blacklist add consumer')
+  await amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, '', addToBlacklist)
 
   logger.info('Starting reload consumer')
   await amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))

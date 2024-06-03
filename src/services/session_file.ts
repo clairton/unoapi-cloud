@@ -3,9 +3,7 @@ import { rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 import { session, writeData, readData, removeData, getKey } from './session'
 import logger from './logger'
 
-export const sessionFile: session = async (
-  phone: string,
-): Promise<{ writeData: writeData; readData: readData; removeData: removeData; getKey: getKey }> => {
+export const sessionFile: session = async (phone: string) => {
   const getKey: getKey = (type: string, id: string) => `/${type}-${id}.json`
   const getFile = (key: string) => `${phone}${key ? key : '/creds.json'}`.replace('/.', '')
 

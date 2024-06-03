@@ -12,6 +12,7 @@ export interface GetMessageMetadata {
 export const getMessageMetadataDefault: GetMessageMetadata = async <T>(data: T) => data
 
 export type Webhook = {
+  id: string,
   url: string
   urlAbsolute: string
   token: string
@@ -80,6 +81,7 @@ export const defaultConfig: Config = {
   baseStore: './data',
   webhooks: [
     {
+      id: 'default',
       url: '',
       urlAbsolute: '',
       token: '',

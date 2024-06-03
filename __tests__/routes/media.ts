@@ -11,6 +11,8 @@ import { MediaStore } from '../../src/services/media_store'
 import { getStore, Store } from '../../src/services/store'
 import { SessionStore } from '../../src/services/session_store'
 import { OnNewLogin } from '../../src/services/socket'
+import { addToBlacklist } from '../../src/services/blacklist'
+const addToBlacklist = mock<addToBlacklist>()
 
 const sessionStore = mock<SessionStore>()
 
@@ -44,7 +46,7 @@ describe('media routes', () => {
     incoming = mock<Incoming>()
     outgoing = mock<Outgoing>()
     const onNewLogin = mock<OnNewLogin>()
-    app = new App(incoming, outgoing, url, getConfigTest, sessionStore, onNewLogin)
+    app = new App(incoming, outgoing, url, getConfigTest, sessionStore, onNewLogin, addToBlacklist)
   })
 
   test('index', async () => {

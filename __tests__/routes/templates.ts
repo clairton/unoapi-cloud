@@ -9,6 +9,8 @@ import { Config, getConfig } from '../../src/services/config'
 import { DataStore } from '../../src/services/data_store'
 import { SessionStore } from '../../src/services/session_store'
 import { OnNewLogin } from '../../src/services/socket'
+import { addToBlacklist } from '../../src/services/blacklist'
+const addToBlacklist = mock<addToBlacklist>()
 
 const sessionStore = mock<SessionStore>()
 const store = mock<Store>()
@@ -31,7 +33,7 @@ describe('templates routes', () => {
   test('index', async () => {
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin)
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist)
     const res = await request(app.server).get('/v15.0/123/message_templates')
     expect(res.status).toEqual(200)
   })
