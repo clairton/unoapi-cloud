@@ -3,12 +3,15 @@ import fetch, { Response, RequestInit } from 'node-fetch'
 import { Webhook, getConfig } from './config'
 import logger from './logger'
 import { completeCloudApiWebHook } from './transformer'
+import { isInBlacklist } from './blacklist'
 
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
+  private isInBlacklist: isInBlacklist
 
-  constructor(getConfig: getConfig) {
+  constructor(getConfig: getConfig, isInBlacklist: isInBlacklist) {
     this.getConfig = getConfig
+    this.isInBlacklist = isInBlacklist
   }
 
   public async formatAndSend(phone: string, to: string, message: object) {
@@ -23,6 +26,11 @@ export class OutgoingCloudApi implements Outgoing {
   }
 
   public async sendHttp(phone: string, webhook: Webhook, message: object) {
+    const destinyPhone = await this.isInBlacklist(phone, webhook.id, message)
+    if (destinyPhone) {
+      logger.info(`Session Phone %s webhook %s and destiny phone %s is in blacklist, ignore send`, phone, webhook.id, destinyPhone)
+      return
+    }
     const body = JSON.stringify(message)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',

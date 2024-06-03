@@ -41,6 +41,7 @@ import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
 import { NotificationJob } from '../jobs/notification'
 import { isSessionStatusOnline } from '../services/session_store'
+import { isInBlacklistInRedis } from '../services/blacklist'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -50,7 +51,7 @@ const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, getConfigRed
 
 const getConfig: getConfig = getConfigRedis
 
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig)
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
 const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)

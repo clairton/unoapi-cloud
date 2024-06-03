@@ -12,6 +12,7 @@ import { autoConnect } from './services/auto_connect'
 import { getConfigByEnv } from './services/config_by_env'
 import { getClientBaileys } from './services/client_baileys'
 import { onNewLoginAlert } from './services/on_new_login_alert'
+import { isInBlacklistInMemory, addToBlacklistInMemory } from './services/blacklist'
 import { version } from '../package.json'
 
 import logger from './services/logger'
@@ -20,14 +21,14 @@ import { ListenerBaileys } from './services/listener_baileys'
 
 import { BASE_URL, PORT } from './defaults'
 
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv)
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistInMemory)
 
 const listenerBaileys: Listener = new ListenerBaileys(outgoingCloudApi, getConfigByEnv)
 const onNewLoginn = onNewLoginAlert(listenerBaileys)
 const incomingBaileys: Incoming = new IncomingBaileys(listenerBaileys, getConfigByEnv, getClientBaileys, onNewLoginn)
 const sessionStore: SessionStore = new SessionStoreFile()
 
-const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL, getConfigByEnv, sessionStore, onNewLoginn)
+const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL, getConfigByEnv, sessionStore, onNewLoginn, addToBlacklistInMemory)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Unoapi Cloud version: %s, listening on port: %s', version, PORT)

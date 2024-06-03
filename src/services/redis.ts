@@ -56,6 +56,20 @@ export const redisGet = async (key: string) => {
   }
 }
 
+export const redisTtl = async (key: string) => {
+  logger.trace(`Ttl ${key}`)
+  try {
+    return client.ttl(key)
+  } catch (error) {
+    if (!client) {
+      await getRedis()
+      return client.ttl(key)
+    } else {
+      throw error
+    }
+  }
+}
+
 const redisDel = async (key: string) => {
   logger.trace(`Deleting ${key}`)
   try {
@@ -165,7 +179,10 @@ export const groupKey = (phone: string, jid: string) => {
   return `${BASE_KEY}group:${phone}:${jid}`
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const blacklist = (from: string, webhookId: string, to: string) => {
+  return `${BASE_KEY}blacklist:${from}:${webhookId}:${to}`
+}
+
 export const getJid = async (phone: string, jid: any) => {
   const key = jidKey(phone, jid)
   return redisGet(key)
@@ -174,6 +191,15 @@ export const getJid = async (phone: string, jid: any) => {
 export const setJid = async (phone: string, jid: string, validJid: string) => {
   const key = jidKey(phone, jid)
   await client.set(key, validJid, { EX: DATA_JID_TTL })
+}
+
+export const setBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
+  const key = blacklist(from, webhookId, to)
+  const options = {}
+  if (ttl > 0) {
+    options['EX'] = ttl
+  }
+  await client.set(key, true, options)
 }
 
 export const getMessageStatus = async (phone: string, id: string) => {

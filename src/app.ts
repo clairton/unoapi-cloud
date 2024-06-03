@@ -10,6 +10,7 @@ import middleware from './services/middleware'
 import injectRoute from './services/inject_route'
 import { OnNewLogin } from './services/socket'
 import { Server } from 'socket.io'
+import { addToBlacklist } from './services/blacklist'
 
 export class App {
   public readonly server: HttpServer
@@ -22,6 +23,7 @@ export class App {
     getConfig: getConfig,
     sessionStore: SessionStore,
     onNewLogin: OnNewLogin,
+    addToBlacklist: addToBlacklist,
     middleware: middleware = async (req: Request, res: Response, next: NextFunction) => next(),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     injectRoute: injectRoute = async (router: Router) => {},
@@ -31,7 +33,7 @@ export class App {
     this.app.use(express.urlencoded({ extended: true }))
     this.server = createServer(this.app)
     const socket: Server = new Server(this.server)
-    this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, middleware, injectRoute)
+    this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, addToBlacklist, middleware, injectRoute)
   }
 
   private router(
@@ -42,10 +44,11 @@ export class App {
     sessionStore: SessionStore,
     socket: Server,
     onNewLogin: OnNewLogin,
+    addToBlacklist: addToBlacklist,
     middleware: middleware,
     injectRoute: injectRoute,
   ) {
-    const roter = router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, middleware, injectRoute)
+    const roter = router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, addToBlacklist, middleware, injectRoute)
     this.app.use(roter)
   }
 }

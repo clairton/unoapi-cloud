@@ -32,8 +32,6 @@ And click in submit on typebot ![image](prints/callback.png)
 
 After, enable the integration on typebot and click in Publish. ![image](prints/publish.png)
 
-
-
 # Lists with typebot
 
 ### Some observations before using list on Typebot, by default Typebot is not ready to work with lists, so has some limitations. 
@@ -42,7 +40,25 @@ After, enable the integration on typebot and click in Publish. ![image](prints/p
 
 ## How to use
 
-
 To use lists, you need to use the text bubble followed by button input. ![image](prints/lists.png)
 
 ![image](prints/exemple_list_typebot.png)
+
+## Config unoapi to not send message to type for some numbers
+To work with this, set a unique id field in webhook json in redis or if use envs config, the id of webhook is a string `default`
+
+For exemplo, if your session number is Y and you want do webhook with id W to never send more message to number X
+
+ttl param is in milliseconds
+
+To remove a phone number your black, send ttl with 0
+
+```sh
+curl -i -X POST \
+http://localhost:9876/Y/blacklist/W \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{ 
+  "ttl": -1, 
+  "to": "X"
+}'

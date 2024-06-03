@@ -23,13 +23,14 @@ import { amqpGetChannel } from './amqp'
 import logger from './services/logger'
 import { version } from '../package.json'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
+import { addToBlacklistJob } from './services/blacklist'
 
 const incoming: Incoming = new IncomingAmqp()
 const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
 const sessionStore: SessionStore = new SessionStoreRedis()
 const onNewLogin = onNewLoginGenerateToken(outgoing)
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, security)
+const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, security)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   await amqpGetChannel(UNOAPI_JOB_INCOMING, '', AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 5 }) // create a channel with priority
