@@ -7,10 +7,26 @@ import { WAMessage, delay } from '@whiskeysockets/baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
 
+const  delays: Map<String, number> = new Map()
+
+const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_MESSAGES_MS ? async (phone, to) => {
+  if (to) { 
+    const key = `${phone}:${to}`
+    const epochMS: number = Math.floor(Date.now());
+    const lastMessage = (delays.get(key) || 0) as number
+    const timeForNextMessage = lastMessage ? Math.floor(lastMessage + (UNOAPI_DELAY_BETWEEN_MESSAGES_MS)) : Math.floor(epochMS + (UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS)) 
+    const ms = timeForNextMessage - epochMS > 0 ? Math.floor((timeForNextMessage - epochMS)) : 0;
+    logger.debug(`Delay for this message is:%s`, ms)
+    delays.set(key, timeForNextMessage)
+    if (ms) {
+      await delay(ms)
+    }
+  }
+} :  async (_phone, _to) => {}
+
 export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
   private getConfig: getConfig
-  private delays: Map<String, true> = new Map()
 
   constructor(outgoing: Outgoing, getConfig: getConfig) {
     this.outgoing = outgoing
@@ -126,14 +142,7 @@ export class ListenerBaileys implements Listener {
     if (data) {
       const response = this.outgoing.send(phone, data)
       const to = i?.key?.remoteJid
-      if (to) {
-        const key = `${phone}:${to}`
-        const ms = this.delays.get(key) ? UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS : UNOAPI_DELAY_BETWEEN_MESSAGES_MS
-        this.delays.set(key, true)
-        if (ms) {
-          await delay(ms)
-        }
-      }
+      await delayFunc(phone, to)
       return response
     } else {
       logger.debug(`Not send message type ${messageType} to http phone %s message id %s`, phone, i?.key?.id)
