@@ -246,6 +246,8 @@ UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
 SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
 SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
 UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS=to service had time do create contact and conversation before send next messages, default 1000
+UNOAPI_DELAY_BETWEEN_MESSAGES_MS=to not duplicate timestamp message. defaul 1
 PROXY_URL the socks proxy url, default not use
 CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
 CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection

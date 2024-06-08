@@ -5,6 +5,7 @@ import { getConfig } from './config'
 import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
 import { WAMessage, delay } from '@whiskeysockets/baileys'
 import { Template } from './template'
+import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
 
 export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
@@ -125,10 +126,13 @@ export class ListenerBaileys implements Listener {
     if (data) {
       const response = this.outgoing.send(phone, data)
       const to = i?.key?.remoteJid
-      const key = `${phone}:${to}`
-      if (to && !this.delays.get(key)) {
+      if (to) {
+        const key = `${phone}:${to}`
+        const ms = this.delays.get(key) ? UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS : UNOAPI_DELAY_BETWEEN_MESSAGES_MS
         this.delays.set(key, true)
-        await delay(2000)
+        if (ms) {
+          await delay(ms)
+        }
       }
       return response
     } else {
