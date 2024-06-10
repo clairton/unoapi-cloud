@@ -907,9 +907,9 @@
     google-gax "^4.0.3"
 
 "@grpc/grpc-js@~1.10.0":
-  version "1.10.7"
-  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.10.7.tgz#1abce1a8c4c90b79dbbe57d7e4310f3b0ce72899"
-  integrity sha512-ZMBVjSeDAz3tFSehyO6Pd08xZT1HfIwq3opbeM4cDlBh52gmwp0wVIPcQur53NN0ac68HMZ/7SF2rGRD5KmVmg==
+  version "1.10.9"
+  resolved "https://registry.yarnpkg.com/@grpc/grpc-js/-/grpc-js-1.10.9.tgz#468cc1549a3fe37b760a16745fb7685d91f4f10c"
+  integrity sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==
   dependencies:
     "@grpc/proto-loader" "^0.7.13"
     "@js-sdsl/ordered-map" "^4.4.2"
