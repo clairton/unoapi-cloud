@@ -143,7 +143,6 @@ export class ClientBaileys implements Client {
         message: {
           conversation: text,
         },
-        messageTimestamp: Math.floor(new Date().getTime() / 1000),
       }
       logger.debug('onNotification %s', JSON.stringify(payload))
       if (this.config.sessionWebhook) {
@@ -169,7 +168,6 @@ export class ClientBaileys implements Client {
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
     logger.debug('Received qrcode %s %s', this.phone, qrCode)
-    const messageTimestamp = Math.floor(new Date().getTime() / 1000)
     const id = uuid()
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
     const remoteJid = phoneNumberToJid(this.phone)
@@ -188,7 +186,6 @@ export class ClientBaileys implements Client {
           caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${time} of ${limit}`,
         },
       },
-      messageTimestamp,
     }
     if (this.config.sessionWebhook) {
       const body = JSON.stringify({ info: { phone: this.phone }, status: await getSessionStatus(this.phone), ...waMessage })

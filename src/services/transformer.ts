@@ -339,10 +339,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       profileName = payload.verifiedBizName || payload.pushName || senderPhone
     }
     let cloudApiStatus
-    let messageTimestamp = payload.messageTimestamp
-    if (!messageTimestamp) {
-      messageTimestamp = Math.floor(Date.now() / 1000)
-    }
+    let messageTimestamp = payload.messageTimestamp || ''
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupMetadata: any = {}
     if (payload.groupMetadata) {
