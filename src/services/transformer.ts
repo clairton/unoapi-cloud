@@ -94,9 +94,6 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
 }
 
 export const completeCloudApiWebHook = (phone, to: string, message: object) => {
-  if (!message['timestamp']) {
-    message['timestamp'] = Math.floor(new Date().getTime() / 1000).toString()
-  }
   return {
     object: 'whatsapp_business_account',
     entry: [
@@ -629,7 +626,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         id: messageId,
         recipient_id: senderPhone.replace('+', ''),
         status: cloudApiStatus,
-        timestamp: messageTimestamp.toString(),
+      }
+      if (payload.messageTimestamp) {
+        state['timestamp'] = payload.messageTimestamp.toString()
       }
       if (cloudApiStatus == 'failed') {
         // https://github.com/tawn33y/whatsapp-cloud-api/issues/40#issuecomment-1290036629
