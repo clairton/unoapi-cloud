@@ -339,7 +339,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       profileName = payload.verifiedBizName || payload.pushName || senderPhone
     }
     let cloudApiStatus
-    let messageTimestamp = payload.messageTimestamp || ''
+    let messageTimestamp = payload.messageTimestamp
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupMetadata: any = {}
     if (payload.groupMetadata) {
@@ -389,7 +389,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     const message: any = {
       from: (fromMe ? phone : senderPhone).replace('+', ''),
       id: whatsappMessageId,
-      timestamp: messageTimestamp.toString(),
+    }
+    if (payload.messageTimestamp) {
+      message['timestamp'] = payload.messageTimestamp.toString()
     }
     switch (messageType) {
       case 'imageMessage':
