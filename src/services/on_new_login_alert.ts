@@ -14,7 +14,6 @@ export const onNewLoginAlert = (listener: Listener): OnNewLogin => {
       message: {
         conversation: message,
       },
-      messageTimestamp: Math.floor(new Date().getTime()).toString(),
     }
     return listener.process(phone, [payload], 'notify')
   }
