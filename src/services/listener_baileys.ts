@@ -16,7 +16,7 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_ME
     const lastMessage = (delays.get(key) || 0) as number
     const timeForNextMessage = lastMessage ? Math.floor(lastMessage + (UNOAPI_DELAY_BETWEEN_MESSAGES_MS)) : Math.floor(epochMS + (UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS)) 
     const ms = timeForNextMessage - epochMS > 0 ? Math.floor((timeForNextMessage - epochMS)) : 0;
-    logger.debug(`Delay for this message is:%s`, ms)
+    logger.debug(`Delay for this message is: %s`, ms)
     delays.set(key, timeForNextMessage)
     if (ms) {
       await delay(ms)
@@ -136,6 +136,7 @@ export class ListenerBaileys implements Listener {
       if (state) {
         const status = state.status || 'error'
         const id = state.id
+        logger.debug(`Set status message %s to %s`, id, status)
         await store?.dataStore?.setStatus(id, status)
       }
     }
