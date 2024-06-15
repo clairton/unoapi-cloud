@@ -5,6 +5,7 @@ import { blacklist, redisTtl, redisKeys } from './redis'
 import logger from './logger'
 
 const DATA = new NodeCache()
+let searchData = true
 
 export interface addToBlacklist {
   (from: string, webhookId: string, to: string, ttl: number): Promise<Boolean>
@@ -28,7 +29,6 @@ export const extractDestinyPhone = (payload: object) => {
   return number
 }
 
-
 export const blacklistInMemory = (from: string, webhookId: string, to: string) => {
   return `${from}:${webhookId}:${to}`
 }
@@ -41,15 +41,24 @@ export const isInBlacklistInMemory: isInBlacklist = async (from: string, webhook
 
 export const addToBlacklistInMemory: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
   const key = blacklistInMemory(from, webhookId, to)
-  return DATA.set(key, to, ttl)
+  if (ttl > 0) {
+    return DATA.set(key, to, ttl)
+  } else if (ttl == 0) {
+    DATA.del(key)
+    return true
+  } else {
+    return DATA.set(key, to)
+  }
 }
 
 export const cleanBlackList = async () => {
   DATA.flushAll()
+  searchData = true
 }
 
 export const isInBlacklistInRedis: isInBlacklist = async (from: string, webhookId: string, payload: object) => {
-  if (DATA.getStats().keys <= 0) {
+  if (DATA.getStats().keys <= 0 && searchData) {
+    searchData = false
     const pattern = `${blacklist('', '', '').replaceAll('::', '')}*`
     const keys = await redisKeys(pattern)
     logger.info(`Load ${keys.length} items in blacklist`)

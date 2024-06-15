@@ -195,11 +195,13 @@ export const setJid = async (phone: string, jid: string, validJid: string) => {
 
 export const setBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
   const key = blacklist(from, webhookId, to)
-  const options = {}
   if (ttl > 0) {
-    options['EX'] = ttl
+    return client.set(key, '1', { EX: ttl })
+  } else if (ttl == 0) {
+    return client.del(key)
+  } else {
+    return client.set(key, '1')
   }
-  await client.set(key, true, options)
 }
 
 export const getMessageStatus = async (phone: string, id: string) => {
