@@ -133,7 +133,7 @@ export class ListenerBaileys implements Listener {
       }
     } finally {
       const state = data?.entry[0]?.changes[0]?.value?.statuses[0] || {}
-      if (state) {
+      if (state.id) {
         const status = state.status || 'error'
         const id = state.id
         logger.debug(`Set status message %s to %s`, id, status)
