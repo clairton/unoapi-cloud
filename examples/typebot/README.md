@@ -49,9 +49,9 @@ To work with this, set a unique id field in webhook json in redis or if use envs
 
 For exemplo, if your session number is Y and you want do webhook with id W to never send more message to number X
 
-ttl param is in milliseconds
+ttl param is in seconds
 
-To remove a phone number your black, send ttl with 0
+To remove a phone number your black, send ttl with 0, with ttl -1, never expire
 
 ```sh
 curl -i -X POST \
