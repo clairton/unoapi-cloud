@@ -8,7 +8,7 @@ const redisKeysMock = redisKeys as jest.MockedFunction<typeof redisKeys>
 const blacklistMock = blacklist as jest.MockedFunction<typeof blacklist>
 
 describe('service blacklist webhook', () => {
-  test('return empty extractDestinyPhone from webhook payload', async () => {
+  test('return empty extractDestinyPhone from webhook payload message', async () => {
     const payload = {
       entry: [
         {
@@ -23,6 +23,23 @@ describe('service blacklist webhook', () => {
       ],
     }
     expect(extractDestinyPhone(payload)).toBe('y')
+  })
+
+  test('return empty extractDestinyPhone from webhook payload status', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            { 
+              value: {
+                statuses: [{  recipient_id: 'x' }]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    expect(extractDestinyPhone(payload)).toBe('x')
   })
 
   test('return empty extractDestinyPhone from api payload', async () => {

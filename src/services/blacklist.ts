@@ -17,15 +17,24 @@ export interface isInBlacklist {
 
 export const extractDestinyPhone = (payload: object) => {
   const data = payload as any
-  const number = (data?.to || (
-    data.entry
-    && data.entry[0]
-    && data.entry[0].changes
-    && data.entry[0].changes[0]
-    && data.entry[0].changes[0].value
-    && data.entry[0].changes[0].value.contacts
-    && data.entry[0].changes[0].value.contacts[0]
-    && data.entry[0].changes[0].value.contacts[0].wa_id)?.replace('+', '')
+  const number = data?.to || (
+    (
+      data.entry
+      && data.entry[0]
+      && data.entry[0].changes
+      && data.entry[0].changes[0]
+      && data.entry[0].changes[0].value
+    ) && (
+      (
+        data.entry[0].changes[0].value.contacts
+        && data.entry[0].changes[0].value.contacts[0]
+        && data.entry[0].changes[0].value.contacts[0].wa_id?.replace('+', '')
+      ) || (
+        data.entry[0].changes[0].value.statuses
+        && data.entry[0].changes[0].value.statuses[0]
+        && data.entry[0].changes[0].value.statuses[0].recipient_id?.replace('+', '')
+      )
+    )
   )
   if (!number) {
     throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
