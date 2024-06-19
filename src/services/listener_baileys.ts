@@ -17,9 +17,11 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_ME
     const timeForNextMessage = lastMessage ? Math.floor(lastMessage + (UNOAPI_DELAY_BETWEEN_MESSAGES_MS)) : Math.floor(epochMS + (UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS)) 
     const ms = timeForNextMessage - epochMS > 0 ? Math.floor((timeForNextMessage - epochMS)) : 0;
     logger.debug(`Delay for this message is: %s`, ms)
-    delays.set(key, timeForNextMessage)
     if (ms) {
+      delays.set(key, timeForNextMessage)
       await delay(ms)
+    } else {
+      delays.set(key, epochMS)
     }
   }
 } :  async (_phone, _to) => {}
