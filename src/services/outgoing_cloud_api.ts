@@ -28,7 +28,7 @@ export class OutgoingCloudApi implements Outgoing {
   public async sendHttp(phone: string, webhook: Webhook, message: object) {
     const destinyPhone = await this.isInBlacklist(phone, webhook.id, message)
     if (destinyPhone) {
-      logger.info(`Session Phone %s webhook %s and destiny phone %s is in blacklist, ignore send`, phone, webhook.id, destinyPhone)
+      logger.info(`Session phone %s webhook %s and destiny phone %s are in blacklist`, phone, webhook.id, destinyPhone)
       return
     }
     const body = JSON.stringify(message)

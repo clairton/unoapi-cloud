@@ -49,11 +49,14 @@ export const blacklistInMemory = (from: string, webhookId: string, to: string) =
 export const isInBlacklistInMemory: isInBlacklist = async (from: string, webhookId: string, payload: object) => {
   const to = extractDestinyPhone(payload)
   const key = blacklistInMemory(from, webhookId, to)
-  return DATA.get(key) || ''
+  const cache: string | undefined = DATA.get(key)
+  logger.debug('Retrieve destiny phone %s and verify key %s is %s in cache', to, key, cache ? 'present' : 'not present')
+  return cache || ''
 }
 
 export const addToBlacklistInMemory: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
   const key = blacklistInMemory(from, webhookId, to)
+  logger.debug('Add %s to blacklist with ttl %s', key, ttl)
   if (ttl > 0) {
     return DATA.set(key, to, ttl)
   } else if (ttl == 0) {
@@ -78,8 +81,7 @@ export const isInBlacklistInRedis: isInBlacklist = async (from: string, webhookI
     const promises = keys.map(async key => {
       const ttl = await redisTtl(key)
       const [ _k, from, webhookId, to ] = key.split(':')
-      const inMemorykey = blacklistInMemory(from, webhookId, to)
-      return DATA.set(inMemorykey, to, ttl)
+      return addToBlacklistInMemory(from, webhookId, to, ttl)
     })
     await Promise.all(promises)
   }
@@ -90,4 +92,3 @@ export const addToBlacklistJob: addToBlacklist = async (from: string, webhookId:
   await amqpEnqueue(UNOAPI_JOB_BLACKLIST_ADD, '', { from, webhookId, to, ttl })
   return true
 }
-
