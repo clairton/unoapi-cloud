@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.16.3",
+  "version": "1.16.4",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",

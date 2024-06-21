@@ -15,6 +15,22 @@ import {
 import logger from './services/logger'
 import { version } from '../package.json'
 
+const withTimeout = (millis, error, promise) => {
+  let timeoutPid
+  const timeout = new Promise((_resolve, reject) =>
+    timeoutPid = setTimeout(
+      () => reject(error),
+      millis))
+  return Promise.race([
+    promise,
+    timeout
+  ]).finally(() => {
+    if (timeoutPid) {
+      clearTimeout(timeoutPid)
+    }
+  })
+}
+
 const queueDelay = (queue: string) => `${queue}.delayed`
 const queueDead = (queue: string) => `${queue}.dead`
 
@@ -169,7 +185,7 @@ export const amqpEnqueue = async (
     queueName = queue
   }
   await channel.publish(queueName, phone, Buffer.from(JSON.stringify(payload)), properties)
-  logger.info('Enqueued at %s with phone: %s, payload: %s, properties: %s', queueName, phone, JSON.stringify(payload), JSON.stringify(properties))
+  logger.debug('Enqueued at %s with phone: %s, payload: %s, properties: %s', queueName, phone, JSON.stringify(payload), JSON.stringify(properties))
 }
 
 export const amqpConsume = async (
@@ -188,7 +204,6 @@ export const amqpConsume = async (
     if (!payload) {
       throw `payload not be null `
     }
-    const timeoutId = setTimeout(() => { throw new Error(`timeout ${CONSUMER_TIMEOUT_MS} is exceeded consume queue: ${queue}, phone: ${phone}`) }, CONSUMER_TIMEOUT_MS)
     const content: string = payload.content.toString()
     const phone = payload.fields.routingKey
     const data = JSON.parse(content)
@@ -200,13 +215,13 @@ export const amqpConsume = async (
       if (IGNORED_CONNECTIONS_NUMBERS.includes(phone)) {
         logger.info(`Ignore messages from ${phone}`)
       } else {
-        await callback(phone, data, { countRetries, maxRetries })
+        const timeoutError = `timeout ${CONSUMER_TIMEOUT_MS} is exceeded consume queue: ${queue}, phone: ${phone}, payload: ${content}`
+        await withTimeout(CONSUMER_TIMEOUT_MS, timeoutError, callback(phone, data, { countRetries, maxRetries }))
       }
       logger.debug('Ack message!')
       await channel.ack(payload)
-      clearTimeout(timeoutId)
     } catch (error) {
-      logger.error(error)
+      logger.error('Error on consume', error)
       if (countRetries >= maxRetries) {
         logger.info('Reject %s retries', countRetries)
         if (options.notifyFailedMessages) {
@@ -219,9 +234,8 @@ export const amqpConsume = async (
                 to: phone,
                 type: 'text',
                 text: {
-                  body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
-                    error.message
-                  }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
+                  body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${error.message
+                    }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
                 },
               },
             },
@@ -235,7 +249,6 @@ export const amqpConsume = async (
         await amqpEnqueue(queue, phone, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
-      clearTimeout(timeoutId)
     }
   }
 
