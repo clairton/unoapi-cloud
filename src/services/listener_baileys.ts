@@ -1,6 +1,7 @@
 import { Listener } from './listener'
 import logger from './logger'
 import { Outgoing } from './outgoing'
+import { Broadcast } from './broadcast'
 import { getConfig } from './config'
 import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
 import { WAMessage, delay } from '@whiskeysockets/baileys'
@@ -29,10 +30,12 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_ME
 export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
   private getConfig: getConfig
+  private broadcast: Broadcast
 
-  constructor(outgoing: Outgoing, getConfig: getConfig) {
+  constructor(outgoing: Outgoing, broadcast: Broadcast, getConfig: getConfig) {
     this.outgoing = outgoing
     this.getConfig = getConfig
+    this.broadcast = broadcast
   }
 
   async process(phone: string, messages: object[], type: 'qrcode' | 'status' | 'history' | 'append' | 'notify' | 'message' | 'update' | 'delete') {
@@ -52,6 +55,19 @@ export class ListenerBaileys implements Listener {
         logger.debug('ignore messages.upsert type append with status pending')
         return
       }
+    }
+    if (type == 'qrcode') {
+      await this.broadcast.send(
+        phone,
+        type,
+        messages[0]['message']['imageMessage']['url']
+      )
+    } else if(type === 'status') {
+      await this.broadcast.send(
+        phone,
+        type,
+        messages[0]['message']['conversation']
+      )
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {

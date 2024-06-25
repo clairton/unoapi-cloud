@@ -1,0 +1,319 @@
+version: '3'
+
+
+x-base: &base
+  image: clairton/chatwoot:${CHATWOOT_VERSION}
+  restart: 'no'
+  command: echo 'ok'
+  depends_on:
+    - postgres
+    - redis
+  environment:
+    ENABLE_ACCOUNT_SIGNUP: false
+    REDIS_PASSWORD: ${REDIS_PASSWORD}
+    REDIS_URL: redis://redis:6379
+    DATABASE_URL: ${DATABASE_URL}
+    ACTIVE_STORAGE_SERVICE: s3_compatible
+    STORAGE_BUCKET_NAME: ${STORAGE_BUCKET_NAME}
+    STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID}
+    STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY}
+    STORAGE_REGION: ${STORAGE_REGION}
+    STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+    # STORAGE_FORCE_PATH_STYLE: true
+    SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    FRONTEND_URL: https://${DOMAIN}
+    DEFAULT_LOCALE: 'pt_BR'
+    INSTALLATION_ENV: docker
+    NODE_ENV: production
+    RAILS_ENV: production
+    WHATSAPP_CLOUD_BASE_URL: https://unoapi.cloud
+    MAILER_INBOUND_EMAIL_DOMAIN: $DOMAIN
+    RAILS_INBOUND_EMAIL_SERVICE: relay
+    SMTP_ADDRESS: ${SMTP_ADDRESS}
+    SMTP_PASSWORD: ${SMTP_PASSWORD}
+    SMTP_PORT: ${SMTP_PORT}
+    SMTP_USERNAME: ${SMTP_USERNAME}
+    RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    VIRTUAL_PORT: 3000
+    LETSENCRYPT_HOST: ${DOMAIN}
+    VIRTUAL_HOST: ${DOMAIN}
+    FB_APP_ID: ${FB_APP_ID}
+    FB_APP_SECRET: ${FB_APP_SECRET}
+    FB_VERIFY_TOKEN: ${FB_VERIFY_TOKEN}
+    IG_VERIFY_TOKEN: ${IG_VERIFY_TOKEN}
+    WEB_CONCURRENCY: 5
+    RAILS_MAX_THREADS: 10
+    SIDEKIQ_CONCURRENCY: 15
+    LOG_LEVEL: error
+    ENABLE_RACK_ATTACK: 'false'
+    GOOGLE_OAUTH_CALLBACK_URL: ${GOOGLE_OAUTH_CALLBACK_URL}
+    GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+    GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+    # RACK_TIMEOUT_SERVICE_TIMEOUT: 90
+  networks:
+    - default
+
+services:
+  web:
+    <<: *base
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    restart: always
+    networks:
+      - default
+      - external-dns
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '3.00'
+    #       memory: 2024M
+    #     reservations:
+    #       cpus: '1.00'
+    #       memory: 1024M
+
+  worker:
+    <<: *base
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    restart: always
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1.00'
+    #       memory: 1024M
+    #     reservations:
+    #       cpus: '0.50'
+    #       memory: 512M
+
+  migrate:
+    <<: *base
+    restart: 'no'
+    command: ['bundle', 'exec', 'rails', 'db:chatwoot_prepare']
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    restart: always
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.25'
+    #       memory: 128M
+    #     reservations:
+    #       cpus: '0.10'
+    #       memory: 64M
+    networks:
+      - default
+  
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+      HTTP_USER: default
+      HTTP_PASSWORD: ${REDIS_PASSWORD}
+      VIRTUAL_PORT: 8081
+      LETSENCRYPT_HOST: redis.${DOMAIN}
+      VIRTUAL_HOST: redis.${DOMAIN}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    networks:
+      - default
+      - external-dns
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.15'
+    #       memory: 128M
+    #     reservations:
+    #       cpus: '0.05'
+    #       memory: 64M
+
+  # postgres:
+  #   image: postgres:15-alpine
+  #   command: postgres -c 'max_connections=200'
+  #   volumes:
+  #     - postgres:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #   restart: always
+  #   networks:
+  #     - default
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '3.00'
+  #         memory: 1024M
+  #       reservations:
+  #         cpus: '1.00'
+  #         memory: 512M
+
+
+  postgres-01:
+    image: bitnami/postgresql:15
+    volumes:
+      - postgres-01:/bitnami/postgresql
+    environment:
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB}
+      POSTGRESQL_REPLICATION_MODE: master
+      POSTGRESQL_REPLICATION_USER: ${POSTGRES_USER}_replication
+      POSTGRESQL_REPLICATION_PASSWORD: ${POSTGRES_PASSWORD}_replication
+      # POSTGRESQL_PGAUDIT_LOG: all
+      # POSTGRESQL_MAX_CONNECTIONS: 50
+      # POSTGRESQL_STATEMENT_TIMEOUT: 15000
+      # POSTGRESQL_SYNCHRONOUS_COMMIT_MODE: on
+      # POSTGRESQL_NUM_SYNCHRONOUS_REPLICAS: 1
+    restart: always
+    networks:
+      - default
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2.00'
+    #       memory: 1024M
+    #     reservations:
+    #       cpus: '0.50'
+    #       memory: 512M
+
+  postgres-02:
+    image: bitnami/postgresql:15
+    depends_on:
+      - postgres-01
+    environment:
+      POSTGRESQL_MASTER_HOST: postgres-01
+      POSTGRESQL_REPLICATION_MODE: slave
+      POSTGRESQL_REPLICATION_USER: ${POSTGRES_USER}_replication
+      POSTGRESQL_REPLICATION_PASSWORD: ${POSTGRES_PASSWORD}_replication
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: always
+    networks:
+      - default
+
+  postgres-03:
+    image: bitnami/postgresql:15
+    depends_on:
+      - postgres-01
+    environment:
+      POSTGRESQL_MASTER_HOST: postgres-01
+      POSTGRESQL_REPLICATION_MODE: slave
+      POSTGRESQL_REPLICATION_USER: ${POSTGRES_USER}_replication
+      POSTGRESQL_REPLICATION_PASSWORD: ${POSTGRES_PASSWORD}_replication
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+    restart: always
+    networks:
+      - default
+
+  postgres:
+    image: bitnami/pgpool:4.4.3
+    restart: always
+    ports:
+      - 5432:5432
+    depends_on:
+      - postgres-01
+    environment:
+      PGPOOL_BACKEND_NODES: 0:postgres-01:5432,1:postgres-02:5432,2:postgres-03:5432
+      PGPOOL_POSTGRES_USERNAME: ${POSTGRES_USER}
+      PGPOOL_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGPOOL_ADMIN_USERNAME: ${POSTGRES_USER}
+      PGPOOL_ADMIN_PASSWORD: ${POSTGRES_PASSWORD}
+      PGPOOL_ENABLE_LOAD_BALANCING: yes
+      PGPOOL_ENABLE_STATEMENT_LOAD_BALANCING: yes
+      PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT: yes
+      PGPOOL_ENABLE_LOG_HOSTNAME: yes
+      PGPOOL_NUM_INIT_CHILDREN: 100
+      PGPOOL_MAX_POOL: 500
+      PGPOOL_SR_CHECK_USER: ${POSTGRES_USER}
+      PGPOOL_SR_CHECK_PASSWORD: ${POSTGRES_PASSWORD}
+
+  pgweb:
+    restart: always
+    image: sosedoff/pgweb
+    depends_on:
+      - postgres
+    environment:
+      PGWEB_DATABASE_URL: ${DATABASE_URL}?sslmode=disable
+      PGWEB_AUTH_USER: ${POSTGRES_USER}
+      PGWEB_AUTH_PASS: ${POSTGRES_PASSWORD}
+      VIRTUAL_PORT: 8081
+      LETSENCRYPT_HOST: postgres.${DOMAIN}
+      VIRTUAL_HOST: postgres.${DOMAIN}
+    networks:
+      - default
+      - external-dns
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.25'
+    #       memory: 128M
+    #     reservations:
+    #       cpus: '0.10'
+    #       memory: 64M
+
+  bot:
+    image: registry.gitlab.com/clairton/chatwootbot:0.15.5
+    environment:
+      PORT: 5555
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      WORKER_LOG_LEVEL: 'nothing'
+      WEBHOOK_LOG_LEVEL: 'nothing'
+    restart: always
+    networks:
+      - default
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.50'
+    #       memory: 128M
+    #     reservations:
+    #       cpus: '0.25'
+    #       memory: 64M
+
+  backup:
+    image: kartoza/pg-backup:15-3.3
+    environment:
+      DUMPPREFIX: PG
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASS: ${POSTGRES_PASSWORD}
+      DBLIST: ${POSTGRES_DB}
+      STORAGE_BACKEND: S3
+      ACCESS_KEY_ID: ${BACKUP_ACCESS_KEY_ID}
+      SECRET_ACCESS_KEY: ${BACKUP_SECRET_ACCESS_KEY}
+      DEFAULT_REGION: ${BACKUP_DEFAULT_REGION}
+      BUCKET: ${BACKUP_BUCKET}
+      HOST_BASE: ${BACKUP_HOST_BASE}
+      HOST_BUCKET: ${BACKUP_BUCKET}
+      SSL_SECURE: ${BACKUP_SSL_SECURE}
+      CRON_SCHEDULE: '0 * * * *'
+    restart: on-failure
+    depends_on:
+      - postgres
+    networks:
+      - default
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1.00'
+    #       memory: 512M
+    #     reservations:
+    #       cpus: '0.25'
+    #       memory: 256M
+
+volumes:
+  redis:
+  postgres:
+  postgres-01:
+  # postgres-02:
+  # postgres-03:
+
+networks:
+  external-dns:
+    external: true
+  

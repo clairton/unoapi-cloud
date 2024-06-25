@@ -11,9 +11,11 @@ import injectRoute from './services/inject_route'
 import { OnNewLogin } from './services/socket'
 import { Server } from 'socket.io'
 import { addToBlacklist } from './services/blacklist'
+import cors from 'cors'
 
 export class App {
   public readonly server: HttpServer
+  public readonly socket: Server
   private app
 
   constructor(
@@ -29,11 +31,17 @@ export class App {
     injectRoute: injectRoute = async (router: Router) => {},
   ) {
     this.app = express()
+    this.app.use(cors({ origin: ['*'] }))
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
     this.server = createServer(this.app)
-    const socket: Server = new Server(this.server)
-    this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, socket, onNewLogin, addToBlacklist, middleware, injectRoute)
+    this.socket = new Server(this.server, {
+      path: '/ws',
+      cors: {
+        origin: '*'
+      }
+    })
+    this.router(incoming, outgoing, baseUrl, getConfig, sessionStore, this.socket, onNewLogin, addToBlacklist, middleware, injectRoute)
   }
 
   private router(
