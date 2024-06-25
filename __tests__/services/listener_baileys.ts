@@ -5,6 +5,7 @@ import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig, getMessageMetadataDefault } from '../../src/services/config'
 import { ListenerBaileys } from '../../src/services/listener_baileys'
 import { Outgoing } from '../../src/services/outgoing'
+import { Broadcast } from '../../src/services/broadcast'
 
 let store: Store
 let getConfig: getConfig
@@ -13,6 +14,7 @@ let getStore: getStore
 let phone
 let outgoing: Outgoing
 let service: ListenerBaileys
+let broadcast: Broadcast
 
 const textPayload = {
   key: {
@@ -38,11 +40,12 @@ describe('service listener baileys', () => {
       return config
     }
     store = mock<Store>()
+    broadcast = mock<Broadcast>()
     outgoing = mock<Outgoing>()
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
     phone = `${new Date().getMilliseconds()}`
-    service = new ListenerBaileys(outgoing, getConfig)
+    service = new ListenerBaileys(outgoing, broadcast, getConfig)
   })
 
   test('send call sendOne when text', async () => {

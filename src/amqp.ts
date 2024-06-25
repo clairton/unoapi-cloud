@@ -221,7 +221,7 @@ export const amqpConsume = async (
       logger.debug('Ack message!')
       await channel.ack(payload)
     } catch (error) {
-      logger.error('Error on consume', error)
+      logger.error('Error on consume %s %s', queue, error)
       if (countRetries >= maxRetries) {
         logger.info('Reject %s retries', countRetries)
         if (options.notifyFailedMessages) {

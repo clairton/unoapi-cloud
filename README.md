@@ -21,6 +21,16 @@ Go to `http://localhost:9876/session/XXX`, when XXX is your phone number, by exa
 
 The qrcode is send to configured webhook to, you can read in chatwoot inbox, in created chat with de same number of connection.
 
+### Qrcode with websocket
+Use the endpoint `/ws` and listen event `broadcast`, the object with type `qrcode` has a `content` attribute with de base64 url of qrcode
+```js
+import { io } from 'socket.io-client';
+const socket = io('http://localhost:9876/ws', { path: '/ws' });
+socket.on('broadcast', data => {
+  console.log('broadcast', data);
+});
+```
+
 ## Send a Message
 
 The payload is based on
@@ -429,6 +439,8 @@ PS: After update JSON, restart de docker container or service
 ## Examples
 
 ### [Docker compose with chatwoot](examples/chatwoot/README.md)
+
+### [Docker compose with chatwoot and unoapi inbox](examples/chatwoot-uno/README.md)
 
 ### [Docker compose with unoapi](examples/docker-compose.yml)
 

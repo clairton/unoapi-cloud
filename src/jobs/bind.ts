@@ -39,15 +39,17 @@ import logger from '../services/logger'
 import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
+import { BroadcastAmqp } from '../services/broadcast_amqp'
 import { NotificationJob } from '../jobs/notification'
 import { isSessionStatusOnline } from '../services/session_store'
 import { isInBlacklistInRedis } from '../services/blacklist'
+import { Broadcast } from '../services/broadcast'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
 const listenerAmqp: Listener = new ListenerAmqp()
-
-const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, getConfigRedis)
+const broadcastAmqp: Broadcast = new BroadcastAmqp()
+const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigRedis)
 
 const getConfig: getConfig = getConfigRedis
 
