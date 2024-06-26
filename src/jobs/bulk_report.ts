@@ -55,6 +55,7 @@ export class BulkReportJob {
       }
       const update = {
         type: typeMessage,
+        from: phone,
         [typeMessage]: message,
       }
       this.outgoing.formatAndSend(phone, phone, update)

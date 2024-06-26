@@ -229,6 +229,7 @@ export class BulkParserJob {
       }
       const message = {
         type: 'text',
+        from: phone,
         text: {
           body: `The bulk ${id} was parsed and found ${messages.length} message(s)!`,
         },

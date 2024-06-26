@@ -26,6 +26,7 @@ export class BulkSenderJob {
       logger.debug(statusMessage)
       let count = 0
       const message = {
+        from: phone,
         type: 'text',
         text: {
           body: statusMessage,
@@ -64,6 +65,7 @@ export class BulkSenderJob {
       }
       const messageUpdate = {
         type: 'text',
+        from: phone,
         text: {
           body: statusMessage,
         },
@@ -74,6 +76,7 @@ export class BulkSenderJob {
       logger.error(error, 'Error on send bulk')
       const messageError = {
         type: 'text',
+        from: phone,
         text: {
           body: text,
         },
