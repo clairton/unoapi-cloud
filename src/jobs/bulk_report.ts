@@ -27,9 +27,9 @@ export class BulkReportJob {
       if (!payload.unverified && status.scheduled) {
         typeMessage = 'text'
         if (count >= 10) {
-          message = `Bulk ${id} phone ${phone} with ${length}, has retried generate ${count} and not retried more`
+          message = { body: `Bulk ${id} phone ${phone} with ${length}, has retried generate ${count} and not retried more` }
         } else {
-          message = `Bulk ${id} phone ${phone} with ${length}, some messages is already scheduled status, try again later, this is ${count} try...`
+          message = { body: `Bulk ${id} phone ${phone} with ${length}, some messages is already scheduled status, try again later, this is ${count} try...` }
           await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { payload: { id, length, count } }, { delay: UNOAPI_BULK_DELAY * 1000 })
         }
       } else {
@@ -48,7 +48,7 @@ export class BulkReportJob {
         message = {
           url: base64,
           mime_type: 'text/csv',
-          filename,
+          filename, 
           caption,
           id: mediaKey,
         }
