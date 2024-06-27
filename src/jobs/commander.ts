@@ -51,6 +51,7 @@ export class CommanderJob {
         })
         const message = {
           type: 'text',
+          from: phone,
           text: {
             body: `The bulk ${id} is created and wil be parsed!`,
           },
