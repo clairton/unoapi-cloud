@@ -21,6 +21,7 @@ export const onNewLoginGenerateToken = (outgoing: Outgoing): OnNewLogin => {
     }
     const message = `Awesome, read the qrcode if you not yet. For now you need to update config to use this auth token ${authToken}`
     const payload = {
+      from: phone,
       type: 'text',
       text: {
         body: message,
