@@ -26,6 +26,7 @@ export type Config = {
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
   ignoreHistoryMessages: boolean
+  dateHistoryMessages: string
   ignoreYourselfMessages: boolean
   ignoreOwnMessages: boolean
   sendConnectionStatus: boolean
@@ -59,6 +60,7 @@ export const defaultConfig: Config = {
   ignoreBroadcastStatuses: true,
   ignoreBroadcastMessages: false,
   ignoreHistoryMessages: true,
+  dateHistoryMessages: new Date().toString(),
   ignoreOwnMessages: true,
   ignoreYourselfMessages: true,
   sendConnectionStatus: true,
