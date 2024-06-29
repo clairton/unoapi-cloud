@@ -20,7 +20,7 @@ import logger from './services/logger'
 import { Listener } from './services/listener'
 import { ListenerBaileys } from './services/listener_baileys'
 
-import { BASE_URL, PORT } from './defaults'
+import { BASE_URL, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME } from './defaults'
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistInMemory)
 
@@ -34,7 +34,7 @@ const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL, getConfigB
 broadcast.setSever(app.socket)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
-  logger.info('Unoapi Cloud version: %s, listening on port: %s', version, PORT)
+  logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
   autoConnect(sessionStore, incomingBaileys, listenerBaileys, getConfigByEnv, getClientBaileys, onNewLoginn)
 })
 
