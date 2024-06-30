@@ -52,6 +52,7 @@ export type Config = {
   sendProfilePicture: boolean
   authToken: string | undefined
   authHeader: string | undefined
+  provider: 'baileys'
 }
 
 export const defaultConfig: Config = {
@@ -97,6 +98,7 @@ export const defaultConfig: Config = {
   proxyUrl: undefined,
   authToken: undefined,
   authHeader: undefined,
+  provider: 'baileys',
 }
 
 export interface getConfig {

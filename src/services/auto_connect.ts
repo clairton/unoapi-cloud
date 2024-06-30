@@ -20,6 +20,11 @@ export const autoConnect = async (
     for (let i = 0, j = phones.length; i < j; i++) {
       const phone = phones[i]
       try {
+        const config = await getConfig(phone)
+        if (config.provider !== 'baileys') {
+          logger.info(`Ignore connecting phone ${phone} is not provider baileys...`)
+          continue;
+        }
         logger.info(`Auto connecting phone ${phone}...`)
         try {
           getClient({ phone, incoming, listener, getConfig, onNewLogin })

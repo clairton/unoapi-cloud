@@ -40,7 +40,7 @@ const channels = new Map<string, Channel>()
 const routes = new Map<string, boolean>()
 
 const validateFormatNumber = (v: string) => {
-  if ('' != v && !/^\d+$/.test(v)) {
+  if (!['bridge', 'worker'].includes(v) && '' != v && !/^\d+$/.test(v)) {
     throw `${v} is not a number`
   }
 }
