@@ -241,6 +241,7 @@ export class BulkParserJob {
     } catch (error) {
       logger.error(error, 'Error on parse bulk')
       const message = {
+        from: phone,
         type: 'text',
         text: {
           body: `Error on parse bulk: ${error?.message}`,
