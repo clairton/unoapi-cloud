@@ -5,6 +5,7 @@ import { Listener } from './listener'
 import { Incoming } from './incoming'
 import { OnNewLogin } from './socket'
 import logger from './logger'
+import { UNOAPI_SERVER_NAME } from '../defaults'
 
 export const autoConnect = async (
   sessionStore: SessionStore,
@@ -23,6 +24,10 @@ export const autoConnect = async (
         const config = await getConfig(phone)
         if (config.provider !== 'baileys') {
           logger.info(`Ignore connecting phone ${phone} is not provider baileys...`)
+          continue;
+        }
+        if (config.server !== UNOAPI_SERVER_NAME) {
+          logger.info(`Ignore connecting phone ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
           continue;
         }
         logger.info(`Auto connecting phone ${phone}...`)

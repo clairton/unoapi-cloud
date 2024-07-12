@@ -6,6 +6,7 @@ import {
   UNOAPI_MESSAGE_RETRY_LIMIT,
   UNOAPI_MESSAGE_RETRY_DELAY,
   UNOAPI_JOB_BIND,
+  UNOAPI_SERVER_NAME,
   NOTIFY_FAILED_MESSAGES,
   UNOAPI_JOB_NOTIFICATION,
   IGNORED_CONNECTIONS_NUMBERS,
@@ -40,7 +41,7 @@ const channels = new Map<string, Channel>()
 const routes = new Map<string, boolean>()
 
 const validateFormatNumber = (v: string) => {
-  if (!['bridge', 'worker'].includes(v) && '' != v && !/^\d+$/.test(v)) {
+  if (![`${UNOAPI_SERVER_NAME}.bridge`, `${UNOAPI_SERVER_NAME}.worker`].includes(v) && '' != v && !/^\d+$/.test(v)) {
     throw `${v} is not a number`
   }
 }
@@ -108,8 +109,9 @@ export const amqpGetChannel = async (
       channels.delete(queue)
     })
   }
-  if (phone && !routes.get(phone)) {
-    await amqpEnqueue(UNOAPI_JOB_BIND, '', { phone })
+  if (/^\d+$/.test(phone) && !routes.get(phone)) {
+    await amqpEnqueue(UNOAPI_JOB_BIND, `${UNOAPI_SERVER_NAME}.bridge`, { phone })
+    await amqpEnqueue(UNOAPI_JOB_BIND, `${UNOAPI_SERVER_NAME}.worker`, { phone })
     routes.set(phone, true)
   }
   return channels.get(queue)

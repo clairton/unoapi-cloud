@@ -6,9 +6,8 @@ import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { 
-  UNOAPI_JOB_BIND, 
-  UNOAPI_JOB_RELOAD,
-  UNOAPI_JOB_DISCONNECT 
+  UNOAPI_JOB_BIND,
+  UNOAPI_SERVER_NAME,
 } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
@@ -19,8 +18,6 @@ import { getClientBaileys } from './services/client_baileys'
 import { Incoming } from './services/incoming'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import logger from './services/logger'
-import { ReloadJob } from './jobs/reload'
-import { DisconnectJob } from './jobs/disconnect'
 import { Listener } from './services/listener'
 import { ListenerAmqp } from './services/listener_amqp'
 import { OutgoingAmqp } from './services/outgoing_amqp'
@@ -35,22 +32,14 @@ const getConfig: getConfig = getConfigRedis
 
 const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindBridgeJob()
-const reloadJob = new ReloadJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
-const disconnectJob = new DisconnectJob(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
 
 const startListner = async () => {
   await startRedis()
 
   logger.info('Unoapi Cloud version %s starting bridge...', version)
 
-  logger.info('Starting reload consumer')
-  await amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))
-
-  logger.info('Starting disconnect consumer')
-  await amqpConsume(UNOAPI_JOB_DISCONNECT, '', disconnectJob.consume.bind(disconnectJob))
-
   logger.info('Starting bind listener consumer')
-  await amqpConsume(UNOAPI_JOB_BIND, 'bridge', bindJob.consume.bind(bindJob))
+  await amqpConsume(UNOAPI_JOB_BIND, `${UNOAPI_SERVER_NAME}.bridge`, bindJob.consume.bind(bindJob))
 
   const sessionStore: SessionStore = new SessionStoreRedis()
 

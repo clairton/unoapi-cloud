@@ -1,3 +1,4 @@
+import { UNOAPI_SERVER_NAME } from '../defaults'
 import { getStore } from './store'
 import { getStoreFile } from './store_file'
 import { WAMessageKey } from '@whiskeysockets/baileys'
@@ -51,8 +52,9 @@ export type Config = {
   sendReactionAsReply: boolean
   sendProfilePicture: boolean
   authToken: string | undefined
-  authHeader: string | undefined
-  provider: 'baileys'
+  authHeader: string | undefined,
+  provider: 'baileys',
+  server:  string | undefined,
 }
 
 export const defaultConfig: Config = {
@@ -99,6 +101,7 @@ export const defaultConfig: Config = {
   authToken: undefined,
   authHeader: undefined,
   provider: 'baileys',
+  server: UNOAPI_SERVER_NAME,
 }
 
 export interface getConfig {

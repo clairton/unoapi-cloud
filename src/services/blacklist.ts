@@ -89,6 +89,6 @@ export const isInBlacklistInRedis: isInBlacklist = async (from: string, webhookI
 }
 
 export const addToBlacklistJob: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
-  await amqpEnqueue(UNOAPI_JOB_BLACKLIST_ADD, '', { from, webhookId, to, ttl })
+  await amqpEnqueue(UNOAPI_JOB_BLACKLIST_ADD, from, { from, webhookId, to, ttl })
   return true
 }

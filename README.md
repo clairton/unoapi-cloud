@@ -510,6 +510,17 @@ To show logs `journalctl -u unoapi.service -f`
 ## Caution with whatsapp web connection
 More then 14 days without open app in smartphone, the connection with whatsapp web is invalidated and need to read a new qrcode.
 
+## Future providers
+### Current lib is baileys, to other libraries implement subscribe:
+- incoming and convert whatsapp cloud api format to lib format
+- disconnect to remove conection
+- reload do close socket and reopen
+### to send messages:
+- write in rabbitmq queue outgoing in format
+
+https://github.com/NaikAayush/whatsapp-cloud-api
+https://github.com/green-api/whatsapp-api-client-golang
+
 ## Legal
 
 - This code is in no way affiliated, authorized, maintained, sponsored or

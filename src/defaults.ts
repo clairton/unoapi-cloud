@@ -25,6 +25,7 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
+export const UNOAPI_SERVER_NAME = process.env.UNOAPI_SERVER_NAME || 'server_1'
 export const CONNECTION_TIMEOUT = parseInt(process.env.CONNECTION_TIMEOUT || '140000')
 export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '5000')
 export const QR_TIMEOUT = parseInt(process.env.QR_TIMEOUT || '30000')

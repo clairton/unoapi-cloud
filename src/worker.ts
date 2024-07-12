@@ -4,7 +4,7 @@ dotenv.config()
 import { BindWorkerJob } from './jobs/bind_worker'
 import { 
   UNOAPI_JOB_BIND, 
-  UNOAPI_JOB_BLACKLIST_ADD,
+  UNOAPI_SERVER_NAME,
 } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
@@ -12,7 +12,6 @@ import { getConfig } from './services/config'
 import { getConfigRedis } from './services/config_redis'
 import logger from './services/logger'
 import { version } from '../package.json'
-import { addToBlacklist } from './jobs/add_to_blacklist'
 
 const getConfig: getConfig = getConfigRedis
 const bindJob = new BindWorkerJob()
@@ -23,10 +22,7 @@ const startWorker = async () => {
   logger.info('Unoapi Cloud version %s starting worker...', version)
 
   logger.info('Starting bind worker consumer')
-  await amqpConsume(UNOAPI_JOB_BIND, 'worker', bindJob.consume.bind(bindJob))
-
-  logger.info('Starting blacklist add consumer')
-  await amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, '', addToBlacklist)
+  await amqpConsume(UNOAPI_JOB_BIND, `${UNOAPI_SERVER_NAME}.worker`, bindJob.consume.bind(bindJob))
 
   logger.info('Unoapi Cloud version %s started worker!', version)
 }

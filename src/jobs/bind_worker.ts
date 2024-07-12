@@ -8,6 +8,7 @@ import { BulkWebhookJob } from '../jobs/bulk_webhook'
 import { BulkParserJob } from '../jobs/bulk_parser'
 import { BulkSenderJob } from '../jobs/bulk_sender'
 import { BulkReportJob } from '../jobs/bulk_report'
+import { addToBlacklist } from '../jobs/add_to_blacklist'
 import { OutgoingCloudApi } from '../services/outgoing_cloud_api'
 import {
   UNOAPI_JOB_OUTGOING,
@@ -21,6 +22,7 @@ import {
   UNOAPI_JOB_BULK_WEBHOOK,
   UNOAPI_JOB_NOTIFICATION,
   UNOAPI_JOB_OUTGOING_PREFETCH,
+  UNOAPI_JOB_BLACKLIST_ADD,
 } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { IncomingAmqp } from '../services/incoming_amqp'
@@ -54,13 +56,13 @@ const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 const processeds = new Map<string, boolean>()
 
 export class BindWorkerJob {
-  async consume(_: string, { phone }: { phone: string }) {
+  async consume(server: string, { phone }: { phone: string }) {
     if (!(await isSessionStatusOnline(phone)) && processeds.get(phone)) {
       return
     }
     processeds.set(phone, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
-    logger.info('Binding queues consumer worker for %s', phone)
+    logger.info('Binding queues consumer for server %s phone %s', server, phone)
 
     const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
@@ -96,5 +98,8 @@ export class BindWorkerJob {
 
     logger.debug('Starting bulk webhook consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_WEBHOOK, phone, bulkWebhookJob.consume.bind(bulkWebhookJob), { notifyFailedMessages })
+
+    logger.info('Starting blacklist add consumer')
+    await amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, phone, addToBlacklist)
   }
 }
