@@ -21,7 +21,7 @@ export class WebhookerJob {
         }),
       )
     } else if (a.webhook) {
-      await this.service.sendHttp(phone, a.webhook, payload)
+      await this.service.sendHttp(phone, a.webhook, payload, {})
     } else {
       await this.service.send(phone, payload)
     }

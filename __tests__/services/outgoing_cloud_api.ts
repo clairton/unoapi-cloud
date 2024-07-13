@@ -66,7 +66,7 @@ describe('service outgoing whatsapp cloud api', () => {
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
     isInBlacklistMock.mockResolvedValue(Promise.resolve('1'))
-    await service.sendHttp(phone, webhook, textPayload)
+    await service.sendHttp(phone, webhook, textPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 })

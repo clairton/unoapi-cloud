@@ -1,7 +1,7 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS /*, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_LIMIT*/ } from '../defaults'
-import { amqpEnqueue } from '../amqp'
+import { EnqueueOption, amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber } from '../services/transformer'
 import logger from '../services/logger'
@@ -38,10 +38,11 @@ export class IncomingJob {
       await amqpEnqueue(this.queueCommander, phone, { payload })
     }
     const { ok, error } = response
+    const optionsOutgoing: Partial<EnqueueOption>  = {}
+    const config = await this.getConfig(phone)
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {
       const idBaileys: string = ok.messages[0].id
       logger.debug('Baileys id %s to Unoapi id %s', idBaileys, idUno)
-      const config = await this.getConfig(phone)
       const { dataStore } = await config.getStore(phone, config)
       await dataStore.setUnoId(idBaileys, idUno)
       const key = await dataStore.loadKey(idBaileys)
@@ -89,7 +90,7 @@ export class IncomingJob {
       }
       const webhooks = config.webhooks.filter((w) => w.sendNewMessages)
       logger.debug('%s webhooks with sendNewMessages', webhooks.length)
-      await Promise.all(webhooks.map((w) => this.outgoing.sendHttp(phone, w, webhookMessage)))
+      await Promise.all(webhooks.map((w) => this.outgoing.sendHttp(phone, w, webhookMessage, {})))
     } else if (!ok.success) {
       throw `Unknow response ${JSON.stringify(response)}`
     } else if (ok.success) {
@@ -102,6 +103,8 @@ export class IncomingJob {
         error.entry[0].changes[0].value.statuses[0].id = idUno
       }
       outgingPayload = error
+      optionsOutgoing.delay = 1000
+      optionsOutgoing.priority = 1
       // const status = error.entry[0].changes[0].value.statuses[0]
       // const code = status?.errors[0]?.code
       // retry when error: 5 - Wait a moment, connecting process
@@ -148,7 +151,7 @@ export class IncomingJob {
       }
     }
     await amqpEnqueue(UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
-    await this.outgoing.send(phone, outgingPayload)
+    await Promise.all(config.webhooks.map((w) => this.outgoing.sendHttp(phone, w, outgingPayload, optionsOutgoing)))
     return response
   }
 }

@@ -55,7 +55,7 @@ export class BindBridgeJob {
     }
     processeds.set(phone, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
-    logger.info('Binding queues consumer server %s phone %s', server, phone)
+    logger.info('Binding queues consumer bridge server %s phone %s', server, phone)
 
     const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages

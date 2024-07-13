@@ -1,3 +1,4 @@
+import { EnqueueOption } from '../amqp'
 import { Webhook } from './config'
 
 export class FailedSend extends Error {
@@ -18,5 +19,5 @@ export class FailedSend extends Error {
 export interface Outgoing {
   formatAndSend(phone: string, to: string, message: object): Promise<void>
   send(phone: string, message: object): Promise<void>
-  sendHttp(phone: string, webhook: Webhook, message: object): Promise<void>
+  sendHttp(phone: string, webhook: Webhook, message: object, options: Partial<EnqueueOption>): Promise<void>
 }
