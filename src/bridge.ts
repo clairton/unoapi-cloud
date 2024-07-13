@@ -33,7 +33,7 @@ const getConfig: getConfig = getConfigRedis
 const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindBridgeJob()
 
-const startListner = async () => {
+const startBrigde = async () => {
   await startRedis()
 
   logger.info('Unoapi Cloud version %s starting bridge...', version)
@@ -47,9 +47,8 @@ const startListner = async () => {
 
   await autoConnect(sessionStore, incomingAmqp, listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
 }
-startListner()
+startBrigde()
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 process.on('unhandledRejection', (reason: any, promise) => {
   logger.error('unhandledRejection bridge: %s %s %s', reason, reason.stack, promise)
   throw reason

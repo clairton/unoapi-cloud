@@ -55,7 +55,7 @@ const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 
 const processeds = new Map<string, boolean>()
 
-export class BindWorkerJob {
+export class BindBrokerJob {
   async consume(server: string, { phone }: { phone: string }) {
     if (!(await isSessionStatusOnline(phone)) && processeds.get(phone)) {
       return

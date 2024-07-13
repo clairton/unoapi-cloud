@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.17.6",
+  "version": "1.17.7",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,12 +19,16 @@
     "dev": "./node_modules/nodemon/bin/nodemon.js src/index.ts --trace-deprecation",
     "web-dev": "./node_modules/nodemon/bin/nodemon.js src/web.ts",
     "worker-dev": "./node_modules/nodemon/bin/nodemon.js src/worker.ts",
+    "broker-dev": "./node_modules/nodemon/bin/nodemon.js src/broker.ts",
+    "bridge-dev": "./node_modules/nodemon/bin/nodemon.js src/bridge.ts",
     "cloud-dev": "./node_modules/nodemon/bin/nodemon.js src/cloud.ts",
     "start-ts": "node --loader ts-node/esm src/index.ts",
     "start": "node dist/src/index.js",
     "cloud": "node dist/src/cloud.js",
     "web": "node dist/src/web.js",
     "worker": "node dist/src/worker.js",
+    "broker": "node dist/src/broker.js",
+    "bridge": "node dist/src/bridge.js",
     "clean:data": "rm -rf ./data/medias/* ./data/sessions/* ./data/stores/*.json"
   },
   "devDependencies": {
