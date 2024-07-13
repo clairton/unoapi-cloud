@@ -98,7 +98,9 @@ export class IncomingJob {
     }
     let outgingPayload
     if (error) {
-      error.entry[0].changes[0].value.statuses[0].id = idUno
+      if (idUno) {
+        error.entry[0].changes[0].value.statuses[0].id = idUno
+      }
       outgingPayload = error
       // const status = error.entry[0].changes[0].value.statuses[0]
       // const code = status?.errors[0]?.code
