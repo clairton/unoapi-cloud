@@ -268,7 +268,7 @@ export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string =
   const country = number.substring(0, 2)
   if (country == '55') {
     const isValid = isValidPhoneNumber(`+${number}`, true)
-    if (!isValid && retry) {
+    if (!isValid && number.length < 13 && retry) {
       const prefix = number.substring(2, 4)
       const digits = number.match('.{8}$')[0]
       const digit = '9'
