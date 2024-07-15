@@ -11,7 +11,7 @@ export class IncomingAmqp implements Incoming {
     this.queueName = queueName
   }
 
-  public async send(phone: string, payload: object, options: object) {
+  public async send(phone: string, payload: object, options: object = {}) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { status, type, to } = payload as any
     if (status) {
