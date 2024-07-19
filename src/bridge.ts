@@ -7,7 +7,7 @@ import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { 
   UNOAPI_JOB_BIND,
-  UNOAPI_SERVER_NAME,
+  UNOAPI_JOB_BIND_BRIDGE
 } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
@@ -39,7 +39,7 @@ const startBrigde = async () => {
   logger.info('Unoapi Cloud version %s starting bridge...', version)
 
   logger.info('Starting bind listener consumer')
-  await amqpConsume(UNOAPI_JOB_BIND, `${UNOAPI_SERVER_NAME}.bridge`, bindJob.consume.bind(bindJob))
+  await amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BRIDGE, bindJob.consume.bind(bindJob))
 
   const sessionStore: SessionStore = new SessionStoreRedis()
 

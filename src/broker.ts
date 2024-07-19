@@ -4,7 +4,7 @@ dotenv.config()
 import { BindBrokerJob } from './jobs/bind_broker'
 import { 
   UNOAPI_JOB_BIND, 
-  UNOAPI_SERVER_NAME,
+  UNOAPI_JOB_BIND_BROKER,
 } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
@@ -22,7 +22,7 @@ const startBroker = async () => {
   logger.info('Unoapi Cloud version %s starting broker...', version)
 
   logger.info('Starting bind broker consumer')
-  await amqpConsume(UNOAPI_JOB_BIND, `${UNOAPI_SERVER_NAME}.broker`, bindJob.consume.bind(bindJob))
+  await amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BROKER, bindJob.consume.bind(bindJob))
 
   logger.info('Unoapi Cloud version %s started broker!', version)
 }
