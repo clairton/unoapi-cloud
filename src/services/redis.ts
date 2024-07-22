@@ -1,8 +1,40 @@
 import { createClient } from '@redis/client'
-import { REDIS_URL, DATA_JID_TTL, DATA_TTL, SESSION_TTL } from '../defaults'
+import { 
+  REDIS_URL, 
+  DATA_JID_TTL, 
+  DATA_TTL, 
+  SESSION_TTL,
+  IGNORE_GROUP_MESSAGES,
+  IGNORE_BROADCAST_STATUSES,
+  IGNORE_BROADCAST_MESSAGES,
+  IGNORE_HISTORY_MESSAGES,
+  IGNORE_OWN_MESSAGES,
+  IGNORE_YOURSELF_MESSAGES,
+  SEND_CONNECTION_STATUS,
+  NOTIFY_FAILED_MESSAGES,
+  COMPOSING_MESSAGE,
+  REJECT_CALLS,
+  REJECT_CALLS_WEBHOOK, // Corrigido: Removido SESSION_WEBHOOK, se não existir em defaults.ts
+  MESSAGE_CALLS_WEBHOOK,
+  LOG_LEVEL,
+  AUTO_CONNECT,
+  AUTO_RESTART_MS,
+  UNOAPI_RETRY_REQUEST_DELAY_MS, // Corrigido: Usando o nome correto
+  THROW_WEBHOOK_ERROR,
+  BASE_STORE,
+  IGNORE_DATA_STORE,
+  SEND_REACTION_AS_REPLY,
+  SEND_PROFILE_PICTURE,
+  UNOAPI_AUTH_TOKEN, // Corrigido: Usando o nome correto
+  UNOAPI_HEADER_NAME, // Corrigido: Usando o nome correto
+  WEBHOOK_URL_ABSOLUTE,
+  WEBHOOK_TOKEN,
+  WEBHOOK_HEADER 
+} from '../defaults'
 import logger from './logger'
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import { Webhook, configs } from './config'
+
 
 export const BASE_KEY = 'unoapi-'
 
@@ -264,20 +296,75 @@ export const getConfig = async (phone: string) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setConfig = async (phone: string, value: any) => {
-  const currentConfig = await getConfig(phone)
+  logger.info(`Valor recebido para setConfig: ${JSON.stringify(value, null, 2)}`)
+
+  const currentConfig = await getConfig(phone) || {}
   const key = configKey(phone)
-  const currentWebhooks: Webhook[] = currentConfig && currentConfig.webhooks || []
-  const newWebhooks: Webhook[] = value && value.webhooks || currentWebhooks
-  const updatedWebooks: Webhook[] = []
-  newWebhooks.forEach(n => {
-    const c = currentWebhooks.find((c) => c.id === n.id)
-    if (c) {
-      const u: Webhook = { ...c, ...n }
-      updatedWebooks.push(u)
+
+  // Definir todas as propriedades obrigatórias a partir de defaults.ts
+  const defaultConfig = {
+    ignoreGroupMessages: IGNORE_GROUP_MESSAGES,
+    ignoreBroadcastStatuses: IGNORE_BROADCAST_STATUSES,
+    ignoreBroadcastMessages: IGNORE_BROADCAST_MESSAGES,
+    ignoreHistoryMessages: IGNORE_HISTORY_MESSAGES,
+    ignoreOwnMessages: IGNORE_OWN_MESSAGES,
+    ignoreYourselfMessages: IGNORE_YOURSELF_MESSAGES,
+    sendConnectionStatus: SEND_CONNECTION_STATUS,
+    notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
+    composingMessage: COMPOSING_MESSAGE,
+    rejectCalls: REJECT_CALLS,
+    rejectCallsWebhook: REJECT_CALLS_WEBHOOK,
+    messageCallsWebhook: MESSAGE_CALLS_WEBHOOK,
+    logLevel: LOG_LEVEL,
+    autoConnect: AUTO_CONNECT,
+    autoRestartMs: AUTO_RESTART_MS,
+    retryRequestDelayMs: UNOAPI_RETRY_REQUEST_DELAY_MS,
+    throwWebhookError: THROW_WEBHOOK_ERROR,
+    baseStore: BASE_STORE,
+    webhooks: [
+      {
+        sendNewMessages: null,
+        id: "default",
+        urlAbsolute: WEBHOOK_URL_ABSOLUTE,
+        token: WEBHOOK_TOKEN,
+        header: WEBHOOK_HEADER
+      }
+    ],
+    ignoreDataStore: IGNORE_DATA_STORE,
+    sendReactionAsReply: SEND_REACTION_AS_REPLY,
+    sendProfilePicture: SEND_PROFILE_PICTURE,
+    authToken: UNOAPI_AUTH_TOKEN,
+    authHeader: UNOAPI_HEADER_NAME
+  }
+
+  // Garante que a lista de webhooks está presente tanto na configuração atual quanto na nova configuração
+  const currentWebhooks: Webhook[] = currentConfig.webhooks || []
+  const newWebhooks: Webhook[] = value.webhooks || []
+
+  // Atualiza a lista de webhooks, mesclando os novos webhooks com os existentes
+  const updatedWebhooks: Webhook[] = currentWebhooks.map((c) => {
+    const n = newWebhooks.find((n) => n.id === c.id)
+    return n ? { ...c, ...n } : c
+  })
+
+  // Adiciona novos webhooks que não estão na lista atual
+  newWebhooks.forEach((n) => {
+    if (!currentWebhooks.some((c) => c.id === n.id)) {
+      updatedWebhooks.push(n)
     }
   })
-  value.webhooks = updatedWebooks
-  const config = { ...currentConfig, ...value }
+
+  // Cria a configuração final, mesclando a configuração atual com a nova configuração e valores padrão
+  const config = {
+    ...defaultConfig,
+    ...currentConfig,
+    ...value,
+    webhooks: updatedWebhooks.length > 0 ? updatedWebhooks : currentWebhooks
+  }
+
+  logger.info(`Configuração final para setConfig: ${JSON.stringify(config, null, 2)}`)
+
+  // Armazena a configuração no Redis com o tempo de expiração definido
   await redisSetAndExpire(key, JSON.stringify(config), SESSION_TTL)
   configs.delete(phone)
   return config
