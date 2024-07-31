@@ -214,9 +214,11 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 
 `yarn start` up a single server and save session and media file in filesystem
 
-`yarn cloud` up a single server and save message in redis and message broker rabbitmq
+`yarn cloud` up a single server and save message in redis and message broker rabbitmq and media in s3 or compatible
 
-`yarn web` e `yarn worker` up a web and worker with redis and rabbitmq
+`yarn web` and `yarn worker` up a web and worker with redis, rabbitmq and s3
+
+`yarn web`, ⁠ `yarn broker` and ⁠ `yarn bridge` ⁠p a web and broker with redis, rabbitmq and s3, broker. Bridge is dedicated do functions with baileys
 
 
 ## Config Options
