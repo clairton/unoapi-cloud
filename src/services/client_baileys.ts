@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, delay, isJidGroup, jidNormalizedUser } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from '@whiskeysockets/baileys'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
 import { Store, stores } from './store'
@@ -273,7 +273,7 @@ export class ClientBaileys implements Client {
     })
     if (!this.config.ignoreHistoryMessages) {
       logger.info('Config import history messages %', this.phone)
-      event('messaging-history.set', async ({ messages, isLatest }: { messages: WAMessage[]; isLatest: boolean }) => {
+      event('messaging-history.set', async ({ messages, isLatest }: { messages: proto.IWebMessageInfo[]; isLatest?: boolean }) => {
         logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
         this.listener.process(this.phone, messages, 'history')
       })
