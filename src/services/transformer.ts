@@ -187,9 +187,29 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'audio':
     case 'document':
     case 'video':
-      const url = payload[type].link
-      if (url) {
-        let mimetype = mime.lookup(url.split('?')[0])
+      const link = payload[type].link
+      if (link) {
+        let mimetype: string | boolean | null = mime.lookup(link.split('?')[0])
+        if (!mimetype) {
+          let url
+          try {
+            url = new URL(link)
+          } catch (error) {
+            logger.error(`Error on parse url: ${link}`)
+          }
+          if (url) {
+            mimetype = url.searchParams.get('response-content-type')
+            if (!mimetype) {
+              const contentDisposition = url.searchParams.get('response-content-disposition')
+              if (contentDisposition) {
+                const filename = contentDisposition.split('filename=')[1].split(';')[0]
+                if (filename) {
+                  mimetype = mime.lookup(filename)
+                }
+              }
+            }
+          }
+        }
         if (type == 'audio') {
           if (mimetype == 'audio/ogg') {
             mimetype = 'audio/ogg; codecs=opus'
@@ -198,16 +218,19 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
           }
           response.ptt = true
         }
+        if (payload[type].filename) {
+          if (!mimetype) {
+            mimetype = mime.lookup(payload[type].filename)
+          }
+          response.fileName = payload[type].filename
+        }
         if (mimetype) {
           response.mimetype = mimetype
-        }
-        if (payload[type].filename) {
-          response.fileName = payload[type].filename
         }
         if (payload[type].caption) {
           response.caption = payload[type].caption
         }
-        response[type] = { url }
+        response[type] = { url: link }
         break
       }
 
