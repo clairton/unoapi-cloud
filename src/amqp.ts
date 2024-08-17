@@ -275,6 +275,12 @@ export const amqpConsume = async (
   await channel.bindQueue(queueDelayed.queue,  queueDelayedName(queue), phone)
   await channel.bindQueue(queueMain.queue, queue, phone)
 
+  channel.on('close', () => {
+    channel.unbindQueue(queueDead.queue, queueDeadName(queue))
+    channel.unbindQueue(queueDelayed.queue,  queueDelayedName(queue), phone)
+    channel.unbindQueue(queueMain.queue, queue, phone)
+  })
+
   channel.consume(queueMain.queue, fn)
   logger.info('Waiting for message %s in queue %s', phone, queue)
 }

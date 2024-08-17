@@ -429,7 +429,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           filename,
           mime_type: mimetype,
           sha256: binMessage.fileSha256,
-          url: binMessage.url && binMessage.url.indexOf('base64') < 0 ? binMessage.url : '',
+          // url: binMessage.url && binMessage.url.indexOf('base64') < 0 ? binMessage.url : '',
           id: mediaKey,
         }
         message.type = mediaType
