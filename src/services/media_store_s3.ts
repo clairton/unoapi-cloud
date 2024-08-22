@@ -47,13 +47,6 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
     await saveMediaBuffer(fileName, buffer)
-    // if (binMessage?.messageType && waMessage.message) {
-    //   const filePath = await mediaStore.getFileName(phone, waMessage)
-    //   const config = await getConfig(phone)
-    //   const url = await getDownloadUrl(config.baseUrl, filePath)
-    //   console.log(`binMessage?.messageType ${binMessage?.messageType} waMessage ${JSON.stringify(waMessage)}`)
-    //   waMessage.message[binMessage?.messageType]['url'] = url
-    // }
     return waMessage
   }
 
