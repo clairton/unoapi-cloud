@@ -108,7 +108,7 @@ export const CLEAN_CONFIG_ON_DISCONNECT =
 export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefined ? false : process.env.VALIDATE_ROUTING_KEY == 'true'
 export const CONFIG_SESSION_PHONE_CLIENT = process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi'
 export const CONFIG_SESSION_PHONE_NAME = process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome'
-export const WHATSAPP_VERSION = JSON.parse(process.env.WHATSAPP_VERSION || '[2, 2413, 1]') as WAVersion
+export const WHATSAPP_VERSION = JSON.parse(process.env.WHATSAPP_VERSION || '[2, 3000, 101590130]') as WAVersion
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {
