@@ -7,6 +7,16 @@ import { Config } from './config'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
 
+
+const MESSAGE_STUB_TYPE_ERRORS = [
+  'Message absent from node'.toLowerCase(),
+  'Invalid PreKey ID'.toLowerCase(),
+  'Key used already or never filled'.toLowerCase(),
+  'No SenderKeyRecord found for decryption'.toLowerCase(),
+  'No session record'.toLowerCase(),
+  'No matching sessions found for message'.toLowerCase(),
+]
+
 export class BindTemplateError extends Error {
   constructor() {
     super('')
@@ -537,14 +547,11 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         break
 
       case 'messageStubType':
-        const errors = [
-          'Message absent from node',
-          'Invalid PreKey ID',
-          'Key used already or never filled',
-          'No SenderKeyRecord found for decryption',
-          'No session record',
-        ]
-        if (payload.messageStubType == 2 && payload.messageStubParameters && errors.includes(payload.messageStubParameters[0])) {
+        MESSAGE_STUB_TYPE_ERRORS
+        if (payload.messageStubType == 2 && 
+            payload.messageStubParameters &&
+            payload.messageStubParameters[0] &&
+            MESSAGE_STUB_TYPE_ERRORS.includes(payload.messageStubParameters[0].toLowerCase())) {
           message.text = {
             body: '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.',
           }
