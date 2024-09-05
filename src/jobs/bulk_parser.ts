@@ -101,10 +101,10 @@ const formatters: any = {
     }
     if (type == 'text') {
       message.payload.text = {
-        body: render(MENSAGEM, { ...row, NOME: PRIMEIRO_NOME }),
+        body: render(MENSAGEM, { ...row, NOME: PRIMEIRO_NOME, firt_name: PRIMEIRO_NOME }),
       }
     } else if (type == 'speech') {
-      const text = render(MENSAGEM, { ...row, NOME: PRIMEIRO_NOME })
+      const text = render(MENSAGEM, { ...row, NOME: PRIMEIRO_NOME, firt_name: PRIMEIRO_NOME })
       const link = await synthesize(phone, getConfig, text)
       message.payload.audio = {
         link,
@@ -112,7 +112,7 @@ const formatters: any = {
       message.payload.type = 'audio'
     } else {
       message.payload[type] = {
-        caption: render(MENSAGEM, { ...row, NOME: PRIMEIRO_NOME }),
+        caption: render(MENSAGEM, { ...row, NOME: PRIMEIRO_NOME, firt_name: PRIMEIRO_NOME }),
         link: row.URL,
       }
     }

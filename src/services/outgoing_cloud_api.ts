@@ -31,8 +31,6 @@ export class OutgoingCloudApi implements Outgoing {
     if (destinyPhone) {
       logger.info(`Session phone %s webhook %s and destiny phone %s are in blacklist`, phone, webhook.id, destinyPhone)
       return
-    } else {
-      logger.debug(`Session phone %s webhook %s and destiny phone %s aren't in blacklist`, phone, webhook.id, destinyPhone)
     }
     const body = JSON.stringify(message)
     const headers = {
