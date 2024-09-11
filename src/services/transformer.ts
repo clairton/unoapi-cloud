@@ -61,6 +61,46 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'messageStubType',
 ]
 
+export const getMimetype = (payload: any) => {
+  const { type } = payload
+  const link = payload[type].link
+
+  let mimetype: string | boolean = mime.lookup(link.split('?')[0])
+  if (!mimetype) {
+    let url
+    try {
+      url = new URL(link)
+    } catch (error) {
+      logger.error(`Error on parse url: ${link}`)
+    }
+    if (url) {
+      mimetype = url.searchParams.get('response-content-type')
+      if (!mimetype) {
+        const contentDisposition = url.searchParams.get('response-content-disposition')
+        if (contentDisposition) {
+          const filename = contentDisposition.split('filename=')[1].split(';')[0]
+          if (filename) {
+            mimetype = mime.lookup(filename)
+          }
+        }
+      }
+    }
+  }
+  if (type == 'audio') {
+    if (mimetype == 'audio/ogg') {
+      mimetype = 'audio/ogg; codecs=opus'
+    } else if (!mimetype) {
+      mimetype = 'audio/mpeg'
+    }
+  }
+  if (payload[type].filename) {
+    if (!mimetype) {
+      mimetype = mime.lookup(payload[type].filename)
+    }
+  }
+  return mimetype ? `${mimetype}` : 'application/unknown'
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getMessageType = (payload: any) => {
   if (payload.update) {
@@ -199,39 +239,11 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
     case 'video':
       const link = payload[type].link
       if (link) {
-        let mimetype: string | boolean | null = mime.lookup(link.split('?')[0])
-        if (!mimetype) {
-          let url
-          try {
-            url = new URL(link)
-          } catch (error) {
-            logger.error(`Error on parse url: ${link}`)
-          }
-          if (url) {
-            mimetype = url.searchParams.get('response-content-type')
-            if (!mimetype) {
-              const contentDisposition = url.searchParams.get('response-content-disposition')
-              if (contentDisposition) {
-                const filename = contentDisposition.split('filename=')[1].split(';')[0]
-                if (filename) {
-                  mimetype = mime.lookup(filename)
-                }
-              }
-            }
-          }
-        }
+        let mimetype: string = getMimetype(payload)
         if (type == 'audio') {
-          if (mimetype == 'audio/ogg') {
-            mimetype = 'audio/ogg; codecs=opus'
-          } else if (!mimetype) {
-            mimetype = 'audio/mpeg'
-          }
           response.ptt = true
         }
         if (payload[type].filename) {
-          if (!mimetype) {
-            mimetype = mime.lookup(payload[type].filename)
-          }
           response.fileName = payload[type].filename
         }
         if (mimetype) {

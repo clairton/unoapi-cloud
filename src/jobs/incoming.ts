@@ -3,8 +3,20 @@ import { Outgoing } from '../services/outgoing'
 import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS /*, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_LIMIT*/ } from '../defaults'
 import { EnqueueOption, amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
-import { jidToPhoneNumber } from '../services/transformer'
+import { jidToPhoneNumber, getMimetype } from '../services/transformer'
 import logger from '../services/logger'
+import fetch, { Response } from 'node-fetch'
+import mime from 'mime-types'
+
+
+const toBuffer = (arrayBuffer) => {
+  const buffer = Buffer.alloc(arrayBuffer.byteLength);
+  const view = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < buffer.length; ++i) {
+    buffer[i] = view[i];
+  }
+  return buffer;
+}
 
 export class IncomingJob {
   private incoming: Incoming
@@ -50,6 +62,25 @@ export class IncomingJob {
         dataStore.setKey(idBaileys, key)
         dataStore.setKey(idUno, key)
       }
+      let messagePayload = payload[payload.type]
+      if (['image', 'audio', 'document', 'video'].includes(payload.type)) {
+        const { mediaStore } = await config.getStore(phone, config)
+        const mediaKey = `${phone}/${idUno}`
+        const link = payload[payload.type].link
+        const mimetype = getMimetype(payload)
+        const extension = mime.extension(mimetype)
+        const fileName = `${mediaKey}.${extension}`
+        const response: Response = await fetch(link, { signal: AbortSignal.timeout(60000), method: 'GET'})
+        const buffer = toBuffer(await response.arrayBuffer())
+        await mediaStore.saveMediaBuffer(fileName, buffer)
+        messagePayload = {
+          filename: payload[payload.type].filename,
+          caption: payload[payload.type].caption,
+          id: mediaKey,
+          mime_type: mimetype,
+        }
+        delete messagePayload['link']
+      }
       const webhookMessage = {
         object: 'whatsapp_business_account',
         entry: [
@@ -77,7 +108,7 @@ export class IncomingJob {
                       from: phone,
                       id: idUno,
                       timestamp,
-                      [payload.type]: payload[payload.type],
+                      [payload.type]: messagePayload,
                       type: payload.type,
                     },
                   ],
