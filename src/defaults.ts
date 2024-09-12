@@ -109,6 +109,7 @@ export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefi
 export const CONFIG_SESSION_PHONE_CLIENT = process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi'
 export const CONFIG_SESSION_PHONE_NAME = process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome'
 export const WHATSAPP_VERSION = JSON.parse(process.env.WHATSAPP_VERSION || '[2, 3000, 101590130]') as WAVersion
+export const MESSAGE_CHECK_WAAPP = process.env.MESSAGE_CHECK_WAAPP || '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {
