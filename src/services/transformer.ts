@@ -4,6 +4,7 @@ import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
 import logger from './logger'
 import { Config } from './config'
+import { MESSAGE_CHECK_WAAPP } from '../defaults'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
 
@@ -565,7 +566,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             payload.messageStubParameters[0] &&
             MESSAGE_STUB_TYPE_ERRORS.includes(payload.messageStubParameters[0].toLowerCase())) {
           message.text = {
-            body: '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.',
+            body: MESSAGE_CHECK_WAAPP,
           }
           message.type = 'text'
           change.value.messages.push(message)
