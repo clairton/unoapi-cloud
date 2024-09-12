@@ -156,7 +156,7 @@ export const connect = async ({
     await setSessionStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version, isLatest } = await fetchLatestBaileysVersion()
-    const message = `Connected with ${phone} using Whatsapp Version v${version.join('.')}, is latest? ${isLatest} at ${new Date().toUTCString()}`
+    const message = `Connected with ${phone} using Whatsapp Version v${WHATSAPP_VERSION.join('.')}, latest Baileys version is v${version.join('.')} at ${new Date().toUTCString()}`
     await onNotification(message, false)
   }
 
