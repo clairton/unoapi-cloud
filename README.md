@@ -263,9 +263,9 @@ PROXY_URL=the socks proxy url, default not use
 CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
 CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
-WHATSAPP_VERSION=Version of whatsapp, default is [2, 2413, 1]
+WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
-MESSAGE_CHECK_WAAPP=message to send webwook when uno fails on reading contente. default '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
+MESSAGE_CHECK_WAAPP=message to send webwook when uno fails on reading content. default '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
