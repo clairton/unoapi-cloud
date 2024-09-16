@@ -6,7 +6,7 @@ import logger from './logger'
 import { Config } from './config'
 import { MESSAGE_CHECK_WAAPP } from '../defaults'
 
-export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage']
+export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
 
 
 const MESSAGE_STUB_TYPE_ERRORS = [
@@ -61,6 +61,7 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'senderKeyDistributionMessage',
   'messageContextInfo',
   'messageStubType',
+  'ptvMessage',
 ]
 
 export const getMimetype = (payload: any) => {
@@ -443,11 +444,15 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       case 'audioMessage':
       case 'stickerMessage':
       case 'documentMessage':
-        const mediaType = messageType.replace('Message', '')
+      case 'ptvMessage':
+        let mediaType = messageType.replace('Message', '')
         const mediaKey = `${phone}/${whatsappMessageId}`
         const mimetype = (binMessage.fileName && mime.lookup(binMessage.fileName)) || binMessage.mimetype.split(';')[0]
         const extension = mime.extension(mimetype)
         const filename = binMessage.fileName || `${payload.key.id}.${extension}`
+        if (mediaType == 'pvt') {
+          mediaType = mimetype.split('/')[0]
+        }
         message[mediaType] = {
           caption: binMessage.caption,
           filename,
