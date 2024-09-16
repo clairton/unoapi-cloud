@@ -57,11 +57,11 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'liveLocationMessage',
   'listResponseMessage',
   'conversation',
+  'ptvMessage',
   'protocolMessage',
   'senderKeyDistributionMessage',
   'messageContextInfo',
   'messageStubType',
-  'ptvMessage',
 ]
 
 export const getMimetype = (payload: any) => {
