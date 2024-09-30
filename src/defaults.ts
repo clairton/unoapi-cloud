@@ -64,6 +64,7 @@ export const UNOAPI_MESSAGE_RETRY_LIMIT = parseInt(process.env.MESSAGE_RETRY_LIM
 export const UNOAPI_MESSAGE_RETRY_DELAY = parseInt(process.env.MESSAGE_RETRY_DELAY || '10000')
 export const UNOAPI_DELAY_BETWEEN_MESSAGES_MS = parseInt(process.env.UNOAPI_DELAY_BETWEEN_MESSAGES_MS || '0')
 export const UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS = parseInt(process.env.UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS || '0')
+export const UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS = parseInt(process.env.UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS || '0')
 export const UNOAPI_BULK_BATCH = parseInt(process.env.UNOAPI_BULK_BATCH || '5')
 export const UNOAPI_BULK_DELAY = parseInt(process.env.UNOAPI_BULK_DELAY || '60')
 export const UNOAPI_BULK_MESSAGE_DELAY = parseInt(process.env.UNOAPI_BULK_DELAY || '12')

@@ -12,6 +12,7 @@ import {
   DecryptError,
   getNormalizedMessage,
   isSaveMedia,
+  extractDestinyPhone,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -33,6 +34,44 @@ const inputDocumentMessage: WAMessage = {
 }
 
 describe('service transformer', () => {
+  test('return y extractDestinyPhone from webhook payload message', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                contacts: [{ wa_id: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(extractDestinyPhone(payload)).toBe('y')
+  })
+
+  test('return x extractDestinyPhone from webhook payload status', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                statuses: [{ recipient_id: 'x' }]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    expect(extractDestinyPhone(payload)).toBe('x')
+  })
+
+  test('return empty extractDestinyPhone from api payload', async () => {
+    expect(extractDestinyPhone({ to: 'y' })).toBe('y')
+  })
+
   test('phoneNumberToJid with nine digit', async () => {
     expect(phoneNumberToJid('+5549988290955')).toEqual('5549988290955@s.whatsapp.net')
   })
