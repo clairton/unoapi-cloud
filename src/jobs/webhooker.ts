@@ -1,7 +1,30 @@
 import { Webhook } from '../services/config'
 import { Outgoing } from '../services/outgoing'
 import { amqpEnqueue } from '../amqp'
-import { UNOAPI_JOB_WEBHOOKER } from '../defaults'
+import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_JOB_WEBHOOKER } from '../defaults'
+import { extractDestinyPhone } from '../services/transformer'
+import logger from '../services/logger'
+const  delays: Map<String, boolean> = new Map()
+
+const sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS ? async (phone, payload) => {
+  let to = ''
+  try {
+    to = extractDestinyPhone(payload)
+  } catch (error) {
+    logger.error('Error on extract to from payload', error)
+  }
+  if (to) { 
+    const key = `${phone}:${to}`
+    if (!delays.get(key)) {
+      delays.set(key, true);
+      sleep(UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS)
+    }
+  }
+} :  async (_phone, _payload) => {}
 
 export class WebhookerJob {
   private service: Outgoing
@@ -22,6 +45,7 @@ export class WebhookerJob {
       )
     } else if (a.webhook) {
       await this.service.sendHttp(phone, a.webhook, payload, {})
+      await delayFunc(phone, payload)
     } else {
       await this.service.send(phone, payload)
     }
