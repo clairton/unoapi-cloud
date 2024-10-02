@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.18.3",
+  "version": "1.19.0",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -84,6 +84,7 @@
     "socks-proxy-agent": "^8.0.3",
     "uuid": "^9.0.1",
     "vcf": "^2.1.2",
+    "voice-calls-baileys": "^1.0.5",
     "xlsx": "^0.18.5",
     "yaml": "^2.4.2"
   }

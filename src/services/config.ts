@@ -55,6 +55,7 @@ export type Config = {
   authHeader: string | undefined,
   provider: 'baileys',
   server:  string | undefined,
+  wavoipToken:  string | undefined,
 }
 
 export const defaultConfig: Config = {
@@ -102,6 +103,7 @@ export const defaultConfig: Config = {
   authHeader: undefined,
   provider: 'baileys',
   server: UNOAPI_SERVER_NAME,
+  wavoipToken: '',
 }
 
 export interface getConfig {

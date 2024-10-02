@@ -35,6 +35,7 @@ import {
   PROXY_URL,
   UNOAPI_AUTH_TOKEN,
   UNOAPI_HEADER_NAME,
+  WAVOIP_TOKEN,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -65,6 +66,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.proxyUrl = PROXY_URL
     config.authToken = UNOAPI_AUTH_TOKEN
     config.authHeader = UNOAPI_HEADER_NAME
+    config.wavoipToken = WAVOIP_TOKEN
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
     config.webhooks[0].token = WEBHOOK_TOKEN

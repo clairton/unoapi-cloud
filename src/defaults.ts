@@ -110,6 +110,7 @@ export const CONFIG_SESSION_PHONE_CLIENT = process.env.CONFIG_SESSION_PHONE_CLIE
 export const CONFIG_SESSION_PHONE_NAME = process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome'
 export const MESSAGE_CHECK_WAAPP = process.env.MESSAGE_CHECK_WAAPP || '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
 export const WHATSAPP_VERSION = JSON.parse(process.env.WHATSAPP_VERSION || `[${DEFAULT_CONNECTION_CONFIG.version}]`) as WAVersion
+export const WAVOIP_TOKEN = process.env.WAVOIP_TOKEN || ''
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {
