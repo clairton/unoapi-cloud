@@ -1,19 +1,19 @@
 import { Request, Response } from 'express'
-import { UNOAPI_JOB_RELOAD, UNOAPI_JOB_DISCONNECT } from '../defaults'
-import { amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
 import { setConfig } from '../services/redis'
 import logger from '../services/logger'
+import { Logout } from '../services/logout'
+import { Reload } from '../services/reload'
 
 export class RegistrationController {
   private getConfig: getConfig
-  private queueReload: string
-  private queueDisconnect: string
+  private logout: Logout
+  private reload: Reload
 
-  constructor(getConfig: getConfig, queueReload: string = UNOAPI_JOB_RELOAD, queueDisconnect: string = UNOAPI_JOB_DISCONNECT) {
+  constructor(getConfig: getConfig, reload: Reload, logout: Logout) {
     this.getConfig = getConfig
-    this.queueReload = queueReload
-    this.queueDisconnect = queueDisconnect
+    this.reload = reload
+    this.logout = logout
   }
 
   public async register(req: Request, res: Response) {
@@ -25,7 +25,7 @@ export class RegistrationController {
     const { phone } = req.params
     try {
       await setConfig(phone, req.body)
-      await amqpEnqueue(this.queueReload, '', { phone })
+      await this.reload.run(phone)
       const config = await this.getConfig(phone)
       return res.status(200).json(config)
     } catch (e) {
@@ -40,7 +40,7 @@ export class RegistrationController {
     logger.debug('deregister body %s', JSON.stringify(req.body))
     logger.debug('deregister query %s', JSON.stringify(req.query))
     const { phone } = req.params
-    await amqpEnqueue(this.queueDisconnect, '', { phone })
+    await this.logout.run(phone)
     return res.status(204).send()
   }
 }

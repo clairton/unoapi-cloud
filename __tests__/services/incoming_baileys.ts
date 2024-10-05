@@ -19,6 +19,8 @@ class DummyClient implements Client {
   async connect(): Promise<void> {}
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   async disconnect(): Promise<void> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async logout(): Promise<void> {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   async send(payload: any): Promise<any> {
     return true

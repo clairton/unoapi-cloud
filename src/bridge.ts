@@ -7,7 +7,9 @@ import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { 
   UNOAPI_JOB_BIND,
-  UNOAPI_JOB_BIND_BRIDGE
+  UNOAPI_JOB_BIND_BRIDGE,
+  UNOAPI_JOB_RELOAD,
+  UNOAPI_JOB_LOGOUT,
 } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
@@ -23,6 +25,10 @@ import { ListenerAmqp } from './services/listener_amqp'
 import { OutgoingAmqp } from './services/outgoing_amqp'
 import { Outgoing } from './services/outgoing'
 import { version } from '../package.json'
+import { ReloadBaileys } from './services/reload_baileys'
+import { LogoutBaileys } from './services/logout_baileys'
+import { ReloadJob } from './jobs/reload'
+import { LogoutJob } from './jobs/logout'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -32,6 +38,10 @@ const getConfig: getConfig = getConfigRedis
 
 const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindBridgeJob()
+const reload = new ReloadBaileys(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
+const reloadJob = new ReloadJob(reload)
+const logout = new LogoutBaileys(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
+const logoutJob = new LogoutJob(logout)
 
 const startBrigde = async () => {
   await startRedis()
@@ -40,6 +50,12 @@ const startBrigde = async () => {
 
   logger.info('Starting bind listener consumer')
   await amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BRIDGE, bindJob.consume.bind(bindJob))
+
+  logger.info('Starting reload consumer')
+  await amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))
+
+  logger.info('Starting logout consumer')
+  await amqpConsume(UNOAPI_JOB_LOGOUT, '', logoutJob.consume.bind(logoutJob))
 
   const sessionStore: SessionStore = new SessionStoreRedis()
 

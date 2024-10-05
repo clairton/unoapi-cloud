@@ -1,9 +1,7 @@
 import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from '@whiskeysockets/baileys'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
-import { Store, stores } from './store'
-import { dataStores } from './data_store'
-import { mediaStores } from './media_store'
+import { Store } from './store'
 import {
   connect,
   SendError,
@@ -16,11 +14,12 @@ import {
   fetchImageUrl,
   fetchGroupMetadata,
   exists,
+  logout,
   close,
   OnReconnect,
 } from './socket'
 import { Client, getClient, clients } from './client'
-import { Config, configs, defaultConfig, getConfig } from './config'
+import { Config, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
@@ -97,6 +96,9 @@ const existsDefault: exists = async (_jid: string) => {
   throw sendError
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const logoutDefault: logout = async () => {}
+
 const closeDefault = async () => logger.info(`Close connection`)
 
 export class ClientBaileys implements Client {
@@ -106,6 +108,7 @@ export class ClientBaileys implements Client {
   private sendMessage = sendMessageDefault
   private fetchImageUrl = fetchImageUrlDefault
   private exists = existsDefault
+  private socketLogout = logoutDefault
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
@@ -234,7 +237,7 @@ export class ClientBaileys implements Client {
       return this.getMessageMetadata(data)
     }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close } = await connect({
+    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout } = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -254,6 +257,7 @@ export class ClientBaileys implements Client {
     this.fetchGroupMetadata = fetchGroupMetadata
     this.close = close
     this.exists = exists
+    this.socketLogout = logout
     event('messages.upsert', async (payload: { messages: []; type }) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
       this.listener.process(this.phone, payload.messages, payload.type)
@@ -320,13 +324,6 @@ export class ClientBaileys implements Client {
     logger.debug('Disconnect client store for %s', this?.phone)
     this.store = undefined
 
-    // clean cache
-    clients.delete(this.phone)
-    stores.delete(this.phone)
-    dataStores.delete(this.phone)
-    mediaStores.delete(this.phone)
-    configs.delete(this.phone)
-
     await this.close()
 
     this.sendMessage = sendMessageDefault
@@ -337,6 +334,14 @@ export class ClientBaileys implements Client {
     this.exists = existsDefault
     this.close = closeDefault
     this.config = defaultConfig
+    this.socketLogout = logoutDefault
+  }
+
+
+  async logout() {
+    await this.disconnect()
+    logger.debug('Logout client store for %s', this?.phone)
+    await this.socketLogout()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

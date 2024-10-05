@@ -52,7 +52,6 @@ const bulkSenderJob = new BulkSenderJob(incomingAmqp, outgoingCloudApi)
 const bulkStatusJob = new BulkStatusJob()
 const bulkReportJob = new BulkReportJob(outgoingCloudApi, getConfigRedis)
 const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
-
 const processeds = new Map<string, boolean>()
 
 export class BindBrokerJob {
@@ -67,10 +66,10 @@ export class BindBrokerJob {
     const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
 
-    logger.debug('Starting outgoing consumer %s', phone)
+    logger.info('Starting outgoing consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_OUTGOING, phone, outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
 
-    logger.debug('Starting webhooker consumer %s', phone)
+    logger.info('Starting webhooker consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_WEBHOOKER, phone, webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
 
     if (config.notifyFailedMessages) {
@@ -78,25 +77,25 @@ export class BindBrokerJob {
       await amqpConsume(UNOAPI_JOB_NOTIFICATION, phone, notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
     }
 
-    logger.debug('Starting media consumer %s', phone)
+    logger.info('Starting media consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_MEDIA, phone, mediaJob.consume.bind(mediaJob), { notifyFailedMessages })
 
-    logger.debug('Starting commander consumer %s', phone)
+    logger.info('Starting commander consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_COMMANDER, phone, commanderJob.consume.bind(commanderJob), { notifyFailedMessages })
 
-    logger.debug('Starting bulk parser consumer %s', phone)
+    logger.info('Starting bulk parser consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_PARSER, phone, bulkParserJob.consume.bind(bulkParserJob), { notifyFailedMessages })
 
-    logger.debug('Starting bulk sender consumer %s', phone)
+    logger.info('Starting bulk sender consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_SENDER, phone, bulkSenderJob.consume.bind(bulkSenderJob), { notifyFailedMessages })
 
-    logger.debug('Starting bulk status consumer %s', phone)
+    logger.info('Starting bulk status consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_STATUS, phone, bulkStatusJob.consume.bind(bulkStatusJob), { notifyFailedMessages })
 
-    logger.debug('Starting bulk report consumer %s', phone)
+    logger.info('Starting bulk report consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_REPORT, phone, bulkReportJob.consume.bind(bulkReportJob), { notifyFailedMessages })
 
-    logger.debug('Starting bulk webhook consumer %s', phone)
+    logger.info('Starting bulk webhook consumer %s', phone)
     await amqpConsume(UNOAPI_JOB_BULK_WEBHOOK, phone, bulkWebhookJob.consume.bind(bulkWebhookJob), { notifyFailedMessages })
 
     logger.info('Starting blacklist add consumer')

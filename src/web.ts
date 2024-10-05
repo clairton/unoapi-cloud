@@ -27,15 +27,18 @@ import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import { addToBlacklistJob } from './services/blacklist'
 import { Broadcast } from './services/broadcast'
 import { BroacastJob } from './jobs/broadcast'
-
+import { ReloadAmqp } from './services/reload_amqp'
+import { LogoutAmqp } from './services/logout_amqp'
 
 const incoming: Incoming = new IncomingAmqp()
 const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
 const sessionStore: SessionStore = new SessionStoreRedis()
 const onNewLogin = onNewLoginGenerateToken(outgoing)
-const broadcast: Broadcast = new Broadcast();
+const broadcast: Broadcast = new Broadcast()
+const reload = new ReloadAmqp()
+const logout = new LogoutAmqp()
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, security)
+const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reload, logout, security)
 broadcast.setSever(app.socket)
 
 const broadcastJob = new BroacastJob(broadcast)

@@ -10,6 +10,8 @@ import { getStore, Store } from '../../src/services/store'
 import { SessionStore } from '../../src/services/session_store'
 import { OnNewLogin } from '../../src/services/socket'
 import { addToBlacklist } from '../../src/services/blacklist'
+import { Reload } from '../../src/services/reload'
+import { Logout } from '../../src/services/logout'
 const addToBlacklist = mock<addToBlacklist>()
 
 const sessionStore = mock<SessionStore>()
@@ -38,7 +40,9 @@ describe('messages routes', () => {
     outgoing = mock<Outgoing>()
     incoming = mock<Incoming>()
     const onNewLogin = mock<OnNewLogin>()
-    app = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist)
+    const reload = mock<Reload>()
+    const logout = mock<Logout>()
+    app = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
   })
 
   test('whatsapp with sucess', async () => {

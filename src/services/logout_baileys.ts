@@ -3,8 +3,9 @@ import { Listener } from '../services/listener'
 import { getConfig } from '../services/config'
 import { getClient } from '../services/client'
 import { OnNewLogin } from '../services/socket'
+import { Logout } from './logout'
 
-export class DisconnectJob {
+export class LogoutBaileys implements Logout {
   private getClient: getClient
   private getConfig: getConfig
   private listener: Listener
@@ -19,7 +20,7 @@ export class DisconnectJob {
     this.onNewLogin = onNewLogin
   }
 
-  async consume(_: string, { phone }: { phone: string }) {
+  async run(phone: string) {
     const client = await this.getClient({
       phone,
       incoming: this.incoming,
@@ -27,6 +28,6 @@ export class DisconnectJob {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    await client.disconnect()
+    await client.logout()
   }
 }

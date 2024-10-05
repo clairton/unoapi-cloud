@@ -32,6 +32,8 @@ export interface Client {
   connect(time: number): Promise<void>
 
   disconnect(): Promise<void>
+  
+  logout(): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(payload: any, options: any): Promise<Response>

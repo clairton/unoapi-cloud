@@ -17,6 +17,8 @@ import { BlacklistController } from './controllers/blacklist_controller'
 import { Server } from 'socket.io'
 import { OnNewLogin } from './services/socket'
 import { addToBlacklist } from './services/blacklist'
+import { Reload } from './services/reload'
+import { Logout } from './services/logout'
 
 export const router = (
   incoming: Incoming,
@@ -27,6 +29,8 @@ export const router = (
   socket: Server,
   onNewLogin: OnNewLogin,
   addToBlacklist: addToBlacklist,
+  reload: Reload,
+  logout: Logout,
   middleware: middleware = async (req: Request, res: Response, next: NextFunction) => next(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   injectRoute: injectRoute = async (router: Router) => {},
@@ -35,7 +39,7 @@ export const router = (
   const messagesController = new MessagesController(incoming, outgoing)
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
-  const registrationController = new RegistrationController(getConfig)
+  const registrationController = new RegistrationController(getConfig, reload, logout)
   const phoneNumberController = new PhoneNumberController(getConfig, sessionStore)
   const sessionController = new SessionController(getConfig, onNewLogin, socket)
   const webhookController = new WebhookController()

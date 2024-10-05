@@ -10,6 +10,8 @@ import { DataStore } from '../../src/services/data_store'
 import { SessionStore } from '../../src/services/session_store'
 import { OnNewLogin } from '../../src/services/socket'
 import { addToBlacklist } from '../../src/services/blacklist'
+import { Reload } from '../../src/services/reload'
+import { Logout } from '../../src/services/logout'
 const addToBlacklist = mock<addToBlacklist>()
 
 const sessionStore = mock<SessionStore>()
@@ -18,6 +20,8 @@ const config = mock<Config>()
 const dataStore = mock<DataStore>()
 const getConfig = mock<getConfig>()
 const onNewLogin = mock<OnNewLogin>()
+const reload = mock<Reload>()
+const logout = mock<Logout>()
 
 const loadTemplates = jest.spyOn(dataStore, 'loadTemplates')
 loadTemplates.mockResolvedValue([])
@@ -33,7 +37,7 @@ describe('templates routes', () => {
   test('index', async () => {
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist)
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
     const res = await request(app.server).get('/v15.0/123/message_templates')
     expect(res.status).toEqual(200)
   })

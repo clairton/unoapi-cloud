@@ -73,6 +73,10 @@ export interface close {
   (): Promise<void>
 }
 
+export interface logout {
+  (): Promise<void>
+}
+
 export type Status = {
   attempt: number
 }
@@ -238,6 +242,7 @@ export const connect = async ({
     logger.info(`${phone} close`)
     try {
       await sock?.ws?.close()
+      sock = undefined
     } catch (error) {}
   }
 
@@ -389,5 +394,5 @@ export const connect = async ({
 
   await connect()
 
-  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout }
 }

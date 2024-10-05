@@ -6,6 +6,8 @@ import { Outgoing } from '../../src/services/outgoing'
 import { defaultConfig, getConfig } from '../../src/services/config'
 import { SessionStore } from '../../src/services/session_store'
 import { OnNewLogin } from '../../src/services/socket'
+import { Reload } from '../../src/services/reload'
+import { Logout } from '../../src/services/logout'
 
 const addToBlacklist = jest.fn().mockReturnValue(Promise.resolve(true))
 
@@ -19,7 +21,9 @@ describe('blacklist routes', () => {
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
     const onNewLogin = mock<OnNewLogin>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist)
+    const reload = mock<Reload>()
+    const logout = mock<Logout>()
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
     const res = await request(app.server).post('/2/blacklist/1').send({ttl: 1, to: '3'})
     expect(addToBlacklist).toHaveBeenCalledWith('2', '1', '3', 1);
     expect(res.status).toEqual(200)

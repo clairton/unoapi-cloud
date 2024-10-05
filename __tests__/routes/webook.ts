@@ -8,6 +8,8 @@ import { defaultConfig, getConfig } from '../../src/services/config'
 import { SessionStore } from '../../src/services/session_store'
 import { OnNewLogin } from '../../src/services/socket'
 import { addToBlacklist } from '../../src/services/blacklist'
+import { Reload } from '../../src/services/reload'
+import { Logout } from '../../src/services/logout'
 const addToBlacklist = mock<addToBlacklist>()
 
 const sessionStore = mock<SessionStore>()
@@ -21,7 +23,9 @@ describe('webhook routes', () => {
     const incoming = mock<Incoming>()
     const outgoing = mock<Outgoing>()
     const onNewLogin = mock<OnNewLogin>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist)
+    const reload = mock<Reload>()
+    const logout = mock<Logout>()
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
     const res = await request(app.server).post('/webhooks/whatsapp/123')
     expect(res.status).toEqual(200)
   })
