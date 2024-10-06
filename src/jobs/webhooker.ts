@@ -4,7 +4,6 @@ import { amqpEnqueue } from '../amqp'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS, UNOAPI_JOB_WEBHOOKER } from '../defaults'
 import { extractDestinyPhone } from '../services/transformer'
 import logger from '../services/logger'
-import { delay } from '@whiskeysockets/baileys'
 
 const  dUntil: Map<String, number> = new Map()
 const  dVerified: Map<String, boolean> = new Map()
