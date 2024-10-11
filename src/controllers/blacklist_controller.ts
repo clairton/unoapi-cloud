@@ -14,7 +14,8 @@ export class BlacklistController {
     logger.debug('blacklist headers %s', JSON.stringify(req.headers))
     logger.debug('blacklist params %s', JSON.stringify(req.params))
     logger.debug('blacklist body %s', JSON.stringify(req.body))
-    const { to, ttl } = req.body
+    const to = req.body.to || req.query.to
+    const ttl = req.body.ttl || req.query.ttl || 0
     if (!to) {
       return res.status(400).send(`{"error": "to param is required"}`)
     }

@@ -55,11 +55,16 @@ To remove a phone number your black, send ttl with 0, with ttl -1, never expire
 
 ```sh
 curl -i -X POST \
-http://localhost:9876/Y/blacklist/W \
+'http://localhost:9876/Y/blacklist/W' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1' \
 -d '{ 
   "ttl": -1, 
   "to": "X"
 }'
+```
+
+Or in url format
+```sh
+curl -i -X POST 'http://localhost:9876/5549988290955/blacklist/type?to=5549999621461&ttl=-1&access_token=1'
 ```
