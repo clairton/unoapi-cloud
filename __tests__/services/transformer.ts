@@ -13,6 +13,7 @@ import {
   getNormalizedMessage,
   isSaveMedia,
   extractDestinyPhone,
+  isGroupMessage,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -66,6 +67,57 @@ describe('service transformer', () => {
       ]
     }
     expect(extractDestinyPhone(payload)).toBe('x')
+  })
+
+  test('return isGroupMessage false with status', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                statuses: [{ recipient_id: 'x' }]
+              }
+            }
+          ]
+        }
+      ]
+    }
+    expect(isGroupMessage(payload)).toBe(false)
+  })
+
+  test('return isGroupMessage false with non group', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                contacts: [{ wa_id: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(isGroupMessage(payload)).toBe(false)
+  })
+
+  test('return isGroupMessage true', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                contacts: [{ group_id: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(isGroupMessage(payload)).toBe(true)
   })
 
   test('return empty extractDestinyPhone from api payload', async () => {

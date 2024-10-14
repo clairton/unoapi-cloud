@@ -2,7 +2,7 @@ import { Outgoing } from './outgoing'
 import fetch, { Response, RequestInit } from 'node-fetch'
 import { Webhook, getConfig } from './config'
 import logger from './logger'
-import { completeCloudApiWebHook } from './transformer'
+import { completeCloudApiWebHook, isGroupMessage } from './transformer'
 import { isInBlacklist } from './blacklist'
 import { EnqueueOption } from '../amqp'
 
@@ -30,6 +30,10 @@ export class OutgoingCloudApi implements Outgoing {
     const destinyPhone = await this.isInBlacklist(phone, webhook.id, message)
     if (destinyPhone) {
       logger.info(`Session phone %s webhook %s and destiny phone %s are in blacklist`, phone, webhook.id, destinyPhone)
+      return
+    }
+    if (!webhook.sendGroupMessages && isGroupMessage(message)) {
+      logger.info(`Session phone %s webhook %s configured to not send group message for this webhook`, phone, webhook.id)
       return
     }
     const body = JSON.stringify(message)

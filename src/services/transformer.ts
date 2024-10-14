@@ -337,6 +337,26 @@ export const extractDestinyPhone = (payload: object) => {
   return number
 }
 
+export const isGroupMessage = (payload: object) => {
+  const data = payload as any
+  return !!(
+    (
+      data.entry
+      && data.entry[0]
+      && data.entry[0].changes
+      && data.entry[0].changes[0]
+      && data.entry[0].changes[0].value
+    ) && (
+      (
+        data.entry[0].changes[0].value.contacts
+        && data.entry[0].changes[0].value.contacts[0]
+        && data.entry[0].changes[0].value.contacts[0].group_id
+      )
+    )
+  )
+}
+
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string => {
   const number = (value || '').split('@')[0].split(':')[0].replace('+', '')
