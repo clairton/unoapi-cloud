@@ -39,6 +39,7 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
         } else {
           logger.debug(`%s doesn't need more delays`, key)
           dVerified.set(key, true);
+          dUntil.delete(key);
         }
       } 
     }
