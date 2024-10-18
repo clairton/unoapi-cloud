@@ -4,7 +4,9 @@ import { amqpEnqueue } from '../amqp'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS, UNOAPI_JOB_WEBHOOKER } from '../defaults'
 import { extractDestinyPhone } from '../services/transformer'
 import logger from '../services/logger'
-const  delays: Map<String, boolean> = new Map()
+
+const  dUntil: Map<string, number> = new Map()
+const  dVerified: Map<string, boolean> = new Map()
 
 const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -17,12 +19,29 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
   } catch (error) {
     logger.error('Error on extract to from payload', error)
   }
+ 
   if (to) { 
     const key = `${phone}:${to}`
-    if (!delays.get(key)) {
-      delays.set(key, true);
-      logger.debug(`Delay for first message %s`, UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
-      sleep(UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
+    if (!dVerified.get(key)) {
+      const epochMS: number = Math.floor(Date.now());
+      let nextMessageTime = dUntil.get(key)
+      if (nextMessageTime === undefined) {
+        nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
+        dUntil.set(key, nextMessageTime);
+        logger.debug(`First message for %s`, key)
+        logger.debug(`Next messages delayed by %s ms`, UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
+        await sleep(UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
+      } else {
+        const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
+        if (thisMessageDelay > 0) {
+          logger.debug(`Message delayed by %s ms`, thisMessageDelay)
+          await sleep(thisMessageDelay)
+        } else {
+          logger.debug(`%s doesn't need more delays`, key)
+          dVerified.set(key, true);
+          dUntil.delete(key);
+        }
+      } 
     }
   }
 } :  async (_phone, _payload) => {}
