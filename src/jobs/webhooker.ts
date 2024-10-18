@@ -5,8 +5,8 @@ import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS, UNOAPI_JOB_WEBHOOKER } fro
 import { extractDestinyPhone } from '../services/transformer'
 import logger from '../services/logger'
 
-const  dUntil: Map<String, number> = new Map()
-const  dVerified: Map<String, boolean> = new Map()
+const  dUntil: Map<string, number> = new Map()
+const  dVerified: Map<string, boolean> = new Map()
 
 const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -26,7 +26,7 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
       const epochMS: number = Math.floor(Date.now());
       let nextMessageTime = (dUntil.get(key) || 0) as number
       if (!nextMessageTime) {
-        const nextMessageTime = Math.floor(epochMS + (UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)) 
+        nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
         dUntil.set(key, nextMessageTime);
         logger.debug(`First message for %s`, key)
         logger.debug(`Next Message delayed by %s ms`, UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
