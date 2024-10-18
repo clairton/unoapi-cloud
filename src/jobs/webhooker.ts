@@ -29,7 +29,7 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
         nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
         dUntil.set(key, nextMessageTime);
         logger.debug(`First message for %s`, key)
-        logger.debug(`Next Message delayed by %s ms`, UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
+        logger.debug(`Next messages delayed by %s ms`, UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
         await sleep(UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
       } else {
         const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
