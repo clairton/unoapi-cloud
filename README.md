@@ -267,6 +267,7 @@ CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera 
 WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
 MESSAGE_CHECK_WAAPP=message to send webwook when uno fails on reading content. default '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
+ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
@@ -401,7 +402,9 @@ http://localhost:9876/v15.0/phone_numbers \
 
 ## Templates
 
-The templates will be customized, saving in `${BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-template:${PHONE_NUMBER}`. The json format is:
+UnoAPI's default definition has 4 templates: hello, unoapi-bulk-report, unoapi-webhook and unoapi-config. UnoAPI can be configured to only present the hello template as default, check the ONLY_HELLO_TEMPLATE variable to obtain this behavior
+
+The templates for each Session (PHONE_NUMBER) can be be customized, saving in `${BASE_STORE}/${PHONE_NUMBER}/templates.json` , or when use redis with key `unoapi-template:${PHONE_NUMBER}`. The json format is:
 
 ```json
 [

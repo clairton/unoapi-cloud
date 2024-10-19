@@ -2,6 +2,7 @@ import { proto, WAMessage, WAMessageKey, isJidGroup, GroupMetadata } from '@whis
 import { DataStore } from './data_store'
 import { jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
+import { ONLY_HELLO_TEMPLATE } from '../defaults'
 import {
   delAuth,
   setMessage,
@@ -124,80 +125,84 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         ],
       }
 
-      const bulkReport = {
-        id: 2,
-        name: 'unoapi-bulk-report',
-        status: 'APPROVED',
-        category: 'UTILITY',
-        language: 'pt_BR',
-        components: [
-          {
-            text: `bulk: {{bulk}}`,
-            type: 'BODY',
-            parameters: [
-              {
-                type: 'text',
-                text: 'bulk',
-              },
-            ],
-          },
-        ],
-      }
+      if(!ONLY_HELLO_TEMPLATE) {
+        const bulkReport = {
+          id: 2,
+          name: 'unoapi-bulk-report',
+          status: 'APPROVED',
+          category: 'UTILITY',
+          language: 'pt_BR',
+          components: [
+            {
+              text: `bulk: {{bulk}}`,
+              type: 'BODY',
+              parameters: [
+                {
+                  type: 'text',
+                  text: 'bulk',
+                },
+              ],
+            },
+          ],
+        }
 
-      const webhook = {
-        id: 3,
-        name: 'unoapi-webhook',
-        status: 'APPROVED',
-        category: 'UTILITY',
-        language: 'pt_BR',
-        components: [
-          {
-            text: `url: {{url}}\nheader: {{header}}\ntoken: {{token}}`,
-            type: 'BODY',
-            parameters: [
-              {
-                type: 'text',
-                text: 'url',
-              },
-              {
-                type: 'text',
-                text: 'header',
-              },
-              {
-                type: 'text',
-                text: 'token',
-              },
-            ],
-          },
-        ],
-      }
+        const webhook = {
+          id: 3,
+          name: 'unoapi-webhook',
+          status: 'APPROVED',
+          category: 'UTILITY',
+          language: 'pt_BR',
+          components: [
+            {
+              text: `url: {{url}}\nheader: {{header}}\ntoken: {{token}}`,
+              type: 'BODY',
+              parameters: [
+                {
+                  type: 'text',
+                  text: 'url',
+                },
+                {
+                  type: 'text',
+                  text: 'header',
+                },
+                {
+                  type: 'text',
+                  text: 'token',
+                },
+              ],
+            },
+          ],
+        }
 
-      const parameters: object[] = []
-      const config = {
-        id: 4,
-        name: 'unoapi-config',
-        status: 'APPROVED',
-        category: 'UTILITY',
-        language: 'pt_BR',
-        components: [
-          {
-            text: '',
-            type: 'BODY',
-            parameters,
-          },
-        ],
+        const parameters: object[] = []
+        const config = {
+          id: 4,
+          name: 'unoapi-config',
+          status: 'APPROVED',
+          category: 'UTILITY',
+          language: 'pt_BR',
+          components: [
+            {
+              text: '',
+              type: 'BODY',
+              parameters,
+            },
+          ],
+        }
+        const keysToIgnore = ['getStore', 'baseStore', 'shouldIgnoreKey', 'shouldIgnoreJid', 'webhooks']
+        const keys = Object.keys(defaultConfig).filter((k) => !keysToIgnore.includes(k))
+        const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name] || 'string'
+        for (const key of keys) {
+          const type = getTypeofProperty(defaultConfig, key as keyof Config)
+          const param: object = { type, text: key }
+          parameters.push(param)
+          config.components[0].text = `${key}: {{${key}}}\n${config.components[0].text}`
+        }
+        return [hello, bulkReport, webhook, config]
+      } else {
+        return [hello]
       }
-      const keysToIgnore = ['getStore', 'baseStore', 'shouldIgnoreKey', 'shouldIgnoreJid', 'webhooks']
-      const keys = Object.keys(defaultConfig).filter((k) => !keysToIgnore.includes(k))
-      const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name] || 'string'
-      for (const key of keys) {
-        const type = getTypeofProperty(defaultConfig, key as keyof Config)
-        const param: object = { type, text: key }
-        parameters.push(param)
-        config.components[0].text = `${key}: {{${key}}}\n${config.components[0].text}`
-      }
-
-      return [hello, bulkReport, webhook, config]
+      
     }
   }
   return store
