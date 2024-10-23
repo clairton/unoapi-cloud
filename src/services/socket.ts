@@ -387,7 +387,7 @@ export const connect = async ({
       event('creds.update', saveCreds)
       event('connection.update', onConnectionUpdate)
       if (config.wavoipToken) {
-        useVoiceCallsBaileys(config.wavoipToken, sock, 'close', true)
+        useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
       }
     }
   }
