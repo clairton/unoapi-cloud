@@ -1,5 +1,5 @@
 import { MessageFilter } from './message_filter'
-import { getConfig, defaultConfig, Config, configs } from './config'
+import { getConfig, defaultConfig, Config, configs, Webhook } from './config'
 import logger from './logger'
 import { Level } from 'pino'
 
@@ -32,6 +32,7 @@ import {
   WEBHOOK_TIMEOUT_MS,
   SEND_PROFILE_PICTURE,
   WEBHOOK_SEND_NEW_MESSAGES,
+  WEBHOOK_SEND_GROUP_MESSAGES,
   PROXY_URL,
   UNOAPI_AUTH_TOKEN,
   UNOAPI_HEADER_NAME,
@@ -73,6 +74,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].header = WEBHOOK_HEADER
     config.webhooks[0].timeoutMs = WEBHOOK_TIMEOUT_MS
     config.webhooks[0].sendNewMessages = WEBHOOK_SEND_NEW_MESSAGES
+    config.webhooks[0].sendGroupMessages = WEBHOOK_SEND_GROUP_MESSAGES
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
