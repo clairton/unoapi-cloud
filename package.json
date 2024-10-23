@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.20.1",
+  "version": "1.20.2",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -65,7 +65,7 @@
     "@aws-sdk/s3-request-presigner": "^3.598.0",
     "@google-cloud/text-to-speech": "^5.2.0",
     "@redis/client": "^1.5.14",
-    "@whiskeysockets/baileys": "^6.7.8",
+    "@whiskeysockets/baileys": "^6.7.9",
     "amqplib": "^0.10.4",
     "awesome-phonenumber": "^6.8.0",
     "dotenv": "^16.4.5",
