@@ -11,16 +11,22 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     const configRedis: any = { ...((await getConfigCache(phone)) || {}) }
     logger.info('Retrieve config default for %s', phone)
     const config: Config = { ...(await getConfigByEnv(phone)) }
+    
     if (configRedis) {
-      const keys = Object.keys(configRedis)
-      for (let index = 0; index < keys.length; index++) {
-        const key = keys[index]
-        if (key in configRedis) {
-          logger.debug('Override env config by redis config in %s: %s => %s', phone, key, JSON.stringify(configRedis[key]))
-          config[key] = configRedis[key]
+      Object.keys(configRedis).forEach((key) => {
+        if (key === 'webhooks') {
+          const webhooksConfig = configRedis[key][0];
+          Object.keys(webhooksConfig).forEach((keyWebhook) => {
+            logger.debug('Override webhook env config by redis webhook config in %s: %s => %s', phone, keyWebhook, JSON.stringify(webhooksConfig[keyWebhook]));
+            config[keyWebhook] = webhooksConfig[keyWebhook];
+          });
+        } else {
+          logger.debug('Override env config by redis config in %s: %s => %s', phone, key, JSON.stringify(configRedis[key]));
+          config[key] = configRedis[key];
         }
-      }
+      });
     }
+    
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
