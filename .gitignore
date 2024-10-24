@@ -7,4 +7,3 @@ data/medias/*
 data/stores/*
 data/sessions/*
 ./.env
-docker-compose-uno-dev.yml
