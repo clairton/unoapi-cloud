@@ -11,14 +11,15 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     const configRedis: any = { ...((await getConfigCache(phone)) || {}) }
     logger.info('Retrieve config default for %s', phone)
     const config: Config = { ...(await getConfigByEnv(phone)) }
-    
+
     if (configRedis) {
       Object.keys(configRedis).forEach((key) => {
         if (key === 'webhooks') {
-          const webhooksConfig = configRedis[key][0];
-          Object.keys(webhooksConfig).forEach((keyWebhook) => {
-            logger.debug('Override webhook env config by redis webhook config in %s: %s => %s', phone, keyWebhook, JSON.stringify(webhooksConfig[keyWebhook]));
-            config[keyWebhook] = webhooksConfig[keyWebhook];
+          configRedis[key].forEach((webhookConfig) => {
+            Object.keys(webhookConfig).forEach((keyWebhook) => {
+              logger.debug('Override webhook env config by redis webhook config in %s: %s => %s', phone, keyWebhook, JSON.stringify(webhookConfig[keyWebhook]));
+              config[keyWebhook] = webhookConfig[keyWebhook];
+            });
           });
         } else {
           logger.debug('Override env config by redis config in %s: %s => %s', phone, key, JSON.stringify(configRedis[key]));
