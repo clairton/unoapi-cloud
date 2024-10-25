@@ -14,14 +14,20 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
 
     if (configRedis) {
       Object.keys(configRedis).forEach((key) => {
-        if (key === 'webhooks') {
-          configRedis[key].forEach((webhookConfig) => {
-            Object.keys(webhookConfig).forEach((keyWebhook) => {
-              logger.debug('Override webhook env config by redis webhook config in %s: %s => %s', phone, keyWebhook, JSON.stringify(webhookConfig[keyWebhook]));
-              config[keyWebhook] = webhookConfig[keyWebhook];
+        if (key in configRedis) {
+          if (key === 'webhooks') {
+            const webhooks: any[] = []
+            configRedis[key].forEach((webhook) => {
+              Object.keys(config.webhooks[0]).forEach((keyWebhook) => {
+                if (!(keyWebhook in webhook)) {
+                  // override by env, if not present in redis
+                  webhook[keyWebhook] = config.webhooks[0][keyWebhook]
+                }
+              });
+              webhooks.push(webhook)
             });
-          });
-        } else {
+            configRedis[key] = webhooks
+          }
           logger.debug('Override env config by redis config in %s: %s => %s', phone, key, JSON.stringify(configRedis[key]));
           config[key] = configRedis[key];
         }

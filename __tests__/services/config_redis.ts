@@ -2,6 +2,7 @@ jest.mock('../../src/services/redis')
 import { getConfig } from '../../src/services/redis'
 import { getConfigRedis } from '../../src/services/config_redis'
 import { configs } from '../../src/services/config'
+import { WEBHOOK_HEADER } from '../../src/defaults'
 const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>
 
 describe('service config redis', () => {
@@ -41,13 +42,19 @@ describe('service config redis', () => {
   })
 
   test('use webhook header redis with value in env too', async () => {
-    const headerEnv = `${new Date().getTime()}`
+    const headerEnv = `${new Date().getTime()}-env`
     const copy = process.env.WEBHOOK_HEADER
     process.env.WEBHOOK_HEADER = headerEnv
-    const headerRedis = `${new Date().getTime()}`
+    const headerRedis = `${new Date().getTime()}-redis`
     mockGetConfig.mockResolvedValue({ webhooks: [{ url: 'http....', header: headerRedis }] })
     const config = await getConfigRedis(`${new Date().getTime()}`)
     process.env.WEBHOOK_HEADER = copy
     expect(config.webhooks[0].header).toBe(headerRedis)
+  })
+
+  test('use webhook header env where not in readis', async () => {
+    mockGetConfig.mockResolvedValue({ webhooks: [{}] })
+    const config = await getConfigRedis(`${new Date().getTime()}`)
+    expect(config.webhooks[0].header).toBe(WEBHOOK_HEADER)
   })
 })
