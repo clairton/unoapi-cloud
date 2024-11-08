@@ -14,6 +14,7 @@ import {
   isSaveMedia,
   extractDestinyPhone,
   isGroupMessage,
+  isOutgoingMessage,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -118,6 +119,27 @@ describe('service transformer', () => {
       ],
     }
     expect(isGroupMessage(payload)).toBe(true)
+  })
+
+  test('return isOutgoingMessage true', async () => {
+    const number = new Date().getTime()
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                metadata: {
+                  display_phone_number: `+${number}`,
+                },
+                messages: [{ from: number }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(isOutgoingMessage(payload)).toBe(true)
   })
 
   test('return empty extractDestinyPhone from api payload', async () => {

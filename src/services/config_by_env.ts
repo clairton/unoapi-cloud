@@ -33,6 +33,7 @@ import {
   SEND_PROFILE_PICTURE,
   WEBHOOK_SEND_NEW_MESSAGES,
   WEBHOOK_SEND_GROUP_MESSAGES,
+  WEBHOOK_SEND_OUTGOING_MESSAGES,
   PROXY_URL,
   UNOAPI_AUTH_TOKEN,
   UNOAPI_HEADER_NAME,
@@ -75,6 +76,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].timeoutMs = WEBHOOK_TIMEOUT_MS
     config.webhooks[0].sendNewMessages = WEBHOOK_SEND_NEW_MESSAGES
     config.webhooks[0].sendGroupMessages = WEBHOOK_SEND_GROUP_MESSAGES
+    config.webhooks[0].sendOutgoingMessages = WEBHOOK_SEND_OUTGOING_MESSAGES
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)

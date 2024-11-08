@@ -21,6 +21,7 @@ export type Webhook = {
   timeoutMs: number
   sendNewMessages: boolean
   sendGroupMessages: boolean
+  sendOutgoingMessages: boolean
 }
 
 export type Config = {
@@ -94,6 +95,7 @@ export const defaultConfig: Config = {
       timeoutMs: 5_000,
       sendNewMessages: false,
       sendGroupMessages: true,
+      sendOutgoingMessages: true,
     },
   ],
   getMessageMetadata: getMessageMetadataDefault,

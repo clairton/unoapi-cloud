@@ -356,6 +356,17 @@ export const isGroupMessage = (payload: object) => {
   )
 }
 
+export const isOutgoingMessage = (payload: object) => {
+  const data = payload as any
+  const from = data.entry[0].changes[0].value.messages
+                && data.entry[0].changes[0].value.messages[0]
+                && data.entry[0].changes[0].value.messages[0].from
+  const session = data.entry[0].changes[0].value.messages
+                && data.entry[0].changes[0].value.metadata
+                && data.entry[0].changes[0].value.metadata.display_phone_number
+  return session && from && `${session}`.replaceAll('+', '') == `${from}`.replaceAll('+', '')
+}
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string => {

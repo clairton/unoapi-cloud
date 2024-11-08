@@ -233,6 +233,7 @@ WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
 WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
+WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
 BASE_URL=current base url to download medias
 PORT=the http port
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
