@@ -484,7 +484,11 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message type ${type}`)
         }
       }
-    } catch (e) {
+    } catch (ee) {
+      let e = ee
+      if (ee.message == 'Media upload failed on all hosts') {
+        e = new SendError(11, ee.message)
+      }
       if (e instanceof SendError) {
         const code = e.code
         const title = e.title
