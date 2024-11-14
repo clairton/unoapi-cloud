@@ -173,6 +173,7 @@ with:
 * 8 - message not allowed
 * 9 - connection lost
 * 10 - Invalid token value
+* 11 - Http Head test link not return success
 
 ## Up for development
 

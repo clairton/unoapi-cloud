@@ -1,4 +1,5 @@
 import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from '@whiskeysockets/baileys'
+import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
 import { Store } from './store'
@@ -27,6 +28,7 @@ import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
 import { getSessionStatus, isSessionStatusOnline } from './session_store'
+import { FETCH_TIMEOUT_MS } from '../defaults'
 const attempts = 3
 
 interface Delay {
@@ -387,6 +389,15 @@ export class ClientBaileys implements Client {
             const template = new Template(this.getConfig)
             content = await template.bind(this.phone, payload.template.name, payload.template.components)
           } else {
+            if (['image', 'audio', 'document', 'video'].includes(type)) {
+              const link = payload[type] && payload[type].link
+              if (link) {
+                const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD'})
+                if (!response.ok) {
+                  throw new SendError(11, `Http Head return ${response.status} with link ${link}`)
+                }
+              }
+            }
             content = toBaileysMessageContent(payload)
           }
           let quoted: WAMessage | undefined = undefined

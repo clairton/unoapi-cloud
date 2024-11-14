@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS /*, UNOAPI_JOB_INCOMING, UNOAPI_MESSAGE_RETRY_LIMIT*/ } from '../defaults'
+import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS } from '../defaults'
 import { EnqueueOption, amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype } from '../services/transformer'
@@ -70,7 +70,7 @@ export class IncomingJob {
         const mimetype = getMimetype(payload)
         const extension = mime.extension(mimetype)
         const fileName = `${mediaKey}.${extension}`
-        const response: Response = await fetch(link, { signal: AbortSignal.timeout(60000), method: 'GET'})
+        const response: Response = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
         const buffer = toBuffer(await response.arrayBuffer())
         await mediaStore.saveMediaBuffer(fileName, buffer)
         messagePayload = {
