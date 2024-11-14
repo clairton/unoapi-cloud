@@ -10,6 +10,9 @@ export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorizati
 export const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
 export const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || LOG_LEVEL
 
+export const VALIDATE_MEDIA_LINK_BEFORE_SEND = 
+  process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == _undefined ? false : process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == 'true'
+
 // comunication
 export const UNOAPI_URL = process.env.UNOAPI_URL || 'http://localhost:6789'
 export const WEBHOOK_URL_ABSOLUTE = process.env.WEBHOOK_URL_ABSOLUTE || ''
