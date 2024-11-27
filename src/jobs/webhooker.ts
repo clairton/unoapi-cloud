@@ -23,19 +23,19 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
   if (to) { 
     const key = `${phone}:${to}`
     if (!dVerified.get(key)) {
-      const epochMS: number = Math.floor(Date.now());
       let nextMessageTime = dUntil.get(key)
+      const epochMS: number = Math.floor(Date.now());
       if (nextMessageTime === undefined) {
         nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
         dUntil.set(key, nextMessageTime);
-        logger.debug(`First message for %s`, key)
+        logger.debug(`Key %s First message`, key)
       } else {
         const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
         if (thisMessageDelay > 0) {
-          logger.debug(`Message delayed by %s ms`, thisMessageDelay)
+          logger.debug(`Key %s Message delayed by %s ms`, key, thisMessageDelay)
           await sleep(thisMessageDelay)
         } else {
-          logger.debug(`%s doesn't need more delays`, key)
+          logger.debug(`Key %s doesn't need more delays`, key)
           dVerified.set(key, true);
           dUntil.delete(key);
         }
