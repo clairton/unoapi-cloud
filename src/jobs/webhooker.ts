@@ -29,8 +29,6 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
         nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
         dUntil.set(key, nextMessageTime);
         logger.debug(`First message for %s`, key)
-        logger.debug(`Next messages delayed by %s ms`, UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
-        await sleep(UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS)
       } else {
         const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
         if (thisMessageDelay > 0) {
@@ -64,8 +62,8 @@ export class WebhookerJob {
         }),
       )
     } else if (a.webhook) {
-      await this.service.sendHttp(phone, a.webhook, payload, {})
       await delayFunc(phone, payload)
+      await this.service.sendHttp(phone, a.webhook, payload, {})
     } else {
       await this.service.send(phone, payload)
     }
