@@ -241,6 +241,40 @@ export const connect = async ({
     await setSessionStatus(phone, 'offline')
     logger.info(`${phone} close`)
     try {
+      [
+        'connection.update',
+        'creds.update',
+        'messaging-history.set',
+        'chats.upsert',
+        'chats.update',
+        'chats.phoneNumberShare',
+        'chats.delete',
+        'presence.update',
+        'contacts.upsert',
+        'contacts.update',
+        'messages.delete',
+        'messages.update',
+        'messages.media-update',
+        'messages.upsert',
+        'messages.reaction',
+        'message-receipt.update',
+        'groups.upsert',
+        'groups.update',
+        'group-participants.update',
+        'blocklist.set',
+        'blocklist.update',
+        'call',
+        'labels.edit',
+        'labels.association',
+        'offline.preview'
+      ].forEach((e: any) => {
+        try {
+          sock?.ev?.removeAllListeners(e)
+        } catch (error) {
+          logger.error(`Error on ${e} removeAllListeners`, e)
+        }
+      })
+      await sock?.end(undefined)
       await sock?.ws?.close()
       sock = undefined
     } catch (error) {}
