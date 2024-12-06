@@ -224,7 +224,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         jid = result.jid
         await dataStore.setJid(phoneOrJid, jid!)
       } else {
-        logger.warn(`${phoneOrJid} not exists on WhatsApp baileys onWhatsApp return results ${results}`)
+        logger.warn(`${phoneOrJid} not exists on WhatsApp baileys onWhatsApp return results ${results ? JSON.stringify(results) : null}`)
       }
     }
     return jid
