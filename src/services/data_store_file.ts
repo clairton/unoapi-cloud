@@ -219,8 +219,9 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         }
       }
       const result = results && results[0]
-      logger.debug(`${phoneOrJid} found onWhatsApp result: ${result} exists: ${result.exists} jid: ${result.jid}`)
-      if (result && result.exists & result.jid) {
+      const test = result && result.exists && result.jid
+      logger.debug(`${phoneOrJid} found onWhatsApp exists: ${result.exists} jid: ${result.jid} test: ${test}`)
+      if (test) {
         logger.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
         jid = result.jid
         await dataStore.setJid(phoneOrJid, jid!)
