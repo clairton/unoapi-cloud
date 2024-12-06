@@ -327,7 +327,7 @@ export class ClientBaileys implements Client {
     this.store = undefined
 
     await this.close()
-
+    clients.delete(this?.phone)
     this.sendMessage = sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
