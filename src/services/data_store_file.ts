@@ -218,7 +218,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
           return jid
         }
       }
-      const result = results && Array.isArray(results) && results[0]
+      const result = results && results[0]
       if (result && result.exists & result.jid) {
         logger.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
         jid = result.jid
