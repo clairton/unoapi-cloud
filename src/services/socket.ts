@@ -297,7 +297,7 @@ export const connect = async ({
   const exists: exists = async (phone: string) => {
     await validateStatus()
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return dataStore.getJid(phone, sock!)
+    return dataStore.loadJid(phone, sock!)
   }
 
   const validateStatus = async () => {

@@ -66,7 +66,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   store.loadUnoId = async (id: string) => await getUnoId(phone, id)
   store.setUnoId = async (id: string, unoId: string) => setUnoId(phone, id, unoId)
 
-  store.loadJid = async (phoneOrJid: string) => {
+  store.getJid = async (phoneOrJid: string) => {
     return getJid(phone, phoneOrJid)
   }
   store.setJid = async (phoneOrJid: string, jid: string) => {

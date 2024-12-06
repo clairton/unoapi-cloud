@@ -35,8 +35,8 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
       | 'deleted',
   ) => Promise<void>
   loadStatus: (id: string) => Promise<string | undefined>
-  getJid: (phone: string, sock: WASocket) => Promise<string | undefined>
-  loadJid: (phone: string) => Promise<string | undefined>
+  getJid: (phone: string) => Promise<string | undefined>
+  loadJid: (phone: string, sock: WASocket) => Promise<string | undefined>
   setJid: (phone: string, jid: string) => Promise<void>
   setMessage: (jid: string, message: WAMessage) => Promise<void>
   cleanSession: () => Promise<void>

@@ -21,8 +21,10 @@ import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
 import { Config } from './config'
 import logger from './logger'
+import NodeCache from 'node-cache'
 
 export const MEDIA_DIR = './data/medias'
+const HOUR = 60 * 60
 
 export const getDataStoreFile: getDataStore = async (phone: string, config: Config): Promise<DataStore> => {
   if (!dataStores.has(phone)) {
@@ -52,11 +54,11 @@ const deepMerge = (obj1, obj2) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> => {
   const keys: Map<string, proto.IMessageKey> = new Map()
-  const jids: Map<string, string> = new Map()
+  const jids: NodeCache = new NodeCache()
   const ids: Map<string, string> = new Map()
   const statuses: Map<string, string> = new Map()
-  const groups: Map<string, GroupMetadata> = new Map()
-  const images: Map<string, string> = new Map()
+  const groups: NodeCache = new NodeCache()
+  const images: NodeCache = new NodeCache()
   const baileysInMemoryStoreConfig: BaileysInMemoryStoreConfig = { logger }
   const store = makeInMemoryStore(baileysInMemoryStoreConfig)
   const dataStore = store as DataStore
@@ -141,7 +143,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     return images.get(jid)
   }
   dataStore.setImageUrl = async (jid: string, url: string) => {
-    images.set(jid, url)
+    images.set(jid, url, HOUR)
   }
   dataStore.loadImageUrl = async (jid: string, sock: WASocket) => {
     let url = await dataStore.getImageUrl(jid)
@@ -158,7 +160,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     return groups.get(jid)
   }
   dataStore.setGroupMetada = async (jid: string, data: GroupMetadata) => {
-    groups.set(jid, data)
+    groups.set(jid, data, HOUR)
   }
   dataStore.loadGroupMetada = async (jid: string, sock: WASocket) => {
     let data = await dataStore.getGroupMetada(jid)
@@ -197,17 +199,12 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   dataStore.setUnoId = async (id: string, unoId: string) => {
     ids.set(id, unoId)
   }
-  dataStore.loadJid = async (phoneOrJid: string) => {
-    return jids.get(phoneOrJid)
-  }
-  dataStore.setJid = async (phoneOrJid: string, jid: string) => {
-    jids.set(phoneOrJid, jid)
-  }
-  dataStore.getJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
+  dataStore.loadJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
     if (isJidGroup(phoneOrJid)) {
       return phoneOrJid
     }
-    if (!(await dataStore.loadJid(phoneOrJid))) {
+    let jid = await dataStore.getJid(phoneOrJid)
+    if (!jid) {
       let results: unknown
       try {
         logger.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
@@ -216,20 +213,27 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       } catch (e) {
         logger.error(e, `Error on check if ${phoneOrJid} has whatsapp`)
         if (phone === phoneOrJid) {
-          const jid = phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
+          jid = phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
           logger.info(`${phoneOrJid} is the phone connection ${phone} returning ${jid}`)
           return jid
         }
       }
       const result = results && Array.isArray(results) && results[0]
-      if (result && result.exists) {
+      if (result && result.exists & result.jid) {
         logger.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
-        await dataStore.setJid(phoneOrJid, result.jid)
+        jid = result.jid
+        await dataStore.setJid(phoneOrJid, jid!)
       } else {
-        logger.warn(`${phoneOrJid} not exists on WhatsApp`)
+        logger.warn(`${phoneOrJid} not exists on WhatsApp baileys onWhatsApp return results ${results}`)
       }
     }
-    return dataStore.loadJid(phoneOrJid)
+    return jid
+  }
+  dataStore.setJid = async (phoneOrJid: string, jid: string) => {
+    jids.set(phoneOrJid, jid, HOUR)
+  }
+  dataStore.getJid = async (phoneOrJid: string) => {
+    return jids.get(phoneOrJid)
   }
   dataStore.setMessage = async (jid: string, message: WAMessage) => {
     if (!store.messages[jid]) {
