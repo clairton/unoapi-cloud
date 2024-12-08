@@ -6,7 +6,7 @@ import { authState } from './auth_state'
 import { sessionFile } from './session_file'
 import { MEDIA_DIR } from './data_store_file'
 import { existsSync, readFileSync, rmSync, mkdirSync, renameSync } from 'fs'
-import { SESSION_DIR } from './session_store_file'
+import { SESSION_DIR, SessionStoreFile } from './session_store_file'
 import { getStore, stores } from './store'
 import { MediaStore } from './media_store'
 import { getMediaStoreFile } from './media_store_file'
@@ -78,5 +78,6 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
   } else {
     logger.info('Store data not save')
   }
-  return { state, saveCreds, dataStore, mediaStore }
+  const sessionStore = new SessionStoreFile()
+  return { state, saveCreds, dataStore, mediaStore, sessionStore }
 }

@@ -1,4 +1,3 @@
-import { getSessionStatus, isSessionStatusIsDisconnect, isSessionStatusOffline } from '../services/session_store'
 import { Request, Response } from 'express'
 import { Server } from 'socket.io'
 import { Config, defaultConfig, getConfig } from '../services/config'
@@ -9,6 +8,8 @@ import { OnDisconnected, OnNewLogin, OnNotification, OnQrCode, OnReconnect, conn
 
 const configuration = async (phone: string, getConfig: getConfig) => {
   const config = await getConfig(phone)
+  const store = await config.getStore(phone, config)
+  const { sessionStore } = store
   const keysToIgnore = ['getStore', 'baseStore', 'shouldIgnoreKey', 'shouldIgnoreJid', 'webhooks', 'getMessageMetadata', 'authToken', 'proxyUrl']
   const keys = Object.keys(defaultConfig).filter((k) => !keysToIgnore.includes(k))
   const getTypeofProperty = <T, K extends keyof T>(o: T, name: K) => typeof o[name]
@@ -17,7 +18,7 @@ const configuration = async (phone: string, getConfig: getConfig) => {
     <body>
       <div id="content">
         <form method="POST" action="/v15.0/${phone}/register">
-          ${await getSessionStatus(phone)}
+          ${await sessionStore.getStatus(phone)}
           <label for="authToken">authToken</label><input type="text" name="authToken" id="authToken" value="" required="true"/><br/>
           <label for="proxyUrl">proxyUrl</label><input type="text" name="proxyUrl" id="proxyUrl" value=""/><br/><!--not show by security question-->
           ${keys
@@ -113,8 +114,11 @@ export class SessionController {
     logger.debug('session params %s', JSON.stringify(req.params))
     logger.debug('session body %s', JSON.stringify(req.body))
     const { phone } = req.params
+    const config = await this.getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const { sessionStore } = store
 
-    const generateQrcode = (await isSessionStatusIsDisconnect(phone)) || (await isSessionStatusOffline(phone))
+    const generateQrcode = (await sessionStore.isStatusIsDisconnect(phone)) || (await sessionStore.isStatusOffline(phone))
     const html = generateQrcode ? await qrcode(phone, this.getConfig, this.onNewLogin, this.socket) : await configuration(phone, this.getConfig)
     return res.send(html)
   }

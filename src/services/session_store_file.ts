@@ -3,10 +3,11 @@ import { Dirent, existsSync, readdirSync } from 'fs'
 
 export const SESSION_DIR = './data/sessions'
 
-export class SessionStoreFile implements SessionStore {
+export class SessionStoreFile extends SessionStore {
   private sessionDir: string
 
   constructor(sessionDir: string = SESSION_DIR) {
+    super()
     this.sessionDir = sessionDir
   }
 

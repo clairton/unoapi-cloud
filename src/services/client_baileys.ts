@@ -27,7 +27,6 @@ import { Response } from './response'
 import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
-import { getSessionStatus, isSessionStatusOnline } from './session_store'
 import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
 const attempts = 3
 
@@ -123,7 +122,8 @@ export class ClientBaileys implements Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private onWebhookError = async (error: any) => {
-    if (!this.config.throwWebhookError && error.name === 'FetchError' && (await isSessionStatusOnline(this.phone))) {
+    const { sessionStore } = this.store!
+    if (!this.config.throwWebhookError && error.name === 'FetchError' && (await sessionStore.isStatusOnline(this.phone))) {
       return this.incoming.send(
         this.phone,
         { to: this.phone, type: 'text', text: { body: `Error on send message to webhook: ${error.message}` } },
@@ -152,7 +152,8 @@ export class ClientBaileys implements Client {
       logger.debug('onNotification %s', JSON.stringify(payload))
       if (this.config.sessionWebhook) {
         try {
-          const body = JSON.stringify({ info: { phone: this.phone }, status: await getSessionStatus(this.phone), ...payload })
+          const { sessionStore } = this.store!
+          const body = JSON.stringify({ info: { phone: this.phone }, status: await sessionStore.getStatus(this.phone), ...payload })
           const response = await fetch(this.config.sessionWebhook, {
             method: 'POST',
             body: body,
@@ -193,7 +194,8 @@ export class ClientBaileys implements Client {
       },
     }
     if (this.config.sessionWebhook) {
-      const body = JSON.stringify({ info: { phone: this.phone }, status: await getSessionStatus(this.phone), ...waMessage })
+      const { sessionStore } = this.store!
+      const body = JSON.stringify({ info: { phone: this.phone }, status: await sessionStore.getStatus(this.phone), ...waMessage })
       try {
         const response = await fetch(this.config.sessionWebhook, {
           method: 'POST',
@@ -554,7 +556,8 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
-    if (!(await isSessionStatusOnline(this.phone))) {
+    const { sessionStore } = this.store!
+    if (!(await sessionStore.isStatusOnline(this.phone))) {
       return message
     }
     const key = message && message['key']

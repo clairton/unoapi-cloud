@@ -2,7 +2,6 @@ import { getClient } from '../services/client'
 import { getConfig } from '../services/config'
 import { Incoming } from '../services/incoming'
 import { Listener } from '../services/listener'
-import { isSessionStatusOnline } from '../services/session_store'
 import { OnNewLogin } from '../services/socket'
 import { Reload } from './reload'
 
@@ -30,7 +29,10 @@ export class ReloadBaileys extends Reload {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    if (await isSessionStatusOnline(phone)) {
+    const config = await this.getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const { sessionStore }  = store
+    if (await sessionStore.isStatusOnline(phone)) {
       await currentClient.disconnect()
     }
     await super.run(phone)

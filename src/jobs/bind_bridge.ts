@@ -18,7 +18,6 @@ import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
 import { BroadcastAmqp } from '../services/broadcast_amqp'
-import { isSessionStatusOnline } from '../services/session_store'
 import { isInBlacklistInRedis } from '../services/blacklist'
 import { ListenerAmqp } from '../services/listener_amqp'
 import { OutgoingCloudApi } from '../services/outgoing_cloud_api'
@@ -41,14 +40,16 @@ const processeds = new Map<string, boolean>()
 
 export class BindBridgeJob {
   async consume(server: string, { phone }: { phone: string }) {
-    if (!(await isSessionStatusOnline(phone)) && processeds.get(phone)) {
+    const config = await getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const { sessionStore } = store
+    if (!(await sessionStore.isStatusOnline(phone)) && processeds.get(phone)) {
       return
     }
     processeds.set(phone, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
     logger.info('Binding queues consumer bridge server %s phone %s', server, phone)
 
-    const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
 
     logger.info('Starting listener consumer %s', phone)

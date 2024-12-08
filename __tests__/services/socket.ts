@@ -5,6 +5,7 @@ import { mock } from 'jest-mock-extended'
 import { Store } from '../../src/services/store'
 import { defaultConfig } from '../../src/services/config'
 import logger from '../../src/services/logger'
+import { SessionStore } from '../../src/services/session_store'
 const mockMakeWASocket = makeWASocket as jest.MockedFunction<typeof makeWASocket>
 
 describe('service socket', () => {
@@ -24,6 +25,7 @@ describe('service socket', () => {
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
     store = mock<Store>()
+    store.sessionStore = mock<SessionStore>()
     mockWaSocket = mock<WASocket>()
     mockBaileysEventEmitter = mock<typeof mockWaSocket.ev>()
     Reflect.set(mockWaSocket, 'ev', mockBaileysEventEmitter)

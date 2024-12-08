@@ -24,7 +24,7 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { isSessionStatusConnecting, isSessionStatusOnline, setSessionStatus, isSessionStatusOffline, isSessionStatusIsDisconnect } from './session_store'
+import { SessionStore } from './session_store'
 import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL } from '../defaults'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
@@ -106,7 +106,7 @@ export const connect = async ({
 }) => {
   let sock: WASocket | undefined = undefined
   const msgRetryCounterCache = new NodeCache()
-  const { dataStore, state, saveCreds } = store
+  const { dataStore, state, saveCreds, sessionStore } = store
 
   const status: Status = {
     attempt: time,
@@ -128,7 +128,7 @@ export const connect = async ({
 
     if (event.isNewLogin) {
       await onNewLogin(phone)
-      await setSessionStatus(phone, 'online')
+      await sessionStore.setStatus(phone, 'online')
     }
 
     if (event.receivedPendingNotifications) {
@@ -136,7 +136,7 @@ export const connect = async ({
     }
 
     if (event.isOnline) {
-      await setSessionStatus(phone, 'online')
+      await sessionStore.setStatus(phone, 'online')
       await onNotification('Online session', true)
     }
 
@@ -150,7 +150,7 @@ export const connect = async ({
         break
 
       case 'connecting':
-        await setSessionStatus(phone, 'connecting')
+        await sessionStore.setStatus(phone, 'connecting')
         await onNotification(`Connnecting...`, false)
         break
     }
@@ -158,7 +158,7 @@ export const connect = async ({
 
   const onOpen = async () => {
     status.attempt = 1
-    await setSessionStatus(phone, 'online')
+    await sessionStore.setStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version } = await fetchLatestBaileysVersion()
     const message = `Connected with ${phone} using Whatsapp Version v${WHATSAPP_VERSION.join('.')}, latest Baileys version is v${version.join('.')} at ${new Date().toUTCString()}`
@@ -167,7 +167,7 @@ export const connect = async ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClose = async (payload: any) => {
-    if ((await isSessionStatusOffline(phone)) || (await isSessionStatusIsDisconnect(phone))) {
+    if ((await sessionStore.isStatusOffline(phone)) || (await sessionStore.isStatusIsDisconnect(phone))) {
       return
     }
     const { lastDisconnect } = payload
@@ -175,7 +175,7 @@ export const connect = async ({
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       status.attempt = 1
-      if (!(await isSessionStatusConnecting(phone))) {
+      if (!(await sessionStore.isStatusConnecting(phone))) {
         const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
         await onNotification(message, true)
       }
@@ -238,7 +238,7 @@ export const connect = async ({
   }
 
   const close = async () => {
-    await setSessionStatus(phone, 'offline')
+    await sessionStore.setStatus(phone, 'offline')
     logger.info(`${phone} close`)
     try {
       [
@@ -286,7 +286,7 @@ export const connect = async ({
     await dataStore.cleanSession()
 
     logger.info(`${phone} disconnected`)
-    await setSessionStatus(phone, 'disconnected')
+    await sessionStore.setStatus(phone, 'disconnected')
     try {
       return sock && (await sock.logout())
     } catch (_error) {
@@ -301,9 +301,9 @@ export const connect = async ({
   }
 
   const validateStatus = async () => {
-    if (await isSessionStatusConnecting(phone)) {
+    if (await sessionStore.isStatusConnecting(phone)) {
       throw new SendError(5, 'Wait a moment, connecting process')
-    } else if (!(await isSessionStatusOnline(phone))) {
+    } else if (!(await sessionStore.isStatusOnline(phone))) {
       throw new SendError(3, 'Disconnected number, please read qr code')
     }
   }
@@ -313,8 +313,8 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    if (!(await isSessionStatusOnline(phone))) {
-      if (!(await isSessionStatusConnecting(phone))) {
+    if (!(await sessionStore.isStatusOnline(phone))) {
+      if (!(await sessionStore.isStatusConnecting(phone))) {
         reconnect()
       }
       return
@@ -346,7 +346,7 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
-    if (!(await isSessionStatusOnline(phone))) return false
+    if (!(await sessionStore.isStatusOnline(phone))) return false
 
     await sock?.readMessages(keys)
     return true
@@ -372,7 +372,7 @@ export const connect = async ({
   }
 
   const connect = async () => {
-    if ((await isSessionStatusOnline(phone)) || (await isSessionStatusConnecting(phone))) return
+    if ((await sessionStore.isStatusOnline(phone)) || (await sessionStore.isStatusConnecting(phone))) return
     logger.debug('Connecting %s', phone)
 
     const browser: WABrowserDescription = config.ignoreHistoryMessages

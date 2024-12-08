@@ -31,7 +31,6 @@ import { getConfigRedis } from '../services/config_redis'
 import { Incoming } from '../services/incoming'
 import logger from '../services/logger'
 import { NotificationJob } from '../jobs/notification'
-import { isSessionStatusOnline } from '../services/session_store'
 import { isInBlacklistInRedis } from '../services/blacklist'
 
 const incomingAmqp: Incoming = new IncomingAmqp()
@@ -55,15 +54,17 @@ const bulkWebhookJob = new BulkWebhookJob(outgoingCloudApi)
 const processeds = new Map<string, boolean>()
 
 export class BindBrokerJob {
-  async consume(server: string, { phone }: { phone: string }) {
-    if (!(await isSessionStatusOnline(phone)) && processeds.get(phone)) {
+  async consume(server: string, { phone }: { phone: string }) { 
+    const config = await getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const { sessionStore } = store
+    if (!(await sessionStore.isStatusOnline(phone)) && processeds.get(phone)) {
       return
     }
     processeds.set(phone, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
     logger.info('Binding queues consumer for server %s phone %s', server, phone)
 
-    const config = await getConfig(phone)
     const notifyFailedMessages = config.notifyFailedMessages
 
     logger.info('Starting outgoing consumer %s', phone)

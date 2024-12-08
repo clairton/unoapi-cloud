@@ -135,6 +135,10 @@ const authKey = (phone: string) => {
   return `${BASE_KEY}auth:${phone}`
 }
 
+const sessionStatusKey = (phone: string) => {
+  return `${BASE_KEY}auth:${phone}`
+}
+
 const messageStatusKey = (phone: string, id: string) => {
   return `${BASE_KEY}message-status:${phone}:${id}`
 }
@@ -202,6 +206,16 @@ export const setBlacklist = async (from: string, webhookId: string, to: string, 
   } else {
     return client.set(key, '1')
   }
+}
+
+export const getSessionStatus = async (phone: string) => {
+  const key = sessionStatusKey(phone)
+  return redisGet(key)
+}
+
+export const setSessionStatus = async (phone: string, status: string) => {
+  const key = sessionStatusKey(phone)
+  await client.set(key, status)
 }
 
 export const getMessageStatus = async (phone: string, id: string) => {

@@ -10,6 +10,7 @@ import { getMediaStoreS3 } from './media_store_s3'
 import { MediaStore } from './media_store'
 import { Config } from './config'
 import logger from './logger'
+import { SessionStoreRedis } from './session_store_redis'
 
 export const getStoreRedis: getStore = async (phone: string, config: Config): Promise<Store> => {
   if (!stores.has(phone)) {
@@ -30,5 +31,6 @@ const storeRedis: store = async (phone: string, config: Config): Promise<Store> 
   const dataStore: DataStore = await getDataStoreRedis(phone, config)
   const mediaStore: MediaStore = getMediaStoreS3(phone, config, getDataStoreRedis) as MediaStore
   logger.info(`Store data in redis`)
-  return { state, saveCreds, dataStore, mediaStore }
+  const sessionStore = new SessionStoreRedis()
+  return { state, saveCreds, dataStore, mediaStore, sessionStore }
 }
