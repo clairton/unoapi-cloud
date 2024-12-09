@@ -24,7 +24,6 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { SessionStore } from './session_store'
 import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL } from '../defaults'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
@@ -167,7 +166,12 @@ export const connect = async ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onClose = async (payload: any) => {
-    if ((await sessionStore.isStatusOffline(phone)) || (await sessionStore.isStatusIsDisconnect(phone))) {
+    if (await sessionStore.isStatusOffline(phone)) {
+      logger.warn('Already Offline %s', phone)
+      return
+    }
+    if (await sessionStore.isStatusIsDisconnect(phone)) {
+      logger.warn('Already Disconnected %s', phone)
       return
     }
     const { lastDisconnect } = payload
@@ -372,7 +376,14 @@ export const connect = async ({
   }
 
   const connect = async () => {
-    if ((await sessionStore.isStatusOnline(phone)) || (await sessionStore.isStatusConnecting(phone))) return
+    if (await sessionStore.isStatusConnecting(phone)) {
+      logger.warn('Already Connecting %s', phone)
+      return
+    }
+    if (await sessionStore.isStatusOnline(phone)) {
+      logger.warn('Already Connected %s', phone)
+      return
+    }
     logger.debug('Connecting %s', phone)
 
     const browser: WABrowserDescription = config.ignoreHistoryMessages

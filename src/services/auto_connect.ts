@@ -32,6 +32,12 @@ export const autoConnect = async (
         }
         logger.info(`Auto connecting phone ${phone}...`)
         try {
+          const store = await config.getStore(phone, config)
+          const { sessionStore } = store
+          if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
+            logger.info(`Update session status to auto connect ${phone}...`)
+            await sessionStore.setStatus(phone, 'offline')
+          }
           getClient({ phone, incoming, listener, getConfig, onNewLogin })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
