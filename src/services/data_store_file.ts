@@ -219,8 +219,8 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         }
       }
       const result = results && results[0]
-      const test = result && result.exists && result.jid
-      logger.debug(`${phoneOrJid} found onWhatsApp exists: ${result.exists} jid: ${result.jid} test: ${test}`)
+      const test = result && result?.exists && result?.jid
+      logger.debug(`${phoneOrJid} found onWhatsApp exists: ${result?.exists} jid: ${result?.jid} test: ${test}`)
       if (test) {
         logger.debug(`${phoneOrJid} exists on WhatsApp, as jid: ${result.jid}`)
         jid = result.jid
