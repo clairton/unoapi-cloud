@@ -48,11 +48,11 @@ export const router = (
   //Routes
   router.get('/ping', indexController.ping)
   router.get('/:version/debug_token', indexController.debugToken)
-  router.get('/session/:phone', sessionController.index.bind(sessionController))
+  router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))
+  router.get('/sessions/:phone', sessionController.index.bind(sessionController))
   router.post('/:version/:phone/register', middleware, registrationController.register.bind(registrationController))
   router.post('/:version/:phone/deregister', middleware, registrationController.deregister.bind(registrationController))
   router.get('/:version/:phone', middleware, phoneNumberController.get.bind(phoneNumberController))
-  router.get('/:version/phone_numbers', middleware, phoneNumberController.list.bind(phoneNumberController))
   router.get('/:version/:phone/message_templates', middleware, templatesController.index.bind(templatesController))
   router.post('/:version/:phone/templates', middleware, templatesController.templates.bind(templatesController))
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))

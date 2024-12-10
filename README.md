@@ -360,7 +360,7 @@ http://localhost:9876/v17.0/5549988290955/deregister \
 
 ```sh
 curl -i -X GET \
-http://localhost:9876/v15.0/5549988290955 \
+http://localhost:9876/sessions/5549988290955 \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1'
 ```
@@ -369,7 +369,7 @@ http://localhost:9876/v15.0/5549988290955 \
 
 ```sh
 curl -i -X GET \
-http://localhost:9876/v15.0/phone_numbers \
+http://localhost:9876/sessions \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1'
 ```
