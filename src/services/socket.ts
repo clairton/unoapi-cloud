@@ -106,6 +106,7 @@ export const connect = async ({
   let sock: WASocket | undefined = undefined
   const msgRetryCounterCache = new NodeCache()
   const { dataStore, state, saveCreds, sessionStore } = store
+  let connectingTimeout
 
   const status: Status = {
     attempt: time,
@@ -154,19 +155,31 @@ export const connect = async ({
     }
   }
 
+  const verifyConnectingTimeout = async () => {
+    if (connectingTimeout) {
+      return
+    }
+    logger.info(`Connecting ${phone} set timeout to ${CONNECTING_TIMEOUT_MS} ms`)
+    if (await sessionStore.isStatusConnecting(phone)) {
+      connectingTimeout = setTimeout(async () => {
+        if (await sessionStore.isStatusConnecting(phone)) {
+          connectingTimeout = null
+          const message = `Connecting ${phone} timed out ${CONNECTING_TIMEOUT_MS} ms, change to disconnect`
+          await onNotification(message, false)
+          logger.warn(message)
+          await onDisconnected(phone, {})
+        }
+      }, CONNECTING_TIMEOUT_MS)
+    } else {
+      connectingTimeout = null
+    }
+  }
+
   const onConnecting = async () => {
     await sessionStore.setStatus(phone, 'connecting')
     await onNotification(`Connnecting...`, false)
     logger.info(`Connecting ${phone} set timeout to ${CONNECTING_TIMEOUT_MS} ms`)
-    setTimeout(async () => {
-      if (await sessionStore.isStatusConnecting(phone)) {
-        const message = `Connecting ${phone} timed out ${CONNECTING_TIMEOUT_MS} ms, change to disconnect`
-        await onNotification(message, false)
-        logger.info(message)
-        await onDisconnected(phone, {})
-        await close()
-      }
-    }, CONNECTING_TIMEOUT_MS)
+    return verifyConnectingTimeout()
   }
 
   const onOpen = async () => {
@@ -314,15 +327,22 @@ export const connect = async ({
 
   const exists: exists = async (phone: string) => {
     await validateStatus()
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     return dataStore.loadJid(phone, sock!)
   }
 
   const validateStatus = async () => {
     if (await sessionStore.isStatusConnecting(phone)) {
+      await verifyConnectingTimeout()
       throw new SendError(5, 'Wait a moment, connecting process')
-    } else if (!(await sessionStore.isStatusOnline(phone))) {
+    } else if (await sessionStore.isStatusIsDisconnect(phone) || !sock) {
       throw new SendError(3, 'Disconnected number, please read qr code')
+    } else if (await sessionStore.isStatusOffline(phone)) {
+      throw new SendError(12, 'offline number, connecting....')
+    }
+    if (connectingTimeout) {
+      clearTimeout(connectingTimeout)
+      connectingTimeout = null
     }
   }
 
@@ -331,12 +351,7 @@ export const connect = async ({
     message: AnyMessageContent,
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
-    if (!(await sessionStore.isStatusOnline(phone))) {
-      if (!(await sessionStore.isStatusConnecting(phone))) {
-        reconnect()
-      }
-      return
-    }
+    await validateStatus()
 
     const id = isJidGroup(to) ? to : await exists(to)
     if (id) {
@@ -364,7 +379,7 @@ export const connect = async ({
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
-    if (!(await sessionStore.isStatusOnline(phone))) return false
+    await validateStatus()
 
     await sock?.readMessages(keys)
     return true
@@ -376,6 +391,8 @@ export const connect = async ({
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
+    await validateStatus()
+
     return sock?.rejectCall(callId, callFrom)
   }
 
