@@ -478,9 +478,6 @@ export class ClientBaileys implements Client {
             }
             const r: Response = { ok }
             return r
-          } else {
-            logger.error('Response on sent to baileys is empty.....')
-            throw new SendError(5, 'Wait a moment, connecting process')
           }
         } else {
           throw new Error(`Unknow message type ${type}`)
@@ -495,7 +492,8 @@ export class ClientBaileys implements Client {
         const code = e.code
         const title = e.title
         await this.onNotification(title, true)
-        if ([3, '3'].includes(code)) {
+        if ([3, '3', 12, '12'].includes(code)) {
+          await this.close()
           await this.connect(1)
         }
         const id = uuid()
