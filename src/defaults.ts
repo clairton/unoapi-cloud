@@ -33,11 +33,11 @@ export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
 export const UNOAPI_SERVER_NAME = process.env.UNOAPI_SERVER_NAME || 'server_1'
-export const CONNECTION_TIMEOUT = parseInt(process.env.CONNECTION_TIMEOUT || '140000')
+export const CONNECTING_TIMEOUT_MS = parseInt(process.env.CONNECTING_TIMEOUT_MS || '60000')
 export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '5000')
-export const QR_TIMEOUT = parseInt(process.env.QR_TIMEOUT || '30000')
-export const SLEEP_TIME = parseInt(process.env.SLEEP_TIME || '5000')
-export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6
+// export const QR_TIMEOUT = parseInt(process.env.QR_TIMEOUT || '30000')
+// export const SLEEP_TIME = parseInt(process.env.SLEEP_TIME || '5000')
+// export const MAX_QRCODE_GENERATE = process.env.MAX_QRCODE_GENERATE || 6
 export const DATA_TTL: number = parseInt(process.env.DATA_TTL || `${60 * 60 * 24 * 30}`) // a month
 export const DATA_JID_TTL: number = parseInt(process.env.DATA_JID_TTL || `${60 * 60 * 24 * 7}`) // a week
 export const SESSION_TTL: number = parseInt(process.env.SESSION_TTL || '-1')

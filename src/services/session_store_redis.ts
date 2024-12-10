@@ -15,9 +15,11 @@ export class SessionStoreRedis extends SessionStore {
       throw error
     }
   }
+
   async getStatus(phone: string) {
-    return (await getSessionStatus(phone)) || 'disconnected'
+    return await getSessionStatus(phone) || 'disconnected'
   }
+
   async setStatus(phone: string, status: sessionStatus) {
     logger.info(`Session status ${phone} change from ${await this.getStatus(phone)} to ${status}`)
     return setSessionStatus(phone, status)

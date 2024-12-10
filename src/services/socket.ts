@@ -24,7 +24,7 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL } from '../defaults'
+import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS } from '../defaults'
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
@@ -149,10 +149,24 @@ export const connect = async ({
         break
 
       case 'connecting':
-        await sessionStore.setStatus(phone, 'connecting')
-        await onNotification(`Connnecting...`, false)
+        await onConnecting()
         break
     }
+  }
+
+  const onConnecting = async () => {
+    await sessionStore.setStatus(phone, 'connecting')
+    await onNotification(`Connnecting...`, false)
+    logger.info(`Connecting ${phone} set timeout to ${CONNECTING_TIMEOUT_MS} ms`)
+    setTimeout(async () => {
+      if (await sessionStore.isStatusConnecting(phone)) {
+        const message = `Connecting ${phone} timed out ${CONNECTING_TIMEOUT_MS}, change to disconnect`
+        await onNotification(message, false)
+        logger.info(message)
+        await onDisconnected(phone, {})
+        await close()
+      }
+    }, CONNECTING_TIMEOUT_MS)
   }
 
   const onOpen = async () => {
