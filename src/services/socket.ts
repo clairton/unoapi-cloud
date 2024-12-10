@@ -160,7 +160,7 @@ export const connect = async ({
     logger.info(`Connecting ${phone} set timeout to ${CONNECTING_TIMEOUT_MS} ms`)
     setTimeout(async () => {
       if (await sessionStore.isStatusConnecting(phone)) {
-        const message = `Connecting ${phone} timed out ${CONNECTING_TIMEOUT_MS}, change to disconnect`
+        const message = `Connecting ${phone} timed out ${CONNECTING_TIMEOUT_MS} ms, change to disconnect`
         await onNotification(message, false)
         logger.info(message)
         await onDisconnected(phone, {})

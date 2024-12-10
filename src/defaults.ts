@@ -33,7 +33,7 @@ export const PROXY_URL = process.env.PROXY_URL
 
 // behavior of unoapi
 export const UNOAPI_SERVER_NAME = process.env.UNOAPI_SERVER_NAME || 'server_1'
-export const CONNECTING_TIMEOUT_MS = parseInt(process.env.CONNECTING_TIMEOUT_MS || '60000')
+export const CONNECTING_TIMEOUT_MS = parseInt(process.env.CONNECTING_TIMEOUT_MS || '180000')
 export const UNOAPI_RETRY_REQUEST_DELAY_MS = parseInt(process.env.UNOAPI_RETRY_REQUEST_DELAY || process.env.UNOAPI_RETRY_REQUEST_DELAY_MS || '5000')
 // export const QR_TIMEOUT = parseInt(process.env.QR_TIMEOUT || '30000')
 // export const SLEEP_TIME = parseInt(process.env.SLEEP_TIME || '5000')

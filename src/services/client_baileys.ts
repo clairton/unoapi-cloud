@@ -556,8 +556,7 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
-    const { sessionStore } = this.store!
-    if (!(await sessionStore.isStatusOnline(this.phone))) {
+    if (!this.store || !(await this.store.sessionStore.isStatusOnline(this.phone))) {
       return message
     }
     const key = message && message['key']
