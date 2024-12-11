@@ -136,7 +136,7 @@ const authKey = (phone: string) => {
 }
 
 const sessionStatusKey = (phone: string) => {
-  return `${BASE_KEY}auth:${phone}`
+  return `${BASE_KEY}status:${phone}`
 }
 
 const messageStatusKey = (phone: string, id: string) => {
