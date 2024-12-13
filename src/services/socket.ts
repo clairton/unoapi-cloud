@@ -26,6 +26,34 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS } from '../defaults'
 
+const EVENTS = [
+  'connection.update',
+  'creds.update',
+  'messaging-history.set',
+  'chats.upsert',
+  'chats.update',
+  'chats.phoneNumberShare',
+  'chats.delete',
+  'presence.update',
+  'contacts.upsert',
+  'contacts.update',
+  'messages.delete',
+  'messages.update',
+  'messages.media-update',
+  'messages.upsert',
+  'messages.reaction',
+  'message-receipt.update',
+  'groups.upsert',
+  'groups.update',
+  'group-participants.update',
+  'blocklist.set',
+  'blocklist.update',
+  'call',
+  'labels.edit',
+  'labels.association',
+  'offline.preview',
+]
+
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
 export type OnNotification = (text: string, important: boolean) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -271,44 +299,24 @@ export const connect = async ({
   const close = async () => {
     await sessionStore.setStatus(phone, 'offline')
     logger.info(`${phone} close`)
+    EVENTS.forEach((e: any) => {
+      try {
+        sock?.ev?.removeAllListeners(e)
+      } catch (error) {
+        logger.error(`Error on removeAllListeners from ${e}`, error)
+      }
+    })
     try {
-      [
-        'connection.update',
-        'creds.update',
-        'messaging-history.set',
-        'chats.upsert',
-        'chats.update',
-        'chats.phoneNumberShare',
-        'chats.delete',
-        'presence.update',
-        'contacts.upsert',
-        'contacts.update',
-        'messages.delete',
-        'messages.update',
-        'messages.media-update',
-        'messages.upsert',
-        'messages.reaction',
-        'message-receipt.update',
-        'groups.upsert',
-        'groups.update',
-        'group-participants.update',
-        'blocklist.set',
-        'blocklist.update',
-        'call',
-        'labels.edit',
-        'labels.association',
-        'offline.preview'
-      ].forEach((e: any) => {
-        try {
-          sock?.ev?.removeAllListeners(e)
-        } catch (error) {
-          logger.error(`Error on ${e} removeAllListeners`, e)
-        }
-      })
       await sock?.end(undefined)
+    } catch (e) {
+      logger.error(`Error sock end`, e)
+    }
+    try {
       await sock?.ws?.close()
-      sock = undefined
-    } catch (error) {}
+    } catch (e) {
+      logger.error(`Error on sock ws close`, e)
+    }
+    sock = undefined
   }
 
   const logout = async () => {
