@@ -453,7 +453,7 @@ export const connect = async ({
     try {
       sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true,
+        printQRInTerminal: config.connectionType == 'qrcode',
         browser,
         msgRetryCounterCache,
         syncFullHistory: !config.ignoreHistoryMessages,
@@ -480,6 +480,14 @@ export const connect = async ({
       dataStore.bind(sock.ev)
       event('creds.update', saveCreds)
       event('connection.update', onConnectionUpdate)
+
+      if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
+        logger.info(`Requesting pairing code ${phone} `)
+        const code = await sock?.requestPairingCode(phone)
+        const message = `Open your WhatsApp, go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > ${code}!`
+        await onNotification(message, true)
+      }
+
       if (config.wavoipToken) {
         useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
       }

@@ -336,6 +336,7 @@ WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
 MESSAGE_CHECK_WAAPP=message to send webwook when uno fails on reading content. default '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
+CONNECTION_TYPE=connection type use qrcode or pairing_code, default is qrcode
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:

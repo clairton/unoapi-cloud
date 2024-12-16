@@ -1,5 +1,5 @@
 import { MessageFilter } from './message_filter'
-import { getConfig, defaultConfig, Config, configs, Webhook } from './config'
+import { getConfig, defaultConfig, Config, configs, Webhook, connectionType } from './config'
 import logger from './logger'
 import { Level } from 'pino'
 
@@ -38,6 +38,7 @@ import {
   UNOAPI_AUTH_TOKEN,
   UNOAPI_HEADER_NAME,
   WAVOIP_TOKEN,
+  CONNECTION_TYPE,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -62,6 +63,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.throwWebhookError = THROW_WEBHOOK_ERROR
     config.notifyFailedMessages = NOTIFY_FAILED_MESSAGES
     config.retryRequestDelayMs = UNOAPI_RETRY_REQUEST_DELAY_MS
+    config.connectionType = CONNECTION_TYPE as connectionType
     config.sendReactionAsReply = SEND_REACTION_AS_REPLY
     config.sendProfilePicture = SEND_PROFILE_PICTURE
     config.sessionWebhook = WEBHOOK_SESSION

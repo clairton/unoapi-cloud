@@ -150,6 +150,10 @@ describe('service transformer', () => {
     expect(phoneNumberToJid('+5549988290955')).toEqual('5549988290955@s.whatsapp.net')
   })
 
+  test('phoneNumberToJid with nine digit 33008196', async () => {
+    expect(phoneNumberToJid('+5549933008196')).toEqual('5549933008196@s.whatsapp.net')
+  })
+
   test('phoneNumberToJid', async () => {
     expect(phoneNumberToJid('+554988290955')).toEqual('5549988290955@s.whatsapp.net')
   })
