@@ -16,6 +16,7 @@ import { PhoneNumberController } from './controllers/phone_number_controller'
 import { RegistrationController } from './controllers/registration_controller'
 import { SessionController } from './controllers/session_controller'
 import { BlacklistController } from './controllers/blacklist_controller'
+import { PairingCodeController } from './controllers/pairing_code_controller'
 import { Server } from 'socket.io'
 import { OnNewLogin } from './services/socket'
 import { addToBlacklist } from './services/blacklist'
@@ -51,6 +52,7 @@ export const router = (
   const webhookController = new WebhookController()
   const blacklistController = new BlacklistController(addToBlacklist)
   const contactsController = new ContactsController(contact)
+  const pairingCodeController = new PairingCodeController(getConfig, incoming)
 
   //Routes
   router.get('/', indexController.root)
@@ -71,6 +73,9 @@ export const router = (
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))
   router.get('/:version/download/:phone/:file', middleware, mediaController.download.bind(mediaController))
   router.post('/:phone/blacklist/:webhook_id', middleware, blacklistController.update.bind(blacklistController))
+
+  // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers/
+  router.post('/:phone/request_code', middleware, pairingCodeController.request.bind(pairingCodeController))
 
   injectRoute(router)
 
