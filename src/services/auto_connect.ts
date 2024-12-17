@@ -16,6 +16,7 @@ export const autoConnect = async (
   onNewLogin: OnNewLogin,
 ) => {
   try {
+    await sessionStore.syncConnecting()
     const phones = await sessionStore.getPhones()
     logger.info(`${phones.length} phones to verify if is auto connect`)
     for (let i = 0, j = phones.length; i < j; i++) {

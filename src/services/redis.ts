@@ -135,7 +135,7 @@ const authKey = (phone: string) => {
   return `${BASE_KEY}auth:${phone}`
 }
 
-const sessionStatusKey = (phone: string) => {
+export const sessionStatusKey = (phone: string) => {
   return `${BASE_KEY}status:${phone}`
 }
 

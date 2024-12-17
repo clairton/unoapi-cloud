@@ -32,4 +32,6 @@ export abstract class SessionStore {
   async isStatusIsDisconnect(phone: string) {
     return await this.getStatus(phone) == 'disconnected'
   }
+
+  async syncConnecting() {}
 }
