@@ -24,7 +24,7 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS } from '../defaults'
+import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS } from '../defaults'
 
 const EVENTS = [
   'connection.update',
@@ -435,12 +435,10 @@ export const connect = async ({
     }
     logger.debug('Connecting %s', phone)
 
-    const browser: WABrowserDescription = config.ignoreHistoryMessages
-      ? [CONFIG_SESSION_PHONE_CLIENT || 'Unoapi', CONFIG_SESSION_PHONE_NAME || 'Chrome', release()]
-      : Browsers.windows('Desktop')
+    const browser: WABrowserDescription = config.ignoreHistoryMessages ? DEFAULT_BROWSER as WABrowserDescription : Browsers.windows('Desktop')
 
     const loggerBaileys = MAIN_LOGGER.child({})
-    // logger.level = config.logLevel as Level
+    logger.level = config.logLevel as Level
     loggerBaileys.level = (LOG_LEVEL) as Level
 
     let agent
@@ -478,16 +476,14 @@ export const connect = async ({
     }
     if (sock) {
       dataStore.bind(sock.ev)
-      event('creds.update', saveCreds)
-      event('connection.update', onConnectionUpdate)
-
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone} `)
         const code = await sock?.requestPairingCode(phone)
         const message = `Open your WhatsApp, go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > ${code}!`
         await onNotification(message, true)
       }
-
+      event('creds.update', saveCreds)
+      event('connection.update', onConnectionUpdate)
       if (config.wavoipToken) {
         useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
       }
