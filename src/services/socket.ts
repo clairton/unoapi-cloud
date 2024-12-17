@@ -492,16 +492,14 @@ export const connect = async ({
     }
     if (sock) {
       dataStore.bind(sock.ev)
-      event('creds.update', saveCreds)
-      event('connection.update', onConnectionUpdate)
-
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone} `)
         const code = await sock?.requestPairingCode(phone)
         const message = `Open your WhatsApp, go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > ${code}!`
         await onNotification(message, true)
       }
-
+      event('creds.update', saveCreds)
+      event('connection.update', onConnectionUpdate)
       if (config.wavoipToken) {
         useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
       }
