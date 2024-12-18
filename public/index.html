@@ -677,7 +677,7 @@
                 const token = localStorage.getItem(tokenKey);
 
                 if (token) {
-                    fetch(`https://unoapi.cloud/v15.0/${number}`, {
+                    fetch(`${apiUrl}/v15.0/${number}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -734,7 +734,7 @@
                 connectToWebSocket(number);
 
                 const intervalId = setInterval(() => {
-                    fetch(`https://uno.api.powerbits.com.br/v15.0/${number}`, {
+                    fetch(`${apiUrl}/v15.0/${number}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -776,7 +776,7 @@
                     console.log("WebSocket já está conectado.");
                     return;
                 }
-                const socket = io('https://uno.api.powerbits.com.br', { path: '/ws' });
+                const socket = io(apiUrl, { path: '/ws' });
                 window.socket = socket;
 
                 const qrcodeDiv = document.getElementById('qrCodeContainer');
