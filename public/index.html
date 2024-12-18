@@ -1,7 +1,847 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h1>Unoapi</h1>
-    <p>WIP page</p>
-  </body>
+<html lang="pt-Br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unoapi - Manager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+    <!-- Socket IO-->
+    <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .navbar {
+            margin-bottom: 20px;
+        }
+
+        .edit-modal {
+            max-width: 80vw;
+        }
+
+        .editForm {
+            width: 80vw;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .d-none {
+            display: none;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 17px;
+            width: 17px;
+            left: 5px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .webhook {
+            margin: 15px 45px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .webhook:not(:last-child) {
+            border-bottom: 1px solid #e1e1e1d6;
+            padding-bottom: 10px;
+            margin: 10px 50px;
+        }
+
+        div#login {
+            height: 100%;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            margin: 0 auto;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: stretch;
+        }
+        #tokenForm {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            padding: 0 25%;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        input {
+            margin-bottom: 15px;
+        }
+
+        :root {
+            --bs-breakpoint-xs: 0;        /* Não configurável diretamente */
+            --bs-breakpoint-sm: 480px;    /* Ajuste para o ponto de início do "sm" */
+            --bs-breakpoint-md: 768px;    /* Ajuste para o ponto de início do "md" */
+            --bs-breakpoint-lg: 1024px;   /* Ajuste para o ponto de início do "lg" */
+            --bs-breakpoint-xl: 1300px;   /* Ajuste para o ponto de início do "xl" */
+            --bs-breakpoint-xxl: 1560px;  /* Ajuste para o ponto de início do "xxl" */
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://raw.githubusercontent.com/clairton/unoapi-cloud/61c7e67e3d043b5d6cc142fd2192b78efffefce0/logos/Unoapi_logo.svg" alt="Logo" width="150" height="80" class="d-inline-block align-text-top">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Configurations Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="configDropdown">
+                            <li>
+                                <button class="dropdown-item" onclick="addInstance()"><i class="fas fa-plus"></i> Adicionar Instância</button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="logout()"><i class="fas fa-sign-out"></i> SAIR</button>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="login">
+        <div id="tokenForm" class="mb-4">
+            <label for="tokenInput" class="form-label">Token configurado:</label>
+            <div class="input-group">
+                <input type="text" id="tokenInput" class="form-control" placeholder="Insira o token aqui">
+                <button id="connectButton" class="btn btn-dark"><i class="fas fa-sign-in"></i> Conectar</button>
+            </div>
+        </div>
+        <p id="errorMessage" class="text-danger d-none">Erro: Token inválido ou conexão falhou.</p>
+    </div>
+    <div class="container mt-4">
+        <table id="sessionsTable" class="table table-striped table-bordered d-none" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Status</th>
+                    <th>Server</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Modal para adicionar instância -->
+    <div class="modal fade" id="addInstanceModal" tabindex="-1" aria-labelledby="addInstanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addInstanceModalLabel">Adicionar Sessão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addInstanceForm">
+                        <div class="mb-3">
+                            <label for="instanceNumber" class="form-label">Número da Conexão</label>
+                            <input type="number" class="form-control" id="instanceNumber" placeholder="Número no formato 55 DDD NUMERO" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="submitInstanceNumber()">Configurar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog edit-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar/Adicionar Sessão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <div class="row">
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="authToken" class="form-label">Auth Token</label>
+                                <input type="text" class="form-control" id="authToken" name="authToken" placeholder="Auth Token">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="wavoipToken" class="form-label">Token Wavoip</label>
+                                <input type="text" class="form-control" id="wavoipToken" name="wavoipToken" placeholder="Token WAVOIP...">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="rejectCallsWebhook" class="form-label">Mensagem de Ligação Recebida e/ou Rejeitada</label>
+                                <input type="text" class="form-control" id="rejectCallsWebhook" name="rejectCallsWebhook" placeholder="Estava te ligando...">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="rejectCalls" class="form-label">Mensagem ao Rejeitar Chamadas</label>
+                                <input type="text" class="form-control" id="rejectCalls" name="rejectCalls" placeholder="Deixe em Branco para não Rejeitar ligações automaticamente">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="ignoreGroupMessages" name="ignoreGroupMessages" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="ignoreGroupMessages" class="form-label">Ignorar Mensagens de Grupo</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="ignoreHistoryMessages" name="ignoreHistoryMessages" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="ignoreHistoryMessages" class="form-label">Ignorar Histórico de Mensagens</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="sendProfilePicture" name="sendProfilePicture">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="sendProfilePicture" class="form-label">Enviar Foto de Perfil</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="ignoreBroadcastStatuses" name="ignoreBroadcastStatuses" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="ignoreBroadcastStatuses" class="form-label">Ignorar Status</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="sendConnectionStatus" name="sendConnectionStatus">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="sendConnectionStatus" class="form-label">Enviar Status da Conexão</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="notifyFailedMessages" name="notifyFailedMessages">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="notifyFailedMessages" class="form-label">Notificar Falhas</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="composingMessage" name="composingMessage">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="composingMessage" class="form-label">Enviar "Digitando"</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="sendReactionAsReply" name="sendReactionAsReply">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="sendReactionAsReply" class="form-label">Enviar Reação Como Resposta</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="ignoreOwnMessages" name="ignoreOwnMessages">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="ignoreOwnMessages" class="form-label">Ignorar Mensagens Próprias</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="ignoreYourselfMessages" name="ignoreYourselfMessages">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="ignoreYourselfMessages" class="form-label">Ignorar Suas Mensagens</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="autoConnect" name="autoConnect" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="autoConnect" class="form-label">Conexão Automática"</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="ignoreBroadcastMessages" name="ignoreBroadcastMessages" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="ignoreBroadcastMessages" class="form-label">Ignorar Listas de Transmissão</label>
+                            </div>
+                        </div>
+                        <div id="webhooksContainer">
+                            <h6>Webhooks</h6>
+                            <div class="webhook mb-3">
+                                <label for="webhookUrl" class="form-label">URL</label>
+                                <input type="text" class="form-control mb-2 webhook-url" placeholder="Webhook URL">
+                                <label for="webhookToken" class="form-label">Token</label>
+                                <input type="text" class="form-control mb-2 webhook-token" placeholder="Webhook Token">
+                                <label for="webhookHeader" class="form-label">Header</label>
+                                <input type="text" class="form-control mb-2 webhook-header" placeholder="Webhook Header">
+                                <label for="sendNewMessages" class="form-label">Enviar Novas Mensagens</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendNewMessages">
+                                    <span class="slider round"></span>
+                                </label>
+                                <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
+                            </div>
+                        </div>
+                        <button type="button" id="addWebhookButton" class="btn btn-secondary btn-sm">Adicionar Webhook</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveEditButton">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Conectar -->
+    <div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="connectModalLabel">Conectar Sessão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p id="qrCodeMessage">Aguarde o evento de QrCode</p>
+                    <div id="qrCodeContainer">QR Code será exibido aqui</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        const apiUrl = `${window.location.origin}`;
+        const tokenKey = "whatsappApiToken";
+
+        //Logout
+        function logout() {
+            localStorage.removeItem(tokenKey);
+            $('.container').addClass('d-none');
+            window.location.reload(); 
+        }
+
+        $(document).ready(function () {
+            var table;
+            const storedToken = localStorage.getItem(tokenKey);
+
+            if (storedToken) {
+                fetchSessions(storedToken, true);
+            }
+
+            //Login
+            $('#connectButton').on('click', function () {
+                const token = $('#tokenInput').val().trim();
+                if (token) {
+                    fetchSessions(token);
+                }
+            });
+
+            //Add Webhook
+            $('#addWebhookButton').on('click', function () {
+                const webhookTemplate = `
+                    <div class="webhook mb-3">
+                        <label for="webhookUrl" class="form-label">URL</label>
+                        <input type="text" class="form-control mb-2 webhook-url" placeholder="Webhook URL">
+                        <label for="webhookToken" class="form-label">Token</label>
+                        <input type="text" class="form-control mb-2 webhook-token" placeholder="Webhook Token">
+                        <label for="webhookHeader" class="form-label">Header</label>
+                        <input type="text" class="form-control mb-2 webhook-header" placeholder="Webhook Header">
+                        <label for="sendNewMessages" class="form-label">Enviar Novas Mensagens</label>
+                        <label class="switch">
+                            <input type="checkbox" class="webhook-sendNewMessages">
+                            <span class="slider round"></span>
+                        </label>
+                        <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
+                    </div>`;
+                $('#webhooksContainer').append(webhookTemplate);
+            });
+
+            $('#webhooksContainer').on('click', '.remove-webhook', function () {
+                $(this).closest('.webhook').remove();
+            });
+
+            //Create DataTable And Fetch Conected Sessions
+            function fetchSessions(token, hideForm = true) {
+                if (!$.fn.dataTable.isDataTable('#sessionsTable')) {
+                    table = $('#sessionsTable').DataTable({
+                        language: {
+                            "decimal": "",
+                            "emptyTable": "Nenhuma sessão nesta instalação",
+                            "info": "Exibindo _START_ até _END_ de _TOTAL_ sessões",
+                            "infoEmpty": "Nenhum Registro",
+                            "infoFiltered": "(filtrado de _MAX_ registros no total)",
+                            "infoPostFix": "",
+                            "thousands": ".",
+                            "lengthMenu": "Exibir _MENU_ Sessões",
+                            "loadingRecords": "Carregando...",
+                            "processing": "Processando...",
+                            "search": "Pesquisar:",
+                            "zeroRecords": "Nenhuma sessão configurada",
+                            "paginate": {
+                                "first": "Primeiro",
+                                "last": "Último",
+                                "next": "Próximo",
+                                "previous": "Anterior"
+                            },
+                            "aria": {
+                                "sortAscending": ": ativar para ordenar a coluna de forma ascendente",
+                                "sortDescending": ": ativar para ordenar a coluna de forma descendente"
+                            }
+                        }
+                    });
+                }
+
+                const headers = { Authorization: `Bearer ${token}` };
+
+                fetch(apiUrl + '/sessions', { headers })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Token inválido ou falha na conexão.");
+                        return response.json();
+                    })
+                    .then(data => {
+                        localStorage.setItem(tokenKey, token);
+                        if (hideForm) {
+                            $('#login').addClass('d-none');
+                        }
+                        populateTable(data); // Popula a tabela com os dados
+                    })
+                    .catch(() => {
+                        $('#errorMessage').removeClass('d-none');
+                        $('#sessionsTable').addClass('d-none');
+                    });
+            }
+
+            // Populate Datatable with session numbers
+            function populateTable(sessions) {
+                $('#errorMessage').addClass('d-none');
+                $('#sessionsTable').removeClass('d-none');
+
+                // Limpa os dados antigos da tabela antes de adicionar os novos
+                table.clear();
+
+                sessions.forEach(session => {
+                    table.row.add([
+                        session.display_phone_number,
+                        session.status,
+                        session.server,
+                        `
+                        <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-number="${session.display_phone_number}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-success connect-btn" data-bs-toggle="modal" data-bs-target="#connectModal" data-number="${session.display_phone_number}">
+                            <i class="fas fa-link"></i> Conectar
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-number="${session.display_phone_number}">
+                            <i class="fas fa-trash"></i> Deletar
+                        </button>`
+                    ]).draw(false);
+                });
+            }
+
+            //deregister function
+            $('#sessionsTable tbody').on('click', '.delete-btn', function() {
+                const number = $(this).data('number');
+                const token = localStorage.getItem(tokenKey);
+                if (token) {
+                    fetch(`${apiUrl}/v15.0/${number}/deregister`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Erro no request.");
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert("A sessão foi removida!");
+                    })
+                    .catch(error => alert(error.message));
+                }
+                
+            });
+
+            //Edit button
+            $('#sessionsTable tbody').on('click', '.edit-btn', function () {
+                const number = $(this).data('number');
+                const token = localStorage.getItem(tokenKey);
+
+                if (token) {
+                    fetch(`${apiUrl}/v15.0/${number}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Erro ao buscar dados da sessão.");
+                        return response.json();
+                    })
+                    .then(data => {
+                        populateEditForm(data);
+
+                        $('#editModal').data('number', number); 
+
+                        $('#editModal').modal('show');
+                    })
+                    .catch(error => alert(error.message));
+                }
+            });
+
+            //Edit form for session number
+            function populateEditForm(session) {
+                $('#authToken').val(session.authToken);
+                $('#wavoipToken').val(session.wavoipToken);
+                $('#rejectCallsWebhook').val(session.rejectCallsWebhook);
+                $('#rejectCalls').val(session.rejectCalls);
+                $('#ignoreGroupMessages').prop('checked', session.ignoreGroupMessages);
+                $('#ignoreHistoryMessages').prop('checked', session.ignoreHistoryMessages);
+                $('#sendProfilePicture').prop('checked', session.sendProfilePicture);
+                $('#ignoreOwnMessages').prop('checked', session.ignoreOwnMessages);
+                $('#ignoreYourselfMessages').prop('checked', session.ignoreYourselfMessages);
+                $('#ignoreBroadcastStatuses').prop('checked', session.ignoreBroadcastStatuses);
+                $('#sendConnectionStatus').prop('checked', session.sendConnectionStatus);
+                $('#notifyFailedMessages').prop('checked', session.notifyFailedMessages);
+                $('#composingMessage').prop('checked', session.composingMessage);
+                $('#sendReactionAsReply').prop('checked', session.sendReactionAsReply);
+                $('#autoConnect').prop('checked', session.autoConnect);
+                $('#ignoreBroadcastMessages').prop('checked', session.ignoreBroadcastMessages);
+
+                // Limpar webhooks existentes no formulário de edição
+                $('#webhooksContainer .webhook').remove();
+
+                if (session.webhooks && Array.isArray(session.webhooks)) {
+                    session.webhooks.forEach(webhook => {
+                        const webhookTemplate = `
+                            <div class="webhook mb-3">
+                                <label for="webhookUrl" class="form-label">URL</label>
+                                <input type="text" class="form-control mb-2 webhook-url" value="${webhook.urlAbsolute}" placeholder="Webhook URL">
+                                <label for="webhookToken" class="form-label">Token</label>
+                                <input type="text" class="form-control mb-2 webhook-token" value="${webhook.token}" placeholder="Webhook Token">
+                                <label for="webhookHeader" class="form-label">Header</label>
+                                <input type="text" class="form-control mb-2 webhook-header" value="${webhook.header}" placeholder="Webhook Header">
+                                <label for="sendNewMessages" class="form-label">Enviar Novas Mensagens</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendNewMessages" ${webhook.sendNewMessages ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
+                                <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
+                            </div>`;
+                        $('#webhooksContainer').append(webhookTemplate);
+                    });
+                }
+            }
+
+            //Save/set configs
+            $('#saveEditButton').on('click', function () {
+                const token = localStorage.getItem(tokenKey);
+                const number = $('#editModal').data('number');
+
+                if (token && number) {
+                    const sessionData = {
+                        authToken: $('#authToken').val(),
+                        wavoipToken: $('#wavoipToken').val(),
+                        rejectCalls: $('#rejectCalls').val(),
+                        rejectCallsWebhook: $('#rejectCallsWebhook').val(),
+                        ignoreGroupMessages: $('#ignoreGroupMessages').is(':checked'),
+                        ignoreHistoryMessages: $('#ignoreHistoryMessages').is(':checked'),
+                        sendProfilePicture: $('#sendProfilePicture').is(':checked'),
+                        ignoreOwnMessages: $('#ignoreOwnMessages').is(':checked'),
+                        ignoreYourselfMessages: $('#ignoreYourselfMessages').is(':checked'),
+                        sendConnectionStatus: $('#sendConnectionStatus').is(':checked'),
+                        ignoreBroadcastStatuses: $('#ignoreBroadcastStatuses').is(':checked'),
+                        notifyFailedMessages: $('#notifyFailedMessages').is(':checked'),
+                        composingMessage: $('#composingMessage').is(':checked'),
+                        sendReactionAsReply: $('#sendReactionAsReply').is(':checked'),
+                        autoConnect: $('#autoConnect').is(':checked'),
+                        ignoreBroadcastMessages: $('#ignoreBroadcastMessages').is(':checked'),
+                        webhooks: []
+                    };
+
+                    $('#webhooksContainer .webhook').each(function () {
+                        const webhook = {
+                            urlAbsolute: $(this).find('.webhook-url').val(),
+                            token: $(this).find('.webhook-token').val(),
+                            header: $(this).find('.webhook-header').val(),
+                            sendNewMessages: $(this).find('.webhook-sendNewMessages').is(':checked')
+                        };
+                        sessionData.webhooks.push(webhook);
+                    });
+
+                    fetch(`${apiUrl}/v15.0/${number}/register`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        },
+                        body: JSON.stringify(sessionData)
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Erro ao salvar dados da sessão.");
+                        return response.json();
+                    })
+                    .then(() => {
+                        $('#editModal').modal('hide');
+                        fetchSessions(token, true);
+                    })
+                    .catch(error => alert(error.message));
+                }
+            });
+
+            //QRCODE AND CONNECT
+
+            //connectButton
+            $(document).on('click', '.connect-btn', function () {
+                const number = $(this).data('number');
+                const token = localStorage.getItem(tokenKey);
+
+                if (token) {
+                    fetch(`https://uno.api.powerbits.com.br/v15.0/${number}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Erro ao buscar status da sessão.");
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'offline' || data.status === 'disconnected') {
+                            attemptRegister(number, token);
+                        } else if (data.status === 'connecting') {
+                            connectToWebSocket(number);
+                        } else if (data.status === 'online') {
+                            document.getElementById('qrCodeContainer').innerHTML = '';
+                            document.getElementById('qrCodeMessage').textContent = 'Sessão já está Conectada';
+                        } else {
+                            console.log("Status não está offline nem connecting.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao verificar status:", error);
+                    });
+                } else {
+                    alert("Token não encontrado.");
+                }
+            });
+
+            // init qrcode and confirm
+            function attemptRegister(number, token) {
+                fetch(`${apiUrl}/v15.0/${number}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro.");
+                    return response.json();
+                })
+                .then(() => {
+                    checkStatusAndRetry(number, token);
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+            }
+
+            // check connecting status
+            function checkStatusAndRetry(number, token) {
+                let attempts = 0;
+                const maxAttempts = 3; 
+                connectToWebSocket(number);
+
+                const intervalId = setInterval(() => {
+                    fetch(`https://uno.api.powerbits.com.br/v15.0/${number}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Erro de Sessão.");
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'connecting') {
+                            clearInterval(intervalId);
+                        } else if (attempts < maxAttempts && data.status !== 'connecting') {
+                            attempts++;
+                            fetch(`${apiUrl}/v15.0/${number}/register`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${token}`
+                                }
+                            })
+                            .catch(error => {
+                                clearInterval(intervalId);
+                                alert(error.message);
+                            });
+                        } else {
+                            clearInterval(intervalId);
+                            console.log("Api não gerou o QRCODE.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao verificar status:", error);
+                    });
+                }, 3000); 
+            }
+
+            // conect to websocket 
+            function connectToWebSocket(phoneNumber) {
+                if (window.socket && window.socket.connected) {
+                    console.log("WebSocket já está conectado.");
+                    return;
+                }
+                const socket = io('https://uno.api.powerbits.com.br', { path: '/ws' });
+                window.socket = socket;
+
+                const qrcodeDiv = document.getElementById('qrCodeContainer');
+                const statusDiv = document.getElementById('qrCodeMessage');
+
+                socket.on('broadcast', (data) => {
+                    if (phoneNumber && data.phone == phoneNumber) {
+                        if (data.type === 'qrcode' && data.content) {
+                            // Exibe o QR Code
+                            qrcodeDiv.innerHTML = `<img src="${data.content}" alt="QR Code">`;
+                            statusDiv.textContent = `Leia o QR Code Abaixo`;
+                        } else if (data.type === 'status' && data.content) {
+                            if (data.content.toLowerCase().indexOf('connected with')  !== -1) {
+                                qrcodeDiv.innerHTML = '';
+                                statusDiv.textContent = `Conectado!`;
+                            } else if (data.content.toLowerCase().indexOf('generate qrcode is exceded')  !== -1) {
+                                console.log("QRCODE EXCEDIDO")
+                                qrcodeDiv.innerHTML = '';
+                                statusDiv.textContent = 'Gerando novo QR Code...';
+                                attemptRegister(phoneNumber, localStorage.getItem(tokenKey));
+                            } else {
+                                statusDiv.textContent = `Status: ${data.content}`;
+                            }
+                        }
+                    }
+                });
+            }
+
+            // disconnect websocket on modal close
+            $('#connectModal').on('hidden.bs.modal', function () {
+                //clear modal status
+                document.getElementById('qrCodeContainer').innerHTML = '';
+                document.getElementById('qrCodeMessage').textContent = 'Aguarde o QrCode';
+
+                //disconnect websocket
+                if (window.socket && window.socket.connected) {
+                    window.socket.disconnect();
+                    window.socket = null;
+                }
+            });            
+        });
+        
+
+        // show number add modal
+        function addInstance() {
+                const addInstanceModal = new bootstrap.Modal(document.getElementById('addInstanceModal'));
+                addInstanceModal.show();
+            }
+
+            function submitInstanceNumber() {
+                const numberInput = document.getElementById('instanceNumber').value;
+
+                if (numberInput) {
+                    const editModal = $('#editModal'); 
+                    editModal.data('number', numberInput); 
+
+                    bootstrap.Modal.getInstance(document.getElementById('addInstanceModal')).hide();
+
+                    const editInstanceModal = new bootstrap.Modal(document.getElementById('editModal'));
+                    editInstanceModal.show();
+
+                } else {
+                    alert('Por favor, insira um número válido.');
+                }
+            }
+    </script>
+</body>
 </html>
