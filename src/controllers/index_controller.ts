@@ -10,7 +10,8 @@ class IndexController {
     logger.debug('root params %s', JSON.stringify(req.params))
     logger.debug('root body %s', JSON.stringify(req.body))
     res.set('Content-Type', 'text/html')
-    return res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'))
+    //return res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'))
+    return res.sendFile(path.resolve('./public/index.html'))
   }
 
 
