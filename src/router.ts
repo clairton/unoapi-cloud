@@ -46,6 +46,8 @@ export const router = (
   const blacklistController = new BlacklistController(addToBlacklist)
 
   //Routes
+  router.get('/', indexController.root)
+  router.get('/index.html', indexController.root)
   router.get('/ping', indexController.ping)
   router.get('/:version/debug_token', indexController.debugToken)
   router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))

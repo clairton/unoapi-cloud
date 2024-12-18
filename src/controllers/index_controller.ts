@@ -1,7 +1,19 @@
 import { Request, Response } from 'express'
 import logger from '../services/logger'
+import path from 'path'
 
 class IndexController {
+
+  public root(req: Request, res: Response) {
+    logger.debug('root method %s', JSON.stringify(req.method))
+    logger.debug('root headers %s', JSON.stringify(req.headers))
+    logger.debug('root params %s', JSON.stringify(req.params))
+    logger.debug('root body %s', JSON.stringify(req.body))
+    res.set('Content-Type', 'text/html')
+    return res.sendFile(path.join(__dirname, '..', '..', 'public', 'index.html'))
+  }
+
+
   public ping(req: Request, res: Response) {
     logger.debug('ping method %s', JSON.stringify(req.method))
     logger.debug('ping headers %s', JSON.stringify(req.headers))
