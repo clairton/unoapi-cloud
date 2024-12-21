@@ -1,7 +1,7 @@
 import { UNOAPI_SERVER_NAME } from '../defaults'
 import { getStore } from './store'
 import { getStoreFile } from './store_file'
-import { WAMessageKey } from '@whiskeysockets/baileys'
+import { WAMessageKey } from 'baileys'
 import { Level } from 'pino'
 
 export const configs: Map<string, Config> = new Map()

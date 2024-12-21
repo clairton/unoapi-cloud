@@ -1,4 +1,4 @@
-import { WAVersion, DEFAULT_CONNECTION_CONFIG } from "@whiskeysockets/baileys"
+import { WAVersion, DEFAULT_CONNECTION_CONFIG } from 'baileys'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const _undefined: any = undefined

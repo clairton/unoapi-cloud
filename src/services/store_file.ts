@@ -1,4 +1,4 @@
-import { AuthenticationState } from '@whiskeysockets/baileys'
+import { AuthenticationState } from 'baileys'
 import { store, Store } from './store'
 import { DataStore } from './data_store'
 import { getDataStoreFile } from './data_store_file'

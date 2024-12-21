@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
