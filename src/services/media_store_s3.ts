@@ -1,4 +1,4 @@
-import { proto, WAMessage, downloadMediaMessage } from '@whiskeysockets/baileys'
+import { proto, WAMessage, downloadMediaMessage } from 'baileys'
 import { getBinMessage } from './transformer'
 import { UNOAPI_JOB_MEDIA, DATA_TTL } from '../defaults'
 import { mediaStores, MediaStore, getMediaStore } from './media_store'

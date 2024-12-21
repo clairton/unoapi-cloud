@@ -1,4 +1,4 @@
-import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds, makeCacheableSignalKeyStore } from '@whiskeysockets/baileys'
+import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds, makeCacheableSignalKeyStore } from 'baileys'
 import { session } from './session'
 import logger from './logger'
 

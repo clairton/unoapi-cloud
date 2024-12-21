@@ -1,4 +1,4 @@
-import { WAMessage } from '@whiskeysockets/baileys'
+import { WAMessage } from 'baileys'
 import { getDataStore } from './data_store'
 import { amqpEnqueue } from '../amqp'
 import { UNOAPI_JOB_MEDIA, DATA_TTL } from '../defaults'

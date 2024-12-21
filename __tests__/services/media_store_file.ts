@@ -1,6 +1,6 @@
 import { DataStore } from '../../src/services/data_store'
 import { getDataStore } from '../../src/services/data_store'
-import { proto } from '@whiskeysockets/baileys'
+import { proto } from 'baileys'
 import { mock } from 'jest-mock-extended'
 import { getMediaStoreFile } from '../../src/services/media_store_file'
 import { MediaStore } from '../../src/services/media_store'

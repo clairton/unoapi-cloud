@@ -1,4 +1,4 @@
-import { AuthenticationState } from '@whiskeysockets/baileys'
+import { AuthenticationState } from 'baileys'
 import { DataStore } from './data_store'
 import { MediaStore } from './media_store'
 import { Config } from './config'

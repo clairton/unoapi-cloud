@@ -19,7 +19,7 @@ import {
   logout,
 } from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
-import { proto } from '@whiskeysockets/baileys'
+import { proto } from 'baileys'
 import { DataStore } from '../../src/services/data_store'
 import { Incoming } from '../../src/services/incoming'
 import { dataStores } from '../../src/services/data_store'

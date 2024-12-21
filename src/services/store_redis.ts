@@ -1,4 +1,4 @@
-import { AuthenticationState } from '@whiskeysockets/baileys'
+import { AuthenticationState } from 'baileys'
 import { sessionRedis } from './session_redis'
 import { authState } from './auth_state'
 import { store, Store } from './store'

@@ -1,4 +1,4 @@
-import { proto, WAMessage, WAMessageKey, isJidGroup, GroupMetadata } from '@whiskeysockets/baileys'
+import { proto, WAMessage, WAMessageKey, isJidGroup, GroupMetadata } from 'baileys'
 import { DataStore } from './data_store'
 import { jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'

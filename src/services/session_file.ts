@@ -1,4 +1,4 @@
-import { BufferJSON } from '@whiskeysockets/baileys'
+import { BufferJSON } from 'baileys'
 import { rmSync, writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs'
 import { session, writeData, readData, removeData, getKey } from './session'
 import logger from './logger'
