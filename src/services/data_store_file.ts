@@ -209,13 +209,17 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       try {
         logger.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        results = await sock.onWhatsApp!(phoneOrJid)
+        results = await sock?.onWhatsApp!(phoneOrJid)
       } catch (e) {
         logger.error(e, `Error on check if ${phoneOrJid} has whatsapp`)
-        if (phone === phoneOrJid) {
-          jid = phoneNumberToJid(jidToPhoneNumber(phoneOrJid))
-          logger.info(`${phoneOrJid} is the phone connection ${phone} returning ${jid}`)
-          return jid
+        try {
+          if (jidToPhoneNumber(phone) === jidToPhoneNumber(phoneOrJid)) {
+            jid = phoneNumberToJid(phone)
+            logger.info(`${phone} is the phone connection ${phone} returning ${jid}`)
+            return jid
+          }
+        } catch (error) {
+          
         }
       }
       const result = results && results[0]
