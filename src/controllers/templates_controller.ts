@@ -17,24 +17,26 @@ export class TemplatesController {
     logger.debug('templates params %s', JSON.stringify(req.params))
     logger.debug('templates body %s', JSON.stringify(req.body))
     logger.debug('templates query %s', JSON.stringify(req.query))
-    const { phone } = req.params
-    const config = await this.getConfig(phone)
-    const store = await config.getStore(phone, config)
-    const templates = await store.dataStore.loadTemplates()
-    return res.status(200).json({ data: templates })
+
+    return this.loadTemplates(req, res)
   }
 
   public async templates(req: Request, res: Response) {
-    logger.debug('templates method %s', JSON.stringify(req.method))
-    logger.debug('templates headers %s', JSON.stringify(req.headers))
-    logger.debug('templates params %s', JSON.stringify(req.params))
-    logger.debug('templates body %s', JSON.stringify(req.body))
-    logger.debug('templates query %s', JSON.stringify(req.query))
+    logger.debug('message_templates method %s', JSON.stringify(req.method))
+    logger.debug('message_templates headers %s', JSON.stringify(req.headers))
+    logger.debug('message_templates params %s', JSON.stringify(req.params))
+    logger.debug('message_templates body %s', JSON.stringify(req.body))
+    logger.debug('message_templates query %s', JSON.stringify(req.query))
+
+    return this.loadTemplates(req, res)
+  }
+
+  private async loadTemplates(req: Request, res: Response) {
     const { phone } = req.params
     try {
       const config = await this.getConfig(phone)
       const store = await config.getStore(phone, config)
-      const templates = await store.dataStore.setTemplates(req.body)
+      const templates = await store.dataStore.loadTemplates()
       return res.status(200).json({ data: templates })
     } catch (e) {
       return res.status(400).json({ status: 'error', message: `${phone} could not create template, error: ${e.message}` })
