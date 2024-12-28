@@ -18,15 +18,16 @@ export class PhoneNumberController {
     logger.debug('phone number get params %s', JSON.stringify(req.params))
     logger.debug('phone number get body %s', JSON.stringify(req.body))
     logger.debug('phone number get query', JSON.stringify(req.query))
-    const { phone } = req.params
-    const config = await this.getConfig(phone)
-    const store = await config.getStore(phone, config)
-    const { sessionStore } = store
     try {
-      const config: Config = await this.getConfig(phone)
+      const { phone } = req.params
+      const config = await this.getConfig(phone)
+      const store = await config.getStore(phone, config)
+      const { sessionStore } = store
+      const templates = await store.dataStore.loadTemplates()
       return res.status(200).json({
         display_phone_number: phone,
         status: await sessionStore.getStatus(phone),
+        message_templates: templates,
         ...config,
       })
     } catch (e) {
