@@ -297,7 +297,6 @@ export const connect = async ({
   }
 
   const close = async () => {
-    await sessionStore.setStatus(phone, 'offline')
     logger.info(`${phone} close`)
     EVENTS.forEach((e: any) => {
       try {
@@ -306,17 +305,20 @@ export const connect = async ({
         logger.error(`Error on removeAllListeners from ${e}`, error)
       }
     })
-    try {
-      await sock?.end(undefined)
-    } catch (e) {
-      logger.error(`Error sock end`, e)
-    }
-    try {
-      await sock?.ws?.close()
-    } catch (e) {
-      logger.error(`Error on sock ws close`, e)
+    if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
+      try {
+        await sock?.end(undefined)
+      } catch (e) {
+        logger.error(`Error sock end`, e)
+      }
+      try {
+        await sock?.ws?.close()
+      } catch (e) {
+        logger.error(`Error on sock ws close`, e)
+      }
     }
     sock = undefined
+    await sessionStore.setStatus(phone, 'offline')
   }
 
   const logout = async () => {
@@ -327,16 +329,24 @@ export const connect = async ({
     logger.info(`${phone} disconnected`)
     await sessionStore.setStatus(phone, 'disconnected')
     try {
-      return sock && (await sock.logout())
+      return sock && await sock.logout()
     } catch (_error) {
       // ignore de unique error if already diconected session
     }
   }
 
-  const exists: exists = async (phone: string) => {
-    await validateStatus()
+  const exists: exists = async (localPhone: string) => {
+    try {
+      await validateStatus()
+    } catch (error) {
+      if (localPhone == phone) {
+        logger.info(`${localPhone} is the phone connection ${phone}`)
+      } else {
+        throw error
+      }
+    }
 
-    return dataStore.loadJid(phone, sock!)
+    return dataStore.loadJid(localPhone, sock!)
   }
 
   const validateStatus = async () => {
