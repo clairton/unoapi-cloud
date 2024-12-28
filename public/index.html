@@ -481,12 +481,12 @@
                         if (!response.ok) throw new Error("Token inválido ou falha na conexão.");
                         return response.json();
                     })
-                    .then(data => {
+                    .then(resp => {
                         localStorage.setItem(tokenKey, token);
                         if (hideForm) {
                             $('#login').addClass('d-none');
                         }
-                        populateTable(data); // Popula a tabela com os dados
+                        populateTable(resp.data); // Popula a tabela com os dados
                     })
                     .catch(() => {
                         $('#errorMessage').removeClass('d-none');
