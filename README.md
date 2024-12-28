@@ -53,6 +53,33 @@ http://localhost:9876/v15.0/5549988290955/messages \
 }'
 ```
 
+To send a contact
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{
+  "messaging_product": "whatsapp",
+  "to": "5549999621461",
+  "type": "contacts",
+  "contacts": [
+    {
+      "name": {
+        "formatted_name": "Clairton - Faça um pix nessa chave e contribua com a unoapi"
+      },
+      "phones": [
+        {
+          "wa_id": "554988290955",
+          "phone": "+5549988290955"
+        }
+      ]
+    }
+  ]
+}'
+```
+
 To send a message to group
 
 ```sh

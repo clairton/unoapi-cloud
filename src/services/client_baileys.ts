@@ -385,7 +385,7 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message status ${status}`)
         }
       } else if (type) {
-        if (['text', 'image', 'audio', 'document', 'video', 'template', 'interactive'].includes(type)) {
+        if (['text', 'image', 'audio', 'document', 'video', 'template', 'interactive', 'contacts'].includes(type)) {
           let content
           if ('template' === type) {
             const template = new Template(this.getConfig)

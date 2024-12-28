@@ -259,6 +259,25 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
         break
       }
 
+    case 'contacts':
+      const contact = payload[type][0]
+      const contacName = contact['name']['formatted_name']
+      const contacts: any[] = []
+      for (let index = 0; index < contact['phones'].length; index++) {
+        const phone = contact['phones'][index]
+        const waid = phone['wa_id']
+        const number = phone['phone']
+        const vcard = 'BEGIN:VCARD\n'
+              + 'VERSION:3.0\n'
+              + `N:${contacName}\n`
+              + `TEL;type=CELL;type=VOICE;waid=${waid}:${number}\n`
+              + 'END:VCARD'
+        contacts.push({ vcard })
+      }
+      const displayName = contact['phones'].length > 1 ? `${contact['phones'].length} contacts` : contacName
+      response[type] = { displayName, contacts }
+      break
+
     case 'template':
       throw new BindTemplateError()
 

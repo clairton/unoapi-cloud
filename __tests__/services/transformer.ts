@@ -985,6 +985,28 @@ describe('service transformer', () => {
     expect(toBaileysMessageContent(input)).toEqual(output)
   })
 
+  test('toBaileysMessageContent contacts', async () => {
+    const displayName = 'abc' + new Date().getTime()
+    const phone = new Date().getTime()
+    const wa_id = new Date().getTime()
+    const input = {
+      type: 'contacts',
+      contacts: [
+        {
+          name: { formatted_name: displayName },
+          phones: [{ phone, wa_id }]
+        }
+      ]
+    }
+    const vcard = 'BEGIN:VCARD\n'
+    + 'VERSION:3.0\n' 
+    + `N:${displayName}\n`
+    + `TEL;type=CELL;type=VOICE;waid=${wa_id}:${phone}\n`
+    + 'END:VCARD'
+    const output = { contacts: { displayName, contacts: [ { vcard }] }}
+    expect(toBaileysMessageContent(input)).toEqual(output)
+  })
+
   test('toBaileysMessageContent media', async () => {
     const body = `ladiuad87hodlnkd ${new Date().getTime()} askpdasioashfjh`
     const text = `${new Date().getTime()}`
