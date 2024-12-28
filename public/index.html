@@ -160,10 +160,10 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse d-none" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <!-- Configurations Dropdown -->
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown d-none" id="navbarDropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-cog"></i>
                         </a>
@@ -400,6 +400,7 @@
         function logout() {
             localStorage.removeItem(tokenKey);
             $('.container').addClass('d-none');
+            $('#navbarDropdown').addClass('d-none');
             window.location.reload(); 
         }
 
@@ -484,6 +485,7 @@
                     .then(resp => {
                         localStorage.setItem(tokenKey, token);
                         if (hideForm) {
+                            $('#navbarDropdown').removeClass('d-none');
                             $('#login').addClass('d-none');
                         }
                         populateTable(resp.data); // Popula a tabela com os dados
