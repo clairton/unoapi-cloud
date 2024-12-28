@@ -135,7 +135,7 @@
             font-weight: bold;
         }
 
-        input {
+        .edit-form-row {
             margin-bottom: 15px;
         }
 
@@ -185,9 +185,9 @@
     <div id="login">
         <div id="tokenForm" class="mb-4">
             <label for="tokenInput" class="form-label">Token configurado:</label>
-            <div class="input-group">
-                <input type="text" id="tokenInput" class="form-control" placeholder="Insira o token aqui">
-                <button id="connectButton" class="btn btn-dark"><i class="fas fa-sign-in"></i> Conectar</button>
+            <div class="input-group mb-3">
+                <input type="text" id="tokenInput" class="form-control" placeholder="Insira o token aqui" aria-describedby="connectButton">
+                <button class="btn btn-dark" type="button" id="connectButton"><i class="fas fa-sign-in"></i> Conectar</button>
             </div>
         </div>
         <p id="errorMessage" class="text-danger d-none">Erro: Token inválido ou conexão falhou.</p>
@@ -239,7 +239,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="editForm">
-                        <div class="row">
+                        <div class="row edit-form-row">
                             <div class="col-12 col-md-12 col-lg-6">
                                 <label for="authToken" class="form-label">Auth Token</label>
                                 <input type="text" class="form-control" id="authToken" name="authToken" placeholder="Auth Token">
@@ -257,7 +257,7 @@
                                 <input type="text" class="form-control" id="rejectCalls" name="rejectCalls" placeholder="Deixe em Branco para não Rejeitar ligações automaticamente">
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row edit-form-row">
                             <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
                                 <label class="switch">
                                     <input type="checkbox" id="ignoreGroupMessages" name="ignoreGroupMessages" checked>
