@@ -27,7 +27,7 @@ export class PhoneNumberController {
       return res.status(200).json({
         display_phone_number: phone,
         status: await sessionStore.getStatus(phone),
-        message_templates: templates,
+        message_templates: { data: templates },
         ...config,
       })
     } catch (e) {
