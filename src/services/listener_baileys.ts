@@ -1,10 +1,10 @@
-import { Listener } from './listener'
+import { eventType, Listener } from './listener'
 import logger from './logger'
 import { Outgoing } from './outgoing'
 import { Broadcast } from './broadcast'
 import { getConfig } from './config'
 import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
-import { WAMessage, delay } from 'baileys'
+import { Contact, WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
 
@@ -38,7 +38,7 @@ export class ListenerBaileys implements Listener {
     this.broadcast = broadcast
   }
 
-  async process(phone: string, messages: object[], type: 'qrcode' | 'status' | 'history' | 'append' | 'notify' | 'message' | 'update' | 'delete') {
+  async process(phone: string, messages: object[], type: eventType) {
     logger.debug('Received %s(s) %s', type, messages.length, phone)
     if (type == 'delete' && messages.keys) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,8 +55,7 @@ export class ListenerBaileys implements Listener {
         logger.debug('ignore messages.upsert type append with status pending')
         return
       }
-    }
-    if (type == 'qrcode') {
+    } else if (type == 'qrcode') {
       await this.broadcast.send(
         phone,
         type,

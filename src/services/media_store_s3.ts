@@ -1,6 +1,6 @@
-import { proto, WAMessage, downloadMediaMessage } from 'baileys'
-import { getBinMessage } from './transformer'
-import { UNOAPI_JOB_MEDIA, DATA_TTL } from '../defaults'
+import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
+import { getBinMessage, toBuffer } from './transformer'
+import { UNOAPI_JOB_MEDIA, DATA_TTL, FETCH_TIMEOUT_MS, DATA_PROFILE_TTL } from '../defaults'
 import { mediaStores, MediaStore, getMediaStore } from './media_store'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
@@ -13,6 +13,8 @@ import { mediaStoreFile } from './media_store_file'
 import mime from 'mime-types'
 import { Config } from './config'
 import logger from './logger'
+import fetch, { Response as FetchResponse } from 'node-fetch'
+
 
 export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   if (!mediaStores.has(phone)) {
@@ -25,6 +27,8 @@ export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, ge
   return mediaStores.get(phone) as MediaStore
 }
 export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
+  const PROFILE_PICTURE_FOLDER = 'profile-pictures'
+  const profilePictureFileName = (phone) => `${phone}.jpg`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s3Config = STORAGE_OPTIONS((config as any).storage)
   const bucket = s3Config.bucket
@@ -64,13 +68,13 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     return true
   }
 
-  const getFileUrl = async (fileName: string) => {
+  const getFileUrl = async (fileName: string, expiresIn = DATA_TTL) => {
     const getParams = {
       Bucket: bucket,
       Key: fileName,
     }
     const command = new GetObjectCommand(getParams)
-    const link = await getSignedUrl(s3Client, command, { expiresIn: DATA_TTL })
+    const link = await getSignedUrl(s3Client, command, { expiresIn })
     return link
   }
 
@@ -120,6 +124,31 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       }
     }
   }
+  const getProfilePictureUrl = async (_baseUrl: string, phoneNumber: string) => {
+    const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
+    try {
+      return getFileUrl(fileName, DATA_PROFILE_TTL)
+    } catch (error) {
+      if (error.name === 'NotFound' || error.code === 'NotFound') {
+        return ''
+      } else {
+        throw error
+      }
+    }
+  }
+  const saveProfilePicture = async (contact: Partial<Contact>) => {
+    const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(contact.id)}`
+    if (contact.imgUrl == 'changed') {
+      logger.debug('Removing profile picture s3 %s...', contact.id)
+      await removeMedia(fileName)
+    } else if (contact.imgUrl) {
+      logger.debug('Saving profile picture s3 %s...', contact.id)
+      const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
+      const buffer = toBuffer(await response.arrayBuffer())
+      await saveMediaBuffer(fileName, buffer)
+      logger.debug('Saved profile picture s3 %s!', contact.id)
+    }
+  }
 
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl }
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl, getProfilePictureUrl, saveProfilePicture }
 }

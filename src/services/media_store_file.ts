@@ -1,5 +1,5 @@
-import { proto, WAMessage, downloadMediaMessage } from 'baileys'
-import { getBinMessage, getMessageType } from './transformer'
+import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
+import { getBinMessage, getMessageType, toBuffer } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'
@@ -8,6 +8,8 @@ import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'
 import logger from './logger'
+import { FETCH_TIMEOUT_MS } from '../defaults'
+import fetch, { Response as FetchResponse } from 'node-fetch'
 
 export const MEDIA_DIR = '/medias'
 
@@ -24,6 +26,9 @@ export const getMediaStoreFile: getMediaStore = (phone: string, config: Config, 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const mediaStoreFile = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
+  const PROFILE_PICTURE_FOLDER = 'profile-pictures'
+  const profilePictureFileName = (phone) => `${phone}.jpg`
+
   const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
     const { key } = waMessage
     const binMessage = getBinMessage(waMessage)
@@ -133,5 +138,32 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       }
     }
   }
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl }
+
+  const getProfilePictureUrl = async (baseUrl: string, phoneNumber: string) => {
+    const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
+    const fName = profilePictureFileName(phoneNumber)
+    const complete = `${base}/${fName}`
+    return existsSync(complete) ? `${baseUrl}/v15.0/download/${phone}/${PROFILE_PICTURE_FOLDER}/${fName}` : undefined
+  }
+
+  const saveProfilePicture = async (contact: Contact) => {
+    const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
+    const fName = profilePictureFileName(contact.id)
+    const complete = `${base}/${fName}`
+    if (contact.imgUrl == 'changed') {
+      logger.debug('Removing profile picture file %s...', contact.id)
+      await removeMedia(complete)
+    } else if (contact.imgUrl) {
+      logger.debug('Saving profile picture file %s....', contact.id)
+      if (!existsSync(base)) {
+        mkdirSync(base)
+      }
+      const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
+      const buffer = toBuffer(await response.arrayBuffer())
+      await writeFile(complete, buffer)
+      logger.debug('Saved profile picture file %s!!', contact.id)
+    }
+  }
+
+  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl, getProfilePictureUrl, saveProfilePicture }
 }

@@ -1,4 +1,4 @@
-import { Listener } from './listener'
+import { eventType, Listener } from './listener'
 import { EnqueueOption, amqpEnqueue } from '../amqp'
 import { UNOAPI_JOB_LISTENER } from '../defaults'
 
@@ -20,13 +20,9 @@ export class ListenerAmqp implements Listener {
     this.queueListener = queueListener
   }
 
-  public async process(
-    phone: string,
-    messages: object[],
-    type: 'qrcode' | 'status' | 'history' | 'append' | 'notify' | 'message' | 'update' | 'delete',
-  ) {
+  public async process(phone: string, messages: object[], type: eventType) {
     const options: Partial<EnqueueOption> = {}
-    options.priority = ListenerAmqp.priorities[type]
+    options.priority = ListenerAmqp.priorities[type] || 5
     await amqpEnqueue(this.queueListener, phone, { messages, type }, options)
   }
 }

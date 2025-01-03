@@ -16,12 +16,13 @@ import makeOrderedDictionary from 'baileys/lib/Store/make-ordered-dictionary'
 import { BaileysInMemoryStoreConfig, waMessageID } from 'baileys/lib/Store/make-in-memory-store'
 import { isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
-import { DataStore } from './data_store'
+import { DataStore, MessageStatus } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
 import { Config } from './config'
 import logger from './logger'
 import NodeCache from 'node-cache'
+import { BASE_URL } from '../defaults'
 
 export const MEDIA_DIR = './data/medias'
 const HOUR = 60 * 60
@@ -58,7 +59,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   const ids: Map<string, string> = new Map()
   const statuses: Map<string, string> = new Map()
   const groups: NodeCache = new NodeCache()
-  const images: NodeCache = new NodeCache()
   const baileysInMemoryStoreConfig: BaileysInMemoryStoreConfig = { logger }
   const store = makeInMemoryStore(baileysInMemoryStoreConfig)
   const dataStore = store as DataStore
@@ -70,7 +70,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       jids,
       ids,
       statuses,
-      images,
       groups,
     }
   }
@@ -80,7 +79,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       keys: proto.IMessageKey[]
       jids: Map<string, string>
       ids: Map<string, string>
-      images: Map<string, string>
       statuses: Map<string, string>
       chats: Chat[]
       contacts: { [id: string]: Contact }
@@ -97,6 +95,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   }
   store.bind = async (ev: BaileysEventEmitter) => {
     await bind(ev)
+    const { mediaStore } = await config.getStore(phone, config)
     // to prevent Value not found at KeyedDB.deleteById
     ev.removeAllListeners('chats.delete')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,7 +116,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           await dataStore.setMessage(key.remoteJid!, msg)
           if (isSaveMedia(msg)) {
-            const { mediaStore } = await config.getStore(phone, config)
             await mediaStore.saveMedia(msg)
           }
         }
@@ -131,6 +129,17 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         }
       }
     })
+    ev.on('contacts.upsert', async (contacts: Contact[]) => {
+      logger.debug('contacts.upsert %s', phone, JSON.stringify(contacts))
+      await Promise.all(contacts.map(async (c) => {
+          return mediaStore.saveProfilePicture(c)
+        })
+      )
+    })
+    ev.on('contacts.update', async (contacts: Partial<Contact>[]) => {
+      logger.debug('contacts.update %s => %s', phone, JSON.stringify(contacts))
+      await Promise.all(contacts.map(async (c) => mediaStore.saveProfilePicture(c)))
+    })
   }
   const loadKey = async (id: string) => {
     return keys.get(id)
@@ -140,19 +149,29 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     return new Promise((resolve) => keys.set(id, key) && resolve())
   }
   dataStore.getImageUrl = async (jid: string) => {
-    return images.get(jid)
+    logger.debug('Retriving profile picture from s3 %s...', jid)
+    const { mediaStore } = await config.getStore(phone, config)
+    const url = await mediaStore.getProfilePictureUrl(BASE_URL, jid)
+    logger.debug('Retrived profile picture from s3 %s!', url)
+    return url
   }
   dataStore.setImageUrl = async (jid: string, url: string) => {
-    images.set(jid, url, HOUR)
+    logger.debug('Saving profile picture from s3 %s...', jid)
+    const { mediaStore } = await config.getStore(phone, config)
+    mediaStore.saveProfilePicture({ imgUrl: url, id: jid })
+    logger.debug('Saved profile picture from s3 %s!', jid)
   }
   dataStore.loadImageUrl = async (jid: string, sock: WASocket) => {
+    logger.debug('Search profile picture for %s', jid)
     let url = await dataStore.getImageUrl(jid)
     if (!url) {
+      logger.debug('Get profile picture in socket for %s', jid)
       url = await sock.profilePictureUrl(jid)
       if (url) {
         await dataStore.setImageUrl(jid, url)
       }
     }
+    logger.debug('Found %s profile picture for %s', url, jid)
     return url
   }
 
@@ -173,22 +192,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     return data
   }
 
-  dataStore.setStatus = async (
-    id: string,
-    status:
-      | 'scheduled'
-      | 'pending'
-      | 'without-whatsapp'
-      | 'invalid-phone-number'
-      | 'error'
-      | 'failed'
-      | 'sent'
-      | 'delivered'
-      | 'read'
-      | 'played'
-      | 'accepted'
-      | 'deleted',
-  ) => {
+  dataStore.setStatus = async (id: string, status: MessageStatus) => {
     statuses.set(id, status)
   }
   dataStore.loadStatus = async (id: string) => {

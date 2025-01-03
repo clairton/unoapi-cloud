@@ -7,6 +7,19 @@ export interface getDataStore {
   (phone: string, config: Config): Promise<DataStore>
 }
 
+export type MessageStatus = 'scheduled'
+      | 'pending'
+      | 'without-whatsapp'
+      | 'invalid-phone-number'
+      | 'error'
+      | 'failed'
+      | 'sent'
+      | 'delivered'
+      | 'read'
+      | 'played'
+      | 'accepted'
+      | 'deleted'
+
 export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   loadKey: (id: string) => Promise<WAMessageKey | undefined>
   setKey: (id: string, key: WAMessageKey) => Promise<void>
@@ -18,22 +31,7 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   getGroupMetada: (jid: string) => Promise<GroupMetadata | undefined>
   loadGroupMetada: (jid: string, sock: Partial<WASocket>) => Promise<GroupMetadata | undefined>
   loadUnoId: (id: string) => Promise<string | undefined>
-  setStatus: (
-    id: string,
-    status:
-      | 'scheduled'
-      | 'pending'
-      | 'without-whatsapp'
-      | 'invalid-phone-number'
-      | 'error'
-      | 'failed'
-      | 'sent'
-      | 'delivered'
-      | 'read'
-      | 'played'
-      | 'accepted'
-      | 'deleted',
-  ) => Promise<void>
+  setStatus: (id: string, status: MessageStatus) => Promise<void>
   loadStatus: (id: string) => Promise<string | undefined>
   getJid: (phone: string) => Promise<string | undefined>
   loadJid: (phone: string, sock: WASocket) => Promise<string | undefined>

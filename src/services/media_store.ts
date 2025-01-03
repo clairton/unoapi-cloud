@@ -1,4 +1,4 @@
-import { proto, WAMessage } from 'baileys'
+import { Contact, proto, WAMessage } from 'baileys'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'
@@ -18,4 +18,6 @@ export type MediaStore = {
   getFileName: (phone: string, waMessage: proto.IWebMessageInfo) => string
   getFileUrl: (fileName: string) => Promise<string>
   getDownloadUrl: (baseUrl: string, fileName: string) => Promise<string>
+  getProfilePictureUrl: (baseUrl: string, phoneNumber: string) => Promise<string | undefined>
+  saveProfilePicture: (contact: Partial<Contact>) => Promise<void>
 }

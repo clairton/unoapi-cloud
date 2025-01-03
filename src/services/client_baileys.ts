@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, Contact } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
@@ -583,6 +583,7 @@ export class ClientBaileys implements Client {
       try {
         const profilePictureGroup = await this.fetchImageUrl(key.remoteJid)
         if (profilePictureGroup) {
+          logger.debug(`Retrieved group picture! ${profilePictureGroup}`)
           groupMetadata['profilePicture'] = profilePictureGroup
         }
       } catch (error) {
@@ -595,12 +596,16 @@ export class ClientBaileys implements Client {
       const jid = await this.exists(remoteJid)
       if (jid) {
         try {
+          logger.debug(`Retrieving user picture for %s...`, jid)
           const profilePicture = await this.fetchImageUrl(jid)
-          logger.debug(`Retrieving user picture...`)
           if (profilePicture) {
+            logger.debug('Retrieved user picture %s for %s!', profilePicture, jid)
             message['profilePicture'] = profilePicture
+          } else {
+            logger.debug(`Not found user picture for %s!`, jid)
           }
         } catch (error) {
+          logger.error(error)
           logger.warn(error, 'Ignore error on retrieve user profile picture')
         }
       }

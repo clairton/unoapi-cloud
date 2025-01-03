@@ -3,20 +3,10 @@ import { Outgoing } from '../services/outgoing'
 import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS } from '../defaults'
 import { EnqueueOption, amqpEnqueue } from '../amqp'
 import { getConfig } from '../services/config'
-import { jidToPhoneNumber, getMimetype } from '../services/transformer'
+import { jidToPhoneNumber, getMimetype, toBuffer } from '../services/transformer'
 import logger from '../services/logger'
 import fetch, { Response } from 'node-fetch'
 import mime from 'mime-types'
-
-
-const toBuffer = (arrayBuffer) => {
-  const buffer = Buffer.alloc(arrayBuffer.byteLength);
-  const view = new Uint8Array(arrayBuffer);
-  for (let i = 0; i < buffer.length; ++i) {
-    buffer[i] = view[i];
-  }
-  return buffer;
-}
 
 export class IncomingJob {
   private incoming: Incoming
