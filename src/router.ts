@@ -1,12 +1,14 @@
-import { Request, Response, NextFunction, Router } from 'express'
+import { Router } from 'express'
 import { Incoming } from './services/incoming'
 import { Outgoing } from './services/outgoing'
 import { getConfig } from './services/config'
 import middleware from './services/middleware'
 import { SessionStore } from './services/session_store'
 import injectRoute from './services/inject_route'
+import injectRouteDummy from './services/inject_route_dummy'
 import { indexController } from './controllers/index_controller'
 import { WebhookController } from './controllers/webhook_controller'
+import { ContactsController } from './controllers/contacts_controller'
 import { TemplatesController } from './controllers/templates_controller'
 import { MessagesController } from './controllers/messages_controller'
 import { MediaController } from './controllers/media_controller'
@@ -19,6 +21,9 @@ import { OnNewLogin } from './services/socket'
 import { addToBlacklist } from './services/blacklist'
 import { Reload } from './services/reload'
 import { Logout } from './services/logout'
+import { Contact } from './services/contact'
+import { ContactDummy } from './services/contact_dummy'
+import { middlewareNext } from './services/middleware_next'
 
 export const router = (
   incoming: Incoming,
@@ -31,9 +36,10 @@ export const router = (
   addToBlacklist: addToBlacklist,
   reload: Reload,
   logout: Logout,
-  middleware: middleware = async (req: Request, res: Response, next: NextFunction) => next(),
+  middleware: middleware = middlewareNext,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  injectRoute: injectRoute = async (router: Router) => {},
+  injectRoute: injectRoute = injectRouteDummy,
+  contact: Contact = new ContactDummy(),
 ) => {
   const router: Router = Router()
   const messagesController = new MessagesController(incoming, outgoing)
@@ -44,6 +50,7 @@ export const router = (
   const sessionController = new SessionController(getConfig, onNewLogin, socket)
   const webhookController = new WebhookController()
   const blacklistController = new BlacklistController(addToBlacklist)
+  const contactsController = new ContactsController(contact)
 
   //Routes
   router.get('/', indexController.root)
@@ -52,6 +59,7 @@ export const router = (
   router.get('/:version/debug_token', indexController.debugToken)
   router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))
   router.get('/sessions/:phone', sessionController.index.bind(sessionController))
+  router.post('/:version/contacts', middleware, contactsController.post.bind(contactsController))
   router.post('/:version/:phone/register', middleware, registrationController.register.bind(registrationController))
   router.post('/:version/:phone/deregister', middleware, registrationController.deregister.bind(registrationController))
   router.get('/:version/:phone', middleware, phoneNumberController.get.bind(phoneNumberController))

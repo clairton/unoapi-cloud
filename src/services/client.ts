@@ -6,6 +6,14 @@ import { Listener } from './listener'
 
 export const clients: Map<string, Client> = new Map()
 
+export type ContactStatus = 'valid' | 'processing' | 'invalid'| 'failed'
+
+export interface Contact {
+  wa_id: String | undefined
+  input: String
+  status: ContactStatus
+}
+
 export interface getClient {
   ({
     phone,
@@ -39,4 +47,6 @@ export interface Client {
   send(payload: any, options: any): Promise<Response>
 
   getMessageMetadata<T>(message: T): Promise<T>
+
+  contacts(numbers: string[]): Promise<Contact[]>
 }

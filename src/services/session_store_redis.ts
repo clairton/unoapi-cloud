@@ -27,7 +27,7 @@ export class SessionStoreRedis extends SessionStore {
   }
 
   async syncConnecting() {
-    logger.info(`Sync lost connecting!`)
+    logger.info(`Syncing lost connections...`)
     try {
       const pattern = sessionStatusKey('*')
       const keys = await redisKeys(pattern)

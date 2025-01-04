@@ -203,6 +203,38 @@ with:
 * 11 - Http Head test link not return success
 * 12 - offline number, connecting....
 
+
+## Verify contacts has whatsapp account
+Based on `https://developers.facebook.com/docs/whatsapp/on-premises/reference/contacts`, it works only with standalone mode in `yarn standalone`, for development in `yarn standalone-dev`
+
+```sh
+curl -i -X POST \
+http://localhost:9876/5549988290955/contacts \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{
+  "blocking": "no_wait",
+  "contacts": [
+  	"16315551000"
+  ],
+  "force_check": true
+}'
+```
+
+this return
+
+```json
+{
+  "contacts": [ 
+    {
+      "wa_id": "16315551000",
+      "input": "16315551000",
+      "status": "valid"
+    }
+  ]
+}
+```
+
 ## Up for development
 
 Copy .env.example to .env an set your config

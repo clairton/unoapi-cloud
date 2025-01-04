@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, Contact } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
@@ -19,7 +19,7 @@ import {
   close,
   OnReconnect,
 } from './socket'
-import { Client, getClient, clients } from './client'
+import { Client, getClient, clients, Contact } from './client'
 import { Config, defaultConfig, getConfig } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
 import { v1 as uuid } from 'uuid'
@@ -611,5 +611,20 @@ export class ClientBaileys implements Client {
       }
     }
     return message
+  }
+
+  public async contacts(numbers: string[]) {
+    const contacts: Contact[] = []
+    for (let index = 0; index < numbers.length; index++) {
+      const number = numbers[index]
+      const testJid = phoneNumberToJid(number)
+      const realJid = await this.exists(testJid)
+      contacts.push({
+        wa_id: realJid,
+        input: number,
+        status: realJid ? 'valid' : 'invalid'
+      })
+    }
+    return contacts
   }
 }

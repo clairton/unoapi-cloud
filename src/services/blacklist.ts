@@ -1,7 +1,7 @@
 import NodeCache from 'node-cache'
 import { amqpEnqueue } from '../amqp'
 import { UNOAPI_JOB_BLACKLIST_ADD } from '../defaults'
-import { blacklist, redisTtl, redisKeys } from './redis'
+import { blacklist, redisTtl, redisKeys, setBlacklist } from './redis'
 import logger from './logger'
 import { extractDestinyPhone } from './transformer'
 
@@ -60,6 +60,12 @@ export const isInBlacklistInRedis: isInBlacklist = async (from: string, webhookI
     await Promise.all(promises)
   }
   return isInBlacklistInMemory(from, webhookId, payload)
+}
+
+export const addToBlacklistRedis: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
+  await setBlacklist(from, webhookId, to, ttl)
+  await addToBlacklistInMemory(from, webhookId, to, ttl)
+  return true
 }
 
 export const addToBlacklistJob: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
