@@ -279,6 +279,11 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 
 `yarn web` e `yarn worker` up a web and worker with redis and rabbitmq
 
+`yarn standalone` 
+  - choose redis when set REDI_URL, if not use file system do save data
+  - choose rabbitmq when set AMQP_URL
+  - choose s3 when set STORAGE_ envs, if not use file system
+
 
 ## Config Options
 ### Config with Environment Variables
