@@ -4,7 +4,7 @@ import { Outgoing } from './outgoing'
 import { Broadcast } from './broadcast'
 import { getConfig } from './config'
 import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
-import { Contact, WAMessage, delay } from 'baileys'
+import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
 
