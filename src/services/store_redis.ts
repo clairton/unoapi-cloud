@@ -30,9 +30,9 @@ const storeRedis: store = async (phone: string, config: Config): Promise<Store> 
   let mediaStore: MediaStore = getMediaStoreFile(phone, config, getDataStoreRedis) as MediaStore
   if (process.env.STORAGE_ENDPOINT) {
     mediaStore = getMediaStoreS3(phone, config, getDataStoreRedis) as MediaStore
-    logger.info(`Store medias in s3`)
+    logger.info(`Store media in s3`)
   } else {
-    logger.info(`Store medias in system file`)
+    logger.info(`Store media in system file`)
   }
   logger.info(`Store data in redis`)
   const sessionStore = new SessionStoreRedis()
