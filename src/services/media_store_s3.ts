@@ -53,6 +53,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     await saveMediaBuffer(fileName, buffer)
     return waMessage
   }
+  mediaStore.saveMedia = saveMedia
 
   const saveMediaBuffer = async (fileName: string, content: Buffer) => {
     logger.debug(`Uploading file ${fileName} to bucket ${bucket}....`)
@@ -67,6 +68,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     await amqpEnqueue(UNOAPI_JOB_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000 })
     return true
   }
+  mediaStore.saveMediaBuffer = saveMediaBuffer
 
   const getFileUrl = async (fileName: string, expiresIn = DATA_TTL) => {
     const getParams = {
@@ -77,6 +79,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     const link = await getSignedUrl(s3Client, command, { expiresIn })
     return link
   }
+  mediaStore.getFileUrl = getFileUrl
 
   const removeMedia = async (fileName: string) => {
     const putParams = {
@@ -85,6 +88,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
     await s3Client.send(new DeleteObjectCommand(putParams))
   }
+  mediaStore.removeMedia = removeMedia
 
   const downloadMedia = async (res: Response, file: string) => {
     const store = await getDataStore(phone, config)
@@ -124,6 +128,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       }
     }
   }
+  mediaStore.downloadMedia = downloadMedia
   const getProfilePictureUrl = async (_baseUrl: string, phoneNumber: string) => {
     const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
     try {
@@ -136,6 +141,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       }
     }
   }
+  mediaStore.getProfilePictureUrl = getProfilePictureUrl
   const saveProfilePicture = async (contact: Partial<Contact>) => {
     const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(contact.id)}`
     if (contact.imgUrl == 'changed') {
@@ -149,6 +155,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       logger.debug('Saved profile picture s3 %s!', contact.id)
     }
   }
+  mediaStore.saveProfilePicture = saveProfilePicture
 
   return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName: mediaStore.getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl, getProfilePictureUrl, saveProfilePicture }
 }
