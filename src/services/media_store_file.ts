@@ -156,7 +156,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     } else if (contact.imgUrl) {
       logger.debug('Saving profile picture file %s....', contact.id)
       if (!existsSync(base)) {
-        mkdirSync(base)
+        mkdirSync(base, { recursive: true })
       }
       const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
       const buffer = toBuffer(await response.arrayBuffer())
