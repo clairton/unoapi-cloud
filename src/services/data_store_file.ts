@@ -131,14 +131,16 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     })
     ev.on('contacts.upsert', async (contacts: Contact[]) => {
       logger.debug('contacts.upsert %s', phone, JSON.stringify(contacts))
+      const { saveProfilePicture } = mediaStore
       await Promise.all(contacts.map(async (c) => {
-          return mediaStore.saveProfilePicture(c)
+          return saveProfilePicture(c)
         })
       )
     })
     ev.on('contacts.update', async (contacts: Partial<Contact>[]) => {
       logger.debug('contacts.update %s => %s', phone, JSON.stringify(contacts))
-      await Promise.all(contacts.map(async (c) => mediaStore.saveProfilePicture(c)))
+      const { saveProfilePicture } = mediaStore
+      await Promise.all(contacts.map(async (c) => saveProfilePicture(c)))
     })
   }
   const loadKey = async (id: string) => {
@@ -158,7 +160,8 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   dataStore.setImageUrl = async (jid: string, url: string) => {
     logger.debug('Saving profile picture from s3 %s...', jid)
     const { mediaStore } = await config.getStore(phone, config)
-    mediaStore.saveProfilePicture({ imgUrl: url, id: jid })
+    const { saveProfilePicture } = mediaStore
+    saveProfilePicture({ imgUrl: url, id: jid })
     logger.debug('Saved profile picture from s3 %s!', jid)
   }
   dataStore.loadImageUrl = async (jid: string, sock: WASocket) => {
