@@ -150,7 +150,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
     const fName = profilePictureFileName(contact.id)
     const complete = `${base}/${fName}`
-    if (contact.imgUrl == 'changed') {
+    if (['changed', 'removed'].includes(contact.imgUrl || '')) {
       logger.debug('Removing profile picture file %s...', contact.id)
       await removeMedia(complete)
     } else if (contact.imgUrl) {
