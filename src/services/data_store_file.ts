@@ -161,7 +161,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     logger.debug('Saving profile picture from s3 %s...', jid)
     const { mediaStore } = await config.getStore(phone, config)
     const { saveProfilePicture } = mediaStore
-    saveProfilePicture({ imgUrl: url, id: jid })
+    await saveProfilePicture({ imgUrl: url, id: jid })
     logger.debug('Saved profile picture from s3 %s!', jid)
   }
   dataStore.loadImageUrl = async (jid: string, sock: WASocket) => {

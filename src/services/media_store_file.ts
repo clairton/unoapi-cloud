@@ -147,13 +147,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   }
 
   const saveProfilePicture = async (contact: Contact) => {
-    const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
     const fName = profilePictureFileName(contact.id)
-    const complete = `${base}/${fName}`
     if (['changed', 'removed'].includes(contact.imgUrl || '')) {
       logger.debug('Removing profile picture file %s...', contact.id)
-      await removeMedia(complete)
+      await removeMedia(`${PROFILE_PICTURE_FOLDER}/${fName}`)
     } else if (contact.imgUrl) {
+      const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
+      const complete = `${base}/${fName}`
       logger.debug('Saving profile picture file %s....', contact.id)
       if (!existsSync(base)) {
         mkdirSync(base, { recursive: true })
