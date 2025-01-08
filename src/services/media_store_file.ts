@@ -8,7 +8,7 @@ import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'
 import logger from './logger'
-import { FETCH_TIMEOUT_MS } from '../defaults'
+import { DATA_PROFILE_TTL, FETCH_TIMEOUT_MS } from '../defaults'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
 export const MEDIA_DIR = '/medias'
@@ -29,7 +29,9 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   const PROFILE_PICTURE_FOLDER = 'profile-pictures'
   const profilePictureFileName = (phone) => `${phone}.jpg`
 
-  const getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
+  const mediaStore: MediaStore = {} as MediaStore
+
+  mediaStore.getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
     const { key } = waMessage
     const binMessage = getBinMessage(waMessage)
     if (binMessage?.message?.mimetype) {
@@ -39,15 +41,15 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     throw 'Not possible get file name'
   }
 
-  const getFileUrl = async (fileName: string) => {
+  mediaStore.getFileUrl = async (fileName: string, _expiresIn = DATA_PROFILE_TTL) => {
     return `${config.baseStore}${MEDIA_DIR}/${fileName}`
   }
 
-  const getDownloadUrl = async (baseUrl: string, filePath: string) => {
+  mediaStore.getDownloadUrl = async (baseUrl: string, filePath: string) => {
     return `${baseUrl}/v15.0/download/${filePath}`
   }
 
-  const saveMedia = async (waMessage: WAMessage) => {
+  mediaStore.saveMedia = async (waMessage: WAMessage) => {
     let buffer
     const binMessage = getBinMessage(waMessage)
     const url = binMessage?.message?.url
@@ -58,16 +60,16 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     } else {
       buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
-    const fileName = getFileName(phone, waMessage)
-    await saveMediaBuffer(fileName, buffer)
+    const fileName = mediaStore.getFileName(phone, waMessage)
+    await mediaStore.saveMediaBuffer(fileName, buffer)
     if (binMessage?.messageType && waMessage.message) {
-      waMessage.message[binMessage?.messageType]['url'] = await getFileUrl(fileName)
+      waMessage.message[binMessage?.messageType]['url'] = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
     }
     return waMessage
   }
 
-  const saveMediaBuffer = async (fileName: string, content: Buffer) => {
-    const filePath = await getFileUrl(fileName)
+  mediaStore.saveMediaBuffer = async (fileName: string, content: Buffer) => {
+    const filePath = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
     const parts = filePath.split('/')
     const dir: string = parts.splice(0, parts.length - 1).join('/')
     if (!existsSync(dir)) {
@@ -77,12 +79,12 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     return true
   }
 
-  const removeMedia = async (fileName: string) => {
-    const filePath = await getFileUrl(fileName)
+  mediaStore.removeMedia = async (fileName: string) => {
+    const filePath = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
     return rmSync(filePath)
   }
 
-  const downloadMedia = async (res: Response, file: string) => {
+  mediaStore.downloadMedia = async (res: Response, file: string) => {
     const store = await getDataStore(phone, config)
     const mediaId = file.split('.')[0]
     let fileName = ''
@@ -104,12 +106,12 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
         }
       }
     }
-    const filePath = await getFileUrl(`${phone}/${file}`)
+    const filePath = await mediaStore.getFileUrl(`${phone}/${file}`, DATA_PROFILE_TTL)
     res.contentType(mime.lookup(filePath) || '')
     res.download(filePath, fileName)
   }
 
-  const getMedia = async (baseUrl: string, mediaId: string) => {
+  mediaStore.getMedia = async (baseUrl: string, mediaId: string) => {
     const store = await getDataStore(phone, config)
     if (mediaId) {
       const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
@@ -122,9 +124,9 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
           logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
             const binMessage = getBinMessage(message)
-            const filePath = await getFileName(phone, message)
+            const filePath = await mediaStore.getFileName(phone, message)
             const mimeType = mime.lookup(filePath)
-            const url = await getDownloadUrl(baseUrl, filePath)
+            const url = await mediaStore.getDownloadUrl(baseUrl, filePath)
             return {
               messaging_product: 'whatsapp',
               url,
@@ -139,20 +141,20 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
   }
 
-  const getProfilePictureUrl = async (baseUrl: string, phoneNumber: string) => {
-    const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
+  mediaStore.getProfilePictureUrl = async (baseUrl: string, phoneNumber: string) => {
+    const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_PROFILE_TTL)
     const fName = profilePictureFileName(phoneNumber)
     const complete = `${base}/${fName}`
     return existsSync(complete) ? `${baseUrl}/v15.0/download/${phone}/${PROFILE_PICTURE_FOLDER}/${fName}` : undefined
   }
 
-  const saveProfilePicture = async (contact: Contact) => {
+  mediaStore.saveProfilePicture = async (contact: Contact) => {
     const fName = profilePictureFileName(contact.id)
     if (['changed', 'removed'].includes(contact.imgUrl || '')) {
       logger.debug('Removing profile picture file %s...', contact.id)
-      await removeMedia(`${PROFILE_PICTURE_FOLDER}/${fName}`)
+      await mediaStore.removeMedia(`${PROFILE_PICTURE_FOLDER}/${fName}`)
     } else if (contact.imgUrl) {
-      const base = await getFileUrl(PROFILE_PICTURE_FOLDER)
+      const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_PROFILE_TTL)
       const complete = `${base}/${fName}`
       logger.debug('Saving profile picture file %s....', contact.id)
       if (!existsSync(base)) {
@@ -165,5 +167,5 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
   }
 
-  return { saveMedia, removeMedia, downloadMedia, getMedia, getFileName, saveMediaBuffer, getFileUrl, getDownloadUrl, getProfilePictureUrl, saveProfilePicture }
+  return mediaStore
 }

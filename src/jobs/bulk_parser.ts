@@ -2,7 +2,7 @@ import { detect } from 'jschardet'
 import { amqpEnqueue } from '../amqp'
 import axios from 'axios'
 import { v1 as uuid } from 'uuid'
-import { UNOAPI_JOB_BULK_SENDER } from '../defaults'
+import { DATA_PROFILE_TTL, UNOAPI_JOB_BULK_SENDER } from '../defaults'
 import { Outgoing } from '../services/outgoing'
 import { jidToPhoneNumber } from '../services/transformer'
 import textToSpeech, { protos } from '@google-cloud/text-to-speech'
@@ -43,7 +43,7 @@ const synthesize = async (phone: string, getConfig: getConfig, text: string) => 
   const buffer: Buffer = Buffer.from(response.audioContent)
   const fileName = `${phone}/${uuid()}.mp3`
   await mediaStore.saveMediaBuffer(fileName, buffer)
-  const link = await mediaStore.getFileUrl(fileName)
+  const link = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
   return link
 }
 
