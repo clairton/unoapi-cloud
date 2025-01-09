@@ -12,6 +12,7 @@ import { MediaStore } from './media_store'
 import { getMediaStoreFile } from './media_store_file'
 import { Config } from './config'
 import logger from './logger'
+import { getMediaStoreS3 } from './media_store_s3'
 
 const STORE_DIR = `./data/stores`
 
@@ -42,7 +43,14 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
   logger.info(`Store medias in directory: ${mediaDir}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await authState(sessionFile, sessionDir)
   const dataStore: DataStore = await getDataStoreFile(phone, config)
-  const mediaStore: MediaStore = getMediaStoreFile(phone, config, getDataStoreFile) as MediaStore
+  let mediaStore: MediaStore
+  if (config.useS3) {
+    mediaStore = getMediaStoreS3(phone, config, getDataStoreFile) as MediaStore
+    logger.info(`Store media in s3`)
+  } else {
+    mediaStore = getMediaStoreFile(phone, config, getDataStoreFile) as MediaStore
+    logger.info(`Store media in system file`)
+  }
   if (!config.ignoreDataStore) {
     const dataFile = `${STORE_DIR}/${phone}.json`
     logger.info(`Store data in file: ${dataFile}`)

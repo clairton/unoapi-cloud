@@ -38,7 +38,7 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
-    if (process.env.REDIS_URL) {
+    if (config.useRedis) {
       config.getStore = getStoreRedis
     } else {
       config.getStore = getStoreFile

@@ -61,11 +61,10 @@ describe('service config redis', () => {
   test('get media store', async () => {
     const phone = `${new Date().getTime()}`
     const config = await getConfigRedis(phone)
-    config.useStorage = true
+    config.useS3 = true
+    config.useRedis = true
     const store = await config.getStore(phone, config)
     const { mediaStore } = store
-    console.log('>>>>>>>>>>>>>>>>>>>>>')
-    // console.log(mediaStore.getProfilePictureUrl)
     expect(mediaStore.type).toBe('s3')
   })
 })

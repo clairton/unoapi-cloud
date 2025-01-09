@@ -27,11 +27,12 @@ const storeRedis: store = async (phone: string, config: Config): Promise<Store> 
   logger.info(`Store session: ${phone}`)
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } = await authState(sessionRedis, phone)
   const dataStore: DataStore = await getDataStoreRedis(phone, config)
-  let mediaStore: MediaStore = getMediaStoreFile(phone, config, getDataStoreRedis) as MediaStore
-  if (process.env.STORAGE_ENDPOINT) {
+  let mediaStore: MediaStore
+  if (config.useS3) {
     mediaStore = getMediaStoreS3(phone, config, getDataStoreRedis) as MediaStore
     logger.info(`Store media in s3`)
   } else {
+    mediaStore = getMediaStoreFile(phone, config, getDataStoreRedis) as MediaStore
     logger.info(`Store media in system file`)
   }
   logger.info(`Store data in redis`)

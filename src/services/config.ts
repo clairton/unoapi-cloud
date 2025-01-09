@@ -58,6 +58,8 @@ export type Config = {
   provider: 'baileys',
   server:  string | undefined,
   wavoipToken:  string | undefined,
+  useRedis: boolean,
+  useS3: boolean,
 }
 
 export const defaultConfig: Config = {
@@ -108,6 +110,8 @@ export const defaultConfig: Config = {
   provider: 'baileys',
   server: UNOAPI_SERVER_NAME,
   wavoipToken: '',
+  useRedis: false,
+  useS3: false,
 }
 
 export interface getConfig {
