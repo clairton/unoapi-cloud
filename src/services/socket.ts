@@ -477,10 +477,18 @@ export const connect = async ({
     if (sock) {
       dataStore.bind(sock.ev)
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
-        logger.info(`Requesting pairing code ${phone} `)
-        const code = await sock?.requestPairingCode(phone)
-        const message = `Open your WhatsApp, go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > ${code}!`
-        await onNotification(message, true)
+        logger.info(`Requesting pairing code ${phone}`)
+        try {
+          await sock.waitForConnectionUpdate((update) => !!update.qr)
+          const onlyNumbers = phone.replace(/[^0-9]/g, '')
+          const code = await sock?.requestPairingCode(onlyNumbers)
+          const beatyCode = `${code?.match(/.{1,4}/g)?.join('-')}`
+          const message = `Open your WhatsApp and go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > ${beatyCode}!`
+          await onNotification(message, true)
+        } catch (error) {
+          console.error(error)
+          throw error
+        }
       }
       event('creds.update', saveCreds)
       event('connection.update', onConnectionUpdate)
