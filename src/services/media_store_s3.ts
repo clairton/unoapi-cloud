@@ -35,6 +35,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
   const s3Client = new S3Client(s3Config)
 
   const mediaStore = mediaStoreFile(phone, config, getDataStore)
+  mediaStore.type = 's3'
 
   mediaStore.saveMedia = async (waMessage: WAMessage) => {
     let buffer

@@ -30,6 +30,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   const profilePictureFileName = (phone) => `${phone}.jpg`
 
   const mediaStore: MediaStore = {} as MediaStore
+  mediaStore.type = 'file'
 
   mediaStore.getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
     const { key } = waMessage

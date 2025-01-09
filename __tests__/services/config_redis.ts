@@ -52,9 +52,20 @@ describe('service config redis', () => {
     expect(config.webhooks[0].header).toBe(headerRedis)
   })
 
-  test('use webhook header env where not in readis', async () => {
+  test('use webhook header env where not in redis', async () => {
     mockGetConfig.mockResolvedValue({ webhooks: [{}] })
     const config = await getConfigRedis(`${new Date().getTime()}`)
     expect(config.webhooks[0].header).toBe(WEBHOOK_HEADER)
+  })
+
+  test('get media store', async () => {
+    const phone = `${new Date().getTime()}`
+    const config = await getConfigRedis(phone)
+    config.useStorage = true
+    const store = await config.getStore(phone, config)
+    const { mediaStore } = store
+    console.log('>>>>>>>>>>>>>>>>>>>>>')
+    // console.log(mediaStore.getProfilePictureUrl)
+    expect(mediaStore.type).toBe('s3')
   })
 })

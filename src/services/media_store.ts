@@ -10,6 +10,7 @@ export interface getMediaStore {
 }
 
 export type MediaStore = {
+  type: string
   getMedia: (baseUrl: string, mediaId: string) => Promise<object | void>
   saveMedia: (waMessage: WAMessage) => Promise<WAMessage>
   saveMediaBuffer: (fileName: string, buffer: Buffer) => Promise<boolean>
