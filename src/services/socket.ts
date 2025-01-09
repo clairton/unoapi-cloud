@@ -13,7 +13,6 @@ import makeWASocket, {
   Browsers,
   ConnectionState,
 } from 'baileys'
-import { release } from 'os'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { Store } from './store'
@@ -305,16 +304,24 @@ export const connect = async ({
         logger.error(`Error on removeAllListeners from ${e}`, error)
       }
     })
-    if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
-      try {
-        await sock?.end(undefined)
-      } catch (e) {
-        logger.error(`Error sock end`, e)
-      }
-      try {
-        await sock?.ws?.close()
-      } catch (e) {
-        logger.error(`Error on sock ws close`, e)
+    const webSocket = sock?.ws['socket'] || {}
+    // WebSocket.CONNECTING (0)
+    // WebSocket.OPEN (1)
+    // WebSocket.CLOSING (2)
+    // WebSocket.CLOSED (3)
+    console.log('socket?.readyState', webSocket['readyState'])
+    if (`${webSocket['readyState']}` == '1'){
+      if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
+        try {
+          await sock?.end(undefined)
+        } catch (e) {
+          logger.error(`Error sock end`, e)
+        }
+        try {
+          await sock?.ws?.close()
+        } catch (e) {
+          logger.error(`Error on sock ws close`, e)
+        }
       }
     }
     sock = undefined
