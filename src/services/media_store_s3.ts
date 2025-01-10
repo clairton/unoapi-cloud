@@ -138,6 +138,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
   }
   mediaStore.saveProfilePicture = async (contact: Partial<Contact>) => {
     const phoneNumber = jidToPhoneNumberIfUser(contact.id)
+    logger.debug('Received profile picture s3 %s with %s...', phoneNumber, contact.imgUrl)
     const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
     if (['changed', 'removed'].includes(contact.imgUrl || '')) {
       logger.debug('Removing profile picture s3 %s...', phoneNumber)

@@ -309,7 +309,6 @@ export const connect = async ({
     // WebSocket.OPEN (1)
     // WebSocket.CLOSING (2)
     // WebSocket.CLOSED (3)
-    console.log('socket?.readyState', webSocket['readyState'])
     if (`${webSocket['readyState']}` == '1'){
       if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
         try {

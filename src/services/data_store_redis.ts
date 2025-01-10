@@ -52,14 +52,16 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     await setKey(phone, id, key)
   }
   store.getImageUrl = async (jid: string) => {
-    const url = await getProfilePicture(phone, jid)
+    const phoneNumber = jidToPhoneNumber(jid)
+    const url = await getProfilePicture(phone, phoneNumber)
     if (url) {
       url
     } else {
       const { mediaStore } = await config.getStore(phone, config)
-      const profileUrl = await mediaStore.getProfilePictureUrl('', jid)
+      const { getProfilePictureUrl } = mediaStore
+      const profileUrl = await getProfilePictureUrl('', jid)
       if (profileUrl) {
-        await setProfilePicture(phone, jid, profileUrl)
+        await setProfilePicture(phone, phoneNumber, profileUrl)
         return profileUrl
       }
     }
