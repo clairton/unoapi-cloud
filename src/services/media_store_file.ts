@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
-import { getBinMessage, getMessageType, toBuffer } from './transformer'
+import { getBinMessage, getMessageType, jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync } from 'fs'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'
@@ -142,7 +142,8 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
   }
 
-  mediaStore.getProfilePictureUrl = async (baseUrl: string, phoneNumber: string) => {
+  mediaStore.getProfilePictureUrl = async (baseUrl: string, jid: string) => {
+    const phoneNumber = jidToPhoneNumberIfUser(jid)
     const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_PROFILE_TTL)
     const fName = profilePictureFileName(phoneNumber)
     const complete = `${base}/${fName}`
@@ -150,21 +151,22 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   }
 
   mediaStore.saveProfilePicture = async (contact: Contact) => {
+    const phoneNumber = jidToPhoneNumberIfUser(contact.id)
     const fName = profilePictureFileName(contact.id)
     if (['changed', 'removed'].includes(contact.imgUrl || '')) {
-      logger.debug('Removing profile picture file %s...', contact.id)
+      logger.debug('Removing profile picture file %s...', phoneNumber)
       await mediaStore.removeMedia(`${PROFILE_PICTURE_FOLDER}/${fName}`)
     } else if (contact.imgUrl) {
       const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_PROFILE_TTL)
       const complete = `${base}/${fName}`
-      logger.debug('Saving profile picture file %s....', contact.id)
+      logger.debug('Saving profile picture file %s....', phoneNumber)
       if (!existsSync(base)) {
         mkdirSync(base, { recursive: true })
       }
       const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
       const buffer = toBuffer(await response.arrayBuffer())
       await writeFile(complete, buffer)
-      logger.debug('Saved profile picture file %s!!', contact.id)
+      logger.debug('Saved profile picture file %s!!', phoneNumber)
     }
   }
 

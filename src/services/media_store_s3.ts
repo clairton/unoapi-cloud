@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
-import { getBinMessage, toBuffer } from './transformer'
+import { getBinMessage, jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { UNOAPI_JOB_MEDIA, DATA_TTL, FETCH_TIMEOUT_MS, DATA_PROFILE_TTL } from '../defaults'
 import { mediaStores, MediaStore, getMediaStore } from './media_store'
 import { Response } from 'express'
@@ -123,7 +123,8 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       }
     }
   }
-  mediaStore.getProfilePictureUrl = async (_baseUrl: string, phoneNumber: string) => {
+  mediaStore.getProfilePictureUrl = async (_baseUrl: string, jid: string) => {
+    const phoneNumber = jidToPhoneNumberIfUser(jid)
     const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
     try {
       return mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
@@ -136,16 +137,17 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     }
   }
   mediaStore.saveProfilePicture = async (contact: Partial<Contact>) => {
-    const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(contact.id)}`
+    const phoneNumber = jidToPhoneNumberIfUser(contact.id)
+    const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
     if (['changed', 'removed'].includes(contact.imgUrl || '')) {
-      logger.debug('Removing profile picture s3 %s...', contact.id)
+      logger.debug('Removing profile picture s3 %s...', phoneNumber)
       await mediaStore.removeMedia(fileName)
     } else if (contact.imgUrl) {
-      logger.debug('Saving profile picture s3 %s...', contact.id)
+      logger.debug('Saving profile picture s3 %s...', phoneNumber)
       const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
       const buffer = toBuffer(await response.arrayBuffer())
       await mediaStore.saveMediaBuffer(fileName, buffer)
-      logger.debug('Saved profile picture s3 %s!', contact.id)
+      logger.debug('Saved profile picture s3 %s!', phoneNumber)
     }
   }
 

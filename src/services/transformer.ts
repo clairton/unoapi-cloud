@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, isJidUser, normalizeMessageContent, proto } from 'baileys'
+import { AnyMessageContent, WAMessage, isJidGroup, isJidUser, normalizeMessageContent, proto } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -402,6 +402,10 @@ export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string =
     }
   }
   return `${plus}${number.replace('+', '')}`
+}
+
+export const jidToPhoneNumberIfUser = (value: any): string => {
+  return isJidUser(value) ? jidToPhoneNumber(value, '') : value 
 }
 
 /*

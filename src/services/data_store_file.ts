@@ -151,10 +151,11 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     return new Promise((resolve) => keys.set(id, key) && resolve())
   }
   dataStore.getImageUrl = async (jid: string) => {
-    logger.debug('Retriving profile picture from s3 %s...', jid)
+    const phoneNumber = jidToPhoneNumber(jid)
+    logger.debug('Retriving profile picture %s...', phoneNumber)
     const { mediaStore } = await config.getStore(phone, config)
     const url = await mediaStore.getProfilePictureUrl(BASE_URL, jid)
-    logger.debug('Retrived profile picture from s3 %s!', url)
+    logger.debug('Retrived profile picture %s!', url)
     return url
   }
   dataStore.setImageUrl = async (jid: string, url: string) => {
@@ -224,6 +225,8 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
             jid = phoneNumberToJid(phone)
             logger.info(`${phone} is the phone connection ${phone} returning ${jid}`)
             return jid
+          } else if ('status@broadcast' == phoneOrJid) {
+            return phoneOrJid
           }
         } catch (error) {
           

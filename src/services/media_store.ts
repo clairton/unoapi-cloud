@@ -19,6 +19,6 @@ export type MediaStore = {
   getFileName: (phone: string, waMessage: proto.IWebMessageInfo) => string
   getFileUrl: (fileName: string, expiresIn: number) => Promise<string>
   getDownloadUrl: (baseUrl: string, fileName: string) => Promise<string>
-  getProfilePictureUrl: (baseUrl: string, phoneNumber: string) => Promise<string | undefined>
+  getProfilePictureUrl: (baseUrl: string, jid: string) => Promise<string | undefined>
   saveProfilePicture: (contact: Partial<Contact>) => Promise<void>
 }
