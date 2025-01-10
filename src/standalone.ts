@@ -5,7 +5,9 @@ import {
   BASE_URL, 
   PORT,
   UNOAPI_JOB_BIND,
+  UNOAPI_JOB_BIND_BRIDGE,
   UNOAPI_JOB_BIND_BROKER,
+  UNOAPI_JOB_LOGOUT,
   UNOAPI_JOB_RELOAD,
 } from './defaults'
 
@@ -50,6 +52,8 @@ import { startRedis } from './services/redis'
 import ContactBaileys from './services/contact_baileys'
 import injectRouteDummy from './services/inject_route_dummy'
 import { Contact } from './services/contact'
+import { LogoutJob } from './jobs/logout'
+import { BindBridgeJob } from './jobs/bind_bridge'
 
 const broadcast: Broadcast = new Broadcast()
 
@@ -93,11 +97,17 @@ if (process.env.AMQP_URL) {
   listener = new ListenerAmqp()
   logout = new LogoutAmqp()
   const reloadJob = new ReloadJob(reload)
-  const bindJob = new BindBrokerJob()
+  const bindBrokerJob = new BindBrokerJob()
+  const bindBridgeJob = new BindBridgeJob()
+  const logoutJob = new LogoutJob(logout)
   logger.info('Starting bind broker consumer')
-  amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BROKER, bindJob.consume.bind(bindJob))
+  amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BROKER, bindBrokerJob.consume.bind(bindBrokerJob))
+  logger.info('Starting bind listener consumer')
+  amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BRIDGE, bindBridgeJob.consume.bind(bindBridgeJob))
   logger.info('Starting reload consumer')
   amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))
+  logger.info('Starting logout consumer')
+  amqpConsume(UNOAPI_JOB_LOGOUT, '', logoutJob.consume.bind(logoutJob))
 } else {
   logger.info('Starting standard mode')
 }

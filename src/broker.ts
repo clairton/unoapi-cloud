@@ -3,7 +3,7 @@ dotenv.config()
 
 import { BindBrokerJob } from './jobs/bind_broker'
 import { 
-  UNOAPI_JOB_BIND, 
+  UNOAPI_JOB_BIND,
   UNOAPI_JOB_BIND_BROKER,
   UNOAPI_JOB_RELOAD,
 } from './defaults'
