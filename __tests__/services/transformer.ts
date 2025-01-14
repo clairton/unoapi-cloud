@@ -250,6 +250,72 @@ describe('service transformer', () => {
     expect(jidToPhoneNumber('+554988290955@s.whatsapp.net', '')).toEqual('5549988290955')
   })
 
+  test('fromBaileysMessageContent with editedMessage for imageMessage', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '5549988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const pushName = `Mary ${new Date().getTime()}`
+    const body = `${new Date().getTime()}`
+    const id = `wa.${new Date().getTime()}`
+    const input = {
+      key:{
+        remoteJid,
+        fromMe: false,
+        id
+      },
+      message:{
+        editedMessage:{
+          message:{
+            protocolMessage:{
+              key:{
+                id: '3AD0FEAAF5915DAEAA07'
+              },
+              type: 'MESSAGE_EDIT',
+              editedMessage: {
+                imageMessage:{
+                  caption: body
+                }
+              }
+            }
+          }
+        }
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    from: remotePhoneNumer,
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body },
+                    type: 'text',
+                  },
+                ],
+                contacts: [{ profile: { name: pushName, picture: undefined }, wa_id: remotePhoneNumer }],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
   test('fromBaileysMessageContent with messageContextInfo', async () => {
     const phoneNumer = '5549998360838'
     const remotePhoneNumer = '554988290955'

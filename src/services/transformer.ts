@@ -580,6 +580,13 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           ...payload,
           message: editedMessage,
         }
+        const editedMessageType = getMessageType(editedMessagePayload)
+        const editedBinMessage = getBinMessage(editedMessagePayload)
+        if (editedMessageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(editedMessageType) && !editedBinMessage?.message?.url && editedBinMessage?.message?.caption) {
+          editedMessagePayload.message = {
+            conversation: editedBinMessage?.message?.caption
+          }
+        }
         return fromBaileysMessageContent(phone, editedMessagePayload)
 
       case 'ephemeralMessage':

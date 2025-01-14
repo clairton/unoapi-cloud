@@ -39,21 +39,18 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
   mediaStore.saveMedia = async (waMessage: WAMessage) => {
     let buffer
     const binMessage = getBinMessage(waMessage)
-    const localUrl = binMessage?.message?.url
-    if (!localUrl) {
-      const error = 'Impossible save media without url'
-      logger.error(`${error}: ${JSON.stringify(waMessage)}`)
-      throw error
+    const localUrl = binMessage?.message?.url || ''
+    if (localUrl) {
+      if (localUrl.indexOf('base64') >= 0) {
+        const parts = localUrl.split(',')
+        const base64 = parts[1]
+        buffer = Buffer.from(base64, 'base64')
+      } else {
+        buffer = await downloadMediaMessage(waMessage, 'buffer', {})
+      }
+      const fileName = mediaStore.getFileName(phone, waMessage)
+      await mediaStore.saveMediaBuffer(fileName, buffer)
     }
-    if (localUrl.indexOf('base64') >= 0) {
-      const parts = localUrl.split(',')
-      const base64 = parts[1]
-      buffer = Buffer.from(base64, 'base64')
-    } else {
-      buffer = await downloadMediaMessage(waMessage, 'buffer', {})
-    }
-    const fileName = mediaStore.getFileName(phone, waMessage)
-    await mediaStore.saveMediaBuffer(fileName, buffer)
     return waMessage
   }
 
