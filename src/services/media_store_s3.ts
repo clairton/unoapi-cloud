@@ -29,7 +29,6 @@ export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, ge
 export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   const PROFILE_PICTURE_FOLDER = 'profile-pictures'
   const profilePictureFileName = (phone) => `${phone}.jpg`
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const s3Config = STORAGE_OPTIONS((config as any).storage)
   const bucket = s3Config.bucket
   const s3Client = new S3Client(s3Config)
@@ -41,6 +40,11 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     let buffer
     const binMessage = getBinMessage(waMessage)
     const localUrl = binMessage?.message?.url
+    if (!localUrl) {
+      const error = 'Impossible save media without url'
+      logger.error(`${error}: ${JSON.stringify(waMessage)}`)
+      throw error
+    }
     if (localUrl.indexOf('base64') >= 0) {
       const parts = localUrl.split(',')
       const base64 = parts[1]
