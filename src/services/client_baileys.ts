@@ -593,6 +593,7 @@ export class ClientBaileys implements Client {
           groupMetadata['profilePicture'] = profilePictureGroup
         }
       } catch (error) {
+        logger.warn(error)
         logger.warn(error, 'Ignore error on retrieve group profile picture')
       }
     } else {
@@ -611,7 +612,7 @@ export class ClientBaileys implements Client {
             logger.debug(`Not found user picture for %s!`, jid)
           }
         } catch (error) {
-          logger.error(error)
+          logger.warn(error)
           logger.warn(error, 'Ignore error on retrieve user profile picture')
         }
       }

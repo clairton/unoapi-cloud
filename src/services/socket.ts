@@ -421,12 +421,10 @@ export const connect = async ({
   }
 
   const fetchImageUrl: fetchImageUrl = async (jid: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.loadImageUrl(jid, sock!)
   }
 
   const fetchGroupMetadata: fetchGroupMetadata = async (jid: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return dataStore.loadGroupMetada(jid, sock!)
   }
 
