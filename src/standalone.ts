@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
 
-import { 
-  BASE_URL, 
+import {
+  BASE_URL,
   PORT,
   UNOAPI_JOB_BIND,
   UNOAPI_JOB_BIND_BRIDGE,
@@ -67,7 +67,7 @@ let onNewLoginn: OnNewLogin = onNewLoginAlert(listener)
 let incoming: Incoming = new IncomingBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
 let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, incoming, onNewLoginn)
 let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener, incoming, onNewLoginn)
-let middleware: middleware = middlewareNext
+let middlewareVar: middleware = middlewareNext
 
 if (process.env.REDIS_URL) {
   logger.info('Starting with redis')
@@ -115,7 +115,7 @@ if (process.env.AMQP_URL) {
 if (process.env.UNOAPI_AUTH_TOKEN) {
   logger.info('Starting http security')
   onNewLoginn = onNewLoginGenerateToken(outgoing)
-  middleware = security
+  middlewareVar = security
 } else {
   logger.info('Starting without http security')
 }
@@ -132,7 +132,7 @@ const app: App = new App(
   addToBlacklistVar,
   reload,
   logout,
-  middleware,
+  middlewareVar,
   injectRouteDummy,
   contact
 )

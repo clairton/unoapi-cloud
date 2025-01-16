@@ -59,7 +59,7 @@ export const router = (
   router.get('/:version/debug_token', indexController.debugToken)
   router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))
   router.get('/sessions/:phone', sessionController.index.bind(sessionController))
-  router.post('/:version/contacts', middleware, contactsController.post.bind(contactsController))
+  router.post('/:phone/contacts', middleware, contactsController.post.bind(contactsController))
   router.post('/:version/:phone/register', middleware, registrationController.register.bind(registrationController))
   router.post('/:version/:phone/deregister', middleware, registrationController.deregister.bind(registrationController))
   router.get('/:version/:phone', middleware, phoneNumberController.get.bind(phoneNumberController))
