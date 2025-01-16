@@ -74,8 +74,15 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       Key: fileName,
     }
     const command = new GetObjectCommand(getParams)
-    const link = await getSignedUrl(s3Client, command, { expiresIn })
-    return link
+    try {
+      const link = await getSignedUrl(s3Client, command, { expiresIn })
+      return link
+    } catch (error) {
+      logger.error(
+        `Error on generate s3 signed url for bucket: ${bucket} file name: ${fileName} expires in: ${expiresIn} -> ${error.message}`
+      )
+      throw error
+    }
   }
 
   mediaStore.removeMedia = async (fileName: string) => {
