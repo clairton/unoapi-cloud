@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.24.15",
+  "version": "1.25.0",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -42,6 +42,7 @@
   "devDependencies": {
     "@eslint/js": "^9.1.1",
     "@types/express": "^4.17.21",
+    "@types/i18n": "^0.13.12",
     "@types/jest": "^29.5.12",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20.12.7",
@@ -78,6 +79,7 @@
     "awesome-phonenumber": "^6.8.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "i18n": "^0.15.1",
     "jimp": "^0.22.12",
     "jschardet": "^3.1.2",
     "link-preview-js": "^3.0.5",
@@ -94,6 +96,6 @@
     "vcf": "^2.1.2",
     "voice-calls-baileys": "^1.0.5",
     "xlsx": "^0.18.5",
-    "yaml": "^2.4.2"
+    "yaml": "^2.7.0"
   }
 }

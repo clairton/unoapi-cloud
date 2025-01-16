@@ -5,6 +5,7 @@ import vCard from 'vcf'
 import logger from './logger'
 import { Config } from './config'
 import { MESSAGE_CHECK_WAAPP } from '../defaults'
+import { t } from '../i18n'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
 
@@ -662,7 +663,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             payload.messageStubParameters[0] &&
             MESSAGE_STUB_TYPE_ERRORS.includes(payload.messageStubParameters[0].toLowerCase())) {
           message.text = {
-            body: MESSAGE_CHECK_WAAPP,
+            body: MESSAGE_CHECK_WAAPP || t('failed_decrypt'),
           }
           message.type = 'text'
           change.value.messages.push(message)

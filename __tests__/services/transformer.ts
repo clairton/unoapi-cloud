@@ -1125,7 +1125,7 @@ describe('service transformer', () => {
       messageStubType: 2,
       messageStubParameters: ['Invalid PreKey ID'],
     }
-    const body = '🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.'
+    const body = '🕒 The message could not be read. Please ask to send it again or open WhatsApp on your phone.'
     const output = {
       object: 'whatsapp_business_account',
       entry: [

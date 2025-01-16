@@ -28,6 +28,7 @@ import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
 import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
+import { t } from '../i18n'
 const attempts = 3
 
 interface Delay {
@@ -67,7 +68,7 @@ export const getClientBaileys: getClient = async ({
   return clients.get(phone) as Client
 }
 
-const sendError = new SendError(3, 'disconnect number, please send a message do try reconnect and read qr code if necessary')
+const sendError = new SendError(3, t('disconnected_session'))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sendMessageDefault: sendMessage = async (_phone, _message) => {
@@ -183,6 +184,7 @@ export class ClientBaileys implements Client {
       remoteJid,
       id,
     }
+    const message =  t('qrcode_attemps', time, limit)
     const waMessage: WAMessage = {
       key: waMessageKey,
       message: {
@@ -190,7 +192,7 @@ export class ClientBaileys implements Client {
           url: qrCodeUrl,
           mimetype: 'image/png',
           fileLength: qrCode.length,
-          caption: `Please, read the QR Code to connect on Whatsapp Web, attempt ${time} of ${limit}`,
+          caption: message,
         },
       },
     }
@@ -402,7 +404,7 @@ export class ClientBaileys implements Client {
               if (link) {
                 const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD'})
                 if (!response.ok) {
-                  throw new SendError(11, `Http Head return ${response.status} with link ${link}`)
+                  throw new SendError(11, t('invalid_link', response.status, link))
                 }
               }
             }
@@ -492,7 +494,15 @@ export class ClientBaileys implements Client {
     } catch (ee) {
       let e = ee
       if (ee.message == 'Media upload failed on all hosts') {
-        e = new SendError(11, ee.message)
+        const link = payload[type] && payload[type].link
+        if (link) {
+          const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD'})
+          if (!response.ok) {
+            e = new SendError(11, t('invalid_link', response.status, link))
+          }
+        } else {
+          e = new SendError(11, ee.message)
+        }
       }
       if (e instanceof SendError) {
         const code = e.code

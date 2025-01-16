@@ -1,0 +1,22 @@
+{
+  "without_whatsapp": "O número de telefone %s não tem whatsapp!",
+  "invalid_phone_number": "O número telefone %s esta inválido!",
+  "offline_session": "Sessão desligado, tentando conectar",
+  "disconnected_session": "Sessão desconectada, por favor leia o qrcode, se não tiver um qrcode atualizado, envia uma mensagem para obter um",
+  "connecting_session": "Espere um momento, conectando a sessão...",
+  "invalid_link": "Houve um erro ao recuperar a midia, status %s para o link %s",
+	"attempts_exceeded": "O limite de %s vezes de geração de qrcode foi excedida!",
+	"received_pending_notifications": "Recebendo mensagem enviadas enquanto estava offline",
+	"online_session": "Sessão está online",
+	"connection_timed_out": "Conectando sessão %s excedeu o tempo de %s ms, alterando para desconectado",
+	"connecting": "Conectando...",
+	"connected": "Conectado com o número %s utilizando a versao do Whatsapp v%s, e a útima versão seria v%s, hora atual %s",
+	"removed": "A sessão foi removida no aplicativo do Whatsapp, envia uma mesagem para gerar o qrcode e conectar!",
+	"unique": "A sessão só pode ser conectado uma vez, saindo da atual, envia uma mensagem para conectar novamente!",
+	"closed": "A sessão for encerrada com status: %s, detalhe: %s!",
+	"connecting_attemps": "Tentativa de conexão %s de %s...",
+	"qrcode_attemps": "Por favor, leia QR Code para conectar, tentativa %s de %s",
+	"auto_restart": "Configura para reiniciar a sessão a cada %s milliseconds.",
+	"failed_decrypt": "🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.",
+	"error": "Erro não tratado: %s."
+}

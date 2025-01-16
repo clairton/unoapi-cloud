@@ -24,6 +24,7 @@ import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS } from '../defaults'
+import { t } from '../i18n'
 
 const EVENTS = [
   'connection.update',
@@ -144,7 +145,7 @@ export const connect = async ({
     if (event.qr) {
       logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
       if (status.attempt > attempts) {
-        const message = `The ${attempts} times of generate qrcode is exceded!`
+        const message =  t('attempts_exceeded', attempts)
         await onNotification(message, true)
         status.attempt = 1
         return logout()
@@ -159,12 +160,12 @@ export const connect = async ({
     }
 
     if (event.receivedPendingNotifications) {
-      await onNotification('Received pending notifications', true)
+      await onNotification(t('received_pending_notifications'), true)
     }
 
     if (event.isOnline) {
       await sessionStore.setStatus(phone, 'online')
-      await onNotification('Online session', true)
+      await onNotification(t('online_session'), true)
     }
 
     switch (event.connection) {
@@ -191,7 +192,7 @@ export const connect = async ({
       connectingTimeout = setTimeout(async () => {
         if (await sessionStore.isStatusConnecting(phone)) {
           connectingTimeout = null
-          const message = `Connecting ${phone} timed out ${CONNECTING_TIMEOUT_MS} ms, change to disconnect`
+          const message = t('connection_timed_out', phone, CONNECTING_TIMEOUT_MS)
           await onNotification(message, false)
           logger.warn(message)
           await onDisconnected(phone, {})
@@ -204,8 +205,9 @@ export const connect = async ({
 
   const onConnecting = async () => {
     await sessionStore.setStatus(phone, 'connecting')
-    await onNotification(`Connnecting...`, false)
-    logger.info(`Connecting ${phone} set timeout to ${CONNECTING_TIMEOUT_MS} ms`)
+    const message = t('connecting')
+    await onNotification(message, false)
+    logger.info(message)
     return verifyConnectingTimeout()
   }
 
@@ -214,7 +216,7 @@ export const connect = async ({
     await sessionStore.setStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version } = await fetchLatestBaileysVersion()
-    const message = `Connected with ${phone} using Whatsapp Version v${WHATSAPP_VERSION.join('.')}, latest Baileys version is v${version.join('.')} at ${new Date().toUTCString()}`
+    const message = t('connected', phone, WHATSAPP_VERSION.join('.'), version.join('.'), new Date().toUTCString())
     await onNotification(message, false)
   }
 
@@ -234,19 +236,19 @@ export const connect = async ({
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       status.attempt = 1
       if (!(await sessionStore.isStatusConnecting(phone))) {
-        const message = `The session is removed in Whatsapp App, send a message here to reconnect!`
+        const message = t('removed')
         await onNotification(message, true)
       }
       await logout()
       return onDisconnected(phone, payload)
     } else if (statusCode === DisconnectReason.connectionReplaced) {
       await close()
-      const message = `The session must be unique, close connection, send a message here to reconnect if him was offline!`
+      const message = t('unique')
       return onNotification(message, true)
     }
     if (status.attempt == 1) {
       const detail = lastDisconnect?.error?.output?.payload?.error
-      const message = `The connection is closed with status: ${statusCode}, detail: ${detail}!`
+      const message = t('closed', statusCode, detail)
       await onNotification(message, true)
     }
     return reconnect()
@@ -284,12 +286,13 @@ export const connect = async ({
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
     if (status.attempt > attempts) {
-      const message = `The ${attempts} times of try connect is exceded!`
+      const message =  t('attempts_exceeded', attempts)
       await onNotification(message, true)
       status.attempt = 1
       return close()
     } else {
-      await onNotification(`Try connnecting time ${status.attempt} of ${attempts}...`, false)
+      const message =  t('connecting_attemps', status.attempt, attempts)
+      await onNotification(message, false)
       await close()
       return onReconnect(status.attempt++)
     }
@@ -358,11 +361,11 @@ export const connect = async ({
   const validateStatus = async () => {
     if (await sessionStore.isStatusConnecting(phone)) {
       await verifyConnectingTimeout()
-      throw new SendError(5, 'Wait a moment, connecting process')
+      throw new SendError(5, t('connecting_session'))
     } else if (await sessionStore.isStatusIsDisconnect(phone) || !sock) {
-      throw new SendError(3, 'Disconnected number, please read qr code')
+      throw new SendError(3, t('disconnected_session'))
     } else if (await sessionStore.isStatusOffline(phone)) {
-      throw new SendError(12, 'offline number, connecting....')
+      throw new SendError(12, t('offline_session'))
     }
     if (connectingTimeout) {
       clearTimeout(connectingTimeout)
@@ -397,9 +400,9 @@ export const connect = async ({
       return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
-      throw new SendError(7, `The phone number ${to} is invalid!`)
+      throw new SendError(7, t('invalid_phone_number', to))
     }
-    throw new SendError(2, `The phone number ${to} does not have Whatsapp account!`)
+    throw new SendError(2, t('without_whatsapp', to))
   }
 
   const read: readMessages = async (keys: WAMessageKey[]) => {
@@ -410,7 +413,8 @@ export const connect = async ({
   }
 
   if (config.autoRestartMs) {
-    await onNotification(`Config to auto restart in ${config.autoRestartMs} milliseconds.`, true)
+    const message = t('auto_restart', config.autoRestartMs)
+    await onNotification(message, true)
     setInterval(reconnect, config.autoRestartMs)
   }
 
@@ -474,7 +478,8 @@ export const connect = async ({
         await onClose({ lastDisconnect: { error } })
       } else {
         logger.error('Baileys Socket error: %s %s', error, error.stack)
-        await onNotification(`Error: ${error.message}.`, true)
+        const message = t('error', error.message)
+        await onNotification(message, true)
         throw error
       }
     }
