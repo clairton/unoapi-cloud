@@ -8,7 +8,7 @@ import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'
 import logger from './logger'
-import { DATA_PROFILE_TTL, FETCH_TIMEOUT_MS } from '../defaults'
+import { DATA_URL_TTL, FETCH_TIMEOUT_MS } from '../defaults'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
 export const MEDIA_DIR = '/medias'
@@ -42,7 +42,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     throw 'Not possible get file name'
   }
 
-  mediaStore.getFileUrl = async (fileName: string, _expiresIn = DATA_PROFILE_TTL) => {
+  mediaStore.getFileUrl = async (fileName: string, _expiresIn = DATA_URL_TTL) => {
     return `${config.baseStore}${MEDIA_DIR}/${fileName}`
   }
 
@@ -64,13 +64,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     const fileName = mediaStore.getFileName(phone, waMessage)
     await mediaStore.saveMediaBuffer(fileName, buffer)
     if (binMessage?.messageType && waMessage.message) {
-      waMessage.message[binMessage?.messageType]['url'] = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
+      waMessage.message[binMessage?.messageType]['url'] = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
     }
     return waMessage
   }
 
   mediaStore.saveMediaBuffer = async (fileName: string, content: Buffer) => {
-    const filePath = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
+    const filePath = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
     const parts = filePath.split('/')
     const dir: string = parts.splice(0, parts.length - 1).join('/')
     if (!existsSync(dir)) {
@@ -81,7 +81,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   }
 
   mediaStore.removeMedia = async (fileName: string) => {
-    const filePath = await mediaStore.getFileUrl(fileName, DATA_PROFILE_TTL)
+    const filePath = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
     return rmSync(filePath)
   }
 
@@ -107,7 +107,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
         }
       }
     }
-    const filePath = await mediaStore.getFileUrl(`${phone}/${file}`, DATA_PROFILE_TTL)
+    const filePath = await mediaStore.getFileUrl(`${phone}/${file}`, DATA_URL_TTL)
     res.contentType(mime.lookup(filePath) || '')
     res.download(filePath, fileName)
   }
@@ -144,7 +144,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
 
   mediaStore.getProfilePictureUrl = async (baseUrl: string, jid: string) => {
     const phoneNumber = jidToPhoneNumberIfUser(jid)
-    const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_PROFILE_TTL)
+    const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_URL_TTL)
     const fName = profilePictureFileName(phoneNumber)
     const complete = `${base}/${fName}`
     return existsSync(complete) ? `${baseUrl}/v15.0/download/${phone}/${PROFILE_PICTURE_FOLDER}/${fName}` : undefined
@@ -157,7 +157,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       logger.debug('Removing profile picture file %s...', phoneNumber)
       await mediaStore.removeMedia(`${PROFILE_PICTURE_FOLDER}/${fName}`)
     } else if (contact.imgUrl) {
-      const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_PROFILE_TTL)
+      const base = await mediaStore.getFileUrl(PROFILE_PICTURE_FOLDER, DATA_URL_TTL)
       const complete = `${base}/${fName}`
       logger.debug('Saving profile picture file %s....', phoneNumber)
       if (!existsSync(base)) {

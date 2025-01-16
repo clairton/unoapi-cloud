@@ -1,5 +1,5 @@
 import { createClient } from '@redis/client'
-import { REDIS_URL, DATA_JID_TTL, DATA_TTL, SESSION_TTL, DATA_PROFILE_TTL } from '../defaults'
+import { REDIS_URL, DATA_JID_TTL, DATA_TTL, SESSION_TTL, DATA_URL_TTL } from '../defaults'
 import logger from './logger'
 import { GroupMetadata } from 'baileys'
 import { Webhook, configs } from './config'
@@ -397,7 +397,7 @@ export const getProfilePicture = async (phone: string, jid: string) => {
 
 export const setProfilePicture = async (phone: string, jid: string, url: string) => {
   const key = profilePictureKey(phone, jid)
-  return redisSetAndExpire(key, url, DATA_PROFILE_TTL)
+  return redisSetAndExpire(key, url, DATA_URL_TTL)
 }
 
 export const getGroup = async (phone: string, jid: string) => {
