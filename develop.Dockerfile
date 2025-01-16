@@ -1,4 +1,4 @@
-FROM node:21-alpine
+FROM node:22-alpine
 
 RUN apk --update --no-cache add git ffmpeg
 RUN wget -O /bin/wait-for https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for
