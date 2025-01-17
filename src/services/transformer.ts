@@ -606,7 +606,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       case 'conversation':
       case 'extendedTextMessage':
         message.text = {
-          body: binMessage.text || binMessage,
+          body: binMessage?.text || binMessage,
         }
         message.type = 'text'
         break

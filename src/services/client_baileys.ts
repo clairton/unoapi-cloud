@@ -351,9 +351,9 @@ export class ClientBaileys implements Client {
 
 
   async logout() {
-    await this.disconnect()
     logger.debug('Logout client store for %s', this?.phone)
     await this.socketLogout()
+    await this.disconnect()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

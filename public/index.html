@@ -474,7 +474,11 @@
                         }
                     });
                 }
+                getSessionAndpopulateTable(token, hideForm)
+            }
 
+            // Populate Datatable with session numbers
+            function getSessionAndpopulateTable(token, hideForm) {
                 const headers = { Authorization: `Bearer ${token}` };
 
                 fetch(apiUrl + '/sessions', { headers })
@@ -483,7 +487,6 @@
                         return response.json();
                     })
                     .then(resp => {
-                        localStorage.setItem(tokenKey, token);
                         if (hideForm) {
                             $('#navbarDropdown').removeClass('d-none');
                             $('#login').addClass('d-none');
@@ -537,10 +540,9 @@
                     })
                     .then(response => {
                         if (!response.ok) throw new Error("Erro no request.");
-                        return response.json();
                     })
-                    .then(data => {
-                        alert("A sessão foi removida!");
+                    .then(_ => {
+                        alert("A sessão foi removida, recarrega a pagina para atualizar a lista!");
                     })
                     .catch(error => alert(error.message));
                 }
@@ -824,26 +826,26 @@
 
         // show number add modal
         function addInstance() {
-                const addInstanceModal = new bootstrap.Modal(document.getElementById('addInstanceModal'));
-                addInstanceModal.show();
+            const addInstanceModal = new bootstrap.Modal(document.getElementById('addInstanceModal'));
+            addInstanceModal.show();
+        }
+
+        function submitInstanceNumber() {
+            const numberInput = document.getElementById('instanceNumber').value;
+
+            if (numberInput) {
+                const editModal = $('#editModal'); 
+                editModal.data('number', numberInput); 
+
+                bootstrap.Modal.getInstance(document.getElementById('addInstanceModal')).hide();
+
+                const editInstanceModal = new bootstrap.Modal(document.getElementById('editModal'));
+                editInstanceModal.show();
+
+            } else {
+                alert('Por favor, insira um número válido.');
             }
-
-            function submitInstanceNumber() {
-                const numberInput = document.getElementById('instanceNumber').value;
-
-                if (numberInput) {
-                    const editModal = $('#editModal'); 
-                    editModal.data('number', numberInput); 
-
-                    bootstrap.Modal.getInstance(document.getElementById('addInstanceModal')).hide();
-
-                    const editInstanceModal = new bootstrap.Modal(document.getElementById('editModal'));
-                    editInstanceModal.show();
-
-                } else {
-                    alert('Por favor, insira um número válido.');
-                }
-            }
+        }
     </script>
 </body>
 </html>
