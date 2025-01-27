@@ -338,11 +338,11 @@ export const connect = async ({
       logger.error(`Error on remove session ${phone}: ${error.message}`,)  
       // ignore de unique error if already diconected session
     } finally {
-      await sessionStore.setStatus(phone, 'disconnected')
       logger.info(`${phone} destroyed`)
       await dataStore.cleanSession()
     }
     await close()
+    await sessionStore.setStatus(phone, 'disconnected')
   }
 
   const exists: exists = async (localPhone: string) => {
