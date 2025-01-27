@@ -484,6 +484,7 @@
                 fetch(apiUrl + '/sessions', { headers })
                     .then(response => {
                         if (!response.ok) throw new Error("Token inválido ou falha na conexão.");
+                        localStorage.setItem(tokenKey, token);
                         return response.json();
                     })
                     .then(resp => {
