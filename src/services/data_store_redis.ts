@@ -1,4 +1,4 @@
-import { proto, WAMessage, WAMessageKey, isJidGroup, GroupMetadata } from 'baileys'
+import { proto, WAMessage, WAMessageKey, isJidUser, GroupMetadata } from 'baileys'
 import { DataStore, MessageStatus } from './data_store'
 import { jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
@@ -82,13 +82,13 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     await setJid(phone, phoneOrJid, jid)
   }
   store.loadMessage = async (remoteJid: string, id: string) => {
-    const newJid = isJidGroup(remoteJid) ? remoteJid : phoneNumberToJid(jidToPhoneNumber(remoteJid))
+    const newJid = isJidUser(remoteJid) ? phoneNumberToJid(jidToPhoneNumber(remoteJid)) : remoteJid
     const m = await getMessage(phone, newJid, id)
     const wm = m as proto.IWebMessageInfo
     return wm
   }
   store.setMessage = async (remoteJid: string, message: WAMessage) => {
-    const newJid = isJidGroup(remoteJid) ? remoteJid : phoneNumberToJid(jidToPhoneNumber(remoteJid))
+    const newJid = isJidUser(remoteJid) ? phoneNumberToJid(jidToPhoneNumber(remoteJid)) : remoteJid
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return setMessage(phone, newJid, message.key.id!, message)
   }
