@@ -2,14 +2,12 @@ import { getClient, ConnectionInProgress } from './client'
 import { getConfig } from './config'
 import { SessionStore } from './session_store'
 import { Listener } from './listener'
-import { Incoming } from './incoming'
 import { OnNewLogin } from './socket'
 import logger from './logger'
 import { UNOAPI_SERVER_NAME } from '../defaults'
 
 export const autoConnect = async (
   sessionStore: SessionStore,
-  incoming: Incoming,
   listener: Listener,
   getConfig: getConfig,
   getClient: getClient,
@@ -39,7 +37,7 @@ export const autoConnect = async (
             logger.info(`Update session status to auto connect ${phone}...`)
             await sessionStore.setStatus(phone, 'offline')
           }
-          getClient({ phone, incoming, listener, getConfig, onNewLogin })
+          getClient({ phone, listener, getConfig, onNewLogin })
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
           if (e instanceof ConnectionInProgress) {

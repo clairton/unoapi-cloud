@@ -427,6 +427,7 @@ export const setUnoId = async (phone: string, idBaileys: string, idUno: string) 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getKey = async (phone: string, id: string): Promise<any | undefined> => {
   const key = idKey(phone, id)
+  console.log('getKey', key)
   const string = await redisGet(key)
   if (string) {
     const json = JSON.parse(string)
@@ -437,6 +438,7 @@ export const getKey = async (phone: string, id: string): Promise<any | undefined
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setKey = async (phone: string, id: string, value: any) => {
   const key = idKey(phone, id)
+  console.log('setKey', key)
   const string = JSON.stringify(value)
   return redisSetAndExpire(key, string, DATA_TTL)
 }

@@ -1,5 +1,4 @@
 import { Response } from './response'
-import { Incoming } from './incoming'
 import { OnNewLogin } from './socket'
 import { getConfig } from './config'
 import { Listener } from './listener'
@@ -17,13 +16,11 @@ export interface Contact {
 export interface getClient {
   ({
     phone,
-    incoming,
     listener,
     getConfig,
     onNewLogin,
   }: {
     phone: string
-    incoming: Incoming
     listener: Listener
     getConfig: getConfig
     onNewLogin: OnNewLogin

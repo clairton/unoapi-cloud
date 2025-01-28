@@ -31,16 +31,15 @@ import { ReloadJob } from './jobs/reload'
 import { LogoutJob } from './jobs/logout'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
-const incomingAmqp: Incoming = new IncomingAmqp()
 const listenerAmqp: Listener = new ListenerAmqp()
 
 const getConfig: getConfig = getConfigRedis
 
 const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindBridgeJob()
-const reload = new ReloadBaileys(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
+const reload = new ReloadBaileys(getClientBaileys, getConfig, listenerAmqp, onNewLogin)
 const reloadJob = new ReloadJob(reload)
-const logout = new LogoutBaileys(getClientBaileys, getConfig, listenerAmqp, incomingAmqp, onNewLogin)
+const logout = new LogoutBaileys(getClientBaileys, getConfig, listenerAmqp, onNewLogin)
 const logoutJob = new LogoutJob(logout)
 
 const startBrigde = async () => {
@@ -61,7 +60,7 @@ const startBrigde = async () => {
 
   logger.info('Unoapi Cloud version %s started brige!', version)
 
-  await autoConnect(sessionStore, incomingAmqp, listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
+  await autoConnect(sessionStore, listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
 }
 startBrigde()
 

@@ -38,6 +38,7 @@ import {
   UNOAPI_AUTH_TOKEN,
   UNOAPI_HEADER_NAME,
   WAVOIP_TOKEN,
+  READ_WHEN_RECEIPT,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -69,6 +70,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.authToken = UNOAPI_AUTH_TOKEN
     config.authHeader = UNOAPI_HEADER_NAME
     config.wavoipToken = WAVOIP_TOKEN
+    config.readWhenReceipt = READ_WHEN_RECEIPT
     config.useRedis = !!process.env.REDIS_URL
     config.useS3 = !!process.env.STORAGE_ENDPOINT
     config.webhooks[0].url = WEBHOOK_URL

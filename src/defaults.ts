@@ -13,6 +13,7 @@ export const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || LOG_LEVEL
 
 export const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || 'en'
 
+
 export const VALIDATE_MEDIA_LINK_BEFORE_SEND = 
   process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == _undefined ? false : process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == 'true'
 
@@ -118,6 +119,7 @@ export const IGNORED_CONNECTIONS_NUMBERS = JSON.parse(process.env.IGNORED_CONNEC
 export const CLEAN_CONFIG_ON_DISCONNECT =
   process.env.CLEAN_CONFIG_ON_DISCONNECT === _undefined ? false : process.env.CLEAN_CONFIG_ON_DISCONNECT == 'true'
 export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefined ? false : process.env.VALIDATE_ROUTING_KEY == 'true'
+export const READ_WHEN_RECEIPT = process.env.READ_WHEN_RECEIPT === _undefined ? false : process.env.READ_WHEN_RECEIPT == 'true'
 export const CONFIG_SESSION_PHONE_CLIENT = process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi'
 export const CONFIG_SESSION_PHONE_NAME = process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome'
 export const MESSAGE_CHECK_WAAPP = process.env.MESSAGE_CHECK_WAAPP || ''

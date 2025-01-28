@@ -87,6 +87,12 @@ describe('service transformer', () => {
     expect(isGroupMessage(payload)).toBe(false)
   })
 
+
+  test('return messageType documentWithCaptionMessage', async () => {
+    const payload = {"key":{"remoteJid":"5517981143030@s.whatsapp.net","fromMe":false,"id":"3EB0AA0FA8CF9A5BD4D13D"},"messageTimestamp":1737746252,"pushName":"Emerson Casemiro","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"Cx7OGNKcbwqyqQ==","senderTimestamp":"1737203328","senderAccountType":"E2EE","receiverAccountType":"E2EE","recipientKeyHash":"S8o1LEWk33YRoA==","recipientTimestamp":"1737744851"},"deviceListMetadataVersion":2,"messageSecret":"+HGjutFitYLj4+gVC8F7S7CCM7fYeFhZM+SIdX0LYcM="},"documentWithCaptionMessage":{"message":{"documentMessage":{"url":"https://mmg.whatsapp.net/v/t62.7119-24/12161728_1172632827186041_246669122271751635_n.enc?ccb=11-4&oh=01_Q5AaIGXESRZeIDpQa_xrdaJw77EfYWwfgqkE6gf8fAXiD0-n&oe=66EDCD0C&_nc_sid=5e03e0&mms3=true","mimetype":"video/mp4","title":"video1981450644.mp4","fileSha256":"NW9GHqDFA8rZO6bFzeHxjFA7FSubZRkGHxGTz5CjqGA=","fileLength":"5740942","pageCount":0,"mediaKey":"tQoQcgWxymM12mmNlh3kcAgmOUo/lymVz3kPqcnFAGA=","fileName":"video1981450644.mp4","fileEncSha256":"KRf3aTRRWSp9gSclIu6iSjUk6ek6C4bFDCjBsrXQYSU=","directPath":"/v/t62.7119-24/32409775_1146339107002189_7733160102753112682_n.enc?ccb=11-4&oh=01_Q5AaIMPEs_9ILdnvkFSoZdM4zRZetoNGBM-a45BuI7vihuag&oe=67BB6FBC&_nc_sid=5e03e0&_nc_hot=1737746251","mediaKeyTimestamp":"1724272727","contactVcard":false,"caption":"video1981450644.mp4"},"messageContextInfo":{"messageSecret":"+HGjutFitYLj4+gVC8F7S7CCM7fYeFhZM+SIdX0LYcM="}}}},"profilePicture":"https://pps.whatsapp.net/v/t61.24694-24/389368984_315748354525689_7231214457442380254_n.jpg?stp=dst-jpg_s96x96_tt6&ccb=11-4&oh=01_Q5AaIGrFzQWqLHY6drciBsqcEvehTMtbjVVYtm3G7BwA4L51&oe=67A0FECA&_nc_sid=5e03e0&_nc_cat=106"}
+    expect(getMessageType(payload)).toEqual('documentWithCaptionMessage')
+  })
+
   test('return isGroupMessage false with non group', async () => {
     const payload = {
       entry: [

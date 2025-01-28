@@ -22,13 +22,23 @@ import { isInBlacklistInRedis } from '../services/blacklist'
 import { ListenerAmqp } from '../services/listener_amqp'
 import { OutgoingCloudApi } from '../services/outgoing_cloud_api'
 import { IncomingBaileys } from '../services/incoming_baileys'
+import { ReadWhenReceipt } from '../services/read_when_receipt'
 
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const listenerAmqp: Listener = new ListenerAmqp()
 const broadcastAmqp: Broadcast = new BroadcastAmqp()
-const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigRedis)
-
 const getConfig: getConfig = getConfigRedis
+const readWhenReceipt: ReadWhenReceipt = async (from, messageId) => {
+  const payload = {
+    messaging_product: 'whatsapp',
+    status: 'read',
+    message_id: messageId
+  }
+  await incomingBaileys.send(from, payload, {})
+}
+
+const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigRedis, readWhenReceipt)
+
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)

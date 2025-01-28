@@ -3,10 +3,11 @@ import logger from './logger'
 import { Outgoing } from './outgoing'
 import { Broadcast } from './broadcast'
 import { getConfig } from './config'
-import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia } from './transformer'
+import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia, jidToPhoneNumber } from './transformer'
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
+import { getReadWhenReceiptDisabled, getReadWhenReceiptEnabled, getReadWhenReceipt } from './read_when_receipt'
 
 const  delays: Map<String, number> = new Map()
 
@@ -29,13 +30,15 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_ME
 
 export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
+  private readWhenReceipt: getReadWhenReceipt
   private getConfig: getConfig
   private broadcast: Broadcast
 
-  constructor(outgoing: Outgoing, broadcast: Broadcast, getConfig: getConfig) {
+  constructor(outgoing: Outgoing, broadcast: Broadcast, getConfig: getConfig, getReadWhenReceipt: getReadWhenReceipt = getReadWhenReceiptDisabled) {
     this.outgoing = outgoing
     this.getConfig = getConfig
     this.broadcast = broadcast
+    this.readWhenReceipt = getReadWhenReceipt
   }
 
   async process(phone: string, messages: object[], type: eventType) {
@@ -75,6 +78,7 @@ export class ListenerBaileys implements Listener {
         (['qrcode', 'status'].includes(type) || (!config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))))
       )
     })
+    console.log('>>>>>>>>>>')
     logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)
     await Promise.all(filteredMessages.map(async (m: object) => this.sendOne(phone, m)))
   }
@@ -89,8 +93,12 @@ export class ListenerBaileys implements Listener {
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
+        console.log(i.key.id, i.key, !!store)
         await store?.dataStore.setKey(i.key.id, i.key)
         if (i.key.remoteJid) {
+          if (!i?.key?.fromMe) {
+            await this.readWhenReceipt.send(phone, jidToPhoneNumber(i?.key?.remoteJid), i.key.id)
+          }
           await store.dataStore.setMessage(i.key.remoteJid, i)
         }
       }

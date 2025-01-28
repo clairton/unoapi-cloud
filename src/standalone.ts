@@ -9,6 +9,7 @@ import {
   UNOAPI_JOB_BIND_BROKER,
   UNOAPI_JOB_LOGOUT,
   UNOAPI_JOB_RELOAD,
+  READ_WHEN_RECEIPT,
 } from './defaults'
 
 import logger from './services/logger'
@@ -54,6 +55,7 @@ import injectRouteDummy from './services/inject_route_dummy'
 import { Contact } from './services/contact'
 import { LogoutJob } from './jobs/logout'
 import { BindBridgeJob } from './jobs/bind_bridge'
+import { ReadWhenReceipt, readWhenReceiptDefault } from './services/read_when_receipt'
 
 const broadcast: Broadcast = new Broadcast()
 
@@ -62,11 +64,21 @@ let isInBlacklistVar: isInBlacklist = isInBlacklistInMemory
 let outgoing: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistVar)
 let getConfigVar: getConfig = getConfigByEnv
 let sessionStore: SessionStore = new SessionStoreFile()
-let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigVar)
+
+const readWhenReceipt: ReadWhenReceipt = !READ_WHEN_RECEIPT ? readWhenReceiptDefault : async (phone, from, messageId) => {
+  logger.debug('Send reading phone: %s from: %s message: %s', phone, from, messageId)
+  const payload = {
+    messaging_product: 'whatsapp',
+    status: 'read',
+    message_id: messageId
+  }
+  await incoming.send(from, payload, {})
+}
+let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigVar, readWhenReceipt)
 let onNewLoginn: OnNewLogin = onNewLoginAlert(listener)
 let incoming: Incoming = new IncomingBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
-let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, incoming, onNewLoginn)
-let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener, incoming, onNewLoginn)
+let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)
+let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)
 let middlewareVar: middleware = middlewareNext
 
 if (process.env.REDIS_URL) {
@@ -120,7 +132,7 @@ if (process.env.UNOAPI_AUTH_TOKEN) {
   logger.info('Starting without http security')
 }
 
-const contact: Contact = new ContactBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn, incoming)
+const contact: Contact = new ContactBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
 
 const app: App = new App(
   incoming,
@@ -140,12 +152,12 @@ broadcast.setSever(app.socket)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Unoapi standalone mode up version: %s, listening on port: %s', version, PORT)
-  autoConnect(sessionStore, incoming, listener, getConfigVar, getClientBaileys, onNewLoginn)
+  autoConnect(sessionStore, listener, getConfigVar, getClientBaileys, onNewLoginn)
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection: %s', reason.stack)
-  logger.error('promise: %s', promise)
-  throw reason
+process.on('unhandledRejection', (args) => {
+  // logger.error('unhandledRejection: %s', reason.stack)
+  logger.error('promise: %s', JSON.stringify(args))
+  // throw reason
 })
