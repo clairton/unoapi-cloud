@@ -5,7 +5,6 @@ import makeWASocket, {
   WAMessageKey,
   delay,
   proto,
-  isJidGroup,
   WASocket,
   AnyMessageContent,
   BaileysEventMap,
@@ -397,6 +396,7 @@ export const connect = async ({
       if (options.quoted) {
         opts['quoted'] = options.quoted
       }
+      logger.debug('Send baileys from %s to %s -> %s', phone, id, JSON.stringify(message))
       return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {

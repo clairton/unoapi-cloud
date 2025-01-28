@@ -10,11 +10,10 @@ import {
   MessageUpsertType,
   WAMessageUpdate,
   GroupMetadata,
-  isJidGroup,
 } from 'baileys'
 import makeOrderedDictionary from 'baileys/lib/Store/make-ordered-dictionary'
 import { BaileysInMemoryStoreConfig, waMessageID } from 'baileys/lib/Store/make-in-memory-store'
-import { isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
+import { isIndividualJid, isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
 import { DataStore, MessageStatus } from './data_store'
 import { SESSION_DIR } from './session_store_file'
@@ -208,7 +207,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     ids.set(id, unoId)
   }
   dataStore.loadJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
-    if (isJidGroup(phoneOrJid)) {
+    if (!isIndividualJid(phoneOrJid)) {
       return phoneOrJid
     }
     let jid = await dataStore.getJid(phoneOrJid)

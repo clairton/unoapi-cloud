@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, isJidUser, normalizeMessageContent, proto } from 'baileys'
+import { AnyMessageContent, WAMessage, isJidUser, isLidUser, normalizeMessageContent, proto } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -300,7 +300,7 @@ export const phoneNumberToJid = (phoneNumber: string) => {
 }
 
 export const isIndividualJid = (jid: string) => {
-  const isIndividual = isJidUser(jid)
+  const isIndividual = isJidUser(jid) || jid.indexOf('@') < 0
   logger.debug('jid %s is individual? %s', jid, isIndividual)
   return isIndividual
 }
@@ -390,6 +390,9 @@ export const isOutgoingMessage = (payload: object) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string => {
+  if (isLidUser(value)) {
+    return value
+  }
   const number = (value || '').split('@')[0].split(':')[0].replace('+', '')
   const country = number.substring(0, 2)
   if (country == '55') {
