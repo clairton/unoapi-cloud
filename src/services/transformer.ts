@@ -406,7 +406,7 @@ export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string =
 }
 
 export const jidToPhoneNumberIfUser = (value: any): string => {
-  return isJidUser(value) ? jidToPhoneNumber(value, '') : value 
+  return isIndividualJid(value) ? jidToPhoneNumber(value, '') : value 
 }
 
 /*

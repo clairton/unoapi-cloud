@@ -17,7 +17,7 @@ import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { Store } from './store'
 import NodeCache from 'node-cache'
-import { isValidPhoneNumber } from './transformer'
+import { isIndividualJid, isValidPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
@@ -380,8 +380,7 @@ export const connect = async ({
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
     await validateStatus()
-
-    const id = isJidGroup(to) ? to : await exists(to)
+    const id =  isIndividualJid(to) ? await exists(to) : to
     if (id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
