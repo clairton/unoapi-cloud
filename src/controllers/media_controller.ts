@@ -22,7 +22,11 @@ export class MediaController {
       const store = await config.getStore(phone, config)
       const mediaResult = await store.mediaStore.getMedia(this.baseUrl, mediaId)
       logger.debug('media index response %s', JSON.stringify(mediaResult))
-      return res.status(200).json(mediaResult)
+      if (mediaResult) {
+        return res.status(200).json(mediaResult)
+      } else {
+        return res.status(404)
+      }
     }
   }
 
