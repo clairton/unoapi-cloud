@@ -54,12 +54,13 @@ export type Config = {
   sendReactionAsReply: boolean
   sendProfilePicture: boolean
   authToken: string | undefined
-  authHeader: string | undefined,
-  provider: 'baileys',
-  server:  string | undefined,
-  wavoipToken:  string | undefined,
-  useRedis: boolean,
-  useS3: boolean,
+  authHeader: string | undefined
+  provider: 'baileys'
+  server:  string | undefined
+  wavoipToken:  string | undefined
+  useRedis: boolean
+  useS3: boolean
+  readWhenReceipt: boolean
 }
 
 export const defaultConfig: Config = {
@@ -112,6 +113,7 @@ export const defaultConfig: Config = {
   wavoipToken: '',
   useRedis: false,
   useS3: false,
+  readWhenReceipt: false
 }
 
 export interface getConfig {

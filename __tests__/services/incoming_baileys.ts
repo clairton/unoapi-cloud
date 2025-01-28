@@ -42,14 +42,11 @@ const getClientDummy: getClient = async ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   phone,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  incoming,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   listener,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getConfig,
 }: {
   phone: string
-  incoming: Incoming
   listener: Listener
   getConfig: getConfig
 }): Promise<Client> => {
