@@ -3,6 +3,7 @@ import { v1 as uuid } from 'uuid'
 import { getConfigRedis } from './config_redis'
 import { getConfig, setConfig } from './redis'
 import { OnNewLogin } from './socket'
+import { t } from '../i18n'
 
 export const onNewLoginGenerateToken = (outgoing: Outgoing): OnNewLogin => {
   return async (phone: string) => {
@@ -19,7 +20,7 @@ export const onNewLoginGenerateToken = (outgoing: Outgoing): OnNewLogin => {
       }
       await setConfig(phone, { ...config })
     }
-    const message = `Awesome, read the qrcode if you not yet. For now you need to update config to use this auth token ${authToken}`
+    const message = t('on_read_qrcode', authToken)
     const payload = {
       from: phone,
       type: 'text',

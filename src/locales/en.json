@@ -18,5 +18,6 @@
 	"qrcode_attemps": "Please, read the QR Code to connect on Whatsapp Web, attempt %s of %s",
 	"auto_restart": "Config to auto restart in %s milliseconds.",
 	"failed_decrypt": "🕒 The message could not be read. Please ask to send it again or open WhatsApp on your phone.",
-	"error": "Error: %s."
+	"error": "Error: %s.",
+	"on_read_qrcode": "Awesome, read the qrcode if you not yet. For now you need to update config to use this auth token %s"
 }
