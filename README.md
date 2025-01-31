@@ -638,30 +638,20 @@ https://chat.whatsapp.com/FZd0JyPVMLq94FHf59I8HU
 
 ## Need More
 
-Mail to comercial@unoapi.cloud
+Mail to sales@unoapi.cloud
 
 ## Donate to the project.
 
+#### Become a sponsor: https://github.com/sponsors/clairton
+
 #### Pix: 0e42d192-f4d6-4672-810b-41d69eba336e
 
-</br>
-
-#### PicPay
-
-<div align="center">
-  <a href="https://app.picpay.com/user/clairton.rodrigo" target="_blank" rel="noopener noreferrer">
-    <img src="./picpay.png" style="width: 50% !important;">
-  </a>
-</div>
-
-</br>
-
-### Buy Me A Coffee
-
-<div align="center">
-  <a href="https://www.buymeacoffee.com/clairton" target="_blank" rel="noopener noreferrer">
-    <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" style="width: 50% !important;">
-  </a>
-</div>
-
-</br>
+## Roadmap
+- Gif message as video: https://github.com/WhiskeySockets/Baileys#gif-message
+- Convert audio message: https://github.com/WhiskeySockets/Baileys#audio-message
+- Disappearing messages: https://github.com/WhiskeySockets/Baileys#disappearing-messages
+- Send Stories: https://github.com/WhiskeySockets/Baileys#broadcast-lists--stories
+- Filter by specific date on sync history: https://github.com/WhiskeySockets/Baileys?tab=readme-ov-file#receive-full-history
+- Connect with pairing code: https://github.com/WhiskeySockets/Baileys#starting-socket-with-pairing-code
+- Message delete endpoint
+- Send reply message with please to send again, when any error and message enqueue in .dead
