@@ -7,6 +7,7 @@ import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMed
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
+import { v1 as uuid } from 'uuid'
 
 const  delays: Map<String, number> = new Map()
 
@@ -89,7 +90,11 @@ export class ListenerBaileys implements Listener {
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
-        await store?.dataStore.setKey(i.key.id, i.key)
+        const idUno = uuid()
+        const idBaileys = i.key.id
+        await store?.dataStore.setUnoId(idBaileys, idUno)
+        await store?.dataStore.setKey(idUno, i.key)
+        i.key.id = idUno
         if (i.key.remoteJid) {
           await store.dataStore.setMessage(i.key.remoteJid, i)
         }
