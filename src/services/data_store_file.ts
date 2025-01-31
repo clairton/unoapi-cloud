@@ -202,9 +202,9 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     return statuses.get(id)
   }
 
-  dataStore.loadUnoId = async (id: string) => ids.get(id)
+  dataStore.loadUnoId = async (id: string) =>  ids.get(id) || ids.get(`${phone}-${id}`)
   dataStore.setUnoId = async (id: string, unoId: string) => {
-    ids.set(id, unoId)
+    ids.set(`${phone}-${id}`, unoId)
   }
   dataStore.loadJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
     if (!isIndividualJid(phoneOrJid)) {
