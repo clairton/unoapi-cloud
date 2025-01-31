@@ -40,7 +40,6 @@ describe('service client baileys', () => {
   let client: Client
   let phone: string
   let listener: Listener
-  let incoming: Incoming
   let store: Store
   let dataStore: DataStore
   let send
@@ -59,7 +58,6 @@ describe('service client baileys', () => {
   beforeEach(async () => {
     phone = `${new Date().getMilliseconds()}`
     listener = mock<Listener>()
-    incoming = mock<Incoming>()
     dataStore = mock<DataStore>()
     close = mock<close>()
     store = mock<Store>()
@@ -74,7 +72,7 @@ describe('service client baileys', () => {
       }
       return config
     }
-    client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
+    client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>().mockResolvedValue(true)
     exists = mockFn<exists>()
