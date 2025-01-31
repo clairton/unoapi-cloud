@@ -1,7 +1,7 @@
 {
   "without_whatsapp": "O número de telefone %s não tem whatsapp!",
   "invalid_phone_number": "O número telefone %s esta inválido!",
-  "offline_session": "Sessão desligado, tentando conectar",
+  "offline_session": "Sessão desligada, tentando conectar...",
   "disconnected_session": "Sessão desconectada, por favor leia o qrcode, se não tiver um qrcode atualizado, envia uma mensagem para obter um",
   "connecting_session": "Espere um momento, conectando a sessão...",
   "invalid_link": "Houve um erro ao recuperar a midia, status %s para o link %s",
