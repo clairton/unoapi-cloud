@@ -653,5 +653,7 @@ Mail to sales@unoapi.cloud
 - Send Stories: https://github.com/WhiskeySockets/Baileys#broadcast-lists--stories
 - Filter by specific date on sync history: https://github.com/WhiskeySockets/Baileys?tab=readme-ov-file#receive-full-history
 - Connect with pairing code: https://github.com/WhiskeySockets/Baileys#starting-socket-with-pairing-code
+- Counting connection retry attempts even when restarting to prevent looping messages
+- Add /health endpoint with test connection with redis, s3 and rabbitmq
 - Message delete endpoint
 - Send reply message with please to send again, when any error and message enqueue in .dead
