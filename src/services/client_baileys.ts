@@ -320,7 +320,8 @@ export class ClientBaileys implements Client {
           this.calls.set(from, true)
           if (this.config.rejectCalls && this.rejectCall) {
             await this.rejectCall(id, from)
-            await this.incoming.send(this.phone, { to: from, type: 'text', text: { body: this.config.rejectCalls } }, {})
+            const phoneNumber = jidToPhoneNumber(from)
+            await this.incoming.send(this.phone, { to: phoneNumber, type: 'text', text: { body: this.config.rejectCalls } }, {})
             logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
           }
           const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
