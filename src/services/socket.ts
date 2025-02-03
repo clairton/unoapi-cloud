@@ -224,10 +224,12 @@ export const connect = async ({
   const onClose = async (payload: any) => {
     if (await sessionStore.isStatusOffline(phone)) {
       logger.warn('Already Offline %s', phone)
+      sock = undefined
       return
     }
     if (await sessionStore.isStatusIsDisconnect(phone)) {
       logger.warn('Already Disconnected %s', phone)
+      sock = undefined
       return
     }
     const { lastDisconnect } = payload
