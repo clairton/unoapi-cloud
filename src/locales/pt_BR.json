@@ -11,7 +11,7 @@
 	"connection_timed_out": "Conectando sessão %s excedeu o tempo de %s ms, alterando para desconectado",
 	"connecting": "Conectando...",
 	"connected": "Conectado com o número %s utilizando a versao do Whatsapp v%s, e a útima versão seria v%s, hora atual %s",
-	"removed": "A sessão foi removida no aplicativo do Whatsapp, envia uma mesagem para gerar o qrcode e conectar!",
+	"removed": "A sessão foi removida no aplicativo do Whatsapp, envie uma mesagem para gerar o qrcode e conectar novamente!",
 	"unique": "A sessão só pode ser conectado uma vez, saindo da atual, envia uma mensagem para conectar novamente!",
 	"closed": "A sessão for encerrada com status: %s, detalhe: %s!",
 	"connecting_attemps": "Tentativa de conexão %s de %s...",
