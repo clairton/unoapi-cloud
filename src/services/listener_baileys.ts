@@ -94,16 +94,16 @@ export class ListenerBaileys implements Listener {
         const idBaileys = i.key.id
         await store?.dataStore.setUnoId(idBaileys, idUno)
         await store?.dataStore.setKey(idUno, i.key)
-        i.key.id = idUno
         if (i.key.remoteJid) {
           await store.dataStore.setMessage(i.key.remoteJid, i)
         }
+        if (isSaveMedia(i)) {
+          logger.debug(`Saving media...`)
+          i = await store?.mediaStore.saveMedia(i)
+          logger.debug(`Saved media!`)
+        }
+        i.key.id = idUno
       }
-    }
-    if (isSaveMedia(i)) {
-      logger.debug(`Saving media...`)
-      i = await store?.mediaStore.saveMedia(i)
-      logger.debug(`Saved media!`)
     }
 
     const key = i.key
