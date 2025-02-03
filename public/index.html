@@ -529,6 +529,9 @@
 
             //deregister function
             $('#sessionsTable tbody').on('click', '.delete-btn', function() {
+                if (!confirm('Tem certeza que desejar deletar essa sessão?')) {
+                    return
+                }
                 const number = $(this).data('number');
                 const token = localStorage.getItem(tokenKey);
                 if (token) {
