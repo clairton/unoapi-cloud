@@ -19,5 +19,5 @@
 	"auto_restart": "Configurado para reiniciar a sessão a cada %s milliseconds.",
 	"failed_decrypt": "🕒 Não foi possível apresentar a mensagem. Peça para enviar novamente a mensagem ou abra a APP do Whatsapp para ver o conteúdo.",
 	"error": "Erro não previsto: %s.",
-	"on_read_qrcode": "Fantástico, leia o QR Code, se ainda não o fez. O token de authenticação para esta sessão é %s"
+	"on_read_qrcode": "Fantástico, se ainda não o fez, leia o QR Code. O token de authenticação para esta sessão é %s"
 }
