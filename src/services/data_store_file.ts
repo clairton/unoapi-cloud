@@ -107,14 +107,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         }
       }
     })
-    ev.on('messages.update', (updates: WAMessageUpdate[]) => {
-      for (const update of updates) {
-        const { key } = update
-        if (key.id) {
-          dataStore.setKey(key.id, key)
-        }
-      }
-    })
     ev.on('contacts.upsert', async (contacts: Contact[]) => {
       logger.debug('contacts.upsert %s', phone, JSON.stringify(contacts))
       const { saveProfilePicture } = mediaStore

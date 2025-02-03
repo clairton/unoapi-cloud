@@ -165,7 +165,6 @@ export class ClientBaileys implements Client {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           logger.error(error, 'Erro on send status')
-          await this.store?.dataStore?.setKey(id, waMessageKey)
           await this.onWebhookError(error)
         }
       } else {
@@ -211,7 +210,6 @@ export class ClientBaileys implements Client {
         await this.onWebhookError(error)
       }
     } else {
-      await this.store?.dataStore?.setKey(id, waMessageKey)
       await this.listener.process(this.phone, [waMessage], 'qrcode')
     }
   }
@@ -326,7 +324,6 @@ export class ClientBaileys implements Client {
           }
           const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
           if (messageCallsWebhook) {
-            const id = uuid()
             const waMessageKey = {
               fromMe: false,
               id: uuid(),
@@ -338,7 +335,6 @@ export class ClientBaileys implements Client {
                 conversation: messageCallsWebhook,
               },
             }
-            await this.store?.dataStore?.setKey(id, waMessageKey)
             await this.listener.process(this.phone, [message], 'notify')
           }
           setTimeout(() => {
