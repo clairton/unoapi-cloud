@@ -142,13 +142,14 @@ export const connect = async ({
   const onConnectionUpdate = async (event: Partial<ConnectionState>) => {
     logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
     if (event.qr) {
-      logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
       if (status.attempt > attempts) {
         const message =  t('attempts_exceeded', attempts)
+        logger.debug(message)
         await onNotification(message, true)
         status.attempt = 1
         return logout()
       } else {
+        logger.debug('QRCode generate... %s of %s', status.attempt, attempts)
         return onQrCode(event.qr, status.attempt++, attempts)
       }
     }
