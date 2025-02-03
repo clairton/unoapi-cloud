@@ -3,7 +3,7 @@ import path from 'path'
 import { DEFAULT_LOCALE } from './defaults'
 
 const i18n = new I18n({
-  locales: ['en', 'pt_BR'],
+  locales: ['en', 'pt_BR', 'pt'],
   defaultLocale: DEFAULT_LOCALE,
   directory: path.join(__dirname, 'locales'),
   updateFiles: false,
