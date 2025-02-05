@@ -365,7 +365,7 @@ CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone con
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
 WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
-DEFAULT_LOCALE=locale for notifications status, now possibile is en and pt_BR, default is en
+DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
 ```
 
