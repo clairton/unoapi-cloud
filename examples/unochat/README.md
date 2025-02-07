@@ -5,7 +5,7 @@ OBS:
   - use uma maquina ou vps limpa, pois temos uma serviço do traefik que vai utilizar a porta 80 e 443, se ja tiver um ngnix ou algum outro serviço rodando utilizando essa porta vai conflitar e não vai dar certo
   - essa versão do chatwoot que esta sendo usada aqui tem algumas customizações que ainda não foram aceitas pelo time do chatwoot:
     - funciona as conversas em grupo
-    - trata a mensagem enviadas por outras conexões, inclusive o aplicativo
+    - trata a mensagens enviadas por outras conexões, inclusive o aplicativo
     - desabilita a janela de 24 horas do whatsapp cloud oficial
     - sincroniza as imagens de perfil dos grupos e usuarios
     - possibilidade de editar o endereço da caixa de entrada do whatsapp, assim pode usar a oficial e a unoapi na mesma instalação(não usar a env WHATSAPP_CLOUD_BASE_URL)
