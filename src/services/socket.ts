@@ -227,7 +227,7 @@ export const connect = async ({
       sock = undefined
       return
     }
-    if (await sessionStore.isStatusIsDisconnect(phone)) {
+    if (await sessionStore.isStatusDisconnect(phone)) {
       logger.warn('Already Disconnected %s', phone)
       sock = undefined
       return
@@ -365,7 +365,7 @@ export const connect = async ({
     if (await sessionStore.isStatusConnecting(phone)) {
       await verifyConnectingTimeout()
       throw new SendError(5, t('connecting_session'))
-    } else if (await sessionStore.isStatusIsDisconnect(phone) || !sock) {
+    } else if (await sessionStore.isStatusDisconnect(phone) || !sock) {
       throw new SendError(3, t('disconnected_session'))
     } else if (await sessionStore.isStatusOffline(phone)) {
       throw new SendError(12, t('offline_session'))
@@ -442,6 +442,10 @@ export const connect = async ({
     }
     if (await sessionStore.isStatusOnline(phone)) {
       logger.warn('Already Connected %s', phone)
+      return
+    }
+    if (await sessionStore.isStatusBlockedAndVerify(phone)) {
+      logger.warn('Blocked %s', phone)
       return
     }
     logger.debug('Connecting %s', phone)

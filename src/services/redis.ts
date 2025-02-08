@@ -135,6 +135,10 @@ const authKey = (phone: string) => {
   return `${BASE_KEY}auth:${phone}`
 }
 
+const connectCountKey = (phone: string, ordinal: number | string) => {
+  return `${BASE_KEY}connect-count:${phone}:${ordinal}`
+}
+
 export const sessionStatusKey = (phone: string) => {
   return `${BASE_KEY}status:${phone}`
 }
@@ -381,6 +385,18 @@ export const getMessage = async <T>(phone: string, jid: string, id: string): Pro
     const json = JSON.parse(string)
     return json
   }
+}
+
+export const getConnectCount = async(phone: string) => {
+  const keyPattern = connectCountKey(phone, '*')
+  const keys = await redisKeys(keyPattern)
+  return keys.length || 0
+}
+
+export const setConnectCount = async (phone: string, ttl: number) => {
+  const last = await getConnectCount(phone)
+  const key = connectCountKey(phone, last + 1)
+  await redisSetAndExpire(key, 1, ttl)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
