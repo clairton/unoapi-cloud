@@ -49,7 +49,6 @@ export class IncomingJob {
       await dataStore.setUnoId(idBaileys, idUno)
       const key = await dataStore.loadKey(idBaileys)
       if (key) {
-        dataStore.setKey(idBaileys, key)
         dataStore.setKey(idUno, key)
       }
       let messagePayload = payload[payload.type]

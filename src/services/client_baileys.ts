@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
@@ -71,7 +71,7 @@ export const getClientBaileys: getClient = async ({
 const sendError = new SendError(3, t('disconnected_session'))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const sendMessageDefault: sendMessage = async (_phone, _message) => {
+const sendMessageDefault: sendMessage = async (_phone: string, _message: AnyMessageContent, _options: unknown) => {
   throw sendError
 }
 
@@ -358,7 +358,7 @@ export class ClientBaileys implements Client {
     const { status, type, to } = payload
     try {
       if (status) {
-        if (['sent', 'delivered', 'failed', 'progress', 'read'].includes(status)) {
+        if (['sent', 'delivered', 'failed', 'progress', 'read', 'deleted'].includes(status)) {
           if (status == 'read') {
             const currentStatus = await this.store?.dataStore?.loadStatus(payload?.message_id)
             if (currentStatus != status) {
@@ -380,6 +380,23 @@ export class ClientBaileys implements Client {
               }
             } else {
               logger.debug('Baileys %s already read message id %s!', this.phone, payload?.message_id)
+            }
+          } else if (status == 'deleted') {
+            const key = await this.store?.dataStore?.loadKey(payload?.message_id)
+            logger.debug('key %s for %s', JSON.stringify(key), payload?.message_id)
+            if (key?.id) {
+              if (key?.id.indexOf('-') > 0) {
+                logger.debug('Ignore delete message for %s with key id %s reading message key %s...', this.phone, key?.id)
+              } else {
+                logger.debug('Baileys %s deleting message key %s...', this.phone, JSON.stringify(key))
+                if (await this.sendMessage(key.remoteJid!, { delete: key }, {})) {
+                  await this.store?.dataStore?.setStatus(payload?.message_id, status)
+                  logger.debug('Baileys %s delete message key %s!', this.phone, JSON.stringify(key))
+                } else {
+                  logger.debug('Baileys %s not delete message key %s!', this.phone, JSON.stringify(key))
+                  throw `not online session ${this.phone}`
+                }
+              }
             }
           } else {
             await this.store?.dataStore?.setStatus(payload?.message_id, status)
@@ -467,6 +484,7 @@ export class ClientBaileys implements Client {
           if (response) {
             logger.debug('Sent to baileys %s', JSON.stringify(response))
             const key = response.key
+            await this.store?.dataStore?.setKey(key.id, key)
             const ok = {
               messaging_product: 'whatsapp',
               contacts: [
