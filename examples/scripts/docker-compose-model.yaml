@@ -1,0 +1,214 @@
+version: "3.7"
+
+services:
+
+## --------------------------- TRAEFIK --------------------------- ##
+  traefik:
+    image: traefik:v3.3.3
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=${DOCKERNETWORK}"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.transport.respondingTimeouts.idleTimeout=3600"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencryptresolver.acme.storage=/etc/traefik/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencryptresolver.acme.email=${LETSENCRYPT_MAIL}"
+      - "--log.level=DEBUG"
+      - "--log.format=common"
+      - "--log.filePath=/var/log/traefik/traefik.log"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access-log"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-https"
+      - "traefik.http.routers.http-catchall.priority=1"
+    volumes:
+      - "certsVolume:/etc/traefik/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      #- "/var/log/traefik:/var/log/traefik"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - ${DOCKERNETWORK}
+
+## --------------------------- PORTAINER --------------------------- ##
+  portainer:
+    image: portainer/portainer-ce:latest
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+    networks:
+      - ${DOCKERNETWORK}
+    ports:
+      - 9000:9000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_SUBDOMAIN}`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.docker.network=${DOCKERNETWORK}"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.priority=1"
+
+## --------------------------- REDIS --------------------------- ##
+  redis:
+    image: redis:latest
+    command: [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--port",
+        "6379",
+        "--requirepass",
+        "${REDIS_PASS}"
+      ]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASS}
+    volumes:
+      - redis_data:/data
+    networks:
+      - ${DOCKERNETWORK}
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+
+##REDIS COMANDER - WEB PANEL
+  redisWeb:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    networks:
+      - ${DOCKERNETWORK}
+    environment:
+      PORT: 8082
+      HTTP_USER: ${REDIS_USER}
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASS}
+      HTTP_PASSWORD: ${REDIS_PASS}
+    depends_on:
+      - redis
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.redisdash.rule=Host(`${REDIS_SUBDOMAIN}`)
+      - traefik.http.routers.redisdash.entrypoints=web,websecure
+      - traefik.http.services.redisdash.loadbalancer.server.port=8082
+      - traefik.http.routers.redisdash.service=redisdash
+      - traefik.http.routers.redisdash.tls.certresolver=letsencryptresolver
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+
+## --------------------------- RABBITMQ --------------------------- ##
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    restart: always
+    networks:
+      - ${DOCKERNETWORK}
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rabbitmq.rule=Host(`${RABBITMQ_SUBDOMAIN}`)
+      - traefik.http.routers.rabbitmq.entrypoints=websecure
+      - traefik.http.routers.rabbitmq.tls.certresolver=letsencryptresolver
+      - traefik.http.routers.rabbitmq.priority=1
+      - traefik.http.routers.rabbitmq.service=rabbitmq
+      - traefik.http.services.rabbitmq.loadbalancer.server.port=15672 
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+        reservations:
+          cpus: '0.50'
+          memory: 128M
+## --------------------------- MINIO --------------------------- ##
+  minio:
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    networks:
+      - ${DOCKERNETWORK}
+    volumes:
+      - minio_data:/data
+    restart: always
+    environment:
+      - MINIO_ROOT_USER=minio_user_casabor
+      - MINIO_ROOT_PASSWORD=78absdfjnasdfnasdfunasdjfnasdf
+      - MINIO_BROWSER_REDIRECT_URL=https://${MINIOAPI_SUBDOMAIN}
+      - MINIO_SERVER_URL=https://${MINIOWEB_SUBDOMAIN}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.minio_public.rule=Host(`${MINIOWEB_SUBDOMAIN}`)
+      - traefik.http.routers.minio_public.entrypoints=web,websecure
+      - traefik.http.routers.minio_public.tls.certresolver=letsencryptresolver
+      - traefik.http.services.minio_public.loadbalancer.server.port=9000
+      - traefik.http.routers.minio_public.service=minio_public
+      - traefik.http.routers.minio_console.rule=Host(`${MINIOAPI_SUBDOMAIN}`)
+      - traefik.http.routers.minio_console.entrypoints=web,websecure
+      - traefik.http.routers.minio_console.tls.certresolver=letsencryptresolver
+      - traefik.http.services.minio_console.loadbalancer.server.port=9001
+      - traefik.http.routers.minio_console.service=minio_console
+
+
+volumes:
+  #PORTAINER_VOLUME
+  portainer_data:
+    external: true
+    name: portainer_data
+
+  #TRAEFIK_VOLUME
+  certsVolume:
+    external: true
+    name: certsVolume
+
+  #REDIS_VOLUME
+  redis_data:
+    external: true
+    name: redis_data
+
+  #RABIT_VOLUME
+  rabbit_data:
+    external: true
+
+  #MINIO_VOLUME
+  minio_data:
+    external: true
+
+  
+networks:
+  ${DOCKERNETWORK}:
+    external: true
+    name: ${DOCKERNETWORK} 
