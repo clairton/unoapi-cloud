@@ -15,7 +15,7 @@ x-base: &base
     STORAGE_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
     STORAGE_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
     STORAGE_REGION: ${MINIO_REGION}
-    STORAGE_ENDPOINT: ${MINIOAPI_SUBDOMAIN}
+    STORAGE_ENDPOINT: https://${MINIOAPI_SUBDOMAIN}
     STORAGE_FORCE_PATH_STYLE: true
     SECRET_KEY_BASE: ${SECRET_KEY_CW}
     FRONTEND_URL: https://${CHATWOOT_SUBDOMAIN}
@@ -84,9 +84,7 @@ services:
     restart: 'no'
     command: ['bundle', 'exec', 'rails', 'db:chatwoot_prepare']
     networks:
-      - default
-      - postgres-master
-      - redis
+      - ${DOCKERNETWORK}
 
 networks:
   ${DOCKERNETWORK}:
