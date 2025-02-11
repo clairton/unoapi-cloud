@@ -23,3 +23,7 @@ fi
 
 # Atualizar o repositório e instalar o Docker
 apt-get update && apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+echo "Digite o nome para a rede da sua instalação docker:"
+read dockerNetwork
+dockerNetwork=${dockerNetwork:-"network"}

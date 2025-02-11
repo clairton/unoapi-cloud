@@ -157,8 +157,8 @@ services:
       - minio_data:/data
     restart: always
     environment:
-      - MINIO_ROOT_USER=minio_user_casabor
-      - MINIO_ROOT_PASSWORD=78absdfjnasdfnasdfunasdjfnasdf
+      - MINIO_ROOT_USER=${MINIO_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_PASS}
       - MINIO_BROWSER_REDIRECT_URL=https://${MINIOAPI_SUBDOMAIN}
       - MINIO_SERVER_URL=https://${MINIOWEB_SUBDOMAIN}
     deploy:
