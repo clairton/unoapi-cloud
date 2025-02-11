@@ -15,134 +15,283 @@ validate_domain() {
     fi
 }
 
-# Verifica se foi passado o argumento "continue"
-if [ "$1" == "continue" ]; then
-    goto minio_setup
-fi
+minio_setup() {
+    echo "Iniciando a configuração do MinIO..."
+    echo "Digite a região configurada no MinIO:"
+    read MINIO_REGION
+    echo "Digite o nome do bucket para o UnoAPI:"
+    read UNOAPI_BUCKET
+    echo "Digite o Access Key do MinIO:"
+    read MINIO_ACCESS_KEY
+    echo "Digite o Secret Key do MinIO:"
+    read MINIO_SECRET_KEY
+    echo "Digite o nome do bucket para o Chatwoot:"
+    read CW_BUCKET
 
-# Verifica se o arquivo .env já existe
-if [ -f .env ]; then
-    echo "Arquivo .env já existe. Deseja continuar para a segunda etapa? (y/n)"
-    read response
-    if [ "$response" == "y" ]; then
-        goto minio_setup
-    else
-        echo "Recriando configurações..."
-        rm .env
+    # Adiciona as variáveis ao .env
+    cat >> .env <<EOL
+MINIO_REGION=$MINIO_REGION
+UNOAPI_BUCKET=$UNOAPI_BUCKET
+MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY
+MINIO_SECRET_KEY=$MINIO_SECRET_KEY
+CW_BUCKET=$CW_BUCKET
+EOL
+
+    echo "Variáveis adicionadas ao .env com sucesso."
+    genUnoapiStack
+
+    setup
+    exit 0
+    
+}
+
+genUnoapiStack() {
+
+    # Dados do repositório alvo
+    REPO_OWNER="clairton"
+    REPO_NAME="unoapi-cloud"
+
+    # Obtém a última tag usando a API do GitHub
+    LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/tags" | jq -r '.[0].name' | cut -c2-)
+
+    # Verifica se encontrou uma tag
+    if [[ -z "$LATEST_TAG" || "$LATEST_TAG" == "null" ]]; then
+        echo "Nenhuma tag encontrada no repositório remoto."
+        exit 1
     fi
+
+    echo "Você quer Gerar uma stack para a versão $LATEST_TAG da unoapi? 
+    Se sim: Aperte Enter, 
+    caso deseje: Digite a versão que quer utilizar"
+    read unoapi_version
+    unoapi_version=${unoapi_version:-$LATEST_TAG}
+
+    echo "Criando Stack para a Versão $unoapi_image"
+
+    # Recarregar variáveis
+    export $(grep -v '^#' .env | xargs)
+    export UNOAPI_IMAGE="clairton/unoapi-cloud:$unoapi_image"
+
+    # Baixar o arquivo docker-compose-model.yaml do GitHub
+    curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/uno-model.yaml -o uno-model.yaml
+
+    # Substituir as variáveis no arquivo docker-compose-model.yaml
+    envsubst < uno-model.yaml > docker-unoapi.yaml
+
+    echo "Arquivo docker-unoapi.yaml gerado com sucesso."
+    
+    setup
+    exit 0
+    
+}
+
+genCwStack() {
+    # Dados do repositório alvo
+    REPO_OWNER="clairton"
+    REPO_NAME="chatwoot"
+
+    # Obtém a última tag usando a API do GitHub
+    LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/tags" | jq -r '.[0].name')
+
+    # Verifica se encontrou uma tag
+    if [[ -z "$LATEST_TAG" || "$LATEST_TAG" == "null" ]]; then
+        echo "Nenhuma tag encontrada no repositório remoto."
+        exit 1
+    fi
+
+    echo "Você quer Gerar uma stack para a versão $LATEST_TAG do chatwoot uno? 
+    Se sim: Aperte Enter, 
+    caso deseje: Digite a versão que quer utilizar"
+    read cw_version
+    cw_version=${cw_version:-$LATEST_TAG}
+
+    echo "Criando Stack para a Versão $cw_version do chatwoot uno"
+
+    # Recarregar variáveis
+    export $(grep -v '^#' .env | xargs)
+    export CHATWOOT_IMAGE="clairton/chatwoot:$unoapi_image"
+
+    # Baixar o arquivo docker-compose-model.yaml do GitHub
+    curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/chatwoot-model.yaml -o chatwoot-model.yaml
+
+    # Substituir as variáveis no arquivo docker-compose-model.yaml
+    envsubst < chatwoot-model.yaml > docker-chatwoot.yaml
+
+    echo "Arquivo docker-chatwoot.yaml gerado com sucesso."
+    
+    setup
+    exit 0
+}
+
+setup(){
+    # SETUP PRINCIPAL
+    if [ -f ".env" ]; then
+        echo "Arquivo .env já existe. O que você gostaria de fazer?
+        1 - Configurar as Opções para o Minio
+        2 - Gerar Stack Atualizada da Unoapi
+        3 - Gerar Stack Atualizada do Chatwoot Uno
+        0 - Gerar novo .env"
+        read resposta
+
+        if [ "$resposta" = "1" ]; then
+            echo "Configurar Minio..."
+            minio_setup
+        fi
+        if [ "$resposta" = "2" ]; then
+            echo "Configurando Unoapi..."
+            genUnoapiStack
+        fi
+        if [ "$resposta" = "3" ]; then
+            echo "Configurado Chatwoot UNO..."
+            genCwStack
+        fi
+        if [ "$resposta" = "0" ]; then
+            echo "Setup Inicial..."
+            initialSetup
+        else
+            echo "Não compreendi sua resposta, Caso queira sair aperte CTRL + C"
+            echo ""
+            setup
+        fi
+        
+    else
+        echo "Bem vindo ao AutoConfigurar Stack para a Unoapi e Chatwoot UNO
+        Vamos começar configurando algumas variáveis?"
+        initialSetup
+        exit 0
+    fi
+}
+
+#Valida para opções passada por parâmetro
+if [ "$1" = "minio" ]; then
+    minio_setup
+    exit 0
+fi
+if [ "$1" = "genUnoStack" ]; then
+    genUnoapiStack
+    exit 0
 fi
 
-# Perguntas e configurações
+if [ "$1" = "genCwStack" ]; then
+    genCwStack
+    exit 0
+fi
+if [ "$1" = "" ]; then
+    setup
+    exit 0
+fi
 
-echo "Qual o nome da rede Docker padrão?"
-read dockernetwork
-dockernetwork=${dockernetwork:-"network"}
+
+initialSetup(){
+    echo "Qual o nome da rede Docker padrão?"
+    read dockernetwork
+    dockernetwork=${dockernetwork:-"network"}
 
 
-echo "Digite o email para os certificados: "
-read letsencrypt_mail
-letsencrypt_mail=${letsencrypt_mail:-"user@gmail.com"}
+    echo "Digite o email para os certificados: "
+    read letsencrypt_mail
+    letsencrypt_mail=${letsencrypt_mail:-"user@gmail.com"}
 
-echo "Digite o domínio principal:"
-read domain
-
-# Validar domínio
-while ! validate_domain "$domain"; do
-    echo "Digite um domínio válido:"
+    echo "Digite o domínio principal:"
     read domain
-done
 
-echo "Subdomínio do MinIO Console (padrão: portainer.$domain):"
-read portainer_subdomain
-portainer_subdomain=${portainer_subdomain:-"portainer.$domain"}
+    # Validar domínio
+    while ! validate_domain "$domain"; do
+        echo "Digite um domínio válido:"
+        read domain
+    done
 
-echo "Subdomínio do MinIO Console (padrão: console.minio.$domain):"
-read minioweb_subdomain
-minioweb_subdomain=${minioweb_subdomain:-"console.minio.$domain"}
+    echo "Subdomínio do MinIO Console (padrão: portainer.$domain):"
+    read portainer_subdomain
+    portainer_subdomain=${portainer_subdomain:-"portainer.$domain"}
 
-echo "Subdomínio do MinIO API (padrão: api.minio.$domain):"
-read minioapi_subdomain
-minioapi_subdomain=${minioapi_subdomain:-"api.minio.$domain"}
+    echo "Subdomínio do MinIO Console (padrão: console.minio.$domain):"
+    read minioweb_subdomain
+    minioweb_subdomain=${minioweb_subdomain:-"console.minio.$domain"}
 
-echo "Subdomínio para o chatwoot (padrão: app.$domain):"
-read chatwoot_subdomain
-chatwoot_subdomain=${chatwoot_subdomain:-"app.$domain"}
+    echo "Subdomínio do MinIO API (padrão: api.minio.$domain):"
+    read minioapi_subdomain
+    minioapi_subdomain=${minioapi_subdomain:-"api.minio.$domain"}
 
-echo "Subdomínio para o UnoAPI (padrão: unoapi.$domain):"
-read unoapi_subdomain
-unoapi_subdomain=${unoapi_subdomain:-"unoapi.$domain"}
+    echo "Subdomínio para o chatwoot (padrão: app.$domain):"
+    read chatwoot_subdomain
+    chatwoot_subdomain=${chatwoot_subdomain:-"app.$domain"}
 
-echo "Subdomínio para o Redis (padrão: redis.$domain):"
-read redis_subdomain
-redis_subdomain=${redis_subdomain:-"redis.$domain"}
+    echo "Subdomínio para o UnoAPI (padrão: unoapi.$domain):"
+    read unoapi_subdomain
+    unoapi_subdomain=${unoapi_subdomain:-"unoapi.$domain"}
 
-echo "Subdomínio para o RabbitMQ (padrão: rabbitmq.$domain):"
-read rabbitmq_subdomain
-rabbitmq_subdomain=${rabbitmq_subdomain:-"rabbitmq.$domain"}
+    echo "Subdomínio para o Redis (padrão: redis.$domain):"
+    read redis_subdomain
+    redis_subdomain=${redis_subdomain:-"redis.$domain"}
 
-echo "Usuário do PostgreSQL:"
-read postgres_user
-postgres_user=${postgres_user:-"postgres"}
-echo "Senha do PostgreSQL (deixe em branco para gerar automaticamente):"
-read postgres_pass
-postgres_pass=${postgres_pass:-$(generate_random_string)}
+    echo "Subdomínio para o RabbitMQ (padrão: rabbitmq.$domain):"
+    read rabbitmq_subdomain
+    rabbitmq_subdomain=${rabbitmq_subdomain:-"rabbitmq.$domain"}
 
-echo "Usuário do RabbitMQ:"
-read rabbitmq_user
-rabbitmq_user=${rabbitmq_user:-"rabbitmq_user"}
-echo "Senha do RabbitMQ (deixe em branco para gerar automaticamente):"
-read rabbitmq_pass
-rabbitmq_pass=${rabbitmq_pass:-$(generate_random_string)}
+    echo "Usuário do PostgreSQL:"
+    read postgres_user
+    postgres_user=${postgres_user:-"postgres"}
+    echo "Senha do PostgreSQL (deixe em branco para gerar automaticamente):"
+    read postgres_pass
+    postgres_pass=${postgres_pass:-$(generate_random_string)}
 
-echo "Usuário do Redis (padrão: default):"
-read redis_user
-redis_user=${redis_user:-"default"}
+    echo "Usuário do RabbitMQ:"
+    read rabbitmq_user
+    rabbitmq_user=${rabbitmq_user:-"rabbitmq_user"}
+    echo "Senha do RabbitMQ (deixe em branco para gerar automaticamente):"
+    read rabbitmq_pass
+    rabbitmq_pass=${rabbitmq_pass:-$(generate_random_string)}
 
-echo "Senha do Redis (deixe em branco para gerar automaticamente):"
-read redis_pass
-redis_pass=${redis_pass:-$(generate_random_string)}
+    echo "Usuário do Redis (padrão: default):"
+    read redis_user
+    redis_user=${redis_user:-"default"}
 
-echo "Usuário do MinIO:"
-read minio_user
-minio_user=${minio_user:-"minio_user"}
-echo "Senha do MinIO (deixe em branco para gerar automaticamente):"
-read minio_pass
-minio_pass=${minio_pass:-$(generate_random_string)}
+    echo "Senha do Redis (deixe em branco para gerar automaticamente):"
+    read redis_pass
+    redis_pass=${redis_pass:-$(generate_random_string)}
 
-echo "Token de autenticação do UnoAPI (deixe em branco para gerar automaticamente):"
-read unoapi_auth_token
-unoapi_auth_token=${unoapi_auth_token:-$(generate_random_string)}
+    echo "Usuário do MinIO:"
+    read minio_user
+    minio_user=${minio_user:-"minio_user"}
+    echo "Senha do MinIO (deixe em branco para gerar automaticamente):"
+    read minio_pass
+    minio_pass=${minio_pass:-$(generate_random_string)}
 
-# Confirmar se as variáveis estão corretas
-echo ""
-echo "Por favor, revise as configurações:"
-echo ""
-echo "E-mail para os certificados: $letsencrypt_mail"
-echo "Domínio: $domain"
-echo "Subdomínio Portainer: $portainer_subdomain"
-echo "Subdomínio Chatwoot: $chatwoot_subdomain"
-echo "Subdomínio UnoAPI: $unoapi_subdomain"
-echo "Subdomínio Redis: $redis_subdomain"
-echo "Subdomínio RabbitMQ: $rabbitmq_subdomain"
-echo "Usuário PostgreSQL: $postgres_user"
-echo "Usuário RabbitMQ: $rabbitmq_user"
-echo "Usuário Redis: $redis_user"
-echo "Usuário MinIO: $minio_user"
-echo "Token UnoAPI: $unoapi_auth_token"
-echo "Subdomínio MinIO Console: $minioweb_subdomain"
-echo "Subdomínio MinIO API: $minioapi_subdomain"
-echo "Rede Docker: $dockernetwork"
-echo ""
-echo "Pressione 'y' para confirmar ou qualquer outra tecla para editar."
+    echo "Token de autenticação do UnoAPI (deixe em branco para gerar automaticamente):"
+    read unoapi_auth_token
+    unoapi_auth_token=${unoapi_auth_token:-$(generate_random_string)}
 
-read confirm
-if [ "$confirm" != "y" ]; then
-    echo "Você pode editar o arquivo .env diretamente ou reiniciar o script."
-    exit 1
-fi
+    # Confirmar se as variáveis estão corretas
+    echo ""
+    echo "Por favor, revise as configurações:"
+    echo ""
+    echo "E-mail para os certificados: $letsencrypt_mail"
+    echo "Domínio: $domain"
+    echo "Subdomínio Portainer: $portainer_subdomain"
+    echo "Subdomínio Chatwoot: $chatwoot_subdomain"
+    echo "Subdomínio UnoAPI: $unoapi_subdomain"
+    echo "Subdomínio Redis: $redis_subdomain"
+    echo "Subdomínio RabbitMQ: $rabbitmq_subdomain"
+    echo "Usuário PostgreSQL: $postgres_user"
+    echo "Usuário RabbitMQ: $rabbitmq_user"
+    echo "Usuário Redis: $redis_user"
+    echo "Usuário MinIO: $minio_user"
+    echo "Token UnoAPI: $unoapi_auth_token"
+    echo "Subdomínio MinIO Console: $minioweb_subdomain"
+    echo "Subdomínio MinIO API: $minioapi_subdomain"
+    echo "Rede Docker: $dockernetwork"
+    echo ""
+    echo "Pressione 'y' para confirmar ou qualquer outra tecla para editar."
 
-# Criar o arquivo de envs
-cat > .env <<EOL
+    read confirm
+    if [ "$confirm" != "y" ]; then
+        echo "Você pode editar o arquivo .env diretamente ou reiniciar o script."
+        exit 1
+    fi
+
+    # Criar o arquivo de envs
+    cat > .env <<EOL
 PORTAINER_SUBDOMAIN=$portainer_subdomain
 LETSENCRYPT_MAIL=$letsencrypt_mail
 DOMAIN=$domain
@@ -164,52 +313,22 @@ MINIOAPI_SUBDOMAIN=$minioapi_subdomain
 DOCKERNETWORK=$dockernetwork
 EOL
 
-echo "Arquivo .env gerado com sucesso."
+    echo "Arquivo .env gerado com sucesso."
 
-# Carregar as variáveis de ambiente do .env
-export $(grep -v '^#' .env | xargs)
+    # Carregar as variáveis de ambiente do .env
+    export $(grep -v '^#' .env | xargs)
 
-# Baixar o arquivo docker-compose-model.yaml do GitHub
-curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/docker-model.yaml -o docker-model.yaml
+    # Baixar o arquivo docker-compose-model.yaml do GitHub
+    curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/docker-model.yaml -o docker-model.yaml
 
-# Substituir as variáveis no arquivo docker-compose-model.yaml
-envsubst < docker-compose-model.yaml > docker-compose.yaml
+    # Substituir as variáveis no arquivo docker-compose-model.yaml
+    envsubst < docker-model.yaml > docker-compose.yaml
 
-echo "Arquivo docker-compose.yaml gerado com sucesso."
+    echo "Arquivo docker-compose.yaml gerado com sucesso."
 
-echo ""
-echo "Execute o comando docker compose up -d para iniciar os serviços!"
-echo "Acesse o console do mínio para configurar a região / os buckets e o token de acesso"
-
-# --- Etapa 2: Configuração do MinIO ---
-:minio_setup
-echo "Iniciando a configuração do Minio..."
-
-echo "Digite a região caonfigurada no MinIO: "
-read minio_region
-minio_region=${minio_region:-"us-east-1"}
-
-echo "Digite o nome do bucket para o serviço da UnoAPI: "
-read unoapi_bucket
-unoapi_bucket=${unoapi_bucket:-"unoapi-bucket"}
-
-echo "Digite a Access Key do MinIO: "
-read minio_access_key
-
-echo "Digite a Secret Key do MinIO: "
-read minio_secret_key
-
-echo "Digite o nome do bucket para o Chatwoot: "
-read cw_bucket
-cw_bucket=${cw_bucket:-"chatwoot-bucket"}
-
-# Adicionar ao arquivo .env
-cat >> .env <<EOL
-MINIO_REGION=$minio_region
-UNOAPI_BUCKET=$unoapi_bucket
-MINIO_ACCESS_KEY=$minio_access_key
-MINIO_SECRET_KEY=$minio_secret_key
-CW_BUCKET=$cw_bucket
-EOL
-
-echo "Configuração do MinIO concluída! Variáveis adicionadas ao .env."
+    echo ""
+    echo "Execute o comando docker compose up -d para iniciar os serviços!"
+    
+    setup
+    exit 0
+}

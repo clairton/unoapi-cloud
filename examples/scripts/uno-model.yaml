@@ -1,5 +1,5 @@
 x-base: &base
-  image: clairton/unoapi-cloud:1.26.5
+  image: clairton/unoapi-cloud:${UNOAPI_IMAGE}
   entrypoint: echo 'ok!'
   networks:
     - ${DOCKERNETWORK}
