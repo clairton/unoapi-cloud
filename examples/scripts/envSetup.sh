@@ -153,7 +153,7 @@ echo "Arquivo .env gerado com sucesso."
 export $(grep -v '^#' .env | xargs)
 
 # Baixar o arquivo docker-compose-model.yaml do GitHub
-curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/docker-compose-model.yaml -o docker-compose-model.yaml
+curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/docker-model.yaml -o docker-model.yaml
 
 # Substituir as variáveis no arquivo docker-compose-model.yaml
 envsubst < docker-compose-model.yaml > docker-compose.yaml
