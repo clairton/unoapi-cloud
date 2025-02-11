@@ -195,7 +195,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASS}
     restart: always
     networks:
-      - default
+      - ${DOCKERNETWORK}
+
+
 volumes:
   #PORTAINER_VOLUME
   portainer_data:
@@ -218,6 +220,10 @@ volumes:
 
   #MINIO_VOLUME
   minio_data:
+    external: true
+
+  #POSTGRES_VOLUME
+  postgres:
     external: true
 
   
