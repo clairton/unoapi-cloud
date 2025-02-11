@@ -15,6 +15,23 @@ validate_domain() {
     fi
 }
 
+# Verifica se foi passado o argumento "continue"
+if [ "$1" == "continue" ]; then
+    goto minio_setup
+fi
+
+# Verifica se o arquivo .env já existe
+if [ -f .env ]; then
+    echo "Arquivo .env já existe. Deseja continuar para a segunda etapa? (y/n)"
+    read response
+    if [ "$response" == "y" ]; then
+        goto minio_setup
+    else
+        echo "Recriando configurações..."
+        rm .env
+    fi
+fi
+
 # Perguntas e configurações
 
 echo "Qual o nome da rede Docker padrão?"
@@ -159,3 +176,40 @@ curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/h
 envsubst < docker-compose-model.yaml > docker-compose.yaml
 
 echo "Arquivo docker-compose.yaml gerado com sucesso."
+
+echo ""
+echo "Execute o comando docker compose up -d para iniciar os serviços!"
+echo "Acesse o console do mínio para configurar a região / os buckets e o token de acesso"
+
+# --- Etapa 2: Configuração do MinIO ---
+:minio_setup
+echo "Iniciando a configuração do Minio..."
+
+echo "Digite a região caonfigurada no MinIO: "
+read minio_region
+minio_region=${minio_region:-"us-east-1"}
+
+echo "Digite o nome do bucket para o serviço da UnoAPI: "
+read unoapi_bucket
+unoapi_bucket=${unoapi_bucket:-"unoapi-bucket"}
+
+echo "Digite a Access Key do MinIO: "
+read minio_access_key
+
+echo "Digite a Secret Key do MinIO: "
+read minio_secret_key
+
+echo "Digite o nome do bucket para o Chatwoot: "
+read cw_bucket
+cw_bucket=${cw_bucket:-"chatwoot-bucket"}
+
+# Adicionar ao arquivo .env
+cat >> .env <<EOL
+MINIO_REGION=$minio_region
+UNOAPI_BUCKET=$unoapi_bucket
+MINIO_ACCESS_KEY=$minio_access_key
+MINIO_SECRET_KEY=$minio_secret_key
+CW_BUCKET=$cw_bucket
+EOL
+
+echo "Configuração do MinIO concluída! Variáveis adicionadas ao .env."
