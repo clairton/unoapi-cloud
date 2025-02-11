@@ -182,7 +182,20 @@ services:
       - traefik.http.services.minio_console.loadbalancer.server.port=9001
       - traefik.http.routers.minio_console.service=minio_console
 
+## --------------------------- POSTGRES --------------------------- ##
 
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - postgres:/data/postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+    restart: always
+    networks:
+      - default
 volumes:
   #PORTAINER_VOLUME
   portainer_data:
