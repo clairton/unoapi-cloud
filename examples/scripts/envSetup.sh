@@ -161,11 +161,15 @@ EOL
 
     envsubst < docker-model.yaml > docker-compose.yaml
 
-    echo "Arquivo docker-compose.yaml gerado com sucesso."
+    curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/apps-model.yaml -o apps-model.yaml
+
+    envsubst < apps-model.yaml > apps-compose.yaml
+
+    echo "Arquivo apps-compose.yaml gerado com sucesso."
 
     echo ""
     echo "Execute o comando docker compose up -d para iniciar os serviços!"
-    rm docker-model.yaml
+    rm docker-model.yaml app-model.yaml
     setup
     exit 0
 }

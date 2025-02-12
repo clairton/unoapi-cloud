@@ -6,9 +6,8 @@ x-base: &base
   restart: 'no'
   command: echo 'ok'
   environment:
-    ENABLE_ACCOUNT_SIGNUP: false 
-    REDIS_PASSWORD: ${REDIS_PASS}
-    REDIS_URL: redis://redis:6379
+    ENABLE_ACCOUNT_SIGNUP: false
+    REDIS_URL: redis://:${REDIS_PASS}@redis:6379
     DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
     ACTIVE_STORAGE_SERVICE: s3_compatible
     STORAGE_BUCKET_NAME: ${CW_BUCKET}
