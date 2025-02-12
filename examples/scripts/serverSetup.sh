@@ -5,6 +5,8 @@ apt install -y ca-certificates curl gnupg wget jp lsb-release
 
 install -m 0755 -d /etc/apt/keyrings
 
+apt purge -y docker-* 
+
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     if [ "$ID" = "debian" ]; then
