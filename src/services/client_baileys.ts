@@ -485,6 +485,7 @@ export class ClientBaileys implements Client {
             logger.debug('Sent to baileys %s', JSON.stringify(response))
             const key = response.key
             await this.store?.dataStore?.setKey(key.id, key)
+            await this.store?.dataStore?.setMessage(key.remoteJid, response)
             const ok = {
               messaging_product: 'whatsapp',
               contacts: [
