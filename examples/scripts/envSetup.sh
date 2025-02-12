@@ -169,7 +169,7 @@ EOL
 
     echo ""
     echo "Execute o comando docker compose up -d para iniciar os serviços!"
-    rm docker-model.yaml app-model.yaml
+    rm docker-model.yaml apps-model.yaml
     setup
     exit 0
 }
