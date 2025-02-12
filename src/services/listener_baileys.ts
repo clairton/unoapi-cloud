@@ -96,12 +96,12 @@ export class ListenerBaileys implements Listener {
         await store?.dataStore.setKey(idUno, i.key)
         await store?.dataStore.setKey(idBaileys, i.key)
         await store.dataStore.setMessage(i.key.remoteJid!, i)
+        i.key.id = idUno
         if (isSaveMedia(i)) {
           logger.debug(`Saving media...`)
           i = await store?.mediaStore.saveMedia(i)
           logger.debug(`Saved media!`)
         }
-        i.key.id = idUno
       }
     }
 

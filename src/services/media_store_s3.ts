@@ -106,6 +106,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
           const message: any = await store.loadMessage(remoteJid, id)
           logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
           if (message) {
+            message.key.id = mediaId
             const binMessage = getBinMessage(message)
             const fileNameS3 = mediaStore.getFileName(phone, message as WAMessage)
             const fileName = binMessage?.message?.fileName || fileNameS3

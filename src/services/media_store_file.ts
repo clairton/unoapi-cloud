@@ -120,22 +120,23 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (key) {
         const { remoteJid, id } = key
         if (remoteJid && id) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const message: any = await store.loadMessage(remoteJid, id)
-          logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
+          logger.debug('message %s for %s', JSON.stringify(message), id)
           if (message) {
             const binMessage = getBinMessage(message)
+            message.key.id = mediaId
             const filePath = await mediaStore.getFileName(phone, message)
             const mimeType = mime.lookup(filePath)
             const url = await mediaStore.getDownloadUrl(baseUrl, filePath)
-            return {
+            const payload = {
               messaging_product: 'whatsapp',
               url,
               mime_type: mimeType,
               sha256: binMessage?.message?.fileSha256,
               file_size: binMessage?.message?.fileLength,
-              id: `${phone}/${id}`,
+              id: `${phone}/${mediaId}`,
             }
+            return payload
           }
         }
       }
