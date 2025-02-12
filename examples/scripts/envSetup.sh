@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Função para gerar senha aleatória
+# gerar aleatória
 generate_random_string() {
     tr -dc A-Za-z0-9 </dev/urandom | head -c 20
 }
 
-# Função para validar o domínio
+# validar o domínio
 validate_domain() {
     if echo "$1" | grep -qE '^[a-zA-Z0-9.-]+$'; then
         return 0
@@ -100,7 +100,7 @@ initialSetup(){
     read POSTGRES_DB
     POSTGRES_DB=${POSTGRES_DB:-"chatwoot_db"}
 
-    # Confirmar se as variáveis estão corretas
+    # Confirmar se está OK
     echo ""
     echo "Por favor, revise as configurações:"
     echo ""
@@ -129,7 +129,6 @@ initialSetup(){
         exit 0
     fi
 
-    # Criar o arquivo de envs
     cat > .env <<EOL
 PORTAINER_SUBDOMAIN=$portainer_subdomain
 LETSENCRYPT_MAIL=$letsencrypt_mail
@@ -158,10 +157,8 @@ EOL
     # Carregar as variáveis de ambiente do .env
     export $(grep -v '^#' .env | xargs)
 
-    # Baixar o arquivo docker-compose-model.yaml do GitHub
     curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/docker-model.yaml -o docker-model.yaml
 
-    # Substituir as variáveis no arquivo docker-compose-model.yaml
     envsubst < docker-model.yaml > docker-compose.yaml
 
     echo "Arquivo docker-compose.yaml gerado com sucesso."
@@ -186,7 +183,6 @@ minio_setup() {
     echo "Digite o nome do bucket para o Chatwoot:"
     read CW_BUCKET
 
-    # Adiciona as variáveis ao .env
     cat >> .env <<EOL
 MINIO_REGION=$MINIO_REGION
 UNOAPI_BUCKET=$UNOAPI_BUCKET
@@ -205,11 +201,10 @@ EOL
 
 genUnoapiStack() {
 
-    # Dados do repositório alvo
     REPO_OWNER="clairton"
     REPO_NAME="unoapi-cloud"
 
-    # Obtém a última tag usando a API do GitHub
+    # Obtém a última tag
     LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/tags" | jq -r '.[0].name' | cut -c2-)
 
     # Verifica se encontrou uma tag
@@ -230,10 +225,8 @@ genUnoapiStack() {
     export $(grep -v '^#' .env | xargs)
     export UNOAPI_IMAGE="clairton/unoapi-cloud:$unoapi_version"
 
-    # Baixar o arquivo docker-compose-model.yaml do GitHub
     curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/uno-model.yaml -o uno-model.yaml
 
-    # Substituir as variáveis no arquivo docker-compose-model.yaml
     envsubst < uno-model.yaml > docker-unoapi.yaml
 
     echo "Arquivo docker-unoapi.yaml gerado com sucesso."
@@ -244,11 +237,10 @@ genUnoapiStack() {
 }
 
 genCwStack() {
-    # Dados do repositório alvo
     REPO_OWNER="clairton"
     REPO_NAME="chatwoot"
 
-    # Obtém a última tag usando a API do GitHub
+    # Obtém a última tag
     LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/tags" | jq -r '.[0].name')
 
     # Verifica se encontrou uma tag
@@ -269,10 +261,8 @@ genCwStack() {
     export $(grep -v '^#' .env | xargs)
     export CHATWOOT_IMAGE="clairton/chatwoot:$cw_version"
 
-    # Baixar o arquivo docker-compose-model.yaml do GitHub
     curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/chatwoot-model.yaml -o chatwoot-model.yaml
 
-    # Substituir as variáveis no arquivo docker-compose-model.yaml
     envsubst < chatwoot-model.yaml > docker-chatwoot.yaml
 
     echo "Arquivo docker-chatwoot.yaml gerado com sucesso."
@@ -321,7 +311,7 @@ setup(){
     fi
 }
 
-#Valida para opções passada por parâmetro
+#Valida o parâmetro passado
 if [ "$1" = "minio" ]; then
     minio_setup
     exit 0
