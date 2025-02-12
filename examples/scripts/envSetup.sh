@@ -260,6 +260,7 @@ genCwStack() {
     # Recarregar variáveis
     export $(grep -v '^#' .env | xargs)
     export CHATWOOT_IMAGE="clairton/chatwoot:$cw_version"
+    export SECRET_KEY_CW=$(generate_random_string)
 
     curl -fsSL https://raw.githubusercontent.com/rodrigo-gmengue/unoapi-cloud/refs/heads/tutorials/examples/scripts/chatwoot-model.yaml -o chatwoot-model.yaml
 

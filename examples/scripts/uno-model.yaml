@@ -4,7 +4,7 @@ x-base: &base
   networks:
     - ${DOCKERNETWORK}
   environment:
-    AMQP_URL: ampq://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+    AMQP_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
     REDIS_URL: redis://:${REDIS_PASS}@redis:6379
     BASE_URL: https://${UNOAPI_SUBDOMAIN} #Dominio da Unoapi
     STORAGE_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY} #Access key do Bucket
