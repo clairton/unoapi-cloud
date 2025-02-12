@@ -149,7 +149,7 @@ services:
           memory: 128M
 ## --------------------------- MINIO --------------------------- ##
   minio:
-    image: quay.io/minio/minio
+    image: quay.io/minio/minio:latest
     command: server /data --console-address ":9001"
     networks:
       - ${DOCKERNETWORK}
@@ -201,32 +201,22 @@ services:
 volumes:
   #PORTAINER_VOLUME
   portainer_data:
-    external: true
-    name: portainer_data
 
   #TRAEFIK_VOLUME
   certsVolume:
-    external: true
-    name: certsVolume
 
   #REDIS_VOLUME
   redis_data:
-    external: true
-    name: redis_data
 
   #RABIT_VOLUME
   rabbit_data:
-    external: true
 
   #MINIO_VOLUME
   minio_data:
-    external: true
 
   #POSTGRES_VOLUME
   postgres:
-    external: true
 
-  
 networks:
   ${DOCKERNETWORK}:
     external: true
