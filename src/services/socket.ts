@@ -11,6 +11,7 @@ import makeWASocket, {
   GroupMetadata,
   Browsers,
   ConnectionState,
+  UserFacingSocketConfig,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
@@ -450,7 +451,7 @@ export const connect = async ({
     }
     logger.debug('Connecting %s', phone)
 
-    const browser: WABrowserDescription = config.ignoreHistoryMessages ? DEFAULT_BROWSER as WABrowserDescription : Browsers.windows('Desktop')
+    let browser: WABrowserDescription = DEFAULT_BROWSER as WABrowserDescription
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
@@ -462,23 +463,32 @@ export const connect = async ({
       agent = new SocksProxyAgent(config.proxyUrl)
       fetchAgent = new HttpsProxyAgent(config.proxyUrl)
     }
+    const socketConfig: UserFacingSocketConfig = {
+      auth: state,
+      logger: loggerBaileys,
+      syncFullHistory: !config.ignoreHistoryMessages,
+      version: WHATSAPP_VERSION,
+      getMessage,
+      shouldIgnoreJid: config.shouldIgnoreJid,
+      retryRequestDelayMs: config.retryRequestDelayMs,
+      msgRetryCounterCache,
+      patchMessageBeforeSending,
+      agent,
+      fetchAgent,
+    }
+    if (config.connectionType == 'pairing_code') {
+      socketConfig.printQRInTerminal = false
+      socketConfig.browser = Browsers.ubuntu('Chrome')
+    } else {
+      if (!config.ignoreHistoryMessages) {
+        browser = Browsers.ubuntu('Desktop')
+      }
+      socketConfig.printQRInTerminal = true
+      socketConfig.browser = browser
+    }
 
     try {
-      sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: config.connectionType == 'qrcode',
-        browser,
-        msgRetryCounterCache,
-        syncFullHistory: !config.ignoreHistoryMessages,
-        logger: loggerBaileys,
-        getMessage,
-        shouldIgnoreJid: config.shouldIgnoreJid,
-        retryRequestDelayMs: config.retryRequestDelayMs,
-        patchMessageBeforeSending,
-        agent,
-        fetchAgent,
-        version: WHATSAPP_VERSION,
-      })
+      sock = makeWASocket(socketConfig)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error && error.isBoom && !error.isServer) {
