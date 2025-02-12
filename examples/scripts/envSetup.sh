@@ -281,10 +281,11 @@ setup(){
     # SETUP PRINCIPAL
     if [ -f ".env" ]; then
         echo "Arquivo .env já existe. O que você gostaria de fazer?
+        0 - Gerar novo .env
         1 - Configurar as Opções para o Minio
         2 - Gerar Stack Atualizada da Unoapi
         3 - Gerar Stack Atualizada do Chatwoot Uno
-        0 - Gerar novo .env"
+        9 - Sair"
         read resposta
 
         if [ "$resposta" = "1" ]; then
@@ -298,6 +299,10 @@ setup(){
         if [ "$resposta" = "3" ]; then
             echo "Configurado Chatwoot UNO..."
             genCwStack
+        fi
+        if [ "$resposta" = "9" ]; then
+            echo "Saindo..."
+            exit 1
         fi
         if [ "$resposta" = "0" ]; then
             echo "Setup Inicial..."
