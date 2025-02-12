@@ -214,8 +214,10 @@ genUnoapiStack() {
     fi
 
     echo "Você quer Gerar uma stack para a versão $LATEST_TAG da unoapi? 
-    Se sim: Aperte Enter, 
-    caso deseje: Digite a versão que quer utilizar"
+    para confirmar as versões disponíves, utilize este link: https://hub.docker.com/r/clairton/unoapi-cloud/tags
+
+    Se Deseja a versão $LATEST_TAG: Apenas tecle Enter, 
+    Caso Deseje outra Versão: Digite-a para utilizar"
     read unoapi_version
     unoapi_version=${unoapi_version:-$LATEST_TAG}
 
@@ -250,8 +252,10 @@ genCwStack() {
     fi
 
     echo "Você quer Gerar uma stack para a versão $LATEST_TAG do chatwoot uno? 
-    Se sim: Aperte Enter, 
-    caso deseje: Digite a versão que quer utilizar"
+    para confirmar as versões disponíves, utilize este link: https://hub.docker.com/r/clairton/chatwoot/tags
+
+    Se Deseja a versão $LATEST_TAG: Apenas tecle Enter, 
+    Caso Deseje outra Versão: Digite-a para utilizar"
     read cw_version
     cw_version=${cw_version:-$LATEST_TAG}
 
