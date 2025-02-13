@@ -1,0 +1,50 @@
+x-base: &base
+  image: ${UNOAPI_IMAGE}
+  entrypoint: echo 'ok!'
+  networks:
+    - ${DOCKERNETWORK}
+  environment:
+    AMQP_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+    REDIS_URL: redis://:${REDIS_PASS}@redis:6379
+    BASE_URL: https://${UNOAPI_SUBDOMAIN} #Dominio da Unoapi
+    STORAGE_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY} #Access key do Bucket
+    STORAGE_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY} #Secret Key do Bucket
+    STORAGE_BUCKET_NAME: ${UNOAPI_BUCKET} #Nome do Bucket
+    STORAGE_ENDPOINT:	https://${MINIOAPI_SUBDOMAIN} #Domínio do Bucket
+    STORAGE_FORCE_PATH_STYLE: true #true para minio
+    STORAGE_REGION: ${MINIO_REGION} #Região do bucket
+    IGNORE_GROUP_MESSAGES: true #Ignorar Mensagem de Grupos -> true OU false
+    IGNORE_OWN_MESSAGES: false #Ignorar Mensagens Próprias de outros dispositivos, ex: App ou Web -> true OU false
+    UNOAPI_AUTH_TOKEN: ${UNOAPI_AUTH_TOKEN}
+    REJECT_CALLS: "" #Mensagem enviada ao Rejeitar Chamadas -> Vazio não rejeita as chamadas no app
+    REJECT_CALLS_WEBHOOK: "Ligação Recebida" #Aviso de ligação recebida no webhook
+    SEND_CONNECTION_STATUS: false #Receber status da conexãa -> true OU false
+    LOG_LEVEL: debug #Nível de log da api
+    UNO_LOG_LEVEL: debug #Nível do log da Unoapi
+    IGNORE_YOURSELF_MESSAGES: false #Ignorar suas mensagens de outros webhooks da uno -> true OU false
+  restart: 'no'
+
+services:
+  cloud:
+    <<: *base
+    entrypoint: yarn cloud
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.unoapiweb.rule=Host(`${UNOAPI_SUBDOMAIN}`)
+      - traefik.http.routers.unoapiweb.entrypoints=web,websecure
+      - traefik.http.services.unoapiweb.loadbalancer.server.port=9876
+      - traefik.http.routers.unoapiweb.service=unoapiweb
+      - traefik.http.routers.unoapiweb.tls.certresolver=letsencryptresolver
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  ${DOCKERNETWORK}:
+    external: true

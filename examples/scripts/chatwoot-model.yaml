@@ -1,0 +1,90 @@
+version: '3.7'
+
+
+x-base: &base
+  image: ${CHATWOOT_IMAGE}
+  restart: 'no'
+  command: echo 'ok'
+  environment:
+    ENABLE_ACCOUNT_SIGNUP: false
+    REDIS_URL: redis://:${REDIS_PASS}@redis:6379
+    DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}
+    ACTIVE_STORAGE_SERVICE: s3_compatible
+    STORAGE_BUCKET_NAME: ${CW_BUCKET}
+    STORAGE_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+    STORAGE_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+    STORAGE_REGION: ${MINIO_REGION}
+    STORAGE_ENDPOINT: https://${MINIOAPI_SUBDOMAIN}
+    STORAGE_FORCE_PATH_STYLE: true
+    SECRET_KEY_BASE: ${SECRET_KEY_CW}
+    FRONTEND_URL: https://${CHATWOOT_SUBDOMAIN}
+    DEFAULT_LOCALE: 'pt_BR'
+    INSTALLATION_ENV: docker
+    NODE_ENV: production
+    RAILS_ENV: production
+    #MAILER_INBOUND_EMAIL_DOMAIN: 
+    #RAILS_INBOUND_EMAIL_SERVICE: 
+    #SMTP_ADDRESS: 
+    #SMTP_PASSWORD: 
+    #SMTP_PORT: 
+    #SMTP_USERNAME: 
+    #SMTP_AUTHENTICATION: 
+    #SMTP_ENABLE_STARTTLS_AUTO: 
+    RAILS_MASTER_KEY: ${SECRET_KEY_CW}
+    WEB_CONCURRENCY: 5
+    RAILS_MAX_THREADS: 5
+    SIDEKIQ_CONCURRENCY: 5
+    LOG_LEVEL: info
+    UNOAPI_AUTH_TOKEN: ${UNOAPI_AUTH_TOKEN}
+    ENABLE_RACK_ATTACK: false
+    POSTGRES_STATEMENT_TIMEOUT: 600s
+    RACK_TIMEOUT_SERVICE_TIMEOUT: 600s
+services:
+  web:
+    <<: *base
+    command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.chatwootweb.rule=Host(`${CHATWOOT_SUBDOMAIN}`)
+      - traefik.http.routers.chatwootweb.entrypoints=web,websecure
+      - traefik.http.services.chatwootweb.loadbalancer.server.port=3000
+      - traefik.http.routers.chatwootweb.service=chatwootweb
+      - traefik.http.routers.chatwootweb.tls.certresolver=letsencryptresolver
+    networks:
+      - ${DOCKERNETWORK}
+    deploy:
+      resources:
+        limits:
+          cpus: '3.00'
+          memory: 2048M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+  worker:
+    <<: *base
+    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    restart: always
+    networks:
+      - ${DOCKERNETWORK}
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
+  migrate:
+    <<: *base
+    restart: 'no'
+    command: ['bundle', 'exec', 'rails', 'db:chatwoot_prepare']
+    networks:
+      - ${DOCKERNETWORK}
+
+networks:
+  ${DOCKERNETWORK}:
+    external: true
