@@ -19,5 +19,6 @@
 	"auto_restart": "Configura para reiniciar a sessão a cada %s milliseconds.",
 	"failed_decrypt": "🕒 Não foi possível ler a mensagem. Peça para enviar novamente ou abra o Whatsapp no celular.",
 	"error": "Erro não tratado: %s.",
-	"on_read_qrcode": "Maravilha, leia o qrcode, se ainda não leu. O token de authenticação para essa sessão é %s"
+	"on_read_qrcode": "Maravilha, leia o qrcode, se ainda não leu. O token de authenticação para essa sessão é %s",
+	"pairing_code": "Informe o código para conectar no whatsapp: %s"
 }
