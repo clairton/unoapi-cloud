@@ -1,0 +1,79 @@
+version: "3.7"
+
+services:
+
+## --------------------------- TRAEFIK --------------------------- ##
+  traefik:
+    image: traefik:v3.3.3
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=${DOCKERNETWORK}"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.transport.respondingTimeouts.idleTimeout=3600"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencryptresolver.acme.storage=/etc/traefik/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencryptresolver.acme.email=${LETSENCRYPT_MAIL}"
+      - "--log.level=DEBUG"
+      - "--log.format=common"
+      - "--log.filePath=/var/log/traefik/traefik.log"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access-log"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+      - "traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-https"
+      - "traefik.http.routers.http-catchall.priority=1"
+    volumes:
+      - "certsVolume:/etc/traefik/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      #- "/var/log/traefik:/var/log/traefik"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - ${DOCKERNETWORK}
+
+## --------------------------- PORTAINER --------------------------- ##
+  portainer:
+    image: portainer/portainer-ce:latest
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+    networks:
+      - ${DOCKERNETWORK}
+    ports:
+      - 9000:9000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_SUBDOMAIN}`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.docker.network=${DOCKERNETWORK}"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.priority=1"
+
+
+volumes:
+  #PORTAINER_VOLUME
+  portainer_data:
+
+  #TRAEFIK_VOLUME
+  certsVolume:
+
+networks:
+  ${DOCKERNETWORK}:
+    external: true
+    name: ${DOCKERNETWORK} 
