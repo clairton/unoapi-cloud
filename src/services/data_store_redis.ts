@@ -1,4 +1,4 @@
-import { proto, WAMessage, WAMessageKey, GroupMetadata } from 'baileys'
+import { proto, WAMessage, WAMessageKey, GroupMetadata, Contact } from 'baileys'
 import { DataStore, MessageStatus } from './data_store'
 import { jidToPhoneNumber, phoneNumberToJid, isIndividualJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
@@ -22,6 +22,8 @@ import {
   getGroup,
   delConfig,
   setTemplates,
+  setContact,
+  getContact,
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -65,6 +67,21 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         return profileUrl
       }
     }
+  }
+  store.setContact = async (contact: Partial<Contact>) => {
+    const id =  jidToPhoneNumber(contact.id || contact.lid)
+    const newData: Partial<Contact> = {}
+    if (contact.name) {
+      newData.name = contact.name
+    }
+    if (contact.verifiedName) {
+      newData.verifiedName = contact.verifiedName
+    }
+    return setContact(phone, id, newData)
+  }
+  store.getContact = async (id: string) => {
+    const newId =  jidToPhoneNumber(id)
+    return getContact(phone, newId)
   }
   store.getGroupMetada = async (jid: string) => {
     return getGroup(phone, jid)
