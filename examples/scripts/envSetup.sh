@@ -157,11 +157,11 @@ EOL
     # Carregar as variáveis de ambiente do .env
     export $(grep -v '^#' .env | xargs)
 
-    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/tutorials/examples/scripts/docker-model.yaml -o docker-model.yaml
+    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/main/examples/scripts/docker-model.yaml -o docker-model.yaml
 
     envsubst < docker-model.yaml > docker-compose.yaml
 
-    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/tutorials/examples/scripts/apps-model.yaml -o apps-model.yaml
+    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/main/examples/scripts/apps-model.yaml -o apps-model.yaml
 
     envsubst < apps-model.yaml > apps-compose.yaml
 
@@ -230,7 +230,7 @@ genUnoapiStack() {
     export $(grep -v '^#' .env | xargs)
     export UNOAPI_IMAGE="clairton/unoapi-cloud:$unoapi_version"
 
-    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/tutorials/examples/scripts/uno-model.yaml -o uno-model.yaml
+    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/main/examples/scripts/uno-model.yaml -o uno-model.yaml
 
     envsubst < uno-model.yaml > docker-unoapi.yaml
 
@@ -269,7 +269,7 @@ genCwStack() {
     export CHATWOOT_IMAGE="clairton/chatwoot:$cw_version"
     export SECRET_KEY_CW=$(generate_random_string)
 
-    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/tutorials/examples/scripts/chatwoot-model.yaml -o chatwoot-model.yaml
+    curl -fsSL https://raw.githubusercontent.com/clairton/unoapi-cloud/refs/heads/main/examples/scripts/chatwoot-model.yaml -o chatwoot-model.yaml
 
     envsubst < chatwoot-model.yaml > docker-chatwoot.yaml
 
