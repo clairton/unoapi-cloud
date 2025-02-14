@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent, Contact as ContactBaileys } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Incoming } from './incoming'
 import { Listener } from './listener'
@@ -305,9 +305,22 @@ export class ClientBaileys implements Client {
     })
     if (!this.config.ignoreHistoryMessages) {
       logger.info('Config import history messages %', this.phone)
-      this.event('messaging-history.set', async ({ messages, isLatest }: { messages: proto.IWebMessageInfo[]; isLatest?: boolean }) => {
-        logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
-        this.listener.process(this.phone, messages, 'history')
+      this.event('messaging-history.set', async ({ messages, isLatest, contacts }: { messages: proto.IWebMessageInfo[]; contacts: ContactBaileys[]; isLatest?: boolean }) => {
+        if (contacts) {
+            const { dataStore } = this.store!
+            await Promise.all(contacts.map(async (c: Partial<ContactBaileys>) => {
+                const cId = c.lid || c.id
+                if (cId && c.imgUrl) {
+                  await dataStore.setImageUrl(cId, c.imgUrl)
+                }
+                return dataStore.setContact(c)
+              })
+            )
+        }
+        if (messages) {
+          logger.info('Importing history messages, is latest %s %s', isLatest, this.phone)
+          this.listener.process(this.phone, messages, 'history')
+        }
       })
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -625,6 +638,18 @@ export class ClientBaileys implements Client {
       remoteJid = key.remoteJid
     }
     if (remoteJid) {
+      if (key.fromMe) {
+        const { dataStore } = this.store!
+        logger.debug('Loading contact for %s...', remoteJid)
+        const contact = await dataStore.getContact(remoteJid)
+        logger.debug('Loaded contact for %s => %s', remoteJid, contact)
+        if (contact?.name) {
+          message['contactName'] = contact.name
+        }
+        if (contact?.verifiedName) {
+          message['contactBizName'] = contact?.verifiedName
+        }
+      }
       const jid = await this.exists(remoteJid)
       if (jid) {
         try {

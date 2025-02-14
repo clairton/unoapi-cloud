@@ -89,9 +89,9 @@ export class ListenerBaileys implements Listener {
     const store = await config.getStore(phone, config)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
-      if (i.key && i.key) {
+      if (i.key && i.key.id) {
         const idUno = uuid()
-        const idBaileys = i.key.id!
+        const idBaileys = i.key.id
         await store?.dataStore.setUnoId(idBaileys, idUno)
         await store?.dataStore.setKey(idUno, i.key)
         await store?.dataStore.setKey(idBaileys, i.key)
