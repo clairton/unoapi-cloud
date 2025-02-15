@@ -35,33 +35,33 @@ initialSetup(){
         read domain
     done
 
-    echo "Subdomínio do Portainer (padrão: portainer.$domain):"
+    echo "Subdomínio do Portainer (apenas, ex: portainer):"
     read portainer_subdomain
-    portainer_subdomain=${portainer_subdomain:-"portainer.$domain"}
+    portainer_subdomain=${portainer_subdomain:-"portainer"}.$domain
 
-    echo "Subdomínio do MinIO Console (padrão: console.minio.$domain):"
+    echo "Subdomínio do MinIO Console (apenas, ex: console.minio):"
     read minioweb_subdomain
-    minioweb_subdomain=${minioweb_subdomain:-"console.minio.$domain"}
+    minioweb_subdomain=${minioweb_subdomain:-"console.minio"}.$domain
 
-    echo "Subdomínio do MinIO API (padrão: api.minio.$domain):"
+    echo "Subdomínio do MinIO API (apenas, ex: api.minio):"
     read minioapi_subdomain
-    minioapi_subdomain=${minioapi_subdomain:-"api.minio.$domain"}
+    minioapi_subdomain=${minioapi_subdomain:-"api.minio"}.$domain
 
-    echo "Subdomínio para o chatwoot (padrão: app.$domain):"
+    echo "Subdomínio para o chatwoot (apenas, ex: app ou chat):"
     read chatwoot_subdomain
-    chatwoot_subdomain=${chatwoot_subdomain:-"app.$domain"}
+    chatwoot_subdomain=${chatwoot_subdomain:-"app"}.$domain
 
-    echo "Subdomínio para o UnoAPI (padrão: unoapi.$domain):"
+    echo "Subdomínio para o UnoAPI (apenas, ex: unoapi):"
     read unoapi_subdomain
-    unoapi_subdomain=${unoapi_subdomain:-"unoapi.$domain"}
+    unoapi_subdomain=${unoapi_subdomain:-"unoapi"}.$domain
 
-    echo "Subdomínio para o Redis (padrão: redis.$domain):"
+    echo "Subdomínio para o Redis (apenas, ex: redis):"
     read redis_subdomain
-    redis_subdomain=${redis_subdomain:-"redis.$domain"}
+    redis_subdomain=${redis_subdomain:-"redis"}.$domain
 
-    echo "Subdomínio para o RabbitMQ (padrão: rabbitmq.$domain):"
+    echo "Subdomínio para o RabbitMQ (apenas, ex: rabbitmq):"
     read rabbitmq_subdomain
-    rabbitmq_subdomain=${rabbitmq_subdomain:-"rabbitmq.$domain"}
+    rabbitmq_subdomain=${rabbitmq_subdomain:-"rabbitmq"}.$domain
 
     echo "Usuário do PostgreSQL: (padrão: postgre)"
     read postgres_user
