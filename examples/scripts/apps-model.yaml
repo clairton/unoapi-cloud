@@ -96,8 +96,8 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_PASS}
-      - MINIO_BROWSER_REDIRECT_URL=https://${MINIOAPI_SUBDOMAIN}
-      - MINIO_SERVER_URL=https://${MINIOWEB_SUBDOMAIN}
+      - MINIO_BROWSER_REDIRECT_URL=https://${MINIOWEB_SUBDOMAIN}
+      - MINIO_SERVER_URL=https://${MINIOAPI_SUBDOMAIN}
     deploy:
       resources:
         limits:
