@@ -475,6 +475,7 @@ export const connect = async ({
       patchMessageBeforeSending,
       agent,
       fetchAgent,
+      qrTimeout: config.qrTimeoutMs,
     }
     if (config.connectionType == 'pairing_code') {
       socketConfig.printQRInTerminal = false

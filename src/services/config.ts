@@ -63,6 +63,7 @@ export type Config = {
   wavoipToken:  string | undefined,
   useRedis: boolean,
   useS3: boolean,
+  qrTimeoutMs: number,
 }
 
 export const defaultConfig: Config = {
@@ -116,6 +117,7 @@ export const defaultConfig: Config = {
   wavoipToken: '',
   useRedis: false,
   useS3: false,
+  qrTimeoutMs: 60000
 }
 
 export interface getConfig {

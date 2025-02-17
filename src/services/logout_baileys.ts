@@ -31,8 +31,8 @@ export class LogoutBaileys implements Logout {
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     const { sessionStore, dataStore } = store
-    if (await sessionStore.isStatusDisconnect(phone)) {
-      dataStore.cleanSession()
+    if (!await sessionStore.isStatusOnline(phone)) {
+      await dataStore.cleanSession()
     } else {
       await client.logout()
     }

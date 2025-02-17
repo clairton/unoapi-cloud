@@ -698,7 +698,7 @@
                         if (data.status === 'offline' || data.status === 'disconnected') {
                             attemptRegister(number, token);
                         } else if (data.status === 'connecting') {
-                            connectToWebSocket(number);
+                            connectToWebSocket(number, data.qrTimeoutMs);
                         } else if (data.status === 'online') {
                             document.getElementById('qrCodeContainer').innerHTML = '';
                             document.getElementById('qrCodeMessage').textContent = 'Sessão já está Conectada';
@@ -727,8 +727,8 @@
                     if (!response.ok) throw new Error("Erro.");
                     return response.json();
                 })
-                .then(() => {
-                    checkStatusAndRetry(number, token);
+                .then((data) => {
+                    checkStatusAndRetry(number, token, data.qrTimeoutMs);
                 })
                 .catch(error => {
                     alert(error.message);
@@ -736,10 +736,10 @@
             }
 
             // check connecting status
-            function checkStatusAndRetry(number, token) {
+            function checkStatusAndRetry(number, token, qrTimeoutMs) {
                 let attempts = 0;
-                const maxAttempts = 3; 
-                connectToWebSocket(number);
+                const maxAttempts = 3;
+                connectToWebSocket(number, qrTimeoutMs);
 
                 const intervalId = setInterval(() => {
                     fetch(`${apiUrl}/v15.0/${number}`, {
@@ -779,7 +779,7 @@
             }
 
             // conect to websocket 
-            function connectToWebSocket(phoneNumber) {
+            function connectToWebSocket(phoneNumber, qrTimeoutMs) {
                 if (window.socket && window.socket.connected) {
                     console.log("WebSocket já está conectado.");
                     return;
@@ -789,6 +789,7 @@
 
                 const qrcodeDiv = document.getElementById('qrCodeContainer');
                 const statusDiv = document.getElementById('qrCodeMessage');
+                var lastTimeout = undefined;
 
                 socket.on('broadcast', (data) => {
                     if (phoneNumber && data.phone == phoneNumber) {
@@ -796,6 +797,14 @@
                             // Exibe o QR Code
                             qrcodeDiv.innerHTML = `<img src="${data.content}" alt="QR Code">`;
                             statusDiv.textContent = `Leia o QR Code Abaixo`;
+                            const timeoutMs =  qrTimeoutMs - (qrTimeoutMs / 5)
+                            if (lastTimeout) {
+                              clearTimeout(lastTimeout);
+                            }
+                            lastTimeout = setTimeout(function() {
+                              qrcodeDiv.innerHTML = 'Esperando um novo qrcode';
+                              qrcodeDiv.textContent = '';
+                            }, timeoutMs);
                         } else if (data.type === 'status' && data.content) {
                             if (data.content.toLowerCase().indexOf('connected with')  !== -1) {
                                 qrcodeDiv.innerHTML = '';
@@ -806,6 +815,7 @@
                                 statusDiv.textContent = 'Gerando novo QR Code...';
                                 attemptRegister(phoneNumber, localStorage.getItem(tokenKey));
                             } else {
+                                qrcodeDiv.innerHTML = ''
                                 statusDiv.textContent = `Status: ${data.content}`;
                             }
                         }

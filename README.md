@@ -370,6 +370,7 @@ ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, defau
 MAX_CONNECT_RETRY=3 max try connect 
 MAX_CONNECT_TIME_MS=300000 interval of max connect, 5 minutes
 CONNECTION_TYPE=connection type use qrcode or pairing_code, default is qrcode
+QR_TIMEOUT_MS=60000 timeout for read qrcode, default is 60000
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
