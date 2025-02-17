@@ -54,6 +54,7 @@ export class PhoneNumberController {
         const { sessionStore } = store
         configs.push({ ...config, display_phone_number: phone, status: await sessionStore.getStatus(phone) })
       }
+      logger.debug('Configs retrieved!')
       return res.status(200).json({ data: configs })
     } catch (e) {
       return res.status(500).json({ status: 'error', message: e.message })
