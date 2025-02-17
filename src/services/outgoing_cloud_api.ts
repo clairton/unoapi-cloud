@@ -42,8 +42,10 @@ export class OutgoingCloudApi implements Outgoing {
     }
     const body = JSON.stringify(message)
     const headers = {
-      'Content-Type': 'application/json; charset=utf-8',
-      [webhook.header]: webhook.token,
+      'Content-Type': 'application/json; charset=utf-8'
+    }
+    if (webhook.header && webhook.token) {
+      headers[webhook.header] = webhook.token
     }
     const url = webhook.urlAbsolute || `${webhook.url}/${phone}`
     logger.debug(`Send url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
