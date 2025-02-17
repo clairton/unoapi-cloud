@@ -32,7 +32,7 @@ export class ReloadBaileys extends Reload {
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     const { sessionStore }  = store
-    if (await sessionStore.isStatusOnline(phone)) {
+    if (await sessionStore.isStatusOnline(phone) || await sessionStore.isStatusConnecting(phone)) {
       await currentClient.disconnect()
     }
     await super.run(phone)
