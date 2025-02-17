@@ -62,6 +62,11 @@ export class ListenerBaileys implements Listener {
         type,
         messages[0]['message']['imageMessage']['url']
       )
+      // await this.broadcast.send(
+      //   phone,
+      //   'status',
+      //   messages[0]['message']['imageMessage']['caption']
+      // )
     } else if(type === 'status') {
       await this.broadcast.send(
         phone,

@@ -39,6 +39,7 @@ import {
   UNOAPI_HEADER_NAME,
   WAVOIP_TOKEN,
   CONNECTION_TYPE,
+  QR_TIMEOUT_MS,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -55,6 +56,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.sendConnectionStatus = SEND_CONNECTION_STATUS
     config.autoConnect = AUTO_CONNECT
     config.autoRestartMs = AUTO_RESTART_MS
+    config.qrTimeoutMs = QR_TIMEOUT_MS
     config.composingMessage = COMPOSING_MESSAGE
     config.baseStore = BASE_STORE
     config.rejectCalls = IGNORE_CALLS
