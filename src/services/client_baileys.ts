@@ -20,7 +20,7 @@ import {
   OnReconnect,
 } from './socket'
 import { Client, getClient, clients, Contact } from './client'
-import { Config, defaultConfig, getConfig } from './config'
+import { Config, configs, defaultConfig, getConfig, getMessageMetadataDefault } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
@@ -283,6 +283,7 @@ export class ClientBaileys implements Client {
     this.close = closeDefault
     this.config = defaultConfig
     this.socketLogout = logoutDefault
+    this.config.getMessageMetadata = getMessageMetadataDefault
   }
 
   async subscribe() {
