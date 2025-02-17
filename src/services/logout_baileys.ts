@@ -28,6 +28,13 @@ export class LogoutBaileys implements Logout {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    await client.logout()
+    const config = await this.getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const { sessionStore, dataStore } = store
+    if (await sessionStore.isStatusDisconnect(phone)) {
+      dataStore.cleanSession()
+    } else {
+      await client.logout()
+    }
   }
 }
