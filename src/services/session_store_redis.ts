@@ -1,5 +1,5 @@
 import { SessionStore, sessionStatus } from './session_store'
-import { configKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConfig, getConnectCount, setConnectCount } from './redis'
+import { configKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConfig, getConnectCount, setConnectCount, delAuth } from './redis'
 import logger from './logger'
 import { MAX_CONNECT_RETRY } from '../defaults'
 
@@ -52,6 +52,7 @@ export class SessionStoreRedis extends SessionStore {
         if (await redisGet(key) == 'connecting' || !await getConfig(phone) ) {
           logger.info(`Sync ${phone} lost connecting!`)
           await this.setStatus(phone, 'disconnected')
+          await delAuth(`${phone}:creds`)
         }
         if (await redisGet(key) == 'blocked' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
           logger.info(`Sync ${phone} blocked!`)
