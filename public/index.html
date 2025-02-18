@@ -346,6 +346,8 @@
                         <div id="webhooksContainer">
                             <h6>Webhooks</h6>
                             <div class="webhook mb-3">
+                                <label for="webhookId" class="form-label">ID</label>
+                                <input type="text" class="form-control mb-2 webhook-id" placeholder="Webhook ID">
                                 <label for="webhookUrl" class="form-label">URL</label>
                                 <input type="text" class="form-control mb-2 webhook-url" placeholder="Webhook URL">
                                 <label for="webhookToken" class="form-label">Token</label>
@@ -379,8 +381,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <p id="qrCodeMessage">Aguarde o evento de QrCode</p>
-                    <div id="qrCodeContainer">QR Code será exibido aqui</div>
+                    <p id="qrCodeMessage">Aguarde o evento com o QrCode/PairingCode</p>
+                    <div id="qrCodeContainer">QrCode/PairingCode será exibido aqui</div>
                 </div>
             </div>
         </div>
@@ -424,6 +426,8 @@
             $('#addWebhookButton').on('click', function () {
                 const webhookTemplate = `
                     <div class="webhook mb-3">
+                        <label for="webhookId" class="form-label">ID</label>
+                        <input type="text" class="form-control mb-2 webhook-id" placeholder="Webhook ID">
                         <label for="webhookUrl" class="form-label">URL</label>
                         <input type="text" class="form-control mb-2 webhook-url" placeholder="Webhook URL">
                         <label for="webhookToken" class="form-label">Token</label>
@@ -603,6 +607,8 @@
                     session.webhooks.forEach(webhook => {
                         const webhookTemplate = `
                             <div class="webhook mb-3">
+                                <label for="webhookId" class="form-label">ID</label>
+                                <input type="text" class="form-control mb-2 webhook-id" value="${webhook.id}" placeholder="Webhook ID">
                                 <label for="webhookUrl" class="form-label">URL</label>
                                 <input type="text" class="form-control mb-2 webhook-url" value="${webhook.urlAbsolute}" placeholder="Webhook URL">
                                 <label for="webhookToken" class="form-label">Token</label>
@@ -649,6 +655,7 @@
 
                     $('#webhooksContainer .webhook').each(function () {
                         const webhook = {
+                            id: $(this).find('.webhook-id').val(),
                             urlAbsolute: $(this).find('.webhook-url').val(),
                             token: $(this).find('.webhook-token').val(),
                             header: $(this).find('.webhook-header').val(),
@@ -802,7 +809,7 @@
                               clearTimeout(lastTimeout);
                             }
                             lastTimeout = setTimeout(function() {
-                              qrcodeDiv.innerHTML = 'Esperando um novo qrcode';
+                              qrcodeDiv.innerHTML = 'Esperando um novo QrCode/PairingCode';
                               qrcodeDiv.textContent = '';
                             }, timeoutMs);
                         } else if (data.type === 'status' && data.content) {
@@ -812,7 +819,7 @@
                             } else if (data.content.toLowerCase().indexOf('generate qrcode is exceded')  !== -1) {
                                 console.log("QRCODE EXCEDIDO")
                                 qrcodeDiv.innerHTML = '';
-                                statusDiv.textContent = 'Gerando novo QR Code...';
+                                statusDiv.textContent = 'Gerando novo QrCode/PairingCode...';
                                 attemptRegister(phoneNumber, localStorage.getItem(tokenKey));
                             } else {
                                 qrcodeDiv.innerHTML = ''
@@ -827,7 +834,7 @@
             $('#connectModal').on('hidden.bs.modal', function () {
                 //clear modal status
                 document.getElementById('qrCodeContainer').innerHTML = '';
-                document.getElementById('qrCodeMessage').textContent = 'Aguarde o QrCode';
+                document.getElementById('qrCodeMessage').textContent = 'Aguarde o QrCode/PairingCode';
 
                 //disconnect websocket
                 if (window.socket && window.socket.connected) {
