@@ -142,7 +142,7 @@ export const connect = async ({
 
   const onConnectionUpdate = async (event: Partial<ConnectionState>) => {
     logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
-    if (event.qr) {
+    if (event.qr && config.connectionType == 'qrcode') {
       if (status.attempt > attempts) {
         const message =  t('attempts_exceeded', attempts)
         logger.debug(message)
@@ -437,6 +437,7 @@ export const connect = async ({
   }
 
   const connect = async () => {
+    await sessionStore.syncConnection(phone)
     if (await sessionStore.isStatusConnecting(phone)) {
       logger.warn('Already Connecting %s', phone)
       return
@@ -504,7 +505,7 @@ export const connect = async ({
     if (sock) {
       dataStore.bind(sock.ev)
       event('creds.update', saveCreds)
-      event('connection.update', onConnectionUpdate)
+      logger.info('Connection type %s already creds %s', config.connectionType, sock?.authState?.creds?.registered)
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone}`)
         try {
@@ -514,10 +515,13 @@ export const connect = async ({
           const beatyCode = `${code?.match(/.{1,4}/g)?.join('-')}`
           const message = t('pairing_code', beatyCode)
           await onNotification(message, true)
+          event('connection.update', onConnectionUpdate)
         } catch (error) {
           console.error(error)
           throw error
         }
+      } else {
+        event('connection.update', onConnectionUpdate)
       }
       if (config.wavoipToken) {
         useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)

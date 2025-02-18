@@ -1,5 +1,5 @@
 import { SessionStore, sessionStatus } from './session_store'
-import { configKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConfig, getConnectCount, setConnectCount, delAuth } from './redis'
+import { configKey, authKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConfig, getConnectCount, setConnectCount, delAuth } from './redis'
 import logger from './logger'
 import { MAX_CONNECT_RETRY } from '../defaults'
 
@@ -49,19 +49,26 @@ export class SessionStoreRedis extends SessionStore {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const phone = key.replace(toReplaceStatus, '')
-        if (await redisGet(key) == 'connecting' || !await getConfig(phone) ) {
-          logger.info(`Sync ${phone} lost connecting!`)
-          await this.setStatus(phone, 'disconnected')
-          await delAuth(`${phone}:creds`)
-        }
-        if (await redisGet(key) == 'blocked' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
-          logger.info(`Sync ${phone} blocked!`)
-          await this.setStatus(phone, 'offline')
-        }
+        await this.syncConnection(phone)
       }
     } catch (error) {
       logger.error(error, 'Error on sync lost connecting')
       throw error
+    }
+  }
+
+  async syncConnection(phone: string) {
+    const aKey = authKey(`${phone}*`)
+    const keys = await redisKeys(aKey)
+    if (keys.length == 1 && keys[0] == authKey(`${phone}:creds`)) {
+      logger.info(`Sync ${phone} lost connecting!`)
+      await delAuth(phone)
+      await this.setStatus(phone, 'disconnected')
+    }
+    const key = sessionStatusKey(phone)
+    if (await redisGet(key) == 'blocked' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
+      logger.info(`Sync ${phone} blocked!`)
+      await this.setStatus(phone, 'offline')
     }
   }
 }

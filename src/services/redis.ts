@@ -131,7 +131,7 @@ const redisSetAndExpire = async function (key: string, value: any, ttl: number) 
   }
 }
 
-const authKey = (phone: string) => {
+export const authKey = (phone: string) => {
   return `${BASE_KEY}auth:${phone}`
 }
 

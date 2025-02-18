@@ -65,4 +65,6 @@ export abstract class SessionStore {
   }
 
   async syncConnections() {}
+
+  async syncConnection(_phone: string) {}
 }
