@@ -168,13 +168,13 @@ export const connect = async ({
       await sessionStore.setStatus(phone, 'online')
       await onNotification(t('online_session'), true)
     }
-
+    
     switch (event.connection) {
       case 'open':
         await onOpen()
         break
-
-      case 'close':
+        
+        case 'close':
         await onClose(event)
         break
 
@@ -238,7 +238,7 @@ export const connect = async ({
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
       status.attempt = 1
-      if (!(await sessionStore.isStatusConnecting(phone))) {
+      if (!await sessionStore.isStatusConnecting(phone)) {
         const message = t('removed')
         await onNotification(message, true)
       }
