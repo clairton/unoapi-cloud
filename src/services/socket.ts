@@ -198,6 +198,7 @@ export const connect = async ({
           logger.warn(message)
           await onDisconnected(phone, {})
         }
+        await sessionStore.syncConnection(phone)
       }, CONNECTING_TIMEOUT_MS)
     } else {
       connectingTimeout = null
@@ -248,8 +249,10 @@ export const connect = async ({
       await close()
       const message = t('unique')
       return onNotification(message, true)
-    }
-    if (status.attempt == 1) {
+    } else if (statusCode === DisconnectReason.restartRequired) {
+      const message = t('restart')
+      await onNotification(message, true)
+    } else if (status.attempt == 1) {
       const detail = lastDisconnect?.error?.output?.payload?.error
       const message = t('closed', statusCode, detail)
       await onNotification(message, true)
@@ -493,6 +496,7 @@ export const connect = async ({
       sock = makeWASocket(socketConfig)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.log(error, error.isBoom, !error.isServer)
       if (error && error.isBoom && !error.isServer) {
         await onClose({ lastDisconnect: { error } })
       } else {
