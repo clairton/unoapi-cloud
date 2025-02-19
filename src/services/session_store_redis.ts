@@ -58,10 +58,11 @@ export class SessionStoreRedis extends SessionStore {
   }
 
   async syncConnection(phone: string) {
+    logger.info(`Syncing ${phone} lost connection`)
     const aKey = authKey(`${phone}*`)
     const keys = await redisKeys(aKey)
+    logger.info(`Found auth ${keys.length} keys for session ${phone}`)
     if (keys.length == 1 && keys[0] == authKey(`${phone}:creds`)) {
-      logger.info(`Sync ${phone} lost connecting!`)
       await delAuth(phone)
       await this.setStatus(phone, 'disconnected')
     }

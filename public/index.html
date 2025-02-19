@@ -256,6 +256,13 @@
                                 <label for="rejectCalls" class="form-label">Mensagem ao Rejeitar Chamadas</label>
                                 <input type="text" class="form-control" id="rejectCalls" name="rejectCalls" placeholder="Deixe em Branco para não Rejeitar ligações automaticamente">
                             </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                              <label for="connectionType" class="form-label">Tipo de Conexão</label>
+                              <select nid="connectionType" name="connectionType" class="form-control">
+                                <option value="qrcode" selected>QrCode</option>
+                                <option value="pairing_code">PairingCode</option>
+                              </select>
+                            </div>
                         </div>
                         <div class="row edit-form-row">
                             <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
@@ -599,6 +606,7 @@
                 $('#sendReactionAsReply').prop('checked', session.sendReactionAsReply);
                 $('#autoConnect').prop('checked', session.autoConnect);
                 $('#ignoreBroadcastMessages').prop('checked', session.ignoreBroadcastMessages);
+                $('#connectionType').val(session.connectionType);
 
                 // Limpar webhooks existentes no formulário de edição
                 $('#webhooksContainer .webhook').remove();
@@ -650,6 +658,7 @@
                         sendReactionAsReply: $('#sendReactionAsReply').is(':checked'),
                         autoConnect: $('#autoConnect').is(':checked'),
                         ignoreBroadcastMessages: $('#ignoreBroadcastMessages').is(':checked'),
+                        connectionType: $('#connectionType').val(),
                         webhooks: []
                     };
 
