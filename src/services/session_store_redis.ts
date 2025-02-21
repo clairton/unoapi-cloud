@@ -59,6 +59,10 @@ export class SessionStoreRedis extends SessionStore {
 
   async syncConnection(phone: string) {
     logger.info(`Syncing ${phone} lost connection`)
+    if(await this.isStatusRestartRequired(phone)) {
+      logger.info(`Restart required ${phone}`)
+      return
+    }
     const aKey = authKey(`${phone}*`)
     const keys = await redisKeys(aKey)
     logger.info(`Found auth ${keys.length} keys for session ${phone}`)

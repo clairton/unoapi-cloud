@@ -252,6 +252,9 @@ export const connect = async ({
     } else if (statusCode === DisconnectReason.restartRequired) {
       const message = t('restart')
       await onNotification(message, true)
+      await sessionStore.setStatus(phone, 'restart_required')
+      await close()
+      return onReconnect(1)
     } else if (status.attempt == 1) {
       const detail = lastDisconnect?.error?.output?.payload?.error
       const message = t('closed', statusCode, detail)
@@ -333,7 +336,9 @@ export const connect = async ({
       }
     }
     sock = undefined
-    await sessionStore.setStatus(phone, 'offline')
+    if (!await sessionStore.isStatusRestartRequired(phone)) {
+      await sessionStore.setStatus(phone, 'offline')
+    }
   }
 
   const logout = async () => {
