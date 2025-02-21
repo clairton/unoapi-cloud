@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { SessionStoreFile } from '../../src/services/session_store_file'
 
-describe('service session store file return phones', () => {
+describe('service session store file', () => {
   test('return a phones', async () => {
     const name = `${new Date().getTime()}`
     const d = new fs.Dirent()
