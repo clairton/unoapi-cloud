@@ -232,7 +232,9 @@ with:
 * 9 - connection lost
 * 10 - Invalid token value
 * 11 - Http Head test link not return success
-* 12 - offline number, connecting....
+* 12 - offline session, connecting....
+* 13 - blocked session, waiting for time configured
+
 
 
 ## Verify contacts has whatsapp account
@@ -321,49 +323,9 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
 
 Create a `.env`file and put configuration if you need change default value:
 
+This a general env:
+
 ```env
-WEBHOOK_URL_ABSOLUTE=the webhook absolute url, not use this if already use WEBHOOK_URL
-WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, no use if use WEBHOOK_URL_ABSOLUTE
-WEBHOOK_TOKEN=the webhook header token
-WEBHOOK_HEADER=the webhook header name
-WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
-WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
-WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
-WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
-WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
-BASE_URL=current base url to download medias
-PORT=the http port
-IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
-IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
-IGNORE_STATUS_MESSAGE=false to send stories in socket to webhook, default true
-IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
-IGNORE_HISTORY_MESSAGES=false to import messages when connect, default is true
-IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
-IGNORE_YOURSELF_MESSAGES=true to ignore messages for yourself, default is true, possible loop if was false
-COMPOSING_MESSAGE=true enable composing before send message as text length, default false
-REJECT_CALLS=message to send when receive a call, default is empty and not reject
-REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send, is deprecated, use MESSAGE_CALLS_WEBHOOK
-MESSAGE_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
-SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
-BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
-IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
-AUTO_CONNECT=true, auto connect on start service
-AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto restart
-THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default is false, if true throw exception
-NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message failed and enqueued in dead queue
-LOG_LEVEL=log level, default warn
-UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
-SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
-SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
-UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
-UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS=to service had time do create contact and conversation before send next messages, default 0
-UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS=to service had time do create contact and conversation in first message after unoapi up, before send next messages, default 0
-UNOAPI_DELAY_BETWEEN_MESSAGES_MS=to not duplicate timestamp message. default 0
-PROXY_URL=the socks proxy url, default not use
-CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
-CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
-CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
-WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
 DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
@@ -371,6 +333,20 @@ MAX_CONNECT_RETRY=3 max try connect
 MAX_CONNECT_TIME_MS=300000 interval of max connect, 5 minutes
 CONNECTION_TYPE=connection type use qrcode or pairing_code, default is qrcode
 QR_TIMEOUT_MS=60000 timeout for read qrcode, default is 60000
+WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode
+BASE_URL=current base url to download medias
+PORT=the http port
+BASE_STORE=dir where save sessions, medias and stores. Defaul is ./data
+LOG_LEVEL=log level, default warn
+UNO_LOG_LEVEL=uno log level. default LOG_LEVEL
+UNOAPI_RETRY_REQUEST_DELAY_MS=retry delay in miliseconds when decrypt failed, default is 1_000(a second)
+UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS=to service had time do create contact and conversation before send next messages, default 0
+UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS=to service had time do create contact and conversation in first message after unoapi up, before send next messages, default 0
+UNOAPI_DELAY_BETWEEN_MESSAGES_MS=to not duplicate timestamp message. default 0
+CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
+CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
+CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
+WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
@@ -392,9 +368,42 @@ AMQP_URL
 REDIS_URL
 ```
 
-### Config with redis
+This env would be set by session:
 
-The `.env` can be save one configm, but on redis use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
+```env
+WEBHOOK_URL_ABSOLUTE=the webhook absolute url, not use this if already use WEBHOOK_URL
+WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, no use if use WEBHOOK_URL_ABSOLUTE
+WEBHOOK_TOKEN=the webhook header token
+WEBHOOK_HEADER=the webhook header name
+WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
+WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
+WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
+WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
+IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
+IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
+IGNORE_STATUS_MESSAGE=false to send stories in socket to webhook, default true
+IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false
+IGNORE_HISTORY_MESSAGES=false to import messages when connect, default is true
+IGNORE_OWN_MESSAGES=false to send own messages in socket to webhook, default true
+IGNORE_YOURSELF_MESSAGES=true to ignore messages for yourself, default is true, possible loop if was false
+COMPOSING_MESSAGE=true enable composing before send message as text length, default false
+REJECT_CALLS=message to send when receive a call, default is empty and not reject
+REJECT_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send, is deprecated, use MESSAGE_CALLS_WEBHOOK
+MESSAGE_CALLS_WEBHOOK=message to send webook when receive a call, default is empty and not send
+SEND_CONNECTION_STATUS=true to send all connection status to webhook, false to send only important messages, default is true
+IGNORE_DATA_STORE=ignore save/retrieve data(message, contacts, groups...)
+AUTO_CONNECT=true, auto connect on start service
+AUTO_RESTART_MS=miliseconds to restart connection, default is 0 and not auto restart
+THROW_WEBHOOK_ERROR=false send webhook error do self whatsapp, default is false, if true throw exception
+NOTIFY_FAILED_MESSAGES=true send message to your self in whatsapp when message failed and enqueued in dead queue
+SEND_REACTION_AS_REPLY=true to send reactions as replay, default false
+SEND_PROFILE_PICTURE=true to send profile picture users and groups, default is true
+PROXY_URL=the socks proxy url, default not use
+```
+
+### Config session with redis
+
+The `.env` can be save one config, but on redis use different webhook by session number, to do this, save the config json with key format `unoapi-config:XXX`, where XXX is your whatsapp number.
 
 ```json
 {
