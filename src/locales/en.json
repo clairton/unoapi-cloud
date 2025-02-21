@@ -21,5 +21,6 @@
 	"error": "Error -> %s.",
 	"on_read_qrcode": "Awesome, read the qrcode if you not yet. For now you need to update config to use this auth token %s",
 	"pairing_code": "Open your WhatsApp and go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > %s",
-  "restart": "Restarting session"
+  "restart": "Restarting session",
+  "blocked": "Blocked session, waiting for time configured to try connect again, %s error in %s seconds"
 }

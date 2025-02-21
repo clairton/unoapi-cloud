@@ -31,6 +31,10 @@ export const autoConnect = async (
           logger.info(`Ignore connecting phone ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
           continue;
         }
+        if (await sessionStore.isStatusBlocked(phone)) {
+          logger.info(`Session blocked ${phone}...`)
+          continue;
+        }
         logger.info(`Auto connecting phone ${phone}...`)
         try {
           const store = await config.getStore(phone, config)

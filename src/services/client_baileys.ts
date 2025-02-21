@@ -237,12 +237,24 @@ export class ClientBaileys implements Client {
   async connect(time: number) {
     logger.debug('Client Baileys connecting for %s', this.phone)
     this.config = await this.getConfig(this.phone)
-    this.config.getMessageMetadata = async <T>(data: T) => {
-      logger.debug(data, 'Put metadata in message')
-      return this.getMessageMetadata(data)
-    }
     this.store = await this.config.getStore(this.phone, this.config)
-    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout } = await connect({
+    const { sessionStore } = this.store
+
+    await sessionStore.syncConnection(this.phone)
+    if (await sessionStore.isStatusConnecting(this.phone)) {
+      logger.warn('Already Connecting %s', this.phone)
+      return
+    }
+    if (await sessionStore.isStatusOnline(this.phone)) {
+      logger.warn('Already Connected %s', this.phone)
+      return
+    }
+    if (await sessionStore.isStatusBlocked(this.phone)) {
+      logger.warn('Blocked %s', this.phone)
+      return
+    }
+
+    const result = await connect({
       phone: this.phone,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
@@ -255,6 +267,10 @@ export class ClientBaileys implements Client {
       onDisconnected: async () => this.disconnect(),
       onReconnect: this.onReconnect,
     })
+    if (!result) {
+      return
+    }
+    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout } = result
     this.event = event
     this.sendMessage = send
     this.readMessages = read
@@ -264,6 +280,10 @@ export class ClientBaileys implements Client {
     this.close = close
     this.exists = exists
     this.socketLogout = logout
+    this.config.getMessageMetadata = async <T>(data: T) => {
+      logger.debug(data, 'Put metadata in message')
+      return this.getMessageMetadata(data)
+    }
     await this.subscribe()
     logger.debug('Client Baileys connected for %s', this.phone)
   }
@@ -347,7 +367,6 @@ export class ClientBaileys implements Client {
       }
     })
   }
-
 
   async logout() {
     logger.debug('Logout client store for %s', this?.phone)

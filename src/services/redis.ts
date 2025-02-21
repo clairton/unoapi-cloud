@@ -393,9 +393,17 @@ export const getConnectCount = async(phone: string) => {
   return keys.length || 0
 }
 
-export const setConnectCount = async (phone: string, ttl: number) => {
-  const last = await getConnectCount(phone)
-  const key = connectCountKey(phone, last + 1)
+export const clearConnectCount = async(phone: string) => {
+  const keyPattern = connectCountKey(phone, '*')
+  const keys = await redisKeys(keyPattern)
+  for (let index = 0; index < keys.length.length; index++) {
+    const key = keys[index];
+    await redisDel(key)
+  }
+}
+
+export const setConnectCount = async (phone: string, count: number, ttl: number) => {
+  const key = connectCountKey(phone, count)
   await redisSetAndExpire(key, 1, ttl)
 }
 

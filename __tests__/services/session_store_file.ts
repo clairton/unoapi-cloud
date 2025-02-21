@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { SessionStoreFile } from '../../src/services/session_store_file'
+import { MAX_CONNECT_RETRY } from '../../src/defaults'
 
 describe('service session store file', () => {
   test('return a phones', async () => {
@@ -27,5 +28,29 @@ describe('service session store file', () => {
     const store = new SessionStoreFile()
     const phones = await store.getPhones()
     expect(phones.length).toBe(0)
+  })
+  test('return a blocked on count and verify', async () => {
+    const session = `${new Date().getTime()}`
+    const store = new SessionStoreFile()
+    const getConnectCount = store.getConnectCount
+    store.getConnectCount = async (phone: string) => {
+      if (session == phone) {
+        return MAX_CONNECT_RETRY
+      }
+      return getConnectCount(session)
+    } 
+    expect(await store.isStatusBlocked(session)).toBe(true)
+  })
+  test('return a unblocked on count and verify', async () => {
+    const session = `${new Date().getTime()}`
+    const store = new SessionStoreFile()
+    const getConnectCount = store.getConnectCount
+    store.getConnectCount = async (phone: string) => {
+      if (session == phone) {
+        return MAX_CONNECT_RETRY - 2
+      }
+      return getConnectCount(session)
+    } 
+    expect(!!await store.isStatusBlocked(session)).toBe(false)
   })
 })

@@ -233,7 +233,7 @@ with:
 * 10 - Invalid token value
 * 11 - Http Head test link not return success
 * 12 - offline session, connecting....
-* 13 - blocked session, waiting for time configured
+* 14 - blocked session, waiting for time configured
 
 
 
@@ -329,8 +329,8 @@ This a general env:
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
 DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
-MAX_CONNECT_RETRY=3 max try connect 
-MAX_CONNECT_TIME_MS=300000 interval of max connect, 5 minutes
+MAX_CONNECT_RETRY=3 max call connect with error in MAX_CONNECT_TIME
+MAX_CONNECT_TIME=3000 interval of max connect, 5 minutes
 CONNECTION_TYPE=connection type use qrcode or pairing_code, default is qrcode
 QR_TIMEOUT_MS=60000 timeout for read qrcode, default is 60000
 WEBHOOK_SESSION=webhook to send events of type OnStatus and OnQrCode

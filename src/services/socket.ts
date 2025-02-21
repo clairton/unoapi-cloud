@@ -23,7 +23,7 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS } from '../defaults'
+import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS, MAX_CONNECT_TIME, MAX_CONNECT_RETRY } from '../defaults'
 import { t } from '../i18n'
 
 const EVENTS = [
@@ -378,6 +378,8 @@ export const connect = async ({
       throw new SendError(3, t('disconnected_session'))
     } else if (await sessionStore.isStatusOffline(phone)) {
       throw new SendError(12, t('offline_session'))
+    } else if (await sessionStore.isStatusBlocked(phone)) {
+      throw new SendError(14, t('blocked', MAX_CONNECT_RETRY, MAX_CONNECT_TIME))
     }
     if (connectingTimeout) {
       clearTimeout(connectingTimeout)
@@ -445,19 +447,6 @@ export const connect = async ({
   }
 
   const connect = async () => {
-    await sessionStore.syncConnection(phone)
-    if (await sessionStore.isStatusConnecting(phone)) {
-      logger.warn('Already Connecting %s', phone)
-      return
-    }
-    if (await sessionStore.isStatusOnline(phone)) {
-      logger.warn('Already Connected %s', phone)
-      return
-    }
-    if (await sessionStore.isStatusBlockedAndVerify(phone)) {
-      logger.warn('Blocked %s', phone)
-      return
-    }
     logger.debug('Connecting %s', phone)
 
     let browser: WABrowserDescription = DEFAULT_BROWSER as WABrowserDescription

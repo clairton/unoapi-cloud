@@ -1,7 +1,7 @@
 import { SessionStore, sessionStatus } from './session_store'
-import { configKey, authKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConnectCount, setConnectCount, delAuth } from './redis'
+import { configKey, authKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConnectCount, setConnectCount, delAuth, clearConnectCount } from './redis'
 import logger from './logger'
-import { MAX_CONNECT_RETRY } from '../defaults'
+import { MAX_CONNECT_RETRY, MAX_CONNECT_TIME } from '../defaults'
 
 const toReplaceConfig = configKey('')
 const toReplaceStatus = sessionStatusKey('')
@@ -24,6 +24,9 @@ export class SessionStoreRedis extends SessionStore {
 
   async setStatus(phone: string, status: sessionStatus) {
     logger.info(`Session status ${phone} change from ${await this.getStatus(phone)} to ${status}`)
+    if (status == 'online') {
+      await this.clearConnectCount(phone)
+    }
     return setSessionStatus(phone, status)
   }
 
@@ -31,14 +34,14 @@ export class SessionStoreRedis extends SessionStore {
     return getConnectCount(phone)
   }
 
-  async incrementConnectCountAndVerify(phone: string) {
+  async incrementConnectCount(phone: string) {
     const count = await this.getConnectCount(phone)
-    await setConnectCount(phone, count + 1)
+    await setConnectCount(phone, count + 1, MAX_CONNECT_TIME)
+  }
 
-    if (await this.getConnectCount(phone) >= MAX_CONNECT_RETRY) {
-      this.setStatus(phone, 'blocked')
-      return true
-    }
+  async clearConnectCount(phone: string) {
+    logger.info('Clear count connect for %s', phone)
+    return clearConnectCount(phone)
   }
 
   async syncConnections() {
