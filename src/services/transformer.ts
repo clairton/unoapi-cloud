@@ -464,7 +464,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     const binMessage = payload.update || payload.receipt || (messageType && payload.message && payload.message[messageType])
     let profileName
     if (fromMe) {
-      profileName = senderPhone
+      profileName = payload.contactBizName || payload.contactName || senderPhone
     } else {
       profileName = payload.verifiedBizName || payload.pushName || senderPhone
     }

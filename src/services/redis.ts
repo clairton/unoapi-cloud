@@ -1,7 +1,7 @@
 import { createClient } from '@redis/client'
 import { REDIS_URL, DATA_JID_TTL, DATA_TTL, SESSION_TTL, DATA_URL_TTL } from '../defaults'
 import logger from './logger'
-import { GroupMetadata } from 'baileys'
+import { Contact, GroupMetadata } from 'baileys'
 import { Webhook, configs } from './config'
 
 export const BASE_KEY = 'unoapi-'
@@ -139,6 +139,10 @@ const connectCountKey = (phone: string, ordinal: number | string) => {
   return `${BASE_KEY}connect-count:${phone}:${ordinal}`
 }
 
+const contactKey = (phone: string, id: string) => {
+  return `${BASE_KEY}contact:${phone}:${id}`
+}
+
 export const sessionStatusKey = (phone: string) => {
   return `${BASE_KEY}status:${phone}`
 }
@@ -220,6 +224,18 @@ export const getSessionStatus = async (phone: string) => {
 export const setSessionStatus = async (phone: string, status: string) => {
   const key = sessionStatusKey(phone)
   await client.set(key, status)
+}
+
+export const getContact = async (phone: string, id: string): Promise<Contact | undefined> => {
+  const key = contactKey(phone, id)
+  const json = await redisGet(key)
+  return json ? JSON.parse(json) as Contact : undefined
+}
+
+export const setContact = async (phone: string, id: string, contact: Partial<Contact> | undefined ) => {
+  const key = contactKey(phone, id)
+  const currentContact = await getContact(phone, id) || {}
+  await client.set(key, JSON.stringify({ ...currentContact, ...(contact || {} )}))
 }
 
 export const getMessageStatus = async (phone: string, id: string) => {
