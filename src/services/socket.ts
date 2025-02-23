@@ -378,8 +378,8 @@ export const connect = async ({
       throw new SendError(3, t('disconnected_session'))
     } else if (await sessionStore.isStatusOffline(phone)) {
       throw new SendError(12, t('offline_session'))
-    } else if (await sessionStore.isStatusBlocked(phone)) {
-      throw new SendError(14, t('blocked', MAX_CONNECT_RETRY, MAX_CONNECT_TIME))
+    } else if (await sessionStore.isStatusStandBy(phone)) {
+      throw new SendError(14, t('stand_by', MAX_CONNECT_RETRY, MAX_CONNECT_TIME))
     }
     if (connectingTimeout) {
       clearTimeout(connectingTimeout)
@@ -447,6 +447,19 @@ export const connect = async ({
   }
 
   const connect = async () => {
+    await sessionStore.syncConnection(phone)
+    if (await sessionStore.isStatusConnecting(phone)) {
+      logger.warn('Already Connecting %s', phone)
+      return
+    }
+    if (await sessionStore.isStatusOnline(phone)) {
+      logger.warn('Already Connected %s', phone)
+      return
+    }
+    if (await sessionStore.verifyStatusStandBy(phone)) {
+      logger.warn('Stand-by %s', phone)
+      return
+    }
     logger.debug('Connecting %s', phone)
 
     let browser: WABrowserDescription = DEFAULT_BROWSER as WABrowserDescription

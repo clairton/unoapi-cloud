@@ -22,5 +22,5 @@
 	"on_read_qrcode": "Fantástico, se ainda não o fez, leia o QR Code. O token de authenticação para esta sessão é %s",
 	"pairing_code": "Informe o código para conectar no whatsapp > %s",
   "restart": "Reiniciando sessão",
-  "blocked": "Sessão bloqueada, esperando pelo tempo configurado para tentar conectar novamente: %s"
+  "stand_by": "Sessão colocado em stand by, esperando pelo tempo configurado para tentar conectar novamente: %s"
 }

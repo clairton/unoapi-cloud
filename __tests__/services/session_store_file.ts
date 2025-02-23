@@ -29,19 +29,19 @@ describe('service session store file', () => {
     const phones = await store.getPhones()
     expect(phones.length).toBe(0)
   })
-  test('return a blocked on count and verify', async () => {
+  test('return a stand by on count and verify', async () => {
     const session = `${new Date().getTime()}`
     const store = new SessionStoreFile()
     const getConnectCount = store.getConnectCount
     store.getConnectCount = async (phone: string) => {
       if (session == phone) {
-        return MAX_CONNECT_RETRY
+        return MAX_CONNECT_RETRY + 1
       }
       return getConnectCount(session)
     } 
-    expect(await store.isStatusBlocked(session)).toBe(true)
+    expect(await store.verifyStatusStandBy(session)).toBe(true)
   })
-  test('return a unblocked on count and verify', async () => {
+  test('return a no stand by on count and verify', async () => {
     const session = `${new Date().getTime()}`
     const store = new SessionStoreFile()
     const getConnectCount = store.getConnectCount
@@ -51,6 +51,6 @@ describe('service session store file', () => {
       }
       return getConnectCount(session)
     } 
-    expect(!!await store.isStatusBlocked(session)).toBe(false)
+    expect(!!await store.verifyStatusStandBy(session)).toBe(false)
   })
 })

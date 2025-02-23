@@ -24,7 +24,7 @@ export class SessionStoreRedis extends SessionStore {
 
   async setStatus(phone: string, status: sessionStatus) {
     logger.info(`Session status ${phone} change from ${await this.getStatus(phone)} to ${status}`)
-    if (status == 'online') {
+    if (['online', 'restart_required'].includes(status)) {
       await this.clearConnectCount(phone)
     }
     return setSessionStatus(phone, status)
@@ -34,9 +34,8 @@ export class SessionStoreRedis extends SessionStore {
     return getConnectCount(phone)
   }
 
-  async incrementConnectCount(phone: string) {
-    const count = await this.getConnectCount(phone)
-    await setConnectCount(phone, count + 1, MAX_CONNECT_TIME)
+  async setConnectCount(phone: string, count) {
+    await setConnectCount(phone, count, MAX_CONNECT_TIME)
   }
 
   async clearConnectCount(phone: string) {
@@ -45,7 +44,7 @@ export class SessionStoreRedis extends SessionStore {
   }
 
   async syncConnections() {
-    logger.info(`Syncing lost and blocked connections...`)
+    logger.info(`Syncing lost and stand-by connections...`)
     try {
       const pattern = sessionStatusKey('*')
       const keys = await redisKeys(pattern)
@@ -74,8 +73,8 @@ export class SessionStoreRedis extends SessionStore {
       await this.setStatus(phone, 'disconnected')
     }
     const key = sessionStatusKey(phone)
-    if (await redisGet(key) == 'blocked' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
-      logger.info(`Sync ${phone} blocked!`)
+    if (await redisGet(key) == 'stand_by' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
+      logger.info(`Sync ${phone} stand_by!`)
       await this.setStatus(phone, 'offline')
     }
   }

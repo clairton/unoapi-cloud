@@ -249,8 +249,8 @@ export class ClientBaileys implements Client {
       logger.warn('Already Connected %s', this.phone)
       return
     }
-    if (await sessionStore.isStatusBlocked(this.phone)) {
-      logger.warn('Blocked %s', this.phone)
+    if (await sessionStore.isStatusStandBy(this.phone)) {
+      logger.warn('Stand by %s', this.phone)
       return
     }
 
