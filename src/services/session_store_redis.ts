@@ -39,8 +39,9 @@ export class SessionStoreRedis extends SessionStore {
   }
 
   async clearConnectCount(phone: string) {
-    logger.info('Clear count connect for %s', phone)
-    return clearConnectCount(phone)
+    logger.info('Cleaning count connect for %s..', phone)
+    await clearConnectCount(phone)
+    logger.info('Cleaned count connect for %s!', phone)
   }
 
   async syncConnections() {
@@ -53,6 +54,7 @@ export class SessionStoreRedis extends SessionStore {
         const phone = key.replace(toReplaceStatus, '')
         await this.syncConnection(phone)
       }
+      logger.info(`Synced lost and standby connections!`)
     } catch (error) {
       logger.error(error, 'Error on sync lost connecting')
       throw error
