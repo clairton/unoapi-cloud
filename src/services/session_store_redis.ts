@@ -44,7 +44,7 @@ export class SessionStoreRedis extends SessionStore {
   }
 
   async syncConnections() {
-    logger.info(`Syncing lost and stand-by connections...`)
+    logger.info(`Syncing lost and standby connections...`)
     try {
       const pattern = sessionStatusKey('*')
       const keys = await redisKeys(pattern)
@@ -73,8 +73,8 @@ export class SessionStoreRedis extends SessionStore {
       await this.setStatus(phone, 'disconnected')
     }
     const key = sessionStatusKey(phone)
-    if (await redisGet(key) == 'stand_by' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
-      logger.info(`Sync ${phone} stand_by!`)
+    if (await redisGet(key) == 'standby' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
+      logger.info(`Sync ${phone} standby!`)
       await this.setStatus(phone, 'offline')
     }
   }

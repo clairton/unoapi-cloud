@@ -32,7 +32,7 @@ export const autoConnect = async (
           continue;
         }
         if (await sessionStore.isStatusStandBy(phone)) {
-          logger.info(`Session stand_by ${phone}...`)
+          logger.info(`Session standby ${phone}...`)
           continue;
         }
         logger.info(`Auto connecting phone ${phone}...`)

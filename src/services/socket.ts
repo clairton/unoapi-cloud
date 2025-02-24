@@ -379,7 +379,7 @@ export const connect = async ({
     } else if (await sessionStore.isStatusOffline(phone)) {
       throw new SendError(12, t('offline_session'))
     } else if (await sessionStore.isStatusStandBy(phone)) {
-      throw new SendError(14, t('stand_by', MAX_CONNECT_RETRY, MAX_CONNECT_TIME))
+      throw new SendError(14, t('standby', MAX_CONNECT_RETRY, MAX_CONNECT_TIME))
     }
     if (connectingTimeout) {
       clearTimeout(connectingTimeout)
@@ -457,7 +457,7 @@ export const connect = async ({
       return
     }
     if (await sessionStore.verifyStatusStandBy(phone)) {
-      logger.warn('Stand-by %s', phone)
+      logger.warn('Standby %s', phone)
       return
     }
     logger.debug('Connecting %s', phone)
