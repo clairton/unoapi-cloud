@@ -271,14 +271,14 @@ export const amqpConsume = async (
     }
   }
 
-  await channel.bindExchange(queueDead.queue, queueDeadName(queue), phone)
-  await channel.bindExchange(queueDelayed.queue,  queueDelayedName(queue), phone)
-  await channel.bindExchange(queueMain.queue, queue, phone)
+  await channel.bindQueue(queueDead.queue, queueDeadName(queue), phone)
+  await channel.bindQueue(queueDelayed.queue,  queueDelayedName(queue), phone)
+  await channel.bindQueue(queueMain.queue, queue, phone)
 
   channel.on('close', () => {
-    channel.unbindExchange(queueDead.queue, queueDeadName(queue))
-    channel.unbindExchange(queueDelayed.queue,  queueDelayedName(queue), phone)
-    channel.unbindExchange(queueMain.queue, queue, phone)
+    channel.unbindQueue(queueDead.queue, queueDeadName(queue))
+    channel.unbindQueue(queueDelayed.queue,  queueDelayedName(queue), phone)
+    channel.unbindQueue(queueMain.queue, queue, phone)
   })
 
   channel.consume(queueMain.queue, fn)
