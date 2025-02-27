@@ -55,13 +55,13 @@ export abstract class SessionStore {
     const count = await this.getConnectCount(phone)
     if (await this.getStatus(phone) == 'standby') {
       if (count < MAX_CONNECT_RETRY) {
-        logger.warn('Stand by removed %s', phone)
+        logger.warn('Standby removed %s', phone)
         await this.setStatus(phone, 'offline')
         return false
       }
-      logger.warn('Stand by %s', phone)
+      logger.warn('Standby %s', phone)
       return true
-    } else if (count > MAX_CONNECT_RETRY) {
+    } else if (count > MAX_CONNECT_RETRY && !await this.isStatusRestartRequired(phone)) {
       this.setStatus(phone, 'standby')
       return true
     }
