@@ -3,6 +3,7 @@ import { getConfig } from '../services/config'
 import { Incoming } from '../services/incoming'
 import { Listener } from '../services/listener'
 import { OnNewLogin } from '../services/socket'
+import logger from './logger'
 import { Reload } from './reload'
 
 export class ReloadBaileys extends Reload {
@@ -21,7 +22,8 @@ export class ReloadBaileys extends Reload {
     this.onNewLogin = onNewLogin
   }
 
-  async run(phone: string) {
+  async run(phone: string, params = { force: false }) {
+    logger.info('Reloading session %s...', phone)
     const currentClient = await this.getClient({
       phone,
       incoming: this.incoming,
@@ -32,9 +34,16 @@ export class ReloadBaileys extends Reload {
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     const { sessionStore }  = store
-    // || await sessionStore.isStatusConnecting(phone)
     if (await sessionStore.isStatusOnline(phone)) {
       await currentClient.disconnect()
+    }
+    if (params.force) {
+      if (await sessionStore.isStatusStandBy(phone) || await sessionStore.isStatusConnecting(phone)) {
+        logger.warn('Force restart session %s!', phone)
+        await currentClient.disconnect()
+        await sessionStore.setStatus(phone, 'online') // to clear standby
+        await sessionStore.setStatus(phone, 'disconnected')
+      }
     }
     await super.run(phone)
     const newClient = await this.getClient({
@@ -44,6 +53,13 @@ export class ReloadBaileys extends Reload {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    await newClient.connect(1)
+    await newClient.send({
+      to: phone,
+      type: 'text',
+      text: {
+        body: 'hello'
+      } 
+    }, {})
+    logger.info('Reloaded session %s!', phone)
   }
 }

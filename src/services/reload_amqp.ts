@@ -10,7 +10,7 @@ export class ReloadAmqp extends Reload {
     this.queueName = queueName
   }
 
-  public async run(phone: string) {
-    await amqpEnqueue(this.queueName, '', { phone })
+  public async run(phone: string, params = { force: false }) {
+    await amqpEnqueue(this.queueName, '', { phone, ...params })
   }
 }

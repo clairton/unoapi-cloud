@@ -7,7 +7,7 @@ export class ReloadJob {
     this.reload = reload
   }
 
-  async consume(_: string, { phone }: { phone: string }) {
-    await this.reload.run(phone);
+  async consume(_: string, { phone, params }: { phone: string, params: { force: boolean } }) {
+    await this.reload.run(phone, params);
   }
 }

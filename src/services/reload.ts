@@ -5,7 +5,7 @@ import { mediaStores } from './media_store'
 import { stores } from './store'
 
 export class Reload {
-  async run(phone: string) {
+  async run(phone: string, _params = { force: false }) {
     clients.delete(phone)
     stores.delete(phone)
     dataStores.delete(phone)
