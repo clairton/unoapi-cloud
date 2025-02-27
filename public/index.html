@@ -140,12 +140,16 @@
         }
 
         :root {
-            --bs-breakpoint-xs: 0;        /* Não configurável diretamente */
-            --bs-breakpoint-sm: 480px;    /* Ajuste para o ponto de início do "sm" */
-            --bs-breakpoint-md: 768px;    /* Ajuste para o ponto de início do "md" */
-            --bs-breakpoint-lg: 1024px;   /* Ajuste para o ponto de início do "lg" */
-            --bs-breakpoint-xl: 1300px;   /* Ajuste para o ponto de início do "xl" */
-            --bs-breakpoint-xxl: 1560px;  /* Ajuste para o ponto de início do "xxl" */
+            --bs-breakpoint-xs: 0;        
+            --bs-breakpoint-sm: 480px;    
+            --bs-breakpoint-md: 768px;    
+            --bs-breakpoint-lg: 1024px;  
+            --bs-breakpoint-xl: 1300px;
+            --bs-breakpoint-xxl: 1560px;
+        }
+        .form-label {
+            margin-top: 10px;
+            margin-bottom: -10px;
         }
 
     </style>
@@ -262,6 +266,10 @@
                                 <option value="qrcode" selected>QrCode</option>
                                 <option value="pairing_code">PairingCode</option>
                               </select>
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="proxyUrl" class="form-label">Proxy Url (Precisa Reiniciar a Unoapi ao Alterar)</label>
+                                <input type="text" class="form-control" id="proxyUrl" name="proxyUrl" placeholder="Ex: socks5://user:pass@ip/domain:port">
                             </div>
                         </div>
                         <div class="row edit-form-row">
@@ -617,6 +625,7 @@
                 $('#autoConnect').prop('checked', session.autoConnect);
                 $('#ignoreBroadcastMessages').prop('checked', session.ignoreBroadcastMessages);
                 $('#connectionType').val(session.connectionType);
+                $('#proxyUrl').val(session.proxyUrl);
 
                 // Limpar webhooks existentes no formulário de edição
                 $('#webhooksContainer .webhook').remove();
@@ -674,6 +683,7 @@
                         autoConnect: $('#autoConnect').is(':checked'),
                         ignoreBroadcastMessages: $('#ignoreBroadcastMessages').is(':checked'),
                         connectionType: $('#connectionType').val(),
+                        proxyUrl: $('#proxyUrl').val(),
                         webhooks: []
                     };
 
