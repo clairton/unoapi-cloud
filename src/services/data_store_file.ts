@@ -111,6 +111,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       logger.debug('contacts.upsert %s', phone, JSON.stringify(contacts))
       const { saveProfilePicture } = mediaStore
       await Promise.all(contacts.map(async (c) => {
+          await dataStore.setContact(c)
           return saveProfilePicture(c)
         })
       )
@@ -118,8 +119,27 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     ev.on('contacts.update', async (contacts: Partial<Contact>[]) => {
       logger.debug('contacts.update %s => %s', phone, JSON.stringify(contacts))
       const { saveProfilePicture } = mediaStore
-      await Promise.all(contacts.map(async (c) => saveProfilePicture(c)))
+      await Promise.all(contacts.map(async (c: Partial<Contact>) => {
+          await dataStore.setContact(c)
+          return saveProfilePicture(c)
+        })
+      )
     })
+  }
+  dataStore.setContact = async (contact: Partial<Contact>) => {
+    const id =  jidToPhoneNumber(contact.id || contact.lid)
+    const newData: Partial<Contact> = {}
+    if (contact.name) {
+      newData.name = contact.name
+    }
+    if (contact.verifiedName) {
+      newData.verifiedName = contact.verifiedName
+    }
+    dataStore.contacts[id]  = { ...(dataStore.contacts[id] || {}), ...newData }
+  }
+  dataStore.getContact = async (id: string) => {
+    const newId =  jidToPhoneNumber(id)
+    return dataStore.contacts[newId]
   }
   const loadKey = async (id: string) => {
     return keys.get(id)
