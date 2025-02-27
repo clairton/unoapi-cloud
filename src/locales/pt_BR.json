@@ -22,5 +22,6 @@
 	"on_read_qrcode": "Maravilha, leia o qrcode, se ainda não leu. O token de authenticação para essa sessão é %s",
 	"pairing_code": "Informe o código para conectar no whatsapp: %s",
   "restart": "Reiniciando sessão",
-  "standby": "Sessão coloca em stand by, esperando pelo tempo configurado para tentar conectar novamente: %s"
+  "standby": "Sessão coloca em standby, esperando pelo tempo configurado para tentar conectar novamente: %s",
+  "proxy_error": "Erro ao conectar no proxy: %s"
 }

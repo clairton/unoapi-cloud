@@ -29,7 +29,7 @@ describe('service session store file', () => {
     const phones = await store.getPhones()
     expect(phones.length).toBe(0)
   })
-  test('return a stand by on count and verify', async () => {
+  test('return a standby on count and verify', async () => {
     const session = `${new Date().getTime()}`
     const store = new SessionStoreFile()
     const getConnectCount = store.getConnectCount
@@ -41,7 +41,7 @@ describe('service session store file', () => {
     } 
     expect(await store.verifyStatusStandBy(session)).toBe(true)
   })
-  test('return a no stand by on count and verify', async () => {
+  test('return a no standby on count and verify', async () => {
     const session = `${new Date().getTime()}`
     const store = new SessionStoreFile()
     const getConnectCount = store.getConnectCount

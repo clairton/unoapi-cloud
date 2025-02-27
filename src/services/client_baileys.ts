@@ -250,7 +250,7 @@ export class ClientBaileys implements Client {
       return
     }
     if (await sessionStore.isStatusStandBy(this.phone)) {
-      logger.warn('Stand by %s', this.phone)
+      logger.warn('Standby %s', this.phone)
       return
     }
 

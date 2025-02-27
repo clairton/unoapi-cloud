@@ -237,7 +237,7 @@ export const connect = async ({
     const { lastDisconnect } = payload
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
-    if ([DisconnectReason.loggedOut, DisconnectReason.badSession, DisconnectReason.forbidden].includes(statusCode)) {
+    if ([DisconnectReason.loggedOut, DisconnectReason.forbidden].includes(statusCode)) {
       status.attempt = 1
       if (!await sessionStore.isStatusConnecting(phone)) {
         const message = t('removed')
@@ -255,6 +255,9 @@ export const connect = async ({
       await sessionStore.setStatus(phone, 'restart_required')
       await close()
       return onReconnect(1)
+    } else if (statusCode === DisconnectReason.badSession && config.proxyUrl && lastDisconnect?.error?.data?.options?.command?.connect) {
+      const message = t('server_error', config.proxyUrl)
+      await onNotification(message, true)
     } else if (status.attempt == 1) {
       const detail = lastDisconnect?.error?.output?.payload?.error
       const message = t('closed', statusCode, detail)
