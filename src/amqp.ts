@@ -1,4 +1,4 @@
-import amqp, { Connection, Channel, Options, ConsumeMessage } from 'amqplib'
+import { connect, Connection, Channel, Options, ConsumeMessage } from 'amqplib'
 import {
   AMQP_URL,
   UNOAPI_X_COUNT_RETRIES,
@@ -34,7 +34,7 @@ const withTimeout = (millis, error, promise) => {
 }
 
 const queueDelayedName = (queue: string) => `${queue}.delayed`
-const queueDeadName = (queue: string) => `${queue}.dead`
+export const queueDeadName = (queue: string) => `${queue}.dead`
 
 let amqpConnection: Connection | undefined
 
@@ -68,7 +68,7 @@ export interface ConsumeCallback {
 export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   if (!amqpConnection) {
     logger.info(`Connecting RabbitMQ at ${amqpUrl}...`)
-    amqpConnection = await amqp.connect(amqpUrl)
+    amqpConnection = await connect(amqpUrl)
   } else {
     logger.info(`Already connected RabbitMQ!`)
   }

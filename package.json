@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "1.29.5",
+  "version": "1.29.6",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,6 +18,7 @@
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "dev": "./node_modules/nodemon/bin/nodemon.js src/index.ts --trace-deprecation",
     "web-dev": "./node_modules/nodemon/bin/nodemon.js src/web.ts",
+    "waker-dev": "./node_modules/nodemon/bin/nodemon.js src/waker.ts",
     "standalone-dev": "./node_modules/nodemon/bin/nodemon.js src/standalone.ts",
     "worker-dev": "./node_modules/nodemon/bin/nodemon.js src/worker.ts",
     "broker-dev": "./node_modules/nodemon/bin/nodemon.js src/broker.ts",
@@ -30,6 +31,7 @@
     "standalone": "node dist/src/standalone.js",
     "standalone-ts": "node --experimental-strip-types --experimental-transform-types src/standalone.ts",
     "web": "node dist/src/web.js",
+    "waker": "node dist/src/waker.js",
     "web-ts": "node --experimental-strip-types --experimental-transform-types src/web.ts",
     "worker": "node dist/src/worker.js",
     "worker-ts": "node --experimental-strip-types --experimental-transform-types src/worker.ts",
