@@ -523,7 +523,7 @@ export const connect = async ({
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone}`)
         try {
-          await sock.waitForConnectionUpdate((update) => !!update.qr)
+          await sock.waitForConnectionUpdate(async (update) => !!update.qr)
           const onlyNumbers = phone.replace(/[^0-9]/g, '')
           const code = await sock?.requestPairingCode(onlyNumbers)
           const beatyCode = `${code?.match(/.{1,4}/g)?.join('-')}`

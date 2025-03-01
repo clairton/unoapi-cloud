@@ -4,7 +4,7 @@
 	"offline_session": "offline session, connecting....",
 	"disconnected_session": "disconnect number, please send a message do try reconnect and read qr code if necessary",
 	"connecting_session": "Wait a moment, connecting process",
-  "invalid_link": "Error os retrieve media, http status %s in link %s",
+  "invalid_link": "Error on retrieve media, http status %s in link %s",
 	"attempts_exceeded": "The %s times of generate qrcode is exceeded!",
 	"received_pending_notifications": "Received pending notifications",
 	"online_session": "Online session",
