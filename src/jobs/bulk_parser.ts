@@ -40,7 +40,7 @@ const synthesize = async (phone: string, getConfig: getConfig, text: string) => 
   if (!response.audioContent) {
     throw 'speech is null'
   }
-  const buffer: Buffer = Buffer.from(response.audioContent)
+  const buffer: Buffer = Buffer.from(response.audioContent as any)
   const fileName = `${phone}/${uuid()}.mp3`
   await mediaStore.saveMediaBuffer(fileName, buffer)
   const link = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
