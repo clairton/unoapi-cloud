@@ -40,6 +40,7 @@ import {
   WAVOIP_TOKEN,
   CONNECTION_TYPE,
   QR_TIMEOUT_MS,
+  READ_ON_RECEIPT,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -47,6 +48,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     const config: Config = { ...defaultConfig }
     config.logLevel = LOG_LEVEL as Level
     config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES
+    config.readOnReceipt = READ_ON_RECEIPT
     config.ignoreBroadcastStatuses = IGNORE_BROADCAST_STATUSES
     config.ignoreBroadcastMessages = IGNORE_BROADCAST_MESSAGES
     config.ignoreHistoryMessages = IGNORE_HISTORY_MESSAGES

@@ -38,7 +38,7 @@ export class DecryptError extends Error {
   }
 }
 
-const TYPE_MESSAGES_TO_PROCESS = [
+export const TYPE_MESSAGES_TO_READ = [
   'viewOnceMessage',
   'editedMessage',
   'ephemeralMessage',
@@ -59,11 +59,14 @@ const TYPE_MESSAGES_TO_PROCESS = [
   'listResponseMessage',
   'conversation',
   'ptvMessage',
+]
+
+const TYPE_MESSAGES_TO_PROCESS = TYPE_MESSAGES_TO_READ.concat([
   'protocolMessage',
   'senderKeyDistributionMessage',
   'messageContextInfo',
   'messageStubType',
-]
+])
 
 export const getMimetype = (payload: any) => {
   const { type } = payload

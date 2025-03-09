@@ -20,7 +20,7 @@ import {
 } from './socket'
 import { Client, getClient, clients, Contact } from './client'
 import { Config, configs, defaultConfig, getConfig, getMessageMetadataDefault } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber } from './transformer'
+import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, getMessageType, TYPE_MESSAGES_TO_READ } from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import QRCode from 'qrcode'
@@ -304,11 +304,27 @@ export class ClientBaileys implements Client {
   async subscribe() {
     this.event('messages.upsert', async (payload: { messages: []; type }) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
-      this.listener.process(this.phone, payload.messages, payload.type)
+      await this.listener.process(this.phone, payload.messages, payload.type)
+      console.log('>>>>>>>>>> readOnReceipt 1')
+      if (this.config.readOnReceipt) {
+        console.log('>>>>>>>>>> readOnReceipt 2')
+        await Promise.all(
+          payload.messages
+            .filter((message: any) => {
+              console.log('>>>>>>>>>> readOnReceipt 3')
+              const messageType = getMessageType(message)
+              return !message?.key?.fromMe && messageType && TYPE_MESSAGES_TO_READ.includes(messageType)
+            })
+            .map(async (message: any) => {
+              console.log('>>>>>>>>>> readOnReceipt 2')
+              return this.readMessages([message.key!])
+            })
+        )
+      }
     })
-    this.event('messages.update', (messages: object[]) => {
+    this.event('messages.update', async (messages: object[]) => {
       logger.debug('messages.update %s %s', this.phone, JSON.stringify(messages))
-      this.listener.process(this.phone, messages, 'update')
+      return this.listener.process(this.phone, messages, 'update')
     })
     this.event('message-receipt.update', (updates: object[]) => {
       logger.debug('message-receipt.update %s %s', this.phone, JSON.stringify(updates))

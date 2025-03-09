@@ -30,6 +30,7 @@ export type Config = {
   ignoreGroupMessages: boolean
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
+  readOnReceipt: boolean
   ignoreHistoryMessages: boolean
   ignoreYourselfMessages: boolean
   ignoreOwnMessages: boolean
@@ -70,6 +71,7 @@ export const defaultConfig: Config = {
   ignoreGroupMessages: true,
   ignoreBroadcastStatuses: true,
   ignoreBroadcastMessages: false,
+  readOnReceipt: false,
   ignoreHistoryMessages: true,
   ignoreOwnMessages: true,
   ignoreYourselfMessages: true,

@@ -289,6 +289,13 @@
                             </div>
                             <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
                                 <label class="switch">
+                                    <input type="checkbox" id="readOnReceipt" name="readOnReceipt" checked>
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="readOnReceipt" class="form-label">Ler a mensagem ao receber</label>
+                            </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
                                     <input type="checkbox" id="sendProfilePicture" name="sendProfilePicture">
                                     <span class="slider round"></span>
                                 </label>
@@ -614,6 +621,7 @@
                 $('#rejectCalls').val(session.rejectCalls);
                 $('#ignoreGroupMessages').prop('checked', session.ignoreGroupMessages);
                 $('#ignoreHistoryMessages').prop('checked', session.ignoreHistoryMessages);
+                $('#readOnReceipt').prop('checked', session.readOnReceipt);
                 $('#sendProfilePicture').prop('checked', session.sendProfilePicture);
                 $('#ignoreOwnMessages').prop('checked', session.ignoreOwnMessages);
                 $('#ignoreYourselfMessages').prop('checked', session.ignoreYourselfMessages);
@@ -672,6 +680,7 @@
                         rejectCallsWebhook: $('#rejectCallsWebhook').val(),
                         ignoreGroupMessages: $('#ignoreGroupMessages').is(':checked'),
                         ignoreHistoryMessages: $('#ignoreHistoryMessages').is(':checked'),
+                        readOnReceipt: $('#readOnReceipt').is(':checked'),
                         sendProfilePicture: $('#sendProfilePicture').is(':checked'),
                         ignoreOwnMessages: $('#ignoreOwnMessages').is(':checked'),
                         ignoreYourselfMessages: $('#ignoreYourselfMessages').is(':checked'),
