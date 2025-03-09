@@ -78,7 +78,7 @@ describe('service client baileys', () => {
       }
       return config
     }
-    client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
+    client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
     send = mockFn<sendMessage>()
     read = mockFn<readMessages>().mockResolvedValue(true)
     exists = mockFn<exists>()

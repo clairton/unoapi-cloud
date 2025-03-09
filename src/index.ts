@@ -32,15 +32,15 @@ const onNewLoginn = onNewLoginAlert(listenerBaileys)
 const incomingBaileys: Incoming = new IncomingBaileys(listenerBaileys, getConfigByEnv, getClientBaileys, onNewLoginn)
 const sessionStore: SessionStore = new SessionStoreFile()
 
-const reload = new ReloadBaileys(getClientBaileys, getConfigByEnv, listenerBaileys, incomingBaileys, onNewLoginn)
-const logout = new LogoutBaileys(getClientBaileys, getConfigByEnv, listenerBaileys, incomingBaileys, onNewLoginn)
+const reload = new ReloadBaileys(getClientBaileys, getConfigByEnv, listenerBaileys, onNewLoginn)
+const logout = new LogoutBaileys(getClientBaileys, getConfigByEnv, listenerBaileys, onNewLoginn)
 
 const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL, getConfigByEnv, sessionStore, onNewLoginn, addToBlacklistInMemory, reload, logout)
 broadcast.setSever(app.socket)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Unoapi Cloud version: %s, listening on port: %s', version, PORT)
-  autoConnect(sessionStore, incomingBaileys, listenerBaileys, getConfigByEnv, getClientBaileys, onNewLoginn)
+  autoConnect(sessionStore, listenerBaileys, getConfigByEnv, getClientBaileys, onNewLoginn)
 })
 
 export default app

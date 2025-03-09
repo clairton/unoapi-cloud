@@ -1,6 +1,5 @@
 import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
-import { Incoming } from './incoming'
 import { Listener } from './listener'
 import { Store } from './store'
 import {
@@ -39,20 +38,18 @@ const delays: Map<string, Map<string, Delay>> = new Map()
 
 export const getClientBaileys: getClient = async ({
   phone,
-  incoming,
   listener,
   getConfig,
   onNewLogin,
 }: {
   phone: string
-  incoming: Incoming
   listener: Listener
   getConfig: getConfig
   onNewLogin: OnNewLogin
 }): Promise<Client> => {
   if (!clients.has(phone)) {
     logger.info('Creating client baileys %s', phone)
-    const client = new ClientBaileys(phone, incoming, listener, getConfig, onNewLogin)
+    const client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
     const config = await getConfig(phone)
     if (config.autoConnect) {
       logger.info('Connecting client baileys %s', phone)
@@ -115,7 +112,6 @@ export class ClientBaileys implements Client {
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
-  private incoming: Incoming
   private listener: Listener
   private store: Store | undefined
   private calls = new Map<string, boolean>()
@@ -126,10 +122,9 @@ export class ClientBaileys implements Client {
   private onWebhookError = async (error: any) => {
     const { sessionStore } = this.store!
     if (!this.config.throwWebhookError && error.name === 'FetchError' && (await sessionStore.isStatusOnline(this.phone))) {
-      return this.incoming.send(
-        this.phone,
-        { to: this.phone, type: 'text', text: { body: `Error on send message to webhook: ${error.message}` } },
-        {},
+      return this.send(
+        phoneNumberToJid(this.phone),
+        { text: `Error on send message to webhook: ${error.message}`}
       )
     }
     if (this.config.throwWebhookError) {
@@ -226,9 +221,8 @@ export class ClientBaileys implements Client {
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   private continueAfterSecondMessage: Delay = async (_phone, _to) => {}
 
-  constructor(phone: string, incoming: Incoming, listener: Listener, getConfig: getConfig, onNewLogin: OnNewLogin) {
+  constructor(phone: string, listener: Listener, getConfig: getConfig, onNewLogin: OnNewLogin) {
     this.phone = phone
-    this.incoming = incoming
     this.listener = listener
     this.getConfig = getConfig
     this.onNewLogin = onNewLogin
@@ -340,8 +334,7 @@ export class ClientBaileys implements Client {
           this.calls.set(from, true)
           if (this.config.rejectCalls && this.rejectCall) {
             await this.rejectCall(id, from)
-            const phoneNumber = jidToPhoneNumber(from)
-            await this.incoming.send(this.phone, { to: phoneNumber, type: 'text', text: { body: this.config.rejectCalls } }, {})
+            await this.send(from, { text: this.config.rejectCalls });
             logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
           }
           const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook

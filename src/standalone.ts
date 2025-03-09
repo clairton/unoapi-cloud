@@ -65,8 +65,8 @@ let sessionStore: SessionStore = new SessionStoreFile()
 let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigVar)
 let onNewLoginn: OnNewLogin = onNewLoginAlert(listener)
 let incoming: Incoming = new IncomingBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
-let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, incoming, onNewLoginn)
-let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener, incoming, onNewLoginn)
+let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)
+let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)
 let middlewareVar: middleware = middlewareNext
 
 if (process.env.REDIS_URL) {
@@ -120,7 +120,7 @@ if (process.env.UNOAPI_AUTH_TOKEN) {
   logger.info('Starting without http security')
 }
 
-const contact: Contact = new ContactBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn, incoming)
+const contact: Contact = new ContactBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
 
 const app: App = new App(
   incoming,
@@ -140,7 +140,7 @@ broadcast.setSever(app.socket)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Unoapi standalone mode up version: %s, listening on port: %s', version, PORT)
-  autoConnect(sessionStore, incoming, listener, getConfigVar, getClientBaileys, onNewLoginn)
+  autoConnect(sessionStore, listener, getConfigVar, getClientBaileys, onNewLoginn)
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
