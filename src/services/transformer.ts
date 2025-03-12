@@ -61,12 +61,12 @@ export const TYPE_MESSAGES_TO_READ = [
   'ptvMessage',
 ]
 
-const TYPE_MESSAGES_TO_PROCESS = TYPE_MESSAGES_TO_READ.concat([
+const OTHER_MESSAGES_TO_PROCESS = [
   'protocolMessage',
   'senderKeyDistributionMessage',
   'messageContextInfo',
   'messageStubType',
-])
+]
 
 export const getMimetype = (payload: any) => {
   const { type } = payload
@@ -118,7 +118,9 @@ export const getMessageType = (payload: any) => {
     return 'receipt'
   } else if (payload.message) {
     const { message } = payload
-    return TYPE_MESSAGES_TO_PROCESS.find((t) => message[t]) || Object.keys(payload.message)[0]
+    return TYPE_MESSAGES_TO_READ.find((t) => message[t]) || 
+            OTHER_MESSAGES_TO_PROCESS.find((t) => message[t]) || 
+            Object.keys(payload.message)[0]
   } else if (payload.messageStubType) {
     return 'messageStubType'
   }

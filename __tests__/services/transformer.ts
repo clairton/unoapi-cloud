@@ -1035,6 +1035,19 @@ describe('service transformer', () => {
   test('getMessageType with viewOnceMessage', async () => {
     const input = {
       message: {
+        protocolMessage: {}, 
+        type: 'MESSAGE_EDIT',
+        editedMessage: { 
+          conversation: 'blablabla2'
+        }
+      }
+    }
+    expect(getMessageType(input)).toEqual('editedMessage')
+  })
+
+  test('getMessageType with viewOnceMessage', async () => {
+    const input = {
+      message: {
         viewOnceMessage: {},
       },
     }
