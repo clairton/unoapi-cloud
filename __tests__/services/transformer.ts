@@ -263,21 +263,21 @@ describe('service transformer', () => {
     const body = `${new Date().getTime()}`
     const id = `wa.${new Date().getTime()}`
     const input = {
-      key:{
+      key: {
         remoteJid,
         fromMe: false,
         id
       },
-      message:{
-        editedMessage:{
-          message:{
-            protocolMessage:{
-              key:{
+      message: {
+        editedMessage: {
+          message: {
+            protocolMessage: {
+              key: {
                 id: '3AD0FEAAF5915DAEAA07'
               },
               type: 'MESSAGE_EDIT',
               editedMessage: {
-                imageMessage:{
+                imageMessage: {
                   caption: body
                 }
               }
@@ -1032,6 +1032,69 @@ describe('service transformer', () => {
     expect(getMessageType(input)).toEqual('protocolMessage')
   })
 
+  test('fromBaileysMessageContent protocolMessage editedMessage', async () => {
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const id2 = `wa.${new Date().getTime()}`
+    const pushName = `Fernanda ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const phoneNumer = '5549998093075'
+    const conversation = `blablabla2.${new Date().getTime()}`
+    const input = { 
+      key: {
+        remoteJid: remoteJid,
+        fromMe: true,
+        id: id,
+      },
+      messageTimestamp,
+      pushName,
+      message: { 
+        protocolMessage: { 
+          key: { 
+            remoteJid, 
+            fromMe: true, 
+            id: id2 
+          }, 
+          type: 'MESSAGE_EDIT', 
+          editedMessage: { 
+            conversation,    
+          }, 
+        } 
+      } 
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: remotePhoneNumber, picture: undefined }, wa_id: remotePhoneNumber.replace('+', '') }],
+                statuses: [],
+                messages: [
+                  {
+                    from: phoneNumer.replace('+', ''),
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body: conversation },
+                    type: 'text',
+                  },
+                ],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
+
   test('getMessageType with viewOnceMessage', async () => {
     const input = {
       message: {
@@ -1082,11 +1145,11 @@ describe('service transformer', () => {
       ]
     }
     const vcard = 'BEGIN:VCARD\n'
-    + 'VERSION:3.0\n' 
-    + `N:${displayName}\n`
-    + `TEL;type=CELL;type=VOICE;waid=${wa_id}:${phone}\n`
-    + 'END:VCARD'
-    const output = { contacts: { displayName, contacts: [ { vcard }] }}
+      + 'VERSION:3.0\n'
+      + `N:${displayName}\n`
+      + `TEL;type=CELL;type=VOICE;waid=${wa_id}:${phone}\n`
+      + 'END:VCARD'
+    const output = { contacts: { displayName, contacts: [{ vcard }] } }
     expect(toBaileysMessageContent(input)).toEqual(output)
   })
 

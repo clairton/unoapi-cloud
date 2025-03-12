@@ -147,6 +147,8 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
     let { message } = binMessage
     if (message.editedMessage) {
       message = message.protocolMessage?.editedMessage
+    }else if (message.protocolMessage?.editedMessage) {
+      message = message.protocolMessage?.editedMessage
     }
     return { key: waMessage.key, message: { [binMessage.messageType]: message } }
   }
@@ -598,6 +600,16 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         }
         return fromBaileysMessageContent(phone, editedMessagePayload)
 
+      
+      case 'protocolMessage':
+        // {"key":{"remoteJid":"351912490567@s.whatsapp.net","fromMe":false,"id":"3EB0C77FBE5C8DACBEC5"},"messageTimestamp":1741714271,"pushName":"Pedro Paiva","broadcast":false,"message":{"protocolMessage":{"key":{"remoteJid":"351211450051@s.whatsapp.net","fromMe":true,"id":"3EB05C0B7B1A0C12284EE0"},"type":"MESSAGE_EDIT","editedMessage":{"conversation":"blablabla2","messageContextInfo":{"messageSecret":"4RYW9eIV1O4j5vjNmY059bZRymJ+B2aTfi9it9+2RxA="}},"timestampMs":"1741714271693"},"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"UgdPt0CEKvqhyg==","senderTimestamp":"1741018303","senderAccountType":"E2EE","receiverAccountType":"E2EE","recipientKeyHash":"EhuHta8R2tH+8g==","recipientTimestamp":"1740522549"},"deviceListMetadataVersion":2,"messageSecret":"4RYW9eIV1O4j5vjNmY059bZRymJ+B2aTfi9it9+2RxA="}}}
+        if (binMessage.editedMessage) {
+          return fromBaileysMessageContent(phone, { ...payload, message: { editedMessage: { message: { protocolMessage: binMessage }}}})
+        } else {
+          logger.debug(`Ignore message type ${messageType}`)
+          return
+        }
+
       case 'ephemeralMessage':
       case 'viewOnceMessage':
       case 'viewOnceMessageV2':
@@ -748,7 +760,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         break
 
       case 'messageContextInfo':
-      case 'protocolMessage':
       case 'senderKeyDistributionMessage':
         logger.debug(`Ignore message type ${messageType}`)
         return
