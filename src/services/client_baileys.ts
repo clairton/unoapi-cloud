@@ -65,12 +65,7 @@ export const getClientBaileys: getClient = async ({
   return clients.get(phone) as Client
 }
 
-const sendError = new SendError(3, t('disconnected_session'))
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const sendMessageDefault: sendMessage = async (_phone: string, _message: AnyMessageContent, _options: unknown) => {
-  throw sendError
-}
+const sendError = new SendError(15, t('reloaded_session'))
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const readMessagesDefault: readMessages = async (_keys) => {
@@ -101,10 +96,16 @@ const logoutDefault: logout = async () => {}
 const closeDefault = async () => logger.info(`Close connection`)
 
 export class ClientBaileys implements Client {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  readonly sendMessageDefault: sendMessage = async (_phone: string, _message: AnyMessageContent, _options: unknown) => {
+    clients.delete(this.phone)
+    throw sendError
+  }
+
   private phone: string
   private config: Config = defaultConfig
   private close: close = closeDefault
-  private sendMessage = sendMessageDefault
+  private sendMessage = this.sendMessageDefault
   private event
   private fetchImageUrl = fetchImageUrlDefault
   private exists = existsDefault
@@ -289,7 +290,7 @@ export class ClientBaileys implements Client {
     await this.close()
     clients.delete(this?.phone)
     configs.delete(this?.phone)
-    this.sendMessage = sendMessageDefault
+    this.sendMessage = this.sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
     this.fetchImageUrl = fetchImageUrlDefault
