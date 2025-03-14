@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, isJidUser, isLidUser, normalizeMessageContent, proto } from 'baileys'
+import { AnyMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, normalizeMessageContent, proto } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -364,10 +364,9 @@ export const extractDestinyPhone = (payload: object) => {
   return number
 }
 
-export const isGroupMessage = (payload: object) => {
+export const getGroupId = (payload: object) => {
   const data = payload as any
-  return !!(
-    (
+  return (
       data.entry
       && data.entry[0]
       && data.entry[0].changes
@@ -380,7 +379,15 @@ export const isGroupMessage = (payload: object) => {
         && data.entry[0].changes[0].value.contacts[0].group_id
       )
     )
-  )
+}
+
+export const isGroupMessage = (payload: object) => {
+  return !!getGroupId(payload)
+}
+
+export const isNewsletterMessage = (payload: object) => {
+  const groupId = getGroupId(payload)
+  return groupId && isJidNewsletter(groupId)
 }
 
 export const isOutgoingMessage = (payload: object) => {
@@ -397,7 +404,7 @@ export const isOutgoingMessage = (payload: object) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string => {
-  if (isLidUser(value)) {
+  if (isLidUser(value) || isJidNewsletter(value)) {
     return value
   }
   const number = (value || '').split('@')[0].split(':')[0].replace('+', '')

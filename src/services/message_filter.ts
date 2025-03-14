@@ -1,4 +1,4 @@
-import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast } from 'baileys'
+import { WAMessageKey, isJidStatusBroadcast, isJidGroup, isJidBroadcast, isJidNewsletter } from 'baileys'
 import { Config, defaultConfig } from './config'
 import { jidToPhoneNumber } from './transformer'
 import logger from './logger'
@@ -48,6 +48,14 @@ export class MessageFilter {
       ignoresJid.push((jid) => {
         const is = isJidGroup(jid)
         logger.trace(`${jid} is group ${is}`)
+        return is
+      })
+    }
+    if (config.ignoreNewsletterMessages) {
+      logger.info('Config to ignore jid newsletter messages')
+      ignoresJid.push((jid) => {
+        const is = isJidNewsletter(jid)
+        logger.trace(`${jid} is newsletter ${is}`)
         return is
       })
     }

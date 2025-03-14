@@ -233,7 +233,7 @@ with:
 * 10 - Invalid token value
 * 11 - Http Head test link not return success
 * 12 - offline session, connecting....
-* 14 - standby session, waiting for time configured
+* 14 - standby session, waiting for time configured\
 
 
 
@@ -384,6 +384,7 @@ WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is tru
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
+IGNORE_NEWSLETTER_MESSAGES=false to ignore newsletter
 IGNORE_STATUS_MESSAGE=false to send stories in socket to webhook, default true
 READ_ON_RECEIPT=false mark message as read on receipt
 IGNORE_BROADCAST_MESSAGES=false to send broadcast messages in socket to webhook, default false

@@ -2,7 +2,7 @@ import { Outgoing } from './outgoing'
 import fetch, { Response, RequestInit } from 'node-fetch'
 import { Webhook, getConfig } from './config'
 import logger from './logger'
-import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage } from './transformer'
+import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage } from './transformer'
 import { isInBlacklist } from './blacklist'
 import { EnqueueOption } from '../amqp'
 
@@ -34,6 +34,10 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (!webhook.sendGroupMessages && isGroupMessage(message)) {
       logger.info(`Session phone %s webhook %s configured to not send group message for this webhook`, phone, webhook.id)
+      return
+    }
+    if (!webhook.sendNewsletterMessages && isNewsletterMessage(message)) {
+      logger.info(`Session phone %s webhook %s configured to not send newsletter message for this webhook`, phone, webhook.id)
       return
     }
     if (!webhook.sendOutgoingMessages && isOutgoingMessage(message)) {

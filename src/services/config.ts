@@ -24,10 +24,12 @@ export type Webhook = {
   sendNewMessages: boolean
   sendGroupMessages: boolean
   sendOutgoingMessages: boolean
+  sendNewsletterMessages: boolean
 }
 
 export type Config = {
   ignoreGroupMessages: boolean
+  ignoreNewsletterMessages: boolean
   ignoreBroadcastMessages: boolean
   ignoreBroadcastStatuses: boolean
   readOnReceipt: boolean
@@ -69,6 +71,7 @@ export type Config = {
 
 export const defaultConfig: Config = {
   ignoreGroupMessages: true,
+  ignoreNewsletterMessages: true,
   ignoreBroadcastStatuses: true,
   ignoreBroadcastMessages: false,
   readOnReceipt: false,
@@ -102,6 +105,7 @@ export const defaultConfig: Config = {
       header: '',
       timeoutMs: 5_000,
       sendNewMessages: false,
+      sendNewsletterMessages: false,
       sendGroupMessages: true,
       sendOutgoingMessages: true,
     },
