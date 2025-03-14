@@ -233,7 +233,8 @@ with:
 * 10 - Invalid token value
 * 11 - Http Head test link not return success
 * 12 - offline session, connecting....
-* 14 - standby session, waiting for time configured\
+* 14 - standby session, waiting for time configured
+* 15 - realoaded session, send message do connect again
 
 
 

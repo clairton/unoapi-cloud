@@ -3,6 +3,7 @@
 	"invalid_phone_number": "The phone number %s is invalid!",
 	"offline_session": "offline session, connecting....",
 	"disconnected_session": "disconnect number, please send a message do try reconnect and read qr code if necessary",
+  "reloaded_session": "Session reloaded, send a message to connect again",
 	"connecting_session": "Wait a moment, connecting process",
   "invalid_link": "Error on retrieve media, http status %s in link %s",
 	"attempts_exceeded": "The %s times of generate qrcode is exceeded!",

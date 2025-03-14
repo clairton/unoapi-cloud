@@ -3,6 +3,7 @@
   "invalid_phone_number": "O número de telefone %s está inválido!",
   "offline_session": "Sessão desligada, a conectar...",
   "disconnected_session": "A sessão foi desligada, por favor envia uma mensagem e leia o QR Code se for necessário.",
+  "reloaded_session": "Sessão terminada, envie uma mensagem para conectar novamente",
   "connecting_session": "Aguarde um momento, a estabelecer a sessão...",
   "invalid_link": "Houve um erro ao carregar o conteúdo, estado %s, link %s",
 	"attempts_exceeded": "O limite de %s vezes de geração de QR Code foi excedido!",
