@@ -509,6 +509,7 @@ export const connect = async ({
       console.log(error, error.isBoom, !error.isServer)
       if (error && error.isBoom && !error.isServer) {
         await onClose({ lastDisconnect: { error } })
+        return false
       } else {
         logger.error('Baileys Socket error: %s %s', error, error.stack)
         const message = t('error', error.message)
@@ -540,10 +541,15 @@ export const connect = async ({
       if (config.wavoipToken) {
         useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
       }
+      return true
     }
+    return false
   }
 
-  await connect()
+  if (!await connect()) {
+    await sessionStore.setStatus(phone, 'offline')
+    return
+  }
 
   return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout }
 }
