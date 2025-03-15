@@ -50,11 +50,11 @@ describe('service socket', () => {
       time: 1,
       config: defaultConfig,
     })
-    expect(response.status.attempt).toBe(1)
+    expect(response && response.status.attempt).toBe(1)
   })
 
   test('call connect and subscribe 2 events', async () => {
     await connect({ phone, store, onQrCode, onNotification, onDisconnected, onReconnect, onNewLogin, attempts: 1, time: 1, config: defaultConfig })
-    expect(mockOn).toBeCalledTimes(2)
+    expect(mockOn).toHaveBeenCalledTimes(2)
   })
 })

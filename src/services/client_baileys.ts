@@ -98,7 +98,16 @@ const closeDefault = async () => logger.info(`Close connection`)
 export class ClientBaileys implements Client {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   readonly sendMessageDefault: sendMessage = async (_phone: string, _message: AnyMessageContent, _options: unknown) => {
-    clients.delete(this.phone)
+    const sessionStore = this?.phone && await (await this?.config?.getStore(this.phone, this.config)).sessionStore
+    if (sessionStore) {
+      if (!await sessionStore.isStatusConnecting(this.phone)) {
+        clients.delete(this.phone)
+      }
+      if (await sessionStore.isStatusOnline(this.phone)) {
+        await sessionStore.setStatus(this.phone, 'offline')
+        clients.delete(this.phone)
+      }
+    }
     throw sendError
   }
 
