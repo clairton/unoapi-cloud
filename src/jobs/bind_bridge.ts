@@ -6,6 +6,7 @@ import {
   UNOAPI_JOB_COMMANDER,
   UNOAPI_JOB_LISTENER,
   UNOAPI_JOB_OUTGOING_PREFETCH,
+  UNOAPI_SERVER_NAME,
 } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { getConfig } from '../services/config'
@@ -41,6 +42,14 @@ const processeds = new Map<string, boolean>()
 export class BindBridgeJob {
   async consume(server: string, { phone }: { phone: string }) {
     const config = await getConfig(phone)
+    if (config.provider !== 'baileys') {
+      logger.info(`Ignore bing brigde phone ${phone} is not provider baileys...`)
+      return;
+    }
+    if (config.server !== UNOAPI_SERVER_NAME) {
+      logger.info(`Ignore bing brigde ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
+      return;
+    }
     const store = await config.getStore(phone, config)
     const { sessionStore } = store
     if (!(await sessionStore.isStatusOnline(phone)) && processeds.get(phone)) {
