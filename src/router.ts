@@ -49,7 +49,7 @@ export const router = (
   const registrationController = new RegistrationController(getConfig, reload, logout)
   const phoneNumberController = new PhoneNumberController(getConfig, sessionStore)
   const sessionController = new SessionController(getConfig, onNewLogin, socket)
-  const webhookController = new WebhookController()
+  const webhookController = new WebhookController(outgoing)
   const blacklistController = new BlacklistController(addToBlacklist)
   const contactsController = new ContactsController(contact)
   const pairingCodeController = new PairingCodeController(getConfig, incoming)
@@ -79,7 +79,7 @@ export const router = (
 
   injectRoute(router)
 
-  // Webhook for tests
-  router.post('/webhooks/whatsapp/:phone', webhookController.whatsapp)
+  // Webhook for proxy connection
+  router.post('/webhooks/whatsapp/:phone', middleware, webhookController.whatsapp.bind(webhookController))
   return router
 }
