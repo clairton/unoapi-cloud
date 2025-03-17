@@ -253,6 +253,7 @@ describe('service transformer', () => {
   test('jidToPhoneNumber without + and put 9˚ digit', async () => {
     expect(jidToPhoneNumber('+554988290955@s.whatsapp.net', '')).toEqual('5549988290955')
   })
+  
 
   test('fromBaileysMessageContent with editedMessage for imageMessage', async () => {
     const phoneNumer = '5549998360838'
@@ -1030,6 +1031,62 @@ describe('service transformer', () => {
       },
     }
     expect(getMessageType(input)).toEqual('protocolMessage')
+  })
+
+  test('fromBaileysMessageContent without protocolMessage editedMessage', async () => {
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Fernanda ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const phoneNumer = '5549998093075'
+    const conversation = `blablabla2.${new Date().getTime()}`
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      messageTimestamp,
+      pushName,
+      message: {
+        editedMessage:{
+          message: {
+            conversation
+          }
+        }
+      }
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName, picture: undefined }, wa_id: remotePhoneNumber.replace('+', '') }],
+                statuses: [],
+                messages: [
+                  {
+                    from: remotePhoneNumber.replace('+', ''),
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body: conversation },
+                    type: 'text',
+                  },
+                ],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
   })
 
   test('fromBaileysMessageContent protocolMessage editedMessage', async () => {
