@@ -67,14 +67,14 @@ export type Config = {
   sendReactionAsReply: boolean
   sendProfilePicture: boolean
   authToken: string | undefined
-  authHeader: string | undefined,
-  provider: 'baileys',
-  server:  string | undefined,
-  connectionType: connectionType,
-  wavoipToken:  string | undefined,
-  useRedis: boolean,
-  useS3: boolean,
-  qrTimeoutMs: number,
+  authHeader: string | undefined
+  provider: 'baileys' | undefined
+  server:  string | undefined
+  connectionType: connectionType
+  wavoipToken:  string | undefined
+  useRedis: boolean
+  useS3: boolean
+  qrTimeoutMs: number
 }
 
 export const defaultConfig: Config = {
@@ -126,8 +126,8 @@ export const defaultConfig: Config = {
   proxyUrl: undefined,
   authToken: undefined,
   authHeader: undefined,
-  provider: 'baileys',
-  server: UNOAPI_SERVER_NAME,
+  provider: undefined,
+  server: undefined,
   connectionType: 'qrcode',
   wavoipToken: '',
   useRedis: false,

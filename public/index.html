@@ -271,6 +271,10 @@
                                 <label for="proxyUrl" class="form-label">Proxy Url (Precisa Reiniciar a Unoapi ao Alterar)</label>
                                 <input type="text" class="form-control" id="proxyUrl" name="proxyUrl" placeholder="Ex: socks5://user:pass@ip/domain:port">
                             </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="server" class="form-label">Server</label>
+                                <input type="text" class="form-control" id="server" name="server" placeholder="Ex: default is server_1">
+                            </div>
                         </div>
                         <div class="row edit-form-row">
                             <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
@@ -662,6 +666,7 @@
                 $('#ignoreBroadcastMessages').prop('checked', session.ignoreBroadcastMessages);
                 $('#connectionType').val(session.connectionType);
                 $('#proxyUrl').val(session.proxyUrl);
+                $('#server').val(session.server);
 
                 // Limpar webhooks existentes no formulário de edição
                 $('#webhooksContainer .webhook').remove();
@@ -732,6 +737,7 @@
                         ignoreBroadcastMessages: $('#ignoreBroadcastMessages').is(':checked'),
                         connectionType: $('#connectionType').val(),
                         proxyUrl: $('#proxyUrl').val(),
+                        server: $('#server').val(),
                         webhooks: []
                     };
 
