@@ -331,7 +331,8 @@ This a general env:
 
 ```env
 CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
-DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en
+AVAILABLE_LOCALES=default is `["en", "pt_BR", "pt"]`
+DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en, to add new, use docker volume for exempla `/app/dist/src/locales/custom.json` and add `custom` in `AVAILABLE_LOCALES`
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
 MAX_CONNECT_RETRY=3 max call connect with error in MAX_CONNECT_TIME
 MAX_CONNECT_TIME=3000 interval of max connect, 5 minutes
@@ -350,7 +351,7 @@ UNOAPI_DELAY_BETWEEN_MESSAGES_MS=to not duplicate timestamp message. default 0
 CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disconnect number, default is false
 CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
-WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version.
+WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version. Format is `[2, 3000, 1019810866]`
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
