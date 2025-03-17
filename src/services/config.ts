@@ -6,7 +6,7 @@ import { Level } from 'pino'
 
 export const configs: Map<string, Config> = new Map()
 
-export type connectionType = 'qrcode' | 'pairing_code'
+export type connectionType = 'qrcode' | 'pairing_code' | 'cloud_api'
 
 export interface GetMessageMetadata {
   <T>(message: T): Promise<T>
@@ -25,6 +25,13 @@ export type Webhook = {
   sendGroupMessages: boolean
   sendOutgoingMessages: boolean
   sendNewsletterMessages: boolean
+}
+
+export type WebhookCloudApi = {
+  phoneNumberId: string,
+  token: string
+  version: string
+  timeoutMs: number
 }
 
 export type Config = {
@@ -53,6 +60,7 @@ export type Config = {
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
+  webhookCloudApi: WebhookCloudApi | undefined
   logLevel: Level
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
@@ -110,6 +118,7 @@ export const defaultConfig: Config = {
       sendOutgoingMessages: true,
     },
   ],
+  webhookCloudApi: undefined,
   getMessageMetadata: getMessageMetadataDefault,
   ignoreDataStore: false,
   sendReactionAsReply: false,

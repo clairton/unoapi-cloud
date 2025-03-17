@@ -28,6 +28,7 @@ import { Template } from './template'
 import logger from './logger'
 import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
 import { t } from '../i18n'
+import { ClientCloudApi } from './client_cloud_api'
 const attempts = 3
 
 interface Delay {
@@ -49,14 +50,20 @@ export const getClientBaileys: getClient = async ({
 }): Promise<Client> => {
   if (!clients.has(phone)) {
     logger.info('Creating client baileys %s', phone)
-    const client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
     const config = await getConfig(phone)
-    if (config.autoConnect) {
-      logger.info('Connecting client baileys %s', phone)
-      await client.connect(1)
-      logger.info('Created and connected client baileys %s', phone)
+    let client
+    if (config.connectionType == 'cloud_api') {
+      logger.info('Connecting client cloud api %s', phone)
+      client = new ClientCloudApi(phone, getConfig)
     } else {
-      logger.info('Config client baileys to not auto connect %s', phone)
+      client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
+      if (config.autoConnect) {
+        logger.info('Connecting client baileys %s', phone)
+        await client.connect(1)
+        logger.info('Created and connected client baileys %s', phone)
+      } else {
+        logger.info('Config client baileys to not auto connect %s', phone)
+      }
     }
     clients.set(phone, client)
   } else {
