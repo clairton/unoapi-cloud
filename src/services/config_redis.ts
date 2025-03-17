@@ -34,6 +34,9 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
         }
       });
     }
+
+    config.server = config.server || 'server_1'
+    config.provider = config.provider || 'baileys'
     
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
