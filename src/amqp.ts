@@ -12,6 +12,7 @@ import {
   VALIDATE_ROUTING_KEY,
   CONSUMER_TIMEOUT_MS,
   UNOAPI_SERVER_NAME,
+  UNOAPI_EXCHANGE_TYPE,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -52,7 +53,6 @@ export type CreateOption = {
   priority: number
   notifyFailedMessages: boolean
   prefetch: number
-  type: string
 }
 
 export type PublishOption = CreateOption & {
@@ -123,8 +123,7 @@ export const amqpCreateChannel = async (
   options: Partial<CreateOption> = { 
     delay: UNOAPI_MESSAGE_RETRY_DELAY, 
     priority: 0, 
-    notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
-    type: 'topic'
+    notifyFailedMessages: NOTIFY_FAILED_MESSAGES
   },
 ) => {
   logger.info('Creating channel %s...', exchange)
@@ -132,7 +131,8 @@ export const amqpCreateChannel = async (
   channel.prefetch(options.prefetch || 1)
   const exchangeDead = exchangeDeadName(exchange)
   logger.info('Creating exchange %s...', exchangeDead)
-  const deadExchange = await channel.assertExchange(exchangeDead, options.type, { durable: true })
+  const exchangeType = UNOAPI_EXCHANGE_TYPE[exchange]
+  await channel.assertExchange(exchangeDead, 'direct', { durable: true })
   await channel.assertQueue(exchangeDead, { durable: true })
   const parameters = {}
   if (options.priority) {
@@ -142,8 +142,8 @@ export const amqpCreateChannel = async (
     durable: true,
     arguments: parameters,
   }
-  const exchangeMain = await channel.assertExchange(exchange, options.type, exchangeOptions)
-  await channel.assertQueue(exchange, exchangeOptions)
+  await channel.assertExchange(exchange, exchangeType, exchangeOptions)
+  const queueMain = await channel.assertQueue(exchange, exchangeOptions)
   logger.info('Created exchange %s!', exchangeDead)
   const exchangeDelayed = exchangeDelayedName(exchange)
   logger.info('Creating exchange %s...', exchangeDelayed)
@@ -151,11 +151,12 @@ export const amqpCreateChannel = async (
     durable: true,
     arguments: { 'x-dead-letter-exchange': exchange },
   }
-  const delayedExchange = await channel.assertExchange(exchangeDelayed, options.type, exchangeDelayedOptions)
-  await channel.assertQueue(exchangeDelayed, exchangeDelayedOptions)
+  await channel.assertExchange(exchangeDelayed, exchangeType, exchangeDelayedOptions)
+  const queueDelayed = await channel.assertQueue(exchangeDelayed, exchangeDelayedOptions)
+  await channel.bindQueue(queueDelayed.queue,  exchangeDelayed, '')
   logger.info('Created exchange %s!', exchangeDelayed)
   logger.info('Created channel %s!', exchange)
-  return { channel, deadExchange, exchangeMain, delayedExchange }
+  return { channel, queueMain, queueDelayed }
 }
 
 export const amqpPublish = async (
@@ -196,7 +197,7 @@ export const amqpPublish = async (
   logger.debug(
     'Published at %s%s, payload: %s, properties: %s',
     exchangeName,
-    routingKey ? `with routing key: ${routingKey},` : '',
+    routingKey ? `, with routing key: ${routingKey},` : '',
     JSON.stringify(payload),
     JSON.stringify(properties)
   )
@@ -213,7 +214,7 @@ export const amqpConsume = async (
   if (!channelObject) {
     throw `Not create channel for exchange ${exchange}`
   }
-  const { channel } = channelObject
+  const { channel, queueMain, queueDelayed } = channelObject
   const fn = async (payload: ConsumeMessage | null) => {
     if (!payload) {
       throw `payload not be null `
@@ -266,24 +267,18 @@ export const amqpConsume = async (
     }
   }
 
-  const exchangeDelayed = exchangeDelayedName(exchange)
-  const exchangeDelayedParams = [exchangeDelayed,  exchangeDelayed]
-  const exchangeParams = [exchange,  exchange]
+  const exchangeParams = [queueMain.queue,  exchange]
   if (routingKey) {
-    exchangeDelayedParams.push(routingKey)
     exchangeParams.push(routingKey)
   } else {
-    exchangeDelayedParams.push('.*')
-    exchangeParams.push('.*')
+    exchangeParams.push('')
   }
-  await channel.bindQueue(...exchangeDelayedParams)
   await channel.bindQueue(...exchangeParams)
 
   channel.on('close', () => {
-    channel.unbindQueue(...exchangeDelayedParams)
     channel.unbindQueue(...exchangeParams)
   })
 
-  channel.consume(exchange, fn)
+  channel.consume(queueMain.queue, fn)
   logger.info('Waiting for message in exchange %s%s', exchange, routingKey ? ` with routing key ${routingKey}` : '')
 }

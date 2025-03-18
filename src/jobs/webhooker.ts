@@ -56,8 +56,8 @@ export class WebhookerJob {
     const payload: object = a.payload
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
-      Promise.all(
-        webhooks.map((webhook) => {
+      await Promise.all(
+        webhooks.map(async (webhook) => {
           return amqpPublish(UNOAPI_JOB_WEBHOOKER, phone, { payload, webhook })
         }),
       )
