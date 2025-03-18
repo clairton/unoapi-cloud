@@ -50,7 +50,7 @@ services:
     restart: on-failure
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:4-management-alpine
     hostname: rabbitmq
     ports:
       - 5672:5672
