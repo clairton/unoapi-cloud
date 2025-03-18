@@ -120,30 +120,30 @@ if (process.env.AMQP_URL) {
   logger.info('Starting bind bridge consumer')
   amqpConsume(UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, bindBridgeJob.consume.bind(bindBridgeJob))
   logger.info('Starting reload consumer')
-  amqpConsume(UNOAPI_JOB_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob), { type: 'direct' })
+  amqpConsume(UNOAPI_JOB_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob))
   logger.info('Starting logout consumer')
-  amqpConsume(UNOAPI_JOB_LOGOUT, '', logoutJob.consume.bind(logoutJob), { type: 'direct' })
+  amqpConsume(UNOAPI_JOB_LOGOUT, '', logoutJob.consume.bind(logoutJob))
   logger.info('Starting media consumer')
   const mediaJob = new MediaJob(getConfigVar)
-  amqpConsume(UNOAPI_JOB_MEDIA, '', mediaJob.consume.bind(mediaJob), { type: 'topic' })
+  amqpConsume(UNOAPI_JOB_MEDIA, '', mediaJob.consume.bind(mediaJob))
   const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
   logger.info('Binding queues consumer for server %s', UNOAPI_SERVER_NAME)
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
   const outgingJob = new OutgoingJob(outgoingCloudApi)
-  amqpConsume(UNOAPI_JOB_OUTGOING, '', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch, type: 'topic' })
+  amqpConsume(UNOAPI_JOB_OUTGOING, '', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
   logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
   const webhookerJob = new WebhookerJob(outgoingCloudApi)
-  amqpConsume(UNOAPI_JOB_WEBHOOKER, '', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch, type: 'topic' })
+  amqpConsume(UNOAPI_JOB_WEBHOOKER, '', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
     const notificationJob = new NotificationJob(incoming)
-    amqpConsume(UNOAPI_JOB_NOTIFICATION, '', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false, type: 'topic' })
+    amqpConsume(UNOAPI_JOB_NOTIFICATION, '', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, '', atbl, { notifyFailedMessages, prefetch, type: 'topic' })
+  amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, '', atbl, { notifyFailedMessages, prefetch })
 } else {
   logger.info('Starting standard mode')
 }

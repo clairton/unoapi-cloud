@@ -57,8 +57,8 @@ export const UNOAPI_JOB_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_JOB_OUTG
 export const UNOAPI_JOB_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
 export const UNOAPI_JOB_NOTIFICATION = `${UNOAPI_QUEUE_NAME}.notification`
 export const UNOAPI_JOB_LISTENER = `${UNOAPI_QUEUE_NAME}.baileys.listener`
-export const UNOAPI_JOB_BLACKLIST_ADD = `${UNOAPI_QUEUE_NAME}.webhooker.blacklist.add`
-export const UNOAPI_JOB_BLACKLIST_RELOAD = `${UNOAPI_QUEUE_NAME}.webhooker.blacklist.reload`
+export const UNOAPI_JOB_BLACKLIST_ADD = `${UNOAPI_QUEUE_NAME}.blacklist.add`
+export const UNOAPI_JOB_BLACKLIST_RELOAD = `${UNOAPI_QUEUE_NAME}.blacklist.reload`
 export const UNOAPI_JOB_BIND = `${UNOAPI_QUEUE_NAME}.bind`
 export const UNOAPI_JOB_OUTGOING = `${UNOAPI_QUEUE_NAME}.outgoing`
 export const UNOAPI_JOB_CONTACT = `${UNOAPI_QUEUE_NAME}.contact`
@@ -72,7 +72,27 @@ export const UNOAPI_JOB_BULK_REPORT = `${UNOAPI_QUEUE_NAME}.bulk.report`
 export const UNOAPI_JOB_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
 export const UNOAPI_JOB_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
 export const UNOAPI_JOB_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
-export const UNOAPI_JOB_REVOKER = `${UNOAPI_QUEUE_NAME}.revoker`
+export const UNOAPI_EXCHANGE_TYPE = {
+  [UNOAPI_JOB_WEBHOOKER]: 'topic',
+  [UNOAPI_JOB_MEDIA]: 'topic',
+  [UNOAPI_JOB_NOTIFICATION]: 'topic',
+  [UNOAPI_JOB_BLACKLIST_ADD]: 'topic',
+  [UNOAPI_JOB_BLACKLIST_RELOAD]: 'topic',
+  [UNOAPI_JOB_BIND]: 'direct',
+  [UNOAPI_JOB_OUTGOING]: 'topic',
+  [UNOAPI_JOB_CONTACT]: 'topic',
+  [UNOAPI_JOB_BULK_PARSER]: 'topic',
+  [UNOAPI_JOB_RELOAD]: 'topic',
+  [UNOAPI_JOB_BROADCAST]: 'topic',
+  [UNOAPI_JOB_LOGOUT]: 'topic',
+  [UNOAPI_JOB_BULK_SENDER]: 'topic',
+  [UNOAPI_JOB_BULK_STATUS]: 'topic',
+  [UNOAPI_JOB_BULK_REPORT]: 'topic',
+  [UNOAPI_JOB_BULK_WEBHOOK]: 'topic',
+  [UNOAPI_JOB_COMMANDER]: 'topic',
+  [UNOAPI_JOB_LISTENER]: 'direct',
+  [UNOAPI_JOB_INCOMING]: 'direct'
+}
 export const UNOAPI_MESSAGE_RETRY_LIMIT = parseInt(process.env.UNOAPI_MESSAGE_RETRY_LIMIT || '5')
 export const UNOAPI_MESSAGE_RETRY_DELAY = parseInt(process.env.UNOAPI_MESSAGE_RETRY_DELAY || '10000')
 export const UNOAPI_DELAY_BETWEEN_MESSAGES_MS = parseInt(process.env.UNOAPI_DELAY_BETWEEN_MESSAGES_MS || '0')
