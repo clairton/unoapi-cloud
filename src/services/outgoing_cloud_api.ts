@@ -4,7 +4,7 @@ import { Webhook, getConfig } from './config'
 import logger from './logger'
 import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage } from './transformer'
 import { isInBlacklist } from './blacklist'
-import { EnqueueOption } from '../amqp'
+import { PublishOption } from '../amqp'
 
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
@@ -26,7 +26,7 @@ export class OutgoingCloudApi implements Outgoing {
     await Promise.all(promises)
   }
 
-  public async sendHttp(phone: string, webhook: Webhook, message: object, _options: Partial<EnqueueOption> = {}) {
+  public async sendHttp(phone: string, webhook: Webhook, message: object, _options: Partial<PublishOption> = {}) {
     const destinyPhone = await this.isInBlacklist(phone, webhook.id, message)
     if (destinyPhone) {
       logger.info(`Session phone %s webhook %s and destiny phone %s are in blacklist`, phone, webhook.id, destinyPhone)

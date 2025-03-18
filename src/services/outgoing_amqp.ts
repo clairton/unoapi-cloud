@@ -1,6 +1,6 @@
 import { Webhook, getConfig } from './config'
 import { Outgoing } from './outgoing'
-import { EnqueueOption, amqpEnqueue } from '../amqp'
+import { PublishOption, amqpPublish } from '../amqp'
 import { UNOAPI_JOB_WEBHOOKER } from '../defaults'
 import { completeCloudApiWebHook } from './transformer'
 
@@ -19,10 +19,10 @@ export class OutgoingAmqp implements Outgoing {
 
   public async send(phone: string, payload: object) {
     const config = await this.getConfig(phone)
-    await amqpEnqueue(this.queueWebhooker, phone, { webhooks: config.webhooks, payload, split: true })
+    await amqpPublish(this.queueWebhooker, phone, { webhooks: config.webhooks, payload, split: true })
   }
 
-  public async sendHttp(phone: string, webhook: Webhook, payload: object, options: Partial<EnqueueOption> = {}) {
-    await amqpEnqueue(this.queueWebhooker, phone, { webhook, payload, split: false }, options)
+  public async sendHttp(phone: string, webhook: Webhook, payload: object, options: Partial<PublishOption> = {}) {
+    await amqpPublish(this.queueWebhooker, phone, { webhook, payload, split: false }, options)
   }
 }

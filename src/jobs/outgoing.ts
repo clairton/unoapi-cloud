@@ -1,6 +1,6 @@
 import { Outgoing } from '../services/outgoing'
 import { UNOAPI_JOB_OUTGOING } from '../defaults'
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 
 export class OutgoingJob {
   private service: Outgoing
@@ -17,7 +17,7 @@ export class OutgoingJob {
     if (a.split) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = a.payload
-      await Promise.all(messages.map(async (m) => amqpEnqueue(this.queueOutgoing, phone, { payload: m, split: false })))
+      await Promise.all(messages.map(async (m) => amqpPublish(this.queueOutgoing, phone, { payload: m, split: false })))
     } else {
       await this.service.send(phone, a.payload)
     }

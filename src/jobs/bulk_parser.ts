@@ -1,5 +1,5 @@
 import { detect } from 'jschardet'
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import axios from 'axios'
 import { v1 as uuid } from 'uuid'
 import { DATA_URL_TTL, UNOAPI_JOB_BULK_SENDER } from '../defaults'
@@ -235,7 +235,7 @@ export class BulkParserJob {
         },
       }
       this.outgoing.formatAndSend(phone, phone, message)
-      await amqpEnqueue(this.queueBulkSender, phone, {
+      await amqpPublish(this.queueBulkSender, phone, {
         payload: { messages, id, length: messages.length },
       })
     } catch (error) {

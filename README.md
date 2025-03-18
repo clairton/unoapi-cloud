@@ -40,7 +40,7 @@ To send a message
 
 ```sh
 curl -i -X POST \
-http://localhost:9876/v15.0/5549988290955/messages \
+http://localhost:9876/v15.0/554931978550/messages \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1' \
 -d '{

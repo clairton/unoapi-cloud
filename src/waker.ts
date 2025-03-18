@@ -11,23 +11,23 @@ import {
 import { Channel, ConsumeMessage } from 'amqplib'
 
 import logger from './services/logger'
-import { amqpConnect, queueDeadName, amqpEnqueue } from './amqp'
+import { amqpConnect, exchangeDeadName, amqpPublish } from './amqp'
 
 logger.info('Starting with waker...')
 const queues = [UNOAPI_JOB_LISTENER, UNOAPI_JOB_INCOMING, UNOAPI_JOB_OUTGOING, UNOAPI_JOB_WEBHOOKER]
 
 amqpConnect(AMQP_URL).then(async (connection) => {
   return queues.forEach(async queue => {
-    const queueName = queueDeadName(queue)
-    logger.info('Waker queue %s', queueName)
+    const exchangeName = exchangeDeadName(queue)
+    logger.info('Waker exchange %s', exchangeName)
     const channel: Channel = await connection.createChannel()
-    logger.info('Creating queue %s...', queueName)
-    await channel.assertExchange(queueName, 'direct', { durable: true })
-    channel.consume(queueName, async (payload: ConsumeMessage | null) => {
+    logger.info('Creating queue %s...', exchangeName)
+    await channel.assertExchange(exchangeName, 'direct', { durable: true })
+    channel.consume(exchangeName, async (payload: ConsumeMessage | null) => {
       if (!payload) {
         throw 'payload not be null'
       }
-      await amqpEnqueue(queue, payload.fields.routingKey, JSON.parse(payload.content.toString()))
+      await amqpPublish(queue, payload.fields.routingKey, JSON.parse(payload.content.toString()))
       return channel.ack(payload)
     })
   })

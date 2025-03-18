@@ -1,5 +1,5 @@
 import { eventType, Listener } from './listener'
-import { EnqueueOption, amqpEnqueue } from '../amqp'
+import { PublishOption, amqpPublish } from '../amqp'
 import { UNOAPI_JOB_LISTENER } from '../defaults'
 
 const priorities = {
@@ -21,8 +21,8 @@ export class ListenerAmqp implements Listener {
   }
 
   public async process(phone: string, messages: object[], type: eventType) {
-    const options: Partial<EnqueueOption> = {}
+    const options: Partial<PublishOption> = {}
     options.priority = priorities[type] || 5
-    await amqpEnqueue(this.queueListener, phone, { messages, type }, options)
+    await amqpPublish(this.queueListener, phone, { messages, type }, options)
   }
 }

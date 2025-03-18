@@ -1,6 +1,6 @@
 import { Webhook } from '../services/config'
 import { Outgoing } from '../services/outgoing'
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS, UNOAPI_JOB_WEBHOOKER } from '../defaults'
 import { extractDestinyPhone } from '../services/transformer'
 import logger from '../services/logger'
@@ -58,7 +58,7 @@ export class WebhookerJob {
       const webhooks: Webhook[] = a.webhooks
       Promise.all(
         webhooks.map((webhook) => {
-          return amqpEnqueue(UNOAPI_JOB_WEBHOOKER, phone, { payload, webhook })
+          return amqpPublish(UNOAPI_JOB_WEBHOOKER, phone, { payload, webhook })
         }),
       )
     } else if (a.webhook) {

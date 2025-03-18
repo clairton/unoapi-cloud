@@ -1,5 +1,5 @@
 import { UNOAPI_JOB_BULK_PARSER, UNOAPI_JOB_RELOAD } from '../defaults'
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import { v1 as uuid } from 'uuid'
 import { Outgoing } from '../services/outgoing'
 import { Template } from '../services/template'
@@ -41,7 +41,7 @@ export class CommanderJob {
       if (payload.type === 'document' && payload?.document?.caption?.toLowerCase() == 'campanha') {
         logger.debug(`Commander processing`)
         const id = uuid()
-        await amqpEnqueue(this.queueBulkParser, phone, {
+        await amqpPublish(this.queueBulkParser, phone, {
           phone,
           payload: {
             id,
@@ -72,7 +72,7 @@ export class CommanderJob {
         const config = { webhooks }
         logger.debug('Template webhooks %s', phone, JSON.stringify(webhooks))
         await setConfig(phone, config)
-        await amqpEnqueue(this.queueReload, '', { phone })
+        await amqpPublish(this.queueReload, '', { phone })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
         logger.debug('Parsing bulk report template... %s', phone)
         const service = new Template(this.getConfig)
@@ -84,7 +84,7 @@ export class CommanderJob {
           throw new YamlParseError(doc.errors)
         }
         const { bulk } = doc.toJS()
-        await amqpEnqueue(UNOAPI_JOB_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } })
+        await amqpPublish(UNOAPI_JOB_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
         logger.debug('Parsing config template... %s', phone)
         const service = new Template(this.getConfig)
@@ -104,7 +104,7 @@ export class CommanderJob {
         }, {})
         logger.debug('Config template to update %s', phone, JSON.stringify(configToUpdate))
         await setConfig(phone, configToUpdate)
-        await amqpEnqueue(this.queueReload, '', { phone })
+        await amqpPublish(this.queueReload, '', { phone })
       } else {
         logger.debug(`Commander ignore`)
       }

@@ -1,4 +1,4 @@
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import { UNOAPI_JOB_LOGOUT } from '../defaults'
 import { Logout } from './logout'
 
@@ -10,6 +10,6 @@ export class LogoutAmqp implements Logout {
   }
 
   public async run(phone: string) {
-    await amqpEnqueue(this.queueName, '', { phone })
+    await amqpPublish(this.queueName, '', { phone })
   }
 }

@@ -1,5 +1,5 @@
 import NodeCache from 'node-cache'
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import { UNOAPI_JOB_BLACKLIST_ADD } from '../defaults'
 import { blacklist, redisTtl, redisKeys, setBlacklist } from './redis'
 import logger from './logger'
@@ -69,6 +69,6 @@ export const addToBlacklistRedis: addToBlacklist = async (from: string, webhookI
 }
 
 export const addToBlacklistJob: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
-  await amqpEnqueue(UNOAPI_JOB_BLACKLIST_ADD, from, { from, webhookId, to, ttl })
+  await amqpPublish(UNOAPI_JOB_BLACKLIST_ADD, from, { from, webhookId, to, ttl })
   return true
 }
