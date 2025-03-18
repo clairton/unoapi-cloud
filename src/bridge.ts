@@ -6,7 +6,7 @@ import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { 
-  UNOAPI_JOB_BIND_BRIDGE,
+  UNOAPI_JOB_BIND,
   UNOAPI_JOB_RELOAD,
   UNOAPI_JOB_LOGOUT,
   UNOAPI_SERVER_NAME,
@@ -46,7 +46,7 @@ const startBrigde = async () => {
   logger.info('Unoapi Cloud version %s starting bridge...', version)
 
   logger.info('Starting bind listener consumer')
-  await amqpConsume(UNOAPI_JOB_BIND_BRIDGE, UNOAPI_SERVER_NAME, bindJob.consume.bind(bindJob))
+  await amqpConsume(UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, bindJob.consume.bind(bindJob))
 
   logger.info('Starting reload consumer')
   await amqpConsume(UNOAPI_JOB_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob))

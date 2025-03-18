@@ -5,8 +5,7 @@ import {
   UNOAPI_X_MAX_RETRIES,
   UNOAPI_MESSAGE_RETRY_LIMIT,
   UNOAPI_MESSAGE_RETRY_DELAY,
-  UNOAPI_JOB_BIND_BRIDGE,
-  UNOAPI_JOB_BIND_BROKER,
+  UNOAPI_JOB_BIND,
   NOTIFY_FAILED_MESSAGES,
   UNOAPI_JOB_NOTIFICATION,
   IGNORED_CONNECTIONS_NUMBERS,
@@ -112,8 +111,7 @@ export const amqpGetChannel = async (
     })
   }
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
-    await amqpPublish(UNOAPI_JOB_BIND_BRIDGE, UNOAPI_SERVER_NAME, { routingKey })
-    await amqpPublish(UNOAPI_JOB_BIND_BROKER, '', { routingKey })
+    await amqpPublish(UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, { routingKey })
     routes.set(routingKey, true)
   }
   return channels.get(exchange)
@@ -126,7 +124,7 @@ export const amqpCreateChannel = async (
     delay: UNOAPI_MESSAGE_RETRY_DELAY, 
     priority: 0, 
     notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
-    type: 'direct'
+    type: 'topic'
   },
 ) => {
   logger.info('Creating channel %s...', exchange)
@@ -274,6 +272,9 @@ export const amqpConsume = async (
   if (routingKey) {
     exchangeDelayedParams.push(routingKey)
     exchangeParams.push(routingKey)
+  } else {
+    exchangeDelayedParams.push('.*')
+    exchangeParams.push('.*')
   }
   await channel.bindQueue(...exchangeDelayedParams)
   await channel.bindQueue(...exchangeParams)
