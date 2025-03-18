@@ -4,11 +4,11 @@ dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
 import {
   BASE_URL,
   PORT,
-  UNOAPI_JOB_BIND,
   UNOAPI_JOB_BIND_BRIDGE,
   UNOAPI_JOB_BIND_BROKER,
   UNOAPI_JOB_LOGOUT,
   UNOAPI_JOB_RELOAD,
+  UNOAPI_SERVER_NAME,
 } from './defaults'
 
 import logger from './services/logger'
@@ -101,13 +101,13 @@ if (process.env.AMQP_URL) {
   const bindBridgeJob = new BindBridgeJob()
   const logoutJob = new LogoutJob(logout)
   logger.info('Starting bind broker consumer')
-  amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BROKER, bindBrokerJob.consume.bind(bindBrokerJob))
-  logger.info('Starting bind listener consumer')
-  amqpConsume(UNOAPI_JOB_BIND, UNOAPI_JOB_BIND_BRIDGE, bindBridgeJob.consume.bind(bindBridgeJob))
+  amqpConsume(UNOAPI_JOB_BIND_BROKER, '', bindBrokerJob.consume.bind(bindBrokerJob), { type: 'direct' })
+  logger.info('Starting bind bridge consumer')
+  amqpConsume(UNOAPI_JOB_BIND_BRIDGE, UNOAPI_SERVER_NAME, bindBridgeJob.consume.bind(bindBridgeJob))
   logger.info('Starting reload consumer')
-  amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob))
+  amqpConsume(UNOAPI_JOB_RELOAD, '', reloadJob.consume.bind(reloadJob), { type: 'direct' })
   logger.info('Starting logout consumer')
-  amqpConsume(UNOAPI_JOB_LOGOUT, '', logoutJob.consume.bind(logoutJob))
+  amqpConsume(UNOAPI_JOB_LOGOUT, '', logoutJob.consume.bind(logoutJob), { type: 'direct' })
 } else {
   logger.info('Starting standard mode')
 }

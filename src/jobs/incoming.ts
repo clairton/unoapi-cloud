@@ -1,7 +1,7 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS } from '../defaults'
-import { EnqueueOption, amqpEnqueue } from '../amqp'
+import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype, toBuffer } from '../services/transformer'
 import logger from '../services/logger'
@@ -38,10 +38,10 @@ export class IncomingJob {
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
       logger.debug(`Enqueue in commmander...`)
-      await amqpEnqueue(this.queueCommander, phone, { payload })
+      await amqpPublish(this.queueCommander, phone, { payload })
     }
     const { ok, error } = response
-    const optionsOutgoing: Partial<EnqueueOption>  = {}
+    const optionsOutgoing: Partial<PublishOption>  = {}
     const config = await this.getConfig(phone)
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {
       const idBaileys: string = ok.messages[0].id
@@ -130,7 +130,7 @@ export class IncomingJob {
       // const code = status?.errors[0]?.code
       // retry when error: 5 - Wait a moment, connecting process
       // if (retries < UNOAPI_MESSAGE_RETRY_LIMIT && ['5', 5].includes(code)) {
-      //   await amqpEnqueue(UNOAPI_JOB_INCOMING, phone, { ...data, retries }, options)
+      //   await amqpPublish(UNOAPI_JOB_INCOMING, phone, { ...data, retries }, options)
       // }
     } else {
       outgingPayload = {
@@ -171,7 +171,7 @@ export class IncomingJob {
         ],
       }
     }
-    await amqpEnqueue(UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
+    await amqpPublish(UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
     await Promise.all(config.webhooks.map((w) => this.outgoing.sendHttp(phone, w, outgingPayload, optionsOutgoing)))
     return response
   }

@@ -40,36 +40,36 @@ const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi)
 const processeds = new Map<string, boolean>()
 
 export class BindBridgeJob {
-  async consume(server: string, { phone }: { phone: string }) {
-    const config = await getConfig(phone)
+  async consume(server: string, { routingKey }: { routingKey: string }) {
+    const config = await getConfig(routingKey)
     if (config.provider !== 'baileys') {
-      logger.info(`Ignore bing brigde phone ${phone} is not provider baileys...`)
+      logger.info(`Ignore bing brigde routing key ${routingKey} is not provider baileys...`)
       return;
     }
     if (config.server !== UNOAPI_SERVER_NAME) {
-      logger.info(`Ignore bing brigde ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
+      logger.info(`Ignore bing brigde ${routingKey} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
       return;
     }
-    const store = await config.getStore(phone, config)
+    const store = await config.getStore(routingKey, config)
     const { sessionStore } = store
-    if (!(await sessionStore.isStatusOnline(phone)) && processeds.get(phone)) {
+    if (!(await sessionStore.isStatusOnline(routingKey)) && processeds.get(routingKey)) {
       return
     }
-    processeds.set(phone, true)
+    processeds.set(routingKey, true)
     const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
-    logger.info('Binding queues consumer bridge server %s phone %s', server, phone)
+    logger.info('Binding queues consumer bridge server %s routingKey %s', server, routingKey)
 
     const notifyFailedMessages = config.notifyFailedMessages
 
-    logger.info('Starting listener consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_LISTENER, phone, listenerJob.consume.bind(listenerJob), {
+    logger.info('Starting listener consumer %s', routingKey)
+    await amqpConsume(UNOAPI_JOB_LISTENER, routingKey, listenerJob.consume.bind(listenerJob), {
       notifyFailedMessages,
       prefetch,
       priority: 5,
     })
 
-    logger.info('Starting incoming consumer %s', phone)
-    await amqpConsume(UNOAPI_JOB_INCOMING, phone, incomingJob.consume.bind(incomingJob), {
+    logger.info('Starting incoming consumer %s', routingKey)
+    await amqpConsume(UNOAPI_JOB_INCOMING, routingKey, incomingJob.consume.bind(incomingJob), {
       priority: 5,
       notifyFailedMessages,
       prefetch: 1 /* allways 1 */,

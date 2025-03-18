@@ -1,4 +1,4 @@
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import { UNOAPI_JOB_LISTENER } from '../defaults'
 import { Listener } from '../services/listener'
 import { Outgoing } from '../services/outgoing'
@@ -33,10 +33,10 @@ export class ListenerJob {
     } else {
       if (type == 'delete' && messages.keys) {
         await Promise.all(
-          messages.keys.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { messages: { keys: [m] }, type, splited: true })),
+          messages.keys.map(async (m: object) => await amqpPublish(this.queueListener, phone, { messages: { keys: [m] }, type, splited: true })),
         )
       } else {
-        await Promise.all(messages.map(async (m: object) => await amqpEnqueue(this.queueListener, phone, { messages: [m], type, splited: true })))
+        await Promise.all(messages.map(async (m: object) => await amqpPublish(this.queueListener, phone, { messages: [m], type, splited: true })))
       }
     }
   }

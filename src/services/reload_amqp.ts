@@ -1,4 +1,4 @@
-import { amqpEnqueue } from '../amqp'
+import { amqpPublish } from '../amqp'
 import { UNOAPI_JOB_RELOAD } from '../defaults'
 import { Reload } from './reload'
 
@@ -11,6 +11,6 @@ export class ReloadAmqp extends Reload {
   }
 
   public async run(phone: string, params = { force: false }) {
-    await amqpEnqueue(this.queueName, '', { phone, ...params })
+    await amqpPublish(this.queueName, '', { phone, ...params })
   }
 }
