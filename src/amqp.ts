@@ -126,7 +126,7 @@ export const amqpCreateChannel = async (
     delay: UNOAPI_MESSAGE_RETRY_DELAY, 
     priority: 0, 
     notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
-    type: 'topic'
+    type: 'direct'
   },
 ) => {
   logger.info('Creating channel %s...', exchange)
@@ -195,7 +195,13 @@ export const amqpPublish = async (
     exchangeName = exchange
   }
   await channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(payload)), properties)
-  logger.debug('Published at %s with routing key: %s, payload: %s, properties: %s', exchangeName, routingKey, JSON.stringify(payload), JSON.stringify(properties))
+  logger.debug(
+    'Published at %s%s, payload: %s, properties: %s',
+    exchangeName,
+    routingKey ? `with routing key: ${routingKey},` : '',
+    JSON.stringify(payload),
+    JSON.stringify(properties)
+  )
 }
 
 export const amqpConsume = async (
