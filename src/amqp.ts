@@ -153,7 +153,7 @@ export const amqpCreateChannel = async (
   }
   await channel.assertExchange(exchangeDelayed, exchangeType, exchangeDelayedOptions)
   const queueDelayed = await channel.assertQueue(exchangeDelayed, exchangeDelayedOptions)
-  await channel.bindQueue(queueDelayed.queue,  exchangeDelayed, '')
+  await channel.bindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
   logger.info('Created exchange %s!', exchangeDelayed)
   logger.info('Created channel %s!', exchange)
   return { channel, queueMain, queueDelayed }
@@ -267,12 +267,7 @@ export const amqpConsume = async (
     }
   }
 
-  const exchangeParams = [queueMain.queue,  exchange]
-  if (routingKey) {
-    exchangeParams.push(routingKey)
-  } else {
-    exchangeParams.push('')
-  }
+  const exchangeParams = [queueMain.queue,  exchange, routingKey]
   await channel.bindQueue(...exchangeParams)
 
   channel.on('close', () => {

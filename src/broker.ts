@@ -57,18 +57,18 @@ const startBroker = async () => {
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
 
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_JOB_OUTGOING, '', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_JOB_OUTGOING, '.*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
 
   logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_JOB_WEBHOOKER, '', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_JOB_WEBHOOKER, '.*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
 
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
-    await amqpConsume(UNOAPI_JOB_NOTIFICATION, '', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
+    await amqpConsume(UNOAPI_JOB_NOTIFICATION, '.*', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, '', addToBlacklist, { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_JOB_BLACKLIST_ADD, '.*', addToBlacklist, { notifyFailedMessages, prefetch })
 
   logger.info('Unoapi Cloud version %s started broker!', version)
 }
