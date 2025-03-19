@@ -134,6 +134,7 @@ export const amqpCreateChannel = async (
   const exchangeType = UNOAPI_EXCHANGE_TYPE[exchange]
   await channel.assertExchange(exchangeDead, 'direct', { durable: true })
   await channel.assertQueue(exchangeDead, { durable: true })
+  const queueMain = await channel.assertQueue(exchange, { durable: true })
   const parameters = {}
   if (options.priority) {
     parameters['x-max-priority'] = options.priority
@@ -153,9 +154,14 @@ export const amqpCreateChannel = async (
   await channel.assertExchange(exchangeDelayed, exchangeType, exchangeDelayedOptions)
   const queueDelayed = await channel.assertQueue(exchangeDelayed, exchangeDelayedOptions)
   await channel.bindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
+
+  channel.on('close', () => {
+    channel.unbindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
+  })
+
   logger.info('Created exchange %s!', exchangeDelayed)
   logger.info('Created channel %s!', exchange)
-  return { channel, queueDelayed }
+  return { channel, queueMain }
 }
 
 export const amqpPublish = async (
@@ -213,7 +219,7 @@ export const amqpConsume = async (
   if (!channelObject) {
     throw `Not create channel for exchange ${exchange}`
   }
-  const { channel } = channelObject
+  const { channel, queueMain } = channelObject
   const fn = async (payload: ConsumeMessage | null) => {
     if (!payload) {
       throw `payload not be null `
@@ -265,19 +271,9 @@ export const amqpConsume = async (
       await channel.ack(payload)
     }
   }
-  const queueMain = await channel.assertQueue(exchange, { durable: true })
   await channel.bindQueue(queueMain.queue,  exchange, routingKey)
 
-  const exchangeDelayed = exchangeDelayedName(exchange)
-  const exchangeDelayedOptions = {
-    durable: true,
-    arguments: { 'x-dead-letter-exchange': exchange },
-  }
-  const queueDelayed = await channel.assertQueue(exchangeDelayed, exchangeDelayedOptions)
-  await channel.bindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
-
   channel.on('close', () => {
-    channel.unbindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
     channel.unbindQueue(queueMain.queue,  exchange, routingKey)
   })
 
