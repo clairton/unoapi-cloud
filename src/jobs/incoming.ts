@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS } from '../defaults'
+import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME } from '../defaults'
 import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype, toBuffer } from '../services/transformer'
@@ -23,6 +23,11 @@ export class IncomingJob {
   }
 
   async consume(phone: string, data: object) {
+    const config = await this.getConfig(phone)
+    if (config.server !== UNOAPI_SERVER_NAME) {
+      logger.info(`Ignore incoming with ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,7 +47,6 @@ export class IncomingJob {
     }
     const { ok, error } = response
     const optionsOutgoing: Partial<PublishOption>  = {}
-    const config = await this.getConfig(phone)
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {
       const idBaileys: string = ok.messages[0].id
       logger.debug('Baileys id %s to Unoapi id %s', idBaileys, idUno)
