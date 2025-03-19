@@ -22,7 +22,11 @@ export class ListenerJob {
   async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number, priority: 0 }) {
     const config = await this.getConfig(phone)
     if (config.server !== UNOAPI_SERVER_NAME) {
-      logger.info(`Ignore listener with ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
+      logger.info(`Ignore listener routing key ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
+      return;
+    }
+    if (config.provider !== 'baileys') {
+      logger.info(`Ignore listener routing key ${phone} is not provider baileys...`)
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,10 +46,16 @@ export class ListenerJob {
     } else {
       if (type == 'delete' && messages.keys) {
         await Promise.all(
-          messages.keys.map(async (m: object) => await amqpPublish(this.queueListener, phone, { messages: { keys: [m] }, type, splited: true })),
+          messages.keys.map(async (m: object) => {
+            return amqpPublish(this.queueListener, phone, { messages: { keys: [m] }, type, splited: true })
+         })
         )
       } else {
-        await Promise.all(messages.map(async (m: object) => await amqpPublish(this.queueListener, phone, { messages: [m], type, splited: true })))
+        await Promise.all(messages.
+          map(async (m: object) => {
+            return amqpPublish(this.queueListener, phone, { messages: [m], type, splited: true })
+          })
+        )
       }
     }
   }
