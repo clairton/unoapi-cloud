@@ -24,16 +24,14 @@ import { ListenerAmqp } from '../services/listener_amqp'
 import { OutgoingCloudApi } from '../services/outgoing_cloud_api'
 import { IncomingBaileys } from '../services/incoming_baileys'
 
-const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
-const listenerAmqp: Listener = new ListenerAmqp()
-const broadcastAmqp: Broadcast = new BroadcastAmqp()
-const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigRedis)
-
 const getConfig: getConfig = getConfigRedis
-
+const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfig)
+const listenerAmqp: Listener = new ListenerAmqp(getConfig)
+const broadcastAmqp: Broadcast = new BroadcastAmqp()
+const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfig)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
-const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
+const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfig, getClientBaileys, onNewLogin)
 const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)
 const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi, getConfig)
 
@@ -62,7 +60,7 @@ export class BindBridgeJob {
     const notifyFailedMessages = config.notifyFailedMessages
 
     logger.info('Starting listener consumer %s', routingKey)
-    await amqpConsume(UNOAPI_JOB_LISTENER, routingKey, listenerJob.consume.bind(listenerJob), {
+    await amqpConsume(`${UNOAPI_JOB_LISTENER}.${config.provider}`, routingKey, listenerJob.consume.bind(listenerJob), {
       notifyFailedMessages,
       prefetch,
       priority: 5,

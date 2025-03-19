@@ -110,10 +110,8 @@ if (process.env.AMQP_URL) {
   addToBlacklistVar = addToBlacklistJob
   outgoing = new OutgoingAmqp(getConfigVar)
   incoming = new IncomingAmqp()
-  listener = new ListenerAmqp()
+  listener = new ListenerAmqp(getConfigVar)
   reload = new ReloadAmqp()
-  listener = new ListenerAmqp()
-  logout = new LogoutAmqp()
   const reloadJob = new ReloadJob(reload)
   const bindBridgeJob = new BindBridgeJob()
   const logoutJob = new LogoutJob(logout)
