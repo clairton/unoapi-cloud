@@ -266,11 +266,19 @@ export const amqpConsume = async (
     }
   }
   const queueMain = await channel.assertQueue(exchange, { durable: true })
-  const exchangeParams = [queueMain.queue,  exchange, routingKey]
-  await channel.bindQueue(...exchangeParams)
+  await channel.bindQueue(queueMain.queue,  exchange, routingKey)
+
+  const exchangeDelayed = exchangeDelayedName(exchange)
+  const exchangeDelayedOptions = {
+    durable: true,
+    arguments: { 'x-dead-letter-exchange': exchange },
+  }
+  const queueDelayed = await channel.assertQueue(exchangeDelayed, exchangeDelayedOptions)
+  await channel.bindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
 
   channel.on('close', () => {
-    channel.unbindQueue(...exchangeParams)
+    channel.unbindQueue(queueDelayed.queue,  exchangeDelayed, '.*')
+    channel.unbindQueue(queueMain.queue,  exchange, routingKey)
   })
 
   channel.consume(queueMain.queue, fn)
