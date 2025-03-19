@@ -97,6 +97,10 @@ export const amqpGetChannel = async (
   options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0 },
 ) => {
   validateRoutingKey(routingKey)
+  if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
+    await amqpPublish(UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, { routingKey })
+    routes.set(routingKey, true)
+  }
   if (!channels.has(exchange)) {
     const connection = await amqpConnect(amqpUrl)
     const channel = await amqpCreateChannel(connection, exchange, options)
@@ -109,10 +113,6 @@ export const amqpGetChannel = async (
       logger.error(err, 'Channel Closed')
       channels.delete(exchange)
     })
-  }
-  if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
-    await amqpPublish(UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, { routingKey })
-    routes.set(routingKey, true)
   }
   return channels.get(exchange)
 }
@@ -194,9 +194,9 @@ export const amqpPublish = async (
   }
   await channel.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(payload)), properties)
   logger.debug(
-    'Published at %s%s, payload: %s, properties: %s',
+    'Published at %s, with routing key: %s, payload: %s, properties: %s',
     exchangeName,
-    routingKey ? `, with routing key: ${routingKey},` : '',
+    routingKey,
     JSON.stringify(payload),
     JSON.stringify(properties)
   )
@@ -225,7 +225,7 @@ export const amqpConsume = async (
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
     const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
-      logger.debug('Received in exchange %s%s, message: %s with headers: %s', exchange, routingKey ? `, with routing key: ${routingKey}` : '', content, JSON.stringify(payload.properties.headers))
+      logger.debug('Received in exchange %s, with routing key: %s, with message: %s with headers: %s', exchange, routingKey, content, JSON.stringify(payload.properties.headers))
       if (IGNORED_CONNECTIONS_NUMBERS.includes(routingKey)) {
         logger.info(`Ignore messages from ${routingKey}`)
       } else {
@@ -282,5 +282,5 @@ export const amqpConsume = async (
   })
 
   channel.consume(queueMain.queue, fn)
-  logger.info('Waiting for message in exchange %s%s', exchange, routingKey ? ` with routing key ${routingKey}` : '')
+  logger.info('Waiting for message in exchange %s with routing key %s', exchange, routingKey)
 }

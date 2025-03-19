@@ -35,7 +35,7 @@ const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklist
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
 const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)
-const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi)
+const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi, getConfig)
 
 const processeds = new Map<string, boolean>()
 
