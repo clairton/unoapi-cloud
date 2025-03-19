@@ -30,7 +30,7 @@ import { LogoutJob } from './jobs/logout'
 
 const getConfig: getConfig = getConfigRedis
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfig)
-const listenerAmqp: Listener = new ListenerAmqp(getConfig)
+const listenerAmqp: Listener = new ListenerAmqp()
 const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindBridgeJob()
 const reload = new ReloadBaileys(getClientBaileys, getConfig, listenerAmqp, onNewLogin)

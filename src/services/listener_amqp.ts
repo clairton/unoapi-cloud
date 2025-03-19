@@ -15,18 +15,15 @@ const priorities = {
 }
 
 export class ListenerAmqp implements Listener {
-  private getConfig: getConfig
   private queueListener: string
 
-  constructor(getConfig: getConfig, queueListener = UNOAPI_JOB_LISTENER) {
+  constructor(queueListener = UNOAPI_JOB_LISTENER) {
     this.queueListener = queueListener
-    this.getConfig = getConfig
   }
 
   public async process(phone: string, messages: object[], type: eventType) {
     const options: Partial<PublishOption> = {}
     options.priority = priorities[type] || 5
-    const config = await this.getConfig(phone)
-    await amqpPublish(`${this.queueListener}.${config.provider}`, phone, { messages, type }, options)
+    await amqpPublish(this.queueListener, phone, { messages, type }, options)
   }
 }
