@@ -39,22 +39,22 @@ const startBulker = async () => {
   logger.info('Unoapi Cloud version %s starting bulker...', version)
 
   logger.info('Starting commander consumer')
-  await amqpConsume(UNOAPI_JOB_COMMANDER, '.*', commanderJob.consume.bind(commanderJob), { type: 'direct' })
+  await amqpConsume(UNOAPI_JOB_COMMANDER, '.*', commanderJob.consume.bind(commanderJob))
 
   logger.info('Starting bulk parser consumer')
-  await amqpConsume(UNOAPI_JOB_BULK_PARSER, '.*', bulkParserJob.consume.bind(bulkParserJob), { type: 'direct' })
+  await amqpConsume(UNOAPI_JOB_BULK_PARSER, '.*', bulkParserJob.consume.bind(bulkParserJob))
 
   logger.info('Starting bulk sender consumer')
-  await amqpConsume(UNOAPI_JOB_BULK_SENDER, '.*', bulkSenderJob.consume.bind(bulkSenderJob), { type: 'direct' })
+  await amqpConsume(UNOAPI_JOB_BULK_SENDER, '.*', bulkSenderJob.consume.bind(bulkSenderJob))
 
   logger.info('Starting bulk status consumer')
-  await amqpConsume(UNOAPI_JOB_BULK_STATUS, '.*', bulkStatusJob.consume.bind(bulkStatusJob), { type: 'direct' })
+  await amqpConsume(UNOAPI_JOB_BULK_STATUS, '.*', bulkStatusJob.consume.bind(bulkStatusJob))
 
   logger.info('Starting bulk report consumer')
-  await amqpConsume(UNOAPI_JOB_BULK_REPORT, '.*', bulkReportJob.consume.bind(bulkReportJob), { type: 'direct' })
+  await amqpConsume(UNOAPI_JOB_BULK_REPORT, '.*', bulkReportJob.consume.bind(bulkReportJob))
 
   logger.info('Starting bulk webhook consumer')
-  await amqpConsume(UNOAPI_JOB_BULK_WEBHOOK, '.*', bulkWebhookJob.consume.bind(bulkWebhookJob), { type: 'direct' })
+  await amqpConsume(UNOAPI_JOB_BULK_WEBHOOK, '.*', bulkWebhookJob.consume.bind(bulkWebhookJob))
 }
 startBulker()
 
