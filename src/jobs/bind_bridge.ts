@@ -7,6 +7,7 @@ import {
   UNOAPI_JOB_LISTENER,
   UNOAPI_JOB_OUTGOING_PREFETCH,
   UNOAPI_SERVER_NAME,
+  UNOAPI_EXCHANGE_BRIDGE_NAME,
 } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { getConfig } from '../services/config'
@@ -54,23 +55,36 @@ export class BindBridgeJob {
       return
     }
     processeds.set(routingKey, true)
-    const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
     logger.info('Binding queues consumer bridge server %s routingKey %s', server, routingKey)
 
     const notifyFailedMessages = config.notifyFailedMessages
 
     logger.info('Starting listener baileys consumer %s', routingKey)
-    await amqpConsume(UNOAPI_JOB_LISTENER, routingKey, listenerJob.consume.bind(listenerJob), {
-      notifyFailedMessages,
-      prefetch,
-      priority: 5,
-    })
+    await amqpConsume(
+      UNOAPI_EXCHANGE_BRIDGE_NAME,
+      UNOAPI_JOB_LISTENER, 
+      routingKey, 
+      listenerJob.consume.bind(listenerJob), 
+      {
+        notifyFailedMessages,
+        priority: 5,
+        prefetch: 1,
+        type: 'direct'
+      }
+    )
 
     logger.info('Starting incoming consumer %s', routingKey)
-    await amqpConsume(UNOAPI_JOB_INCOMING, routingKey, incomingJob.consume.bind(incomingJob), {
-      priority: 5,
-      notifyFailedMessages,
-      prefetch: 1 /* allways 1 */,
-    })
+    await amqpConsume(
+      UNOAPI_EXCHANGE_BRIDGE_NAME,
+      UNOAPI_JOB_INCOMING, 
+      routingKey, 
+      incomingJob.consume.bind(incomingJob), 
+      {
+        notifyFailedMessages,
+        priority: 5,
+        prefetch: 1 /* allways 1 */,
+        type: 'direct'
+      }
+    )
   }
 }

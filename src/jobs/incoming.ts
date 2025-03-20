@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME } from '../defaults'
+import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
 import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype, toBuffer } from '../services/transformer'
@@ -43,7 +43,7 @@ export class IncomingJob {
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
       logger.debug(`Enqueue in commmander...`)
-      await amqpPublish(this.queueCommander, phone, { payload })
+      await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, this.queueCommander, phone, { payload })
     }
     const { ok, error } = response
     const optionsOutgoing: Partial<PublishOption>  = {}
@@ -175,7 +175,7 @@ export class IncomingJob {
         ],
       }
     }
-    await amqpPublish(UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
     await Promise.all(config.webhooks.map((w) => this.outgoing.sendHttp(phone, w, outgingPayload, optionsOutgoing)))
     return response
   }

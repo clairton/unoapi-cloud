@@ -1,5 +1,5 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_JOB_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
+import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
 import { Listener } from '../services/listener'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
@@ -10,13 +10,11 @@ export class ListenerJob {
   private listener: Listener
   private outgoing: Outgoing
   private getConfig: getConfig
-  private queueListener: string
 
-  constructor(listener: Listener, outgoing: Outgoing, getConfig: getConfig, queueListener = UNOAPI_JOB_LISTENER) {
+  constructor(listener: Listener, outgoing: Outgoing, getConfig: getConfig) {
     this.listener = listener
     this.outgoing = outgoing
     this.getConfig = getConfig
-    this.queueListener = queueListener
   }
 
   async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number, priority: 0 }) {
@@ -47,13 +45,13 @@ export class ListenerJob {
       if (type == 'delete' && messages.keys) {
         await Promise.all(
           messages.keys.map(async (m: object) => {
-            return amqpPublish(this.queueListener, phone, { messages: { keys: [m] }, type, splited: true })
+            return amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LISTENER, phone, { messages: { keys: [m] }, type, splited: true })
          })
         )
       } else {
         await Promise.all(messages.
           map(async (m: object) => {
-            return amqpPublish(this.queueListener, phone, { messages: [m], type, splited: true })
+            return amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LISTENER, phone, { messages: [m], type, splited: true })
           })
         )
       }

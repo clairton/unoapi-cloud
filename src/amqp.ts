@@ -1,4 +1,4 @@
-import { connect, Connection, Channel, Exchange, Queue, Options, ConsumeMessage } from 'amqplib'
+import { connect, Connection, Channel, Queue, Options, ConsumeMessage } from 'amqplib'
 import {
   AMQP_URL,
   UNOAPI_X_COUNT_RETRIES,
@@ -12,7 +12,7 @@ import {
   VALIDATE_ROUTING_KEY,
   CONSUMER_TIMEOUT_MS,
   UNOAPI_SERVER_NAME,
-  UNOAPI_QUEUE_NAME,
+  UNOAPI_EXCHANGE_BROKER_NAME,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -35,21 +35,21 @@ const withTimeout = (millis, error, promise) => {
 
 const queueDelayedName = (queue: string) => `${queue}.delayed`
 export const queueDeadName = (queue: string) => `${queue}.dead`
-const exchangeName = () => `${UNOAPI_QUEUE_NAME}`
 
 let amqpConnection: Connection | undefined
 let amqpChannel: Channel | undefined
-let amqpExchange: Exchange | undefined
+
 type QueueObject = {
   queueMain: Queue
   queueDead: Queue
   queueDelayed: Queue
 }
+const exchanges = new Map<string, boolean>()
 const queues = new Map<string, QueueObject>()
 const routes = new Map<string, boolean>()
 const consumers = new Map<string, boolean>()
 
-const extractRoutingKeyFromBindingKey = (bindingKey) => {
+export const extractRoutingKeyFromBindingKey = (bindingKey) => {
   const parts = bindingKey.split('.')
   return parts[parts.length - 1]
 }
@@ -61,11 +61,14 @@ const validateFormatNumber = (v: string) => {
 }
 const validateRoutingKey = VALIDATE_ROUTING_KEY ? validateFormatNumber : (_) => _
 
+export type ExchagenType = 'direct' | 'topic'
+
 export type CreateOption = {
   delay: number
   priority: number
   notifyFailedMessages: boolean
   prefetch: number
+  type: ExchagenType
 }
 
 export type PublishOption = CreateOption & {
@@ -103,26 +106,25 @@ export const amqpDisconnect = async (connection: Connection) => {
   return connection.close()
 }
 
-export const amqpGetChannel = async (amqpUrl = AMQP_URL) => {
+export const amqpGetChannel = async () => {
   if (!amqpChannel) {
     logger.info('Creating channel...')
-    const connection = await amqpConnect(amqpUrl)
+    const connection = await amqpConnect()
     amqpChannel = await connection.createChannel()
     logger.info('Created channel!')
   }
   return amqpChannel
 }
 
-export const amqpGetExchange = async (amqpUrl = AMQP_URL) => {
-  if (!amqpExchange) {
+export const amqpGetExchange = async (exchange: string, type: ExchagenType, prefetch: number) => {
+  if (!exchanges.get(exchange)) {
     logger.info('Creating exchange...')
-    const channel = await amqpGetChannel(amqpUrl)
-    amqpExchange = exchangeName()
-    await channel.assertExchange(amqpExchange, 'direct', { durable: true,  arguments: { 'x-max-priority': 5 }})
+    const channel = await amqpGetChannel()
+    channel.prefetch(prefetch)
+    await channel.assertExchange(exchange, type, { durable: true,  arguments: { 'x-max-priority': 5 }})
     logger.info('Created exchange!')
+    exchanges.set(exchange, true)
   }
-
-  return amqpExchange
 }
 
 const bindingKey = (amqpQueue, routingKey) => {
@@ -137,21 +139,21 @@ const bindQueue = async (channel, exchangeName, amqpQueue, routingKey) => {
 }
 
 export const amqpGetQueue = async (
+  exchange: string,
   queue: string,
   routingKey: string,
-  amqpUrl = AMQP_URL,
-  options: Partial<PublishOption> = {
-    dead: false,
+  options: Partial<CreateOption> = {
     delay: 0,
     priority: 0,
-    notifyFailedMessages: NOTIFY_FAILED_MESSAGES
+    notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
+    type: 'topic',
+    prefetch: 1
   },
 ): Promise<QueueObject> => {
   if (!queues.get(queue)) {
-    const exchange = await amqpGetExchange(amqpUrl)
-    const channel = await amqpGetChannel(amqpUrl)
+    await amqpGetExchange(exchange, options.type!, options.prefetch!)
+    const channel = await amqpGetChannel()
     logger.info('Creating queue %s...', queue)
-    channel.prefetch(options.prefetch || 1)
     const queueMain = await channel.assertQueue(queue, { durable: true })
     const queueDeadId = queueDeadName(queue)
     const queueDead = await channel.assertQueue(queueDeadId, { durable: true })
@@ -174,22 +176,30 @@ export const amqpGetQueue = async (
 
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
-    await amqpPublish(UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, { routingKey })
+    await amqpPublish(exchange, UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, { routingKey })
     routes.set(routingKey, true)
   }
   return queues.get(queue)!
 }
 
 export const amqpPublish = async (
+  exchange: string,
   queue: string,
   routingKey: string,
   payload: object,
-  options: Partial<PublishOption> = { delay: 0, dead: false, maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT, countRetries: 0, priority: 0 },
+  options: Partial<PublishOption> = { 
+    delay: 0,
+    dead: false,
+    maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT,
+    countRetries: 0,
+    priority: 0,
+    type: 'topic'
+  },
 ) => {
   validateRoutingKey(routingKey)
   const channel = await amqpGetChannel()
-  const exchange = await amqpGetExchange()
-  const { queueMain, queueDead, queueDelayed } = await amqpGetQueue(queue, routingKey, AMQP_URL, options)
+  await amqpGetExchange(exchange, options.type!, options.prefetch!)
+  const { queueMain, queueDead, queueDelayed } = await amqpGetQueue(exchange, queue, routingKey, options)
   const { delay, dead, maxRetries, countRetries } = options
   const headers: any = {}
   headers[UNOAPI_X_COUNT_RETRIES] = countRetries
@@ -224,15 +234,21 @@ export const amqpPublish = async (
 }
 
 export const amqpConsume = async (
+  exchange: string,
   queue: string,
   routingKey: string,
   callback: ConsumeCallback,
-  options: Partial<CreateOption> = { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 0, notifyFailedMessages: NOTIFY_FAILED_MESSAGES },
+  options: Partial<CreateOption> = {
+    delay: UNOAPI_MESSAGE_RETRY_DELAY, 
+    priority: 0,
+    notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
+    type: 'topic'
+  },
 ) => {
   validateRoutingKey(routingKey)
-  const exchange = await amqpGetExchange()
+  await amqpGetExchange(exchange, options.type!, options.prefetch!)
   const channel = await amqpGetChannel()
-  const { queueMain } = await amqpGetQueue(queue, routingKey, AMQP_URL, options)
+  const { queueMain } = await amqpGetQueue(exchange, queue, routingKey, options)
   const fn = async (payload: ConsumeMessage | null) => {
     if (!payload) {
       throw `payload not be null `
@@ -260,6 +276,7 @@ export const amqpConsume = async (
         if (options.notifyFailedMessages) {
           logger.info('Sending error to whatsapp...')
           await amqpPublish(
+            UNOAPI_EXCHANGE_BROKER_NAME,
             UNOAPI_JOB_NOTIFICATION,
             routingKey,
             {
@@ -276,10 +293,10 @@ export const amqpConsume = async (
           )
           logger.info('Sent error to whatsapp!')
         }
-        await amqpPublish(queue, routingKey, data, { dead: true })
+        await amqpPublish(exchange, queue, routingKey, data, { dead: true })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
-        await amqpPublish(queue, routingKey, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
+        await amqpPublish(exchange, queue, routingKey, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
       }
       await channel.ack(payload)
     }

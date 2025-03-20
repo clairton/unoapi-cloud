@@ -2,7 +2,7 @@ import { detect } from 'jschardet'
 import { amqpPublish } from '../amqp'
 import axios from 'axios'
 import { v1 as uuid } from 'uuid'
-import { DATA_URL_TTL, UNOAPI_JOB_BULK_SENDER } from '../defaults'
+import { DATA_URL_TTL, UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BULK_SENDER } from '../defaults'
 import { Outgoing } from '../services/outgoing'
 import { jidToPhoneNumber } from '../services/transformer'
 import textToSpeech, { protos } from '@google-cloud/text-to-speech'
@@ -235,7 +235,7 @@ export class BulkParserJob {
         },
       }
       this.outgoing.formatAndSend(phone, phone, message)
-      await amqpPublish(this.queueBulkSender, phone, {
+      await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, this.queueBulkSender, phone, {
         payload: { messages, id, length: messages.length },
       })
     } catch (error) {
