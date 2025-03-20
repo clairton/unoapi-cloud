@@ -44,7 +44,6 @@ broadcast.setSever(app.socket)
 const broadcastJob = new BroacastJob(broadcast)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
-  await amqpGetChannel(UNOAPI_JOB_INCOMING, '', AMQP_URL, { delay: UNOAPI_MESSAGE_RETRY_DELAY, priority: 5 }) // create a channel with priority
   logger.info('Starting broadcast consumer')
   await amqpConsume(UNOAPI_JOB_BROADCAST, '', broadcastJob.consume.bind(broadcastJob))
   logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
