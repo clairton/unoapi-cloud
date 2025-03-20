@@ -1,15 +1,17 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_JOB_LOGOUT } from '../defaults'
+import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LOGOUT } from '../defaults'
+import { getConfig } from './config'
 import { Logout } from './logout'
 
 export class LogoutAmqp implements Logout {
-  private queueName: string
+  private getConfig: getConfig
 
-  constructor(queueName: string = UNOAPI_JOB_LOGOUT) {
-    this.queueName = queueName
+  constructor(getConfig: getConfig) {
+    this.getConfig = getConfig
   }
 
-  public async run(phone: string) {
-    await amqpPublish(this.queueName, '', { phone })
+    public async run(phone: string) {
+    const config = await this.getConfig(phone)
+    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LOGOUT, config.server!, { phone })
   }
 }

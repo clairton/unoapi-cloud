@@ -1,16 +1,19 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_JOB_RELOAD } from '../defaults'
+import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_RELOAD } from '../defaults'
+import { getConfig } from './config'
 import { Reload } from './reload'
 
 export class ReloadAmqp extends Reload {
-  private queueName: string
+  private getConfig: getConfig
 
-  constructor(queueName: string = UNOAPI_JOB_RELOAD) {
+  constructor(getConfig: getConfig) {
     super()
-    this.queueName = queueName
+    this.getConfig = getConfig
   }
 
   public async run(phone: string, params = { force: false }) {
-    await amqpPublish(this.queueName, '', { phone, ...params })
+    const config = await this.getConfig(phone)
+    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_RELOAD, config.server!, { phone, ...params })
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_RELOAD, phone, { phone, ...params })
   }
 }

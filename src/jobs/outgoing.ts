@@ -1,14 +1,11 @@
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_OUTGOING } from '../defaults'
+import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_OUTGOING } from '../defaults'
 import { amqpPublish } from '../amqp'
 
 export class OutgoingJob {
   private service: Outgoing
-  private queueOutgoing: string
-
-  constructor(service: Outgoing, queueOutgoing: string = UNOAPI_JOB_OUTGOING) {
+  constructor(service: Outgoing) {
     this.service = service
-    this.queueOutgoing = queueOutgoing
   }
 
   async consume(phone: string, data: object) {
@@ -17,7 +14,11 @@ export class OutgoingJob {
     if (a.split) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = a.payload
-      await Promise.all(messages.map(async (m) => amqpPublish(this.queueOutgoing, phone, { payload: m, split: false })))
+      await Promise.all(
+        messages.map(async (m) => {
+          return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_OUTGOING, phone, { payload: m, split: false })
+        })
+      )
     } else {
       await this.service.send(phone, a.payload)
     }

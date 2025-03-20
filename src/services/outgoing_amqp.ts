@@ -1,14 +1,13 @@
 import { Webhook, getConfig } from './config'
 import { Outgoing } from './outgoing'
 import { PublishOption, amqpPublish } from '../amqp'
-import { UNOAPI_JOB_WEBHOOKER } from '../defaults'
+import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_WEBHOOKER } from '../defaults'
 import { completeCloudApiWebHook } from './transformer'
 
 export class OutgoingAmqp implements Outgoing {
-  private queueWebhooker: string
   private getConfig: getConfig
-constructor(getConfig: getConfig, queueWebhooker = UNOAPI_JOB_WEBHOOKER) {
-    this.queueWebhooker = queueWebhooker
+
+  constructor(getConfig: getConfig) {
     this.getConfig = getConfig
   }
 
@@ -19,10 +18,10 @@ constructor(getConfig: getConfig, queueWebhooker = UNOAPI_JOB_WEBHOOKER) {
 
   public async send(phone: string, payload: object) {
     const config = await this.getConfig(phone)
-    await amqpPublish(this.queueWebhooker, phone, { webhooks: config.webhooks, payload, split: true })
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_WEBHOOKER, phone, { webhooks: config.webhooks, payload, split: true })
   }
 
   public async sendHttp(phone: string, webhook: Webhook, payload: object, options: Partial<PublishOption> = {}) {
-    await amqpPublish(this.queueWebhooker, phone, { webhook, payload, split: false }, options)
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_WEBHOOKER, phone, { webhook, payload, split: false }, options)
   }
 }

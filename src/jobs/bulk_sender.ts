@@ -1,5 +1,5 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_BULK_BATCH, UNOAPI_BULK_DELAY, UNOAPI_JOB_BULK_SENDER, UNOAPI_JOB_BULK_REPORT, UNOAPI_BULK_MESSAGE_DELAY } from '../defaults'
+import { UNOAPI_BULK_BATCH, UNOAPI_BULK_DELAY, UNOAPI_JOB_BULK_SENDER, UNOAPI_JOB_BULK_REPORT, UNOAPI_BULK_MESSAGE_DELAY, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import { setMessageStatus, setbulkMessage } from '../services/redis'
@@ -51,6 +51,7 @@ export class BulkSenderJob {
       if (messages.length > batch) {
         const messagesToRenqueue = messages.slice(batch)
         await amqpPublish(
+          UNOAPI_EXCHANGE_BROKER_NAME,
           UNOAPI_JOB_BULK_SENDER,
           phone,
           {
@@ -61,7 +62,12 @@ export class BulkSenderJob {
         statusMessage = `Bulk ${id} phone ${phone} reenqueuing ${messagesToRenqueue.length} message(s) with delay ${delayToResend}...`
       } else {
         statusMessage = `Bulk ${id} phone ${phone} is finished with ${messagesToSend.length} message(s)!`
-        await amqpPublish(UNOAPI_JOB_BULK_REPORT, phone, { payload: { id, length } }, { delay: UNOAPI_BULK_DELAY * 1000 })
+        await amqpPublish(
+          UNOAPI_EXCHANGE_BROKER_NAME,
+          UNOAPI_JOB_BULK_REPORT, phone, 
+          { payload: { id, length } }, 
+          { delay: UNOAPI_BULK_DELAY * 1000 }
+        )
       }
       const messageUpdate = {
         type: 'text',

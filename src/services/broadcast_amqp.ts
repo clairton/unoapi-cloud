@@ -1,17 +1,10 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_JOB_BROADCAST } from '../defaults'
+import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BROADCAST } from '../defaults'
 import { Broadcast } from './broadcast'
 
 export class BroadcastAmqp extends Broadcast {
-  private queueName: string
-
-  constructor(queueName: string = UNOAPI_JOB_BROADCAST) {
-    super()
-    this.queueName = queueName
-  }
-
   public async send(phone: string, type: string, content: string) {
     const payload = { phone, type, content }
-    await amqpPublish(this.queueName, '', payload)
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BROADCAST, '', payload)
   }
 }
