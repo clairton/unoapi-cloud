@@ -49,8 +49,8 @@ export const DATA_TTL: number = parseInt(process.env.DATA_TTL || `${60 * 60 * 24
 export const DATA_URL_TTL: number = parseInt(process.env.DATA_URL_TTL || `${60 * 60 * 24 * 3}`) // tree days
 export const DATA_JID_TTL: number = parseInt(process.env.DATA_JID_TTL || `${60 * 60 * 24 * 7}`) // a week
 export const SESSION_TTL: number = parseInt(process.env.SESSION_TTL || '-1')
-export const UNOAPI_X_COUNT_RETRIES = process.env.UNOAPI_X_COUNT_RETRIES || 'x-unoapi-count-retries'
-export const UNOAPI_X_MAX_RETRIES = process.env.UNOAPI_X_MAX_RETRIES || 'x-unoapi-max-retries'
+export const UNOAPI_X_COUNT_RETRIES: string = process.env.UNOAPI_X_COUNT_RETRIES || 'x-unoapi-count-retries'
+export const UNOAPI_X_MAX_RETRIES: string = process.env.UNOAPI_X_MAX_RETRIES || 'x-unoapi-max-retries'
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
 export const UNOAPI_JOB_WEBHOOKER = `${UNOAPI_QUEUE_NAME}.webhooker`
 export const UNOAPI_JOB_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_JOB_OUTGOING_PREFETCH || '1')
@@ -73,23 +73,23 @@ export const UNOAPI_JOB_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
 export const UNOAPI_JOB_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
 export const UNOAPI_JOB_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
 export const UNOAPI_EXCHANGE_TYPE = {
-  [UNOAPI_JOB_WEBHOOKER]: 'topic',
-  [UNOAPI_JOB_MEDIA]: 'topic',
-  [UNOAPI_JOB_NOTIFICATION]: 'topic',
-  [UNOAPI_JOB_BLACKLIST_ADD]: 'topic',
-  [UNOAPI_JOB_BLACKLIST_RELOAD]: 'topic',
+  [UNOAPI_JOB_WEBHOOKER]: 'direct',
+  [UNOAPI_JOB_MEDIA]: 'direct',
+  [UNOAPI_JOB_NOTIFICATION]: 'direct',
+  [UNOAPI_JOB_BLACKLIST_ADD]: 'direct',
+  [UNOAPI_JOB_BLACKLIST_RELOAD]: 'direct',
   [UNOAPI_JOB_BIND]: 'direct',
-  [UNOAPI_JOB_OUTGOING]: 'topic',
-  [UNOAPI_JOB_CONTACT]: 'topic',
-  [UNOAPI_JOB_BULK_PARSER]: 'topic',
-  [UNOAPI_JOB_RELOAD]: 'topic',
-  [UNOAPI_JOB_BROADCAST]: 'topic',
-  [UNOAPI_JOB_LOGOUT]: 'topic',
-  [UNOAPI_JOB_BULK_SENDER]: 'topic',
-  [UNOAPI_JOB_BULK_STATUS]: 'topic',
-  [UNOAPI_JOB_BULK_REPORT]: 'topic',
-  [UNOAPI_JOB_BULK_WEBHOOK]: 'topic',
-  [UNOAPI_JOB_COMMANDER]: 'topic',
+  [UNOAPI_JOB_OUTGOING]: 'direct',
+  [UNOAPI_JOB_CONTACT]: 'direct',
+  [UNOAPI_JOB_BULK_PARSER]: 'direct',
+  [UNOAPI_JOB_RELOAD]: 'direct',
+  [UNOAPI_JOB_BROADCAST]: 'direct',
+  [UNOAPI_JOB_LOGOUT]: 'direct',
+  [UNOAPI_JOB_BULK_SENDER]: 'direct',
+  [UNOAPI_JOB_BULK_STATUS]: 'direct',
+  [UNOAPI_JOB_BULK_REPORT]: 'direct',
+  [UNOAPI_JOB_BULK_WEBHOOK]: 'direct',
+  [UNOAPI_JOB_COMMANDER]: 'direct',
   [UNOAPI_JOB_LISTENER]: 'direct',
   [UNOAPI_JOB_INCOMING]: 'direct'
 }
