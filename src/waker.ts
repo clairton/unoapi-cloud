@@ -13,57 +13,64 @@ import {
 import { Channel, ConsumeMessage } from 'amqplib'
 
 import logger from './services/logger'
-import { amqpConnect, queueDeadName, amqpPublish, extractRoutingKeyFromBindingKey, ExchagenType } from './amqp'
+import { queueDeadName, amqpConnect, amqpPublish, amqpGetChannel, extractRoutingKeyFromBindingKey, ExchagenType } from './amqp'
 
 logger.info('Starting with waker...')
 
-const bridgeQueue = [UNOAPI_QUEUE_INCOMING, UNOAPI_QUEUE_OUTGOING]
-const brokerQueue = [UNOAPI_QUEUE_LISTENER, UNOAPI_QUEUE_WEBHOOKER]
+const brokerQueues = [UNOAPI_QUEUE_WEBHOOKER, UNOAPI_QUEUE_OUTGOING]
+const bridgeQueues = [UNOAPI_QUEUE_LISTENER, UNOAPI_QUEUE_INCOMING]
 
-const queues = bridgeQueue.concat(brokerQueue)
+const queues = bridgeQueues.concat(brokerQueues)
 
 const getExchangeName = queue => {
-  if (bridgeQueue.includes(queue)) {
+  if (bridgeQueues.includes(queue)) {
     return UNOAPI_EXCHANGE_BRIDGE_NAME
-  } else if (bridgeQueue.includes(queue)) {
+  } else if (brokerQueues.includes(queue)) {
     return UNOAPI_EXCHANGE_BROKER_NAME
   } else {
     throw `Unknow queue ${queue}`
   }
 }
 const getExchangeType = (queue): ExchagenType => {
-  if (bridgeQueue.includes(queue)) {
+  if (bridgeQueues.includes(queue)) {
     return 'direct'
-  } else if (bridgeQueue.includes(queue)) {
+  } else if (brokerQueues.includes(queue)) {
     return 'topic'
   } else {
     throw `Unknow queue ${queue}`
   }
 }
 
-amqpConnect(AMQP_URL).then(async (connection) => {
-  return queues.forEach(async queue => {
-    const exchangeName = queueDeadName(queue)
-    logger.info('Waker exchange %s', exchangeName)
-    const channel: Channel = await connection.createChannel()
-    logger.info('Creating queue %s...', exchangeName)
-    await channel.assertExchange(exchangeName, getExchangeName(queue), { durable: true })
-    channel.consume(exchangeName, async (payload: ConsumeMessage | null) => {
-      if (!payload) {
-        throw 'payload not be null'
-      }
-      await amqpPublish(
-        getExchangeName(queue), 
-        queue, 
-        extractRoutingKeyFromBindingKey(payload.fields.routingKey),
-        JSON.parse(payload.content.toString()), {
-          type: getExchangeType(queue)
+(async () => {
+  return Promise.all(
+    queues.map(async queue => {
+      const connection =  await amqpConnect()
+      const exchangeName = getExchangeName(queue)
+      const queueName = queueDeadName(queue)
+      const exchangeType = getExchangeType(queue)
+      logger.info('Waker exchange %s queue %s type %s', exchangeName, queueName, exchangeType)
+      const channel: Channel = await connection.createChannel()
+      await channel.assertExchange(exchangeName, exchangeType, { durable: true })
+      await channel.assertQueue(queueName, { durable: true })
+      await channel.bindQueue(queueName, exchangeName)
+      channel.consume(queueName, async (payload: ConsumeMessage | null) => {
+        if (!payload) {
+          throw 'payload not be null'
         }
-      )
-      return channel.ack(payload)
+        await amqpPublish(
+          exchangeName, 
+          queue, 
+          extractRoutingKeyFromBindingKey(payload.fields.routingKey),
+          JSON.parse(payload.content.toString()),
+          { type: exchangeType }
+        )
+        return channel.ack(payload)
+      })
+      await channel.unbindQueue(queueName, exchangeName)
     })
-  })
-})
+  )
+  // process.exit(1)
+})()
   
 process.on('unhandledRejection', (reason: any, promise) => {
   logger.error('unhandledRejection: %s', reason.stack)

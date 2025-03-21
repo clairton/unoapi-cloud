@@ -13,6 +13,7 @@ import {
   CONSUMER_TIMEOUT_MS,
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BROKER_NAME,
+  UNOAPI_EXCHANGE_BRIDGE_NAME,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -180,7 +181,7 @@ export const amqpGetQueue = async (
 
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
-    await amqpPublish(exchange, UNOAPI_QUEUE_BIND, UNOAPI_SERVER_NAME, { routingKey })
+    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_BIND, UNOAPI_SERVER_NAME, { routingKey })
     routes.set(routingKey, true)
   }
   return queues.get(queue)!
