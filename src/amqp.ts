@@ -237,7 +237,7 @@ export const amqpPublish = async (
   await channel.publish(exchangeUsed, destiny, Buffer.from(JSON.stringify(payload)), properties)
   logger.debug(
     'Published at exchange %s, with binding key: %s, payload: %s, properties: %s',
-    exchange,
+    exchangeUsed,
     destiny,
     JSON.stringify(payload),
     JSON.stringify(properties)
@@ -309,18 +309,20 @@ export const amqpConsume = async (
       } else {
         await amqpGetExchange(exchangeDelayed, options.type!, options.prefetch!, exchange)
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
-        await amqpPublish(exchange, queue, routingKey, data, { delay: UNOAPI_MESSAGE_RETRY_DELAY * countRetries, maxRetries, countRetries })
+        await amqpPublish(exchange, queue, routingKey, data, { delay: 60000, maxRetries, countRetries })
       }
       await channel.ack(payload)
     }
   }
 
   const bindingKey = await bindQueue(channel, exchange, queueMain, routingKey)
-  const bindingKeyDelayed = await bindQueue(channel, exchangeDelayed, queueDelayed, routingKey)
+  const bindingKeyDelayed = await bindQueue(channel, exchange, queueDelayed, routingKey)
+  const bindingKeyDelayedExchange = await bindQueue(channel, exchangeDelayed, queueDelayed, routingKey)
 
   channel.on('close', () => {
     channel.unbindQueue(queueMain.queue, exchange, bindingKey)
-    channel.unbindQueue(queueDelayed.queue, exchangeDelayed, bindingKeyDelayed)
+    channel.unbindQueue(queueDelayed.queue, exchange, bindingKeyDelayed)
+    channel.unbindQueue(queueDelayed.queue, exchangeDelayed, bindingKeyDelayedExchange)
   })
   if (!consumers.get(queue)) {
     consumers.set(queue, true)
