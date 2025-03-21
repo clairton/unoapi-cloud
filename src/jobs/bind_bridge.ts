@@ -63,8 +63,8 @@ export class BindBridgeJob {
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
       UNOAPI_JOB_LISTENER, 
-      routingKey, 
-      listenerJob.consume.bind(listenerJob), 
+      routingKey,
+      listenerJob.consume.bind(listenerJob),
       {
         notifyFailedMessages,
         priority: 5,
