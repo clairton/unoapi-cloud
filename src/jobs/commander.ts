@@ -1,4 +1,4 @@
-import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BULK_PARSER, UNOAPI_JOB_RELOAD } from '../defaults'
+import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_PARSER, UNOAPI_QUEUE_RELOAD } from '../defaults'
 import { amqpPublish } from '../amqp'
 import { v1 as uuid } from 'uuid'
 import { Outgoing } from '../services/outgoing'
@@ -6,7 +6,7 @@ import { Template } from '../services/template'
 import { getConfig } from '../services/config'
 import { parseDocument, YAMLError } from 'yaml'
 import { setConfig } from '../services/redis'
-import { UNOAPI_JOB_BULK_REPORT } from '../defaults'
+import { UNOAPI_QUEUE_BULK_REPORT } from '../defaults'
 import logger from '../services/logger'
 
 export class YamlParseError extends Error {
@@ -23,7 +23,7 @@ export class CommanderJob {
   private queueBulkParser: string
   private queueReload: string
 
-  constructor(outgoing: Outgoing, getConfig: getConfig, queueBulkParser: string = UNOAPI_JOB_BULK_PARSER, queueReload: string = UNOAPI_JOB_RELOAD) {
+  constructor(outgoing: Outgoing, getConfig: getConfig, queueBulkParser: string = UNOAPI_QUEUE_BULK_PARSER, queueReload: string = UNOAPI_QUEUE_RELOAD) {
     this.outgoing = outgoing
     this.getConfig = getConfig
     this.queueBulkParser = queueBulkParser
@@ -89,7 +89,7 @@ export class CommanderJob {
           throw new YamlParseError(doc.errors)
         }
         const { bulk } = doc.toJS()
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } })
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
         logger.debug('Parsing config template... %s', phone)
         const service = new Template(this.getConfig)

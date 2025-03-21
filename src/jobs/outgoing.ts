@@ -1,5 +1,5 @@
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_OUTGOING } from '../defaults'
+import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING } from '../defaults'
 import { amqpPublish } from '../amqp'
 
 export class OutgoingJob {
@@ -16,7 +16,7 @@ export class OutgoingJob {
       const messages: any[] = a.payload
       await Promise.all(
         messages.map(async (m) => {
-          return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_OUTGOING, phone, { payload: m, split: false })
+          return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { payload: m, split: false })
         })
       )
     } else {

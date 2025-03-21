@@ -2,14 +2,14 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 import { 
-  UNOAPI_JOB_RELOAD,
+  UNOAPI_QUEUE_RELOAD,
   UNOAPI_SERVER_NAME,
-  UNOAPI_JOB_MEDIA,
-  UNOAPI_JOB_OUTGOING,
-  UNOAPI_JOB_WEBHOOKER,
-  UNOAPI_JOB_NOTIFICATION,
-  UNOAPI_JOB_OUTGOING_PREFETCH,
-  UNOAPI_JOB_BLACKLIST_ADD,
+  UNOAPI_QUEUE_MEDIA,
+  UNOAPI_QUEUE_OUTGOING,
+  UNOAPI_QUEUE_WEBHOOKER,
+  UNOAPI_QUEUE_NOTIFICATION,
+  UNOAPI_QUEUE_OUTGOING_PREFETCH,
+  UNOAPI_QUEUE_BLACKLIST_ADD,
   NOTIFY_FAILED_MESSAGES,
   UNOAPI_EXCHANGE_BROKER_NAME,
 } from './defaults'
@@ -44,33 +44,33 @@ const webhookerJob = new WebhookerJob(outgoingCloudApi)
 const startBroker = async () => {
   await startRedis()
 
-  const prefetch = UNOAPI_JOB_OUTGOING_PREFETCH
+  const prefetch = UNOAPI_QUEUE_OUTGOING_PREFETCH
 
   logger.info('Unoapi Cloud version %s starting broker...', version)
 
   logger.info('Starting reload consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob))
 
   logger.info('Starting media consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_MEDIA, '*', mediaJob.consume.bind(mediaJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob))
 
   logger.info('Binding queues consumer for server %s', UNOAPI_SERVER_NAME)
 
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
 
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
 
   logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_WEBHOOKER, '*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
 
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
-    await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
+    await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BLACKLIST_ADD, '*', addToBlacklist, { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', addToBlacklist, { notifyFailedMessages, prefetch })
 
   logger.info('Unoapi Cloud version %s started broker!', version)
 }

@@ -13,7 +13,7 @@ import {
   PORT,
   CONFIG_SESSION_PHONE_CLIENT,
   CONFIG_SESSION_PHONE_NAME,
-  UNOAPI_JOB_BROADCAST,
+  UNOAPI_QUEUE_BROADCAST,
   UNOAPI_EXCHANGE_BROKER_NAME,
 } from './defaults'
 import { getConfigRedis } from './services/config_redis'
@@ -43,6 +43,6 @@ const broadcastJob = new BroacastJob(broadcast)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Starting broadcast consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob))
   logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
 })
