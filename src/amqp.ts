@@ -1,4 +1,4 @@
-import { connect, Connection, Channel, Queue, Options, ConsumeMessage } from 'amqplib'
+import { connect, Connection, Channel, Queue, Exchange, Options, ConsumeMessage, abc } from 'amqplib'
 import {
   AMQP_URL,
   UNOAPI_X_COUNT_RETRIES,
@@ -33,8 +33,8 @@ const withTimeout = (millis, error, promise) => {
   })
 }
 
-const queueDelayedName = (queue: string) => `${queue}.delayed`
 export const queueDeadName = (queue: string) => `${queue}.dead`
+export const queueDelayedName = (queue: string) => `${queue}.delayed`
 
 let amqpConnection: Connection | undefined
 let amqpChannel: Channel | undefined
@@ -116,29 +116,31 @@ export const amqpGetChannel = async () => {
   return amqpChannel
 }
 
-export const amqpGetExchange = async (exchange: string, type: ExchagenType, prefetch: number, dle = '') => {
+export const amqpGetExchange = async (exchange: string, type: ExchagenType, prefetch: number) => {
   if (!exchanges.get(exchange)) {
-    logger.info('Creating exchange...')
+    logger.info('Creating exchange %s...', exchange)
     const channel = await amqpGetChannel()
-    channel.prefetch(prefetch)
-    const values = { 'x-max-priority': 5 }
-    if (dle) {
-      values['x-dead-letter-exchange'] = dle
-    }
-    await channel.assertExchange(exchange, type, { durable: true,  arguments: values})
-    logger.info('Created exchange!')
+    await channel.prefetch(prefetch)
+    await channel.assertExchange(exchange, type, { durable: true,  arguments: { 'x-max-priority': 5 }})
+
+    const exchangeDelayedId = queueDelayedName(exchange)
+    await amqpChannel.assertExchange(exchangeDelayedId, 'topic', { durable: true , arguments: {
+      'x-dead-letter-exchange': exchange
+    }})
+    logger.info('Created exchange %s!', exchange)
     exchanges.set(exchange, true)
   }
 }
 
-const bindingKey = (amqpQueue, routingKey) => {
-  return `${amqpQueue.queue}${routingKey ? `.${routingKey}` : ''}`
+const bindingKey = (queueName, routingKey) => {
+  return `${queueName}${routingKey ? `.${routingKey}` : ''}`
 }
 
-const bindQueue = async (channel, exchangeName, amqpQueue, routingKey) => {
-  const destiny = bindingKey(amqpQueue, routingKey)
+const bindQueue = async (channel, exchangeName, queueName, routingKey, delayed = false) => {
+  const queueNameToBind = delayed ? queueDelayedName(queueName) : queueName
+  const destiny = bindingKey(queueNameToBind, routingKey)
   logger.info('Bind exchange %s binding key %s', exchangeName, destiny)
-  await channel.bindQueue(amqpQueue.queue, exchangeName, destiny)
+  await channel.bindQueue(queueName, exchangeName, destiny)
   return destiny
 }
 
@@ -155,29 +157,22 @@ export const amqpGetQueue = async (
   },
 ): Promise<QueueObject> => {
   if (!queues.get(queue)) {
-    const exchangeDelayedID = queueDelayedName(exchange)
     await amqpGetExchange(exchange, options.type!, options.prefetch!)
-    await amqpGetExchange(exchangeDelayedID, options.type!, options.prefetch!, exchange)
     const channel = await amqpGetChannel()
     logger.info('Creating queue %s...', queue)
     const queueMain = await channel.assertQueue(queue, { durable: true })
+
     const queueDeadId = queueDeadName(queue)
     const queueDead = await channel.assertQueue(queueDeadId, { durable: true })
-    // await bindQueue(channel, exchange, queueDead, '*')
-    const queueDelayedID = queueDelayedName(queue)
-    const queueDelayedOptions = {
-      durable: true,
-      arguments: { 
-        // 'x-dead-letter-queue': queue,
-        'x-dead-letter-exchange': exchange
-      },
-    }
-    // const destiny = bindingKey(queueMain, routingKey)
-    // const queueDelayedOptions = {
-    //   durable: true,
-    //   arguments: { 'x-dead-letter-routing-key': destiny },
-    // }
-    const queueDelayed = await channel.assertQueue(queueDelayedID, queueDelayedOptions)
+    await amqpChannel.bindQueue(queueDeadId, exchange, `${queueDeadId}.*`)
+
+    const exchangeDelayedId = queueDelayedName(exchange)
+    const queueDelayedId = queueDelayedName(queue)
+    const queueDelayed = await amqpChannel.assertQueue(queueDelayedId, { durable: true, arguments: {
+      'x-dead-letter-exchange': exchange
+    }})
+    await amqpChannel.bindQueue(queueDelayedId, exchangeDelayedId, `${queueDelayedId}.*`)
+
     queues.set(queue, { queueMain, queueDead, queueDelayed })
     logger.info('Created queue %s!', queue)
   }
@@ -213,7 +208,7 @@ export const amqpPublish = async (
   const headers: any = {}
   headers[UNOAPI_X_COUNT_RETRIES] = countRetries
   headers[UNOAPI_X_MAX_RETRIES] = maxRetries
-  let queueUsed
+  let queueUsed = queueMain
   let exchangeUsed = exchange
   const properties: Options.Publish = {
     persistent: true,
@@ -224,16 +219,14 @@ export const amqpPublish = async (
     properties.priority = options.priority
   }
   if (delay) {
-    queueUsed = queueDelayed
     const delayMilliseconds: number = typeof delay == 'number' ? delay : UNOAPI_MESSAGE_RETRY_DELAY
     properties.expiration = delayMilliseconds
     exchangeUsed = queueDelayedName(exchange)
+    queueUsed = queueDelayed
   } else if (dead) {
     queueUsed = queueDead
-  } else {
-    queueUsed = queueMain
   }
-  const destiny = bindingKey(queueUsed, routingKey)
+  const destiny = bindingKey(queueUsed.queue, routingKey)
   await channel.publish(exchangeUsed, destiny, Buffer.from(JSON.stringify(payload)), properties)
   logger.debug(
     'Published at exchange %s, with binding key: %s, payload: %s, properties: %s',
@@ -258,9 +251,8 @@ export const amqpConsume = async (
 ) => {
   validateRoutingKey(routingKey)
   await amqpGetExchange(exchange, options.type!, options.prefetch!)
-  const exchangeDelayed = queueDelayedName(exchange)
   const channel = await amqpGetChannel()
-  const { queueMain, queueDelayed } = await amqpGetQueue(exchange, queue, routingKey, options)
+  await amqpGetQueue(exchange, queue, routingKey, options)
   const fn = async (payload: ConsumeMessage | null) => {
     if (!payload) {
       throw `payload not be null `
@@ -307,7 +299,6 @@ export const amqpConsume = async (
         }
         await amqpPublish(exchange, queue, routingKey, data, { dead: true })
       } else {
-        await amqpGetExchange(exchangeDelayed, options.type!, options.prefetch!, exchange)
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
         await amqpPublish(exchange, queue, routingKey, data, { delay: 60000, maxRetries, countRetries })
       }
@@ -315,14 +306,12 @@ export const amqpConsume = async (
     }
   }
 
-  const bindingKey = await bindQueue(channel, exchange, queueMain, routingKey)
-  const bindingKeyDelayed = await bindQueue(channel, exchange, queueDelayed, routingKey)
-  const bindingKeyDelayedExchange = await bindQueue(channel, exchangeDelayed, queueDelayed, routingKey)
+  const bindingKey = await bindQueue(channel, exchange, queue, routingKey)
+  const bindingKeyDelayed = await bindQueue(channel, exchange, queue, routingKey, true)
 
   channel.on('close', () => {
-    channel.unbindQueue(queueMain.queue, exchange, bindingKey)
-    channel.unbindQueue(queueDelayed.queue, exchange, bindingKeyDelayed)
-    channel.unbindQueue(queueDelayed.queue, exchangeDelayed, bindingKeyDelayedExchange)
+    channel.unbindQueue(queue, exchange, bindingKey)
+    channel.unbindQueue(queue, exchange, bindingKeyDelayed)
   })
   if (!consumers.get(queue)) {
     consumers.set(queue, true)
