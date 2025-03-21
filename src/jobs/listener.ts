@@ -1,5 +1,5 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
+import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
 import { Listener } from '../services/listener'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
@@ -45,13 +45,13 @@ export class ListenerJob {
       if (type == 'delete' && messages.keys) {
         await Promise.all(
           messages.keys.map(async (m: object) => {
-            return amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LISTENER, phone, { messages: { keys: [m] }, type, splited: true })
+            return amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, phone, { messages: { keys: [m] }, type, splited: true })
          })
         )
       } else {
         await Promise.all(messages.
           map(async (m: object) => {
-            return amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_JOB_LISTENER, phone, { messages: [m], type, splited: true })
+            return amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, phone, { messages: [m], type, splited: true })
           })
         )
       }

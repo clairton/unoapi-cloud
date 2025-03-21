@@ -54,52 +54,29 @@ export const UNOAPI_X_MAX_RETRIES: string = process.env.UNOAPI_X_MAX_RETRIES || 
 export const UNOAPI_EXCHANGE_NAME = process.env.UNOAPI_EXCHANGE_BROKER_NAME || 'unoapi'
 export const UNOAPI_EXCHANGE_BROKER_NAME =`${UNOAPI_EXCHANGE_NAME}.broker`
 export const UNOAPI_EXCHANGE_BRIDGE_NAME = `${UNOAPI_EXCHANGE_NAME}.brigde`
-export const UNOAPI_EXCHANGE_DELAYED_NAME = `${UNOAPI_EXCHANGE_NAME}.delayed`
-export const UNOAPI_EXCHANGE_FAILED_NAME = `${UNOAPI_EXCHANGE_NAME}.delayed`
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
-export const UNOAPI_JOB_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_JOB_OUTGOING_PREFETCH || '1')
-export const UNOAPI_JOB_DELAYED = `${UNOAPI_QUEUE_NAME}.delayed`
-export const UNOAPI_JOB_FAILED = `${UNOAPI_QUEUE_NAME}.failed`
-export const UNOAPI_JOB_WEBHOOKER = `${UNOAPI_QUEUE_NAME}.webhooker`
-export const UNOAPI_JOB_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
-export const UNOAPI_JOB_NOTIFICATION = `${UNOAPI_QUEUE_NAME}.notification`
-export const UNOAPI_JOB_LISTENER = `${UNOAPI_QUEUE_NAME}.listener`
-export const UNOAPI_JOB_BLACKLIST_ADD = `${UNOAPI_QUEUE_NAME}.blacklist.add`
-export const UNOAPI_JOB_BLACKLIST_RELOAD = `${UNOAPI_QUEUE_NAME}.blacklist.reload`
-export const UNOAPI_JOB_BIND = `${UNOAPI_QUEUE_NAME}.bind`
-export const UNOAPI_JOB_OUTGOING = `${UNOAPI_QUEUE_NAME}.outgoing`
-export const UNOAPI_JOB_CONTACT = `${UNOAPI_QUEUE_NAME}.contact`
-export const UNOAPI_JOB_BULK_PARSER = `${UNOAPI_QUEUE_NAME}.bulk.parser`
-export const UNOAPI_JOB_RELOAD = `${UNOAPI_QUEUE_NAME}.reload`
-export const UNOAPI_JOB_BROADCAST = `${UNOAPI_QUEUE_NAME}.broadcast`
-export const UNOAPI_JOB_LOGOUT = `${UNOAPI_QUEUE_NAME}.logout`
-export const UNOAPI_JOB_BULK_SENDER = `${UNOAPI_QUEUE_NAME}.bulk.sender`
-export const UNOAPI_JOB_BULK_STATUS = `${UNOAPI_QUEUE_NAME}.bulk.status`
-export const UNOAPI_JOB_BULK_REPORT = `${UNOAPI_QUEUE_NAME}.bulk.report`
-export const UNOAPI_JOB_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
-export const UNOAPI_JOB_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
-export const UNOAPI_JOB_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
-// export const UNOAPI_EXCHANGE_TYPE = {
-//   [UNOAPI_JOB_WEBHOOKER]: 'direct',
-//   [UNOAPI_JOB_MEDIA]: 'direct',
-//   [UNOAPI_JOB_NOTIFICATION]: 'direct',
-//   [UNOAPI_JOB_BLACKLIST_ADD]: 'direct',
-//   [UNOAPI_JOB_BLACKLIST_RELOAD]: 'direct',
-//   [UNOAPI_JOB_BIND]: 'direct',
-//   [UNOAPI_JOB_OUTGOING]: 'direct',
-//   [UNOAPI_JOB_CONTACT]: 'direct',
-//   [UNOAPI_JOB_BULK_PARSER]: 'direct',
-//   [UNOAPI_JOB_RELOAD]: 'direct',
-//   [UNOAPI_JOB_BROADCAST]: 'direct',
-//   [UNOAPI_JOB_LOGOUT]: 'direct',
-//   [UNOAPI_JOB_BULK_SENDER]: 'direct',
-//   [UNOAPI_JOB_BULK_STATUS]: 'direct',
-//   [UNOAPI_JOB_BULK_REPORT]: 'direct',
-//   [UNOAPI_JOB_BULK_WEBHOOK]: 'direct',
-//   [UNOAPI_JOB_COMMANDER]: 'direct',
-//   [UNOAPI_JOB_LISTENER]: 'direct',
-//   [UNOAPI_JOB_INCOMING]: 'direct'
-// }
+export const UNOAPI_QUEUE_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_QUEUE_OUTGOING_PREFETCH || '1')
+export const UNOAPI_QUEUE_DELAYED = `${UNOAPI_QUEUE_NAME}.delayed`
+export const UNOAPI_QUEUE_FAILED = `${UNOAPI_QUEUE_NAME}.failed`
+export const UNOAPI_QUEUE_WEBHOOKER = `${UNOAPI_QUEUE_NAME}.webhooker`
+export const UNOAPI_QUEUE_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
+export const UNOAPI_QUEUE_NOTIFICATION = `${UNOAPI_QUEUE_NAME}.notification`
+export const UNOAPI_QUEUE_LISTENER = `${UNOAPI_QUEUE_NAME}.listener`
+export const UNOAPI_QUEUE_BLACKLIST_ADD = `${UNOAPI_QUEUE_NAME}.blacklist.add`
+export const UNOAPI_QUEUE_BLACKLIST_RELOAD = `${UNOAPI_QUEUE_NAME}.blacklist.reload`
+export const UNOAPI_QUEUE_BIND = `${UNOAPI_QUEUE_NAME}.bind`
+export const UNOAPI_QUEUE_OUTGOING = `${UNOAPI_QUEUE_NAME}.outgoing`
+export const UNOAPI_QUEUE_CONTACT = `${UNOAPI_QUEUE_NAME}.contact`
+export const UNOAPI_QUEUE_BULK_PARSER = `${UNOAPI_QUEUE_NAME}.bulk.parser`
+export const UNOAPI_QUEUE_RELOAD = `${UNOAPI_QUEUE_NAME}.reload`
+export const UNOAPI_QUEUE_BROADCAST = `${UNOAPI_QUEUE_NAME}.broadcast`
+export const UNOAPI_QUEUE_LOGOUT = `${UNOAPI_QUEUE_NAME}.logout`
+export const UNOAPI_QUEUE_BULK_SENDER = `${UNOAPI_QUEUE_NAME}.bulk.sender`
+export const UNOAPI_QUEUE_BULK_STATUS = `${UNOAPI_QUEUE_NAME}.bulk.status`
+export const UNOAPI_QUEUE_BULK_REPORT = `${UNOAPI_QUEUE_NAME}.bulk.report`
+export const UNOAPI_QUEUE_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
+export const UNOAPI_QUEUE_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
+export const UNOAPI_QUEUE_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
 export const UNOAPI_MESSAGE_RETRY_LIMIT = parseInt(process.env.UNOAPI_MESSAGE_RETRY_LIMIT || '5')
 export const UNOAPI_MESSAGE_RETRY_DELAY = parseInt(process.env.UNOAPI_MESSAGE_RETRY_DELAY || '10000')
 export const UNOAPI_DELAY_BETWEEN_MESSAGES_MS = parseInt(process.env.UNOAPI_DELAY_BETWEEN_MESSAGES_MS || '0')

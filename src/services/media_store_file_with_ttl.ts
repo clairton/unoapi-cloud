@@ -1,7 +1,7 @@
 import { WAMessage } from 'baileys'
 import { getDataStore } from './data_store'
 import { amqpPublish } from '../amqp'
-import { UNOAPI_JOB_MEDIA, DATA_TTL, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
+import { UNOAPI_QUEUE_MEDIA, DATA_TTL, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
 import { getMediaStore, MediaStore, mediaStores } from './media_store'
 import { mediaStoreFile } from './media_store_file'
 import { Config } from './config'
@@ -25,7 +25,7 @@ const mediaStoreFileWithTTL = (phone: string, config: Config, getDataStore: getD
     const i = await saveMedia(waMessage)
     if (i) {
       const fileName = mediaStore.getFileName(phone, waMessage)
-      await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000 })
+      await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000 })
     }
     return i
   }

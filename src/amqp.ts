@@ -5,9 +5,9 @@ import {
   UNOAPI_X_MAX_RETRIES,
   UNOAPI_MESSAGE_RETRY_LIMIT,
   UNOAPI_MESSAGE_RETRY_DELAY,
-  UNOAPI_JOB_BIND,
+  UNOAPI_QUEUE_BIND,
   NOTIFY_FAILED_MESSAGES,
-  UNOAPI_JOB_NOTIFICATION,
+  UNOAPI_QUEUE_NOTIFICATION,
   IGNORED_CONNECTIONS_NUMBERS,
   VALIDATE_ROUTING_KEY,
   CONSUMER_TIMEOUT_MS,
@@ -180,7 +180,7 @@ export const amqpGetQueue = async (
 
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
-    await amqpPublish(exchange, UNOAPI_JOB_BIND, UNOAPI_SERVER_NAME, { routingKey })
+    await amqpPublish(exchange, UNOAPI_QUEUE_BIND, UNOAPI_SERVER_NAME, { routingKey })
     routes.set(routingKey, true)
   }
   return queues.get(queue)!
@@ -281,7 +281,7 @@ export const amqpConsume = async (
           logger.info('Sending error to whatsapp...')
           await amqpPublish(
             UNOAPI_EXCHANGE_BROKER_NAME,
-            UNOAPI_JOB_NOTIFICATION,
+            UNOAPI_QUEUE_NOTIFICATION,
             routingKey,
             {
               payload: {

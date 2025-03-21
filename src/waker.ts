@@ -5,10 +5,10 @@ import {
   AMQP_URL,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
   UNOAPI_EXCHANGE_BROKER_NAME,
-  UNOAPI_JOB_INCOMING,
-  UNOAPI_JOB_LISTENER,
-  UNOAPI_JOB_OUTGOING,
-  UNOAPI_JOB_WEBHOOKER,
+  UNOAPI_QUEUE_INCOMING,
+  UNOAPI_QUEUE_LISTENER,
+  UNOAPI_QUEUE_OUTGOING,
+  UNOAPI_QUEUE_WEBHOOKER,
 } from './defaults'
 import { Channel, ConsumeMessage } from 'amqplib'
 
@@ -17,8 +17,8 @@ import { amqpConnect, queueDeadName, amqpPublish, extractRoutingKeyFromBindingKe
 
 logger.info('Starting with waker...')
 
-const bridgeQueue = [UNOAPI_JOB_INCOMING, UNOAPI_JOB_OUTGOING]
-const brokerQueue = [UNOAPI_JOB_LISTENER, UNOAPI_JOB_WEBHOOKER]
+const bridgeQueue = [UNOAPI_QUEUE_INCOMING, UNOAPI_QUEUE_OUTGOING]
+const brokerQueue = [UNOAPI_QUEUE_LISTENER, UNOAPI_QUEUE_WEBHOOKER]
 
 const queues = bridgeQueue.concat(brokerQueue)
 

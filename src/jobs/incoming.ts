@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_JOB_COMMANDER, UNOAPI_JOB_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
+import { UNOAPI_QUEUE_COMMANDER, UNOAPI_QUEUE_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
 import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype, toBuffer } from '../services/transformer'
@@ -15,7 +15,7 @@ export class IncomingJob {
   private getConfig: getConfig
   private queueCommander: string
 
-  constructor(incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, queueCommander = UNOAPI_JOB_COMMANDER) {
+  constructor(incoming: Incoming, outgoing: Outgoing, getConfig: getConfig, queueCommander = UNOAPI_QUEUE_COMMANDER) {
     this.incoming = incoming
     this.outgoing = outgoing
     this.getConfig = getConfig
@@ -134,7 +134,7 @@ export class IncomingJob {
       // const code = status?.errors[0]?.code
       // retry when error: 5 - Wait a moment, connecting process
       // if (retries < UNOAPI_MESSAGE_RETRY_LIMIT && ['5', 5].includes(code)) {
-      //   await amqpPublish(UNOAPI_JOB_INCOMING, phone, { ...data, retries }, options)
+      //   await amqpPublish(UNOAPI_QUEUE_INCOMING, phone, { ...data, retries }, options)
       // }
     } else {
       outgingPayload = {
@@ -175,7 +175,7 @@ export class IncomingJob {
         ],
       }
     }
-    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_JOB_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
     await Promise.all(config.webhooks.map((w) => this.outgoing.sendHttp(phone, w, outgingPayload, optionsOutgoing)))
     return response
   }

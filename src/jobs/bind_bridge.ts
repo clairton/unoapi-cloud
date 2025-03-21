@@ -2,10 +2,10 @@ import { IncomingJob } from './incoming'
 import { ListenerJob } from './listener'
 import { Broadcast } from '../services/broadcast'
 import {
-  UNOAPI_JOB_INCOMING,
-  UNOAPI_JOB_COMMANDER,
-  UNOAPI_JOB_LISTENER,
-  UNOAPI_JOB_OUTGOING_PREFETCH,
+  UNOAPI_QUEUE_INCOMING,
+  UNOAPI_QUEUE_COMMANDER,
+  UNOAPI_QUEUE_LISTENER,
+  UNOAPI_QUEUE_OUTGOING_PREFETCH,
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
 } from '../defaults'
@@ -33,7 +33,7 @@ const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmq
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfig, getClientBaileys, onNewLogin)
-const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_JOB_COMMANDER)
+const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_QUEUE_COMMANDER)
 const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi, getConfig)
 
 const processeds = new Map<string, boolean>()
@@ -62,7 +62,7 @@ export class BindBridgeJob {
     logger.info('Starting listener baileys consumer %s', routingKey)
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
-      UNOAPI_JOB_LISTENER, 
+      UNOAPI_QUEUE_LISTENER, 
       routingKey,
       listenerJob.consume.bind(listenerJob),
       {
@@ -76,7 +76,7 @@ export class BindBridgeJob {
     logger.info('Starting incoming consumer %s', routingKey)
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
-      UNOAPI_JOB_INCOMING, 
+      UNOAPI_QUEUE_INCOMING, 
       routingKey, 
       incomingJob.consume.bind(incomingJob), 
       {

@@ -6,9 +6,9 @@ import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
 import { 
-  UNOAPI_JOB_BIND,
-  UNOAPI_JOB_RELOAD,
-  UNOAPI_JOB_LOGOUT,
+  UNOAPI_QUEUE_BIND,
+  UNOAPI_QUEUE_RELOAD,
+  UNOAPI_QUEUE_LOGOUT,
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
 } from './defaults'
@@ -47,7 +47,7 @@ const startBrigde = async () => {
   logger.info('Starting bind listener consumer')
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME, 
-    UNOAPI_JOB_BIND, 
+    UNOAPI_QUEUE_BIND, 
     UNOAPI_SERVER_NAME, 
     bindJob.consume.bind(bindJob),
     {
@@ -59,7 +59,7 @@ const startBrigde = async () => {
   logger.info('Starting reload consumer')
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME, 
-    UNOAPI_JOB_RELOAD, 
+    UNOAPI_QUEUE_RELOAD, 
     UNOAPI_SERVER_NAME, 
     reloadJob.consume.bind(reloadJob),
     {
@@ -71,7 +71,7 @@ const startBrigde = async () => {
   logger.info('Starting logout consumer')
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME,
-    UNOAPI_JOB_LOGOUT, 
+    UNOAPI_QUEUE_LOGOUT, 
     UNOAPI_SERVER_NAME, 
     logoutJob.consume.bind(logoutJob),
     {
