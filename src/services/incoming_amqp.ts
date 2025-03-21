@@ -9,6 +9,7 @@ export class IncomingAmqp implements Incoming {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { status, type, to } = payload as any
     if (status) {
+      options['type'] = 'direct'
       options['priority'] = 3 // update status is always middle important
       await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_INCOMING, phone, { payload, options }, options)
       return { ok: { success: true } }
@@ -17,6 +18,7 @@ export class IncomingAmqp implements Incoming {
       if (!options['priority']) {
         options['priority'] = 5 // send message without bulk is very important
       }
+      options['type'] = 'direct'
       await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_INCOMING, phone, { payload, id, options }, options)
       const ok = {
         messaging_product: 'whatsapp',
