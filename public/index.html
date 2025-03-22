@@ -407,6 +407,11 @@
                                     <input type="checkbox" class="webhook-sendOutgoingMessages">
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="sendUpdateMessages" class="form-label">Enviar Atualização de Mensagens</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendUpdateMessages">
+                                    <span class="slider round"></span>
+                                </label>
                                 <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
                             </div>
                         </div>
@@ -500,6 +505,11 @@
                         <label for="sendOutgoingMessages" class="form-label">Enviar Mensagens de Saída</label>
                         <label class="switch">
                             <input type="checkbox" class="webhook-sendOutgoingMessages">
+                            <span class="slider round"></span>
+                        </label>
+                        <label for="sendUpdateMessages" class="form-label">Enviar Atualização de Mensagens</label>
+                        <label class="switch">
+                            <input type="checkbox" class="webhook-sendUpdateMessages">
                             <span class="slider round"></span>
                         </label>
                         <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
@@ -703,6 +713,11 @@
                                     <input type="checkbox" class="webhook-sendOutgoingMessages" ${webhook.sendOutgoingMessages ? 'checked' : ''}>
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="sendUpdateMessages" class="form-label">Enviar Atualização de Mensagens</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendUpdateMessages" ${webhook.sendUpdateMessages ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
                                 <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
                             </div>`;
                         $('#webhooksContainer').append(webhookTemplate);
@@ -749,8 +764,9 @@
                             header: $(this).find('.webhook-header').val(),
                             sendNewMessages: $(this).find('.webhook-sendNewMessages').is(':checked'),
                             sendGroupMessages: $(this).find('.webhook-sendGroupMessages').is(':checked'),
-                            sendOutgoingMessages: $(this).find('.webhook-sendOutgoingMessages').is(':checked'),
                             sendNewsletterMessages: $(this).find('.webhook-sendNewsletterMessages').is(':checked'),
+                            sendOutgoingMessages: $(this).find('.webhook-sendOutgoingMessages').is(':checked'),
+                            sendUpdateMessages: $(this).find('.webhook-sendUpdateMessages').is(':checked'),
                         };
                         sessionData.webhooks.push(webhook);
                     });

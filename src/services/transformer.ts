@@ -402,6 +402,11 @@ export const isOutgoingMessage = (payload: object) => {
 }
 
 
+export const isUpdateMessage = (payload: object) => {
+  const data = payload as any
+  return data.entry[0].changes[0].value.statuses && data.entry[0].changes[0].value.statuses[0]
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string => {
   if (isLidUser(value) || isJidNewsletter(value)) {

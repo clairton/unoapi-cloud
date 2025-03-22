@@ -384,6 +384,7 @@ WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
+WEBHOOK_SEND_UPDATE_MESSAGES=true, send update messages sent, delivered, read
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true
 IGNORE_NEWSLETTER_MESSAGES=false to ignore newsletter

@@ -22,6 +22,7 @@ export type Webhook = {
   header: string
   timeoutMs: number
   sendNewMessages: boolean
+  sendUpdateMessages: boolean
   sendGroupMessages: boolean
   sendOutgoingMessages: boolean
   sendNewsletterMessages: boolean
@@ -116,6 +117,7 @@ export const defaultConfig: Config = {
       sendNewsletterMessages: false,
       sendGroupMessages: true,
       sendOutgoingMessages: true,
+      sendUpdateMessages: true,
     },
   ],
   webhookCloudApi: undefined,
