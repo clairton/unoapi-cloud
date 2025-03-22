@@ -43,6 +43,7 @@ import {
   READ_ON_RECEIPT,
   IGNORE_NEWSLETTER_MESSAGES,
   WEBHOOK_SEND_NEWSLETTER_MESSAGES,
+  WEBHOOK_SEND_UPDATE_MESSAGES,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -89,6 +90,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].sendGroupMessages = WEBHOOK_SEND_GROUP_MESSAGES
     config.webhooks[0].sendOutgoingMessages = WEBHOOK_SEND_OUTGOING_MESSAGES
     config.webhooks[0].sendNewsletterMessages = WEBHOOK_SEND_NEWSLETTER_MESSAGES
+    config.webhooks[0].sendUpdateMessages = WEBHOOK_SEND_UPDATE_MESSAGES
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)
     config.shouldIgnoreKey = filter.isIgnoreKey.bind(filter)
