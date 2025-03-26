@@ -31,11 +31,11 @@ export class ClientForward implements Client {
       logger.error(error, `Error on send to url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
       throw error
     }
-    logger.debug('Response: %s', response?.status)
+    logger.debug('Response status: %s', response?.status)
     if (!response?.ok) {
-      throw await response?.text()
+      return { error: await response.json(), ok: undefined }
     } else {
-      return response.json()
+      return { ok: await response.json(), error: undefined }
     }
   }
 

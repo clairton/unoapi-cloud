@@ -77,9 +77,10 @@ export const router = (
   // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers/
   router.post('/:phone/request_code', middleware, pairingCodeController.request.bind(pairingCodeController))
 
+  // Webhook for forward connection
+  router.post('/webhooks/whatsapp/:phone', middleware, webhookController.whatsapp.bind(webhookController))
+
   injectRoute(router)
 
-  // Webhook for proxy connection
-  router.post('/webhooks/whatsapp/:phone', middleware, webhookController.whatsapp.bind(webhookController))
   return router
 }
