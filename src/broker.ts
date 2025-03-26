@@ -49,7 +49,7 @@ const startBroker = async () => {
   logger.info('Unoapi Cloud version %s starting broker...', version)
 
   logger.info('Starting reload consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '*', reloadJob.consume.bind(reloadJob))
 
   logger.info('Starting media consumer')
   await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob))

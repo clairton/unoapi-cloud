@@ -1,3 +1,4 @@
+import { UNOAPI_SERVER_NAME } from '../defaults'
 import { getClient } from '../services/client'
 import { getConfig } from '../services/config'
 import { Listener } from '../services/listener'
@@ -21,13 +22,16 @@ export class ReloadBaileys extends Reload {
 
   async run(phone: string, params = { force: false }) {
     logger.info('Reloading session %s...', phone)
+    const config = await this.getConfig(phone)
+    if (config.server != UNOAPI_SERVER_NAME) {
+      return super.run(phone)
+    }
     const currentClient = await this.getClient({
       phone,
       listener: this.listener,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     const { sessionStore }  = store
     if (await sessionStore.isStatusOnline(phone)) {
