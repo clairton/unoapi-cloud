@@ -119,11 +119,11 @@ if (process.env.AMQP_URL) {
   const bindBridgeJob = new BindBridgeJob()
   const logoutJob = new LogoutJob(logout)
   logger.info('Starting bind bridge consumer')
-  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_BIND, UNOAPI_SERVER_NAME, bindBridgeJob.consume.bind(bindBridgeJob), { type: 'direct' })
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '*', bindBridgeJob.consume.bind(bindBridgeJob), { type: 'direct' })
   logger.info('Starting reload consumer')
-  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob), { type: 'direct' })
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, '*', reloadJob.consume.bind(reloadJob), { type: 'direct' })
   logger.info('Starting logout consumer')
-  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LOGOUT, '', logoutJob.consume.bind(logoutJob), { type: 'direct' })
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`, '*', logoutJob.consume.bind(logoutJob), { type: 'direct' })
   logger.info('Starting media consumer')
   const mediaJob = new MediaJob(getConfigVar)
   amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '', mediaJob.consume.bind(mediaJob))
@@ -133,18 +133,18 @@ if (process.env.AMQP_URL) {
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
   const outgingJob = new OutgoingJob(outgoingCloudApi)
-  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
   logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
   const webhookerJob = new WebhookerJob(outgoingCloudApi)
-  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
     const notificationJob = new NotificationJob(incoming)
-    amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
+    amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '', atbl, { notifyFailedMessages, prefetch })
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', atbl, { notifyFailedMessages, prefetch })
 } else {
   logger.info('Starting standard mode')
 }

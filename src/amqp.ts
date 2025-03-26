@@ -165,9 +165,6 @@ export const amqpGetQueue = async (
     logger.info('Creating queue %s...', queue)
     const queueMain = await channel.assertQueue(queue, { durable: true })
     let deadLetterExchange = exchange
-    if ([UNOAPI_QUEUE_RELOAD, UNOAPI_QUEUE_LOGOUT].includes(queue)) {
-      deadLetterExchange = UNOAPI_EXCHANGE_BRIDGE_NAME
-    }
 
     const queueDeadId = queueDeadName(queue)
     const queueDead = await channel.assertQueue(queueDeadId, { durable: true })
@@ -187,7 +184,7 @@ export const amqpGetQueue = async (
 
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
-    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_BIND, UNOAPI_SERVER_NAME, { routingKey }, { type: 'direct' })
+    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '', { routingKey }, { type: 'direct' })
     routes.set(routingKey, true)
   }
   return queues.get(queue)!

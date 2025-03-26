@@ -13,7 +13,19 @@ export class ReloadAmqp extends Reload {
 
   public async run(phone: string, params = { force: false }) {
     const config = await this.getConfig(phone)
-    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_RELOAD, config.server!, { phone, ...params }, { type: 'direct' })
-    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, phone, { phone, ...params }, { type: 'direct' })
+    await amqpPublish(
+      UNOAPI_EXCHANGE_BROKER_NAME,
+      UNOAPI_QUEUE_RELOAD,
+      phone,
+      { phone, ...params },
+      { type: 'direct' }
+    )
+    await amqpPublish(
+      UNOAPI_EXCHANGE_BRIDGE_NAME,
+      `${UNOAPI_QUEUE_RELOAD}.${config.server!}`,
+      phone,
+      { phone, ...params },
+      { type: 'direct' }
+    )
   }
 }
