@@ -13,7 +13,7 @@ import {
 import { Channel, ConsumeMessage } from 'amqplib'
 
 import logger from './services/logger'
-import { queueDeadName, amqpConnect, amqpPublish, amqpGetChannel, extractRoutingKeyFromBindingKey, ExchagenType } from './amqp'
+import { queueDeadName, amqpConnect, amqpPublish, extractRoutingKeyFromBindingKey, ExchagenType } from './amqp'
 
 logger.info('Starting with waker...')
 

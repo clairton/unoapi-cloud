@@ -5,7 +5,6 @@ import {
   UNOAPI_QUEUE_INCOMING,
   UNOAPI_QUEUE_COMMANDER,
   UNOAPI_QUEUE_LISTENER,
-  UNOAPI_QUEUE_OUTGOING_PREFETCH,
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
 } from '../defaults'
@@ -62,7 +61,7 @@ export class BindBridgeJob {
     logger.info('Starting listener baileys consumer %s', routingKey)
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
-      UNOAPI_QUEUE_LISTENER, 
+      `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`, 
       routingKey,
       listenerJob.consume.bind(listenerJob),
       {
@@ -76,7 +75,7 @@ export class BindBridgeJob {
     logger.info('Starting incoming consumer %s', routingKey)
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
-      UNOAPI_QUEUE_INCOMING, 
+      `${UNOAPI_QUEUE_INCOMING}.${UNOAPI_SERVER_NAME}`, 
       routingKey, 
       incomingJob.consume.bind(incomingJob), 
       {

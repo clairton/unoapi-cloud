@@ -47,7 +47,7 @@ export class ListenerJob {
           messages.keys.map(async (m: object) => {
             return amqpPublish(
               UNOAPI_EXCHANGE_BRIDGE_NAME,
-              UNOAPI_QUEUE_LISTENER,
+              `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
               phone,
               { messages: { keys: [m] }, type, splited: true },
               { type: 'direct' }
@@ -59,7 +59,7 @@ export class ListenerJob {
           map(async (m: object) => {
             return amqpPublish(
               UNOAPI_EXCHANGE_BRIDGE_NAME,
-              UNOAPI_QUEUE_LISTENER,
+              `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
               phone,
               { messages: [m], type, splited: true },
               { type: 'direct' }
