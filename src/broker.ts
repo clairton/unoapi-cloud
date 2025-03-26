@@ -49,28 +49,28 @@ const startBroker = async () => {
   logger.info('Unoapi Cloud version %s starting broker...', version)
 
   logger.info('Starting reload consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, UNOAPI_SERVER_NAME, reloadJob.consume.bind(reloadJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '', reloadJob.consume.bind(reloadJob))
 
   logger.info('Starting media consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '', mediaJob.consume.bind(mediaJob))
 
   logger.info('Binding queues consumer for server %s', UNOAPI_SERVER_NAME)
 
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
 
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
 
   logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
 
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
-    await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
+    await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', addToBlacklist, { notifyFailedMessages, prefetch })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '', addToBlacklist, { notifyFailedMessages, prefetch })
 
   logger.info('Unoapi Cloud version %s started broker!', version)
 }

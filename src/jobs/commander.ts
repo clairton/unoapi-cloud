@@ -20,14 +20,10 @@ export class YamlParseError extends Error {
 export class CommanderJob {
   private outgoing: Outgoing
   private getConfig: getConfig
-  private queueBulkParser: string
-  private queueReload: string
 
-  constructor(outgoing: Outgoing, getConfig: getConfig, queueBulkParser: string = UNOAPI_QUEUE_BULK_PARSER, queueReload: string = UNOAPI_QUEUE_RELOAD) {
+  constructor(outgoing: Outgoing, getConfig: getConfig) {
     this.outgoing = outgoing
     this.getConfig = getConfig
-    this.queueBulkParser = queueBulkParser
-    this.queueReload = queueReload
   }
 
   async consume(phone: string, data: object) {
@@ -44,7 +40,7 @@ export class CommanderJob {
         const id = uuid()
         await amqpPublish(
           UNOAPI_EXCHANGE_BROKER_NAME, 
-          this.queueBulkParser, 
+          UNOAPI_QUEUE_BULK_PARSER, 
           phone, {
             phone,
             payload: {
@@ -77,7 +73,7 @@ export class CommanderJob {
         const config = { webhooks }
         logger.debug('Template webhooks %s', phone, JSON.stringify(webhooks))
         await setConfig(phone, config)
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, this.queueReload, currentConfig.server!, { phone })
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, `${UNOAPI_QUEUE_RELOAD}.${currentConfig.server!}`, phone , { phone })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
         logger.debug('Parsing bulk report template... %s', phone)
         const service = new Template(this.getConfig)
@@ -109,7 +105,7 @@ export class CommanderJob {
         }, {})
         logger.debug('Config template to update %s', phone, JSON.stringify(configToUpdate))
         await setConfig(phone, configToUpdate)
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, this.queueReload, currentConfig.server!, { phone })
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, `${UNOAPI_QUEUE_RELOAD}.${currentConfig.server!}`, phone, { phone })
       } else {
         logger.debug(`Commander ignore`)
       }

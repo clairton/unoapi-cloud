@@ -15,6 +15,7 @@ import {
   CONFIG_SESSION_PHONE_NAME,
   UNOAPI_QUEUE_BROADCAST,
   UNOAPI_EXCHANGE_BROKER_NAME,
+  UNOAPI_QUEUE_RELOAD,
 } from './defaults'
 import { getConfigRedis } from './services/config_redis'
 import security from './services/security'
@@ -35,6 +36,8 @@ const onNewLogin = onNewLoginGenerateToken(outgoing)
 const broadcast: Broadcast = new Broadcast()
 const reload = new ReloadAmqp(getConfigRedis)
 const logout = new LogoutAmqp(getConfigRedis)
+import { ReloadJob } from './jobs/reload'
+const reloadJob = new ReloadJob(reload)
 
 const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reload, logout, security)
 broadcast.setSever(app.socket)
@@ -43,6 +46,7 @@ const broadcastJob = new BroacastJob(broadcast)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Starting broadcast consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '', broadcastJob.consume.bind(broadcastJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '', reloadJob.consume.bind(reloadJob))
   logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
 })

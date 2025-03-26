@@ -47,8 +47,8 @@ const startBrigde = async () => {
   logger.info('Starting bind listener consumer')
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME, 
-    UNOAPI_QUEUE_BIND, 
-    UNOAPI_SERVER_NAME, 
+    `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, 
+    '*',
     bindJob.consume.bind(bindJob),
     {
       prefetch: 1,
@@ -59,8 +59,8 @@ const startBrigde = async () => {
   logger.info('Starting reload consumer')
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME, 
-    UNOAPI_QUEUE_RELOAD, 
-    UNOAPI_SERVER_NAME, 
+    `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, 
+    '*', 
     reloadJob.consume.bind(reloadJob),
     {
       prefetch: 1,
