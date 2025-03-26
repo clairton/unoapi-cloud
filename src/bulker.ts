@@ -24,9 +24,9 @@ import logger from './services/logger'
 import { isInBlacklistInRedis } from './services/blacklist'
 import { version } from '../package.json'
 
-const incomingAmqp: Incoming = new IncomingAmqp()
-
 const getConfig: getConfig = getConfigRedis
+const incomingAmqp: Incoming = new IncomingAmqp(getConfig)
+
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
 const commanderJob = new CommanderJob(outgoingCloudApi, getConfigRedis)

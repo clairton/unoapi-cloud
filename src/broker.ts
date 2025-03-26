@@ -15,7 +15,7 @@ import {
 } from './defaults'
 
 import { amqpConsume } from './amqp'
-import { getConfig, startRedis } from './services/redis'
+import { startRedis } from './services/redis'
 import { OutgoingCloudApi } from './services/outgoing_cloud_api'
 import { getConfigRedis } from './services/config_redis'
 import logger from './services/logger'
@@ -32,11 +32,11 @@ import { isInBlacklistInRedis } from './services/blacklist'
 import { NotificationJob } from './jobs/notification'
 import { addToBlacklist } from './jobs/add_to_blacklist'
 
-const incomingAmqp: Incoming = new IncomingAmqp()
+const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
 const reload = new Reload()
 const reloadJob = new ReloadJob(reload)
-const mediaJob = new MediaJob(getConfig)
+const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(outgoingCloudApi)
 const webhookerJob = new WebhookerJob(outgoingCloudApi)

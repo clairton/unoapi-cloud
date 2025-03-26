@@ -111,7 +111,7 @@ if (process.env.AMQP_URL) {
   })
   addToBlacklistVar = addToBlacklistJob
   outgoing = new OutgoingAmqp(getConfigVar)
-  incoming = new IncomingAmqp()
+  incoming = new IncomingAmqp(getConfigVar)
   listener = new ListenerAmqp()
   logout = new LogoutAmqp(getConfigVar)
   reload = new ReloadAmqp(getConfigVar)
