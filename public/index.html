@@ -257,10 +257,6 @@
                                 <input type="text" class="form-control" id="rejectCallsWebhook" name="rejectCallsWebhook" placeholder="Estava te ligando...">
                             </div>
                             <div class="col-12 col-md-12 col-lg-6">
-                                <label for="rejectCalls" class="form-label">Mensagem ao Rejeitar Chamadas</label>
-                                <input type="text" class="form-control" id="rejectCalls" name="rejectCalls" placeholder="Deixe em Branco para não Rejeitar ligações automaticamente">
-                            </div>
-                            <div class="col-12 col-md-12 col-lg-6">
                               <label for="connectionType" class="form-label">Tipo de Conexão</label>
                               <select id="connectionType" name="connectionType" class="form-control">
                                 <option value="qrcode" selected>QrCode</option>
@@ -270,6 +266,10 @@
                             <div class="col-12 col-md-12 col-lg-6">
                                 <label for="proxyUrl" class="form-label">Proxy Url (Precisa Reiniciar a Unoapi ao Alterar)</label>
                                 <input type="text" class="form-control" id="proxyUrl" name="proxyUrl" placeholder="Ex: socks5://user:pass@ip/domain:port">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                              <label for="rejectCalls" class="form-label">Mensagem ao Rejeitar Chamadas</label>
+                              <textarea class="form-control" id="rejectCalls" name="rejectCalls" placeholder="Deixe em Branco para não Rejeitar ligações automaticamente" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
                             </div>
                         </div>
                         <div class="row edit-form-row">
