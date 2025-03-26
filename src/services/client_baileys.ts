@@ -28,7 +28,7 @@ import { Template } from './template'
 import logger from './logger'
 import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
 import { t } from '../i18n'
-import { ClientCloudApi } from './client_cloud_api'
+import { ClientForward } from './client_forward'
 const attempts = 3
 
 interface Delay {
@@ -52,9 +52,9 @@ export const getClientBaileys: getClient = async ({
     logger.info('Creating client baileys %s', phone)
     const config = await getConfig(phone)
     let client
-    if (config.connectionType == 'cloud_api') {
+    if (config.connectionType == 'forward') {
       logger.info('Connecting client cloud api %s', phone)
-      client = new ClientCloudApi(phone, getConfig)
+      client = new ClientForward(phone, getConfig)
     } else {
       client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
       if (config.autoConnect) {

@@ -1,4 +1,3 @@
-import { UNOAPI_SERVER_NAME } from '../defaults'
 import { getStore } from './store'
 import { getStoreFile } from './store_file'
 import { WAMessageKey } from 'baileys'
@@ -6,7 +5,7 @@ import { Level } from 'pino'
 
 export const configs: Map<string, Config> = new Map()
 
-export type connectionType = 'qrcode' | 'pairing_code' | 'cloud_api'
+export type connectionType = 'qrcode' | 'pairing_code' | 'forward'
 
 export interface GetMessageMetadata {
   <T>(message: T): Promise<T>
@@ -28,7 +27,8 @@ export type Webhook = {
   sendNewsletterMessages: boolean
 }
 
-export type WebhookCloudApi = {
+export type webhookForward = {
+  url: string
   phoneNumberId: string,
   token: string
   version: string
@@ -61,7 +61,7 @@ export type Config = {
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
-  webhookCloudApi: WebhookCloudApi | undefined
+  webhookForward: webhookForward | Partial<webhookForward>
   logLevel: Level
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
@@ -120,7 +120,7 @@ export const defaultConfig: Config = {
       sendUpdateMessages: true,
     },
   ],
-  webhookCloudApi: undefined,
+  webhookForward: {},
   getMessageMetadata: getMessageMetadataDefault,
   ignoreDataStore: false,
   sendReactionAsReply: false,
