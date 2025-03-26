@@ -28,6 +28,15 @@ export const getConfigRedis: getConfig = async (phone: string): Promise<Config> 
               webhooks.push(webhook)
             });
             configRedis[key] = webhooks
+          } else if (key === 'webhookForward'){
+            const webhookForward: any[] = []
+            Object.keys(configRedis[key]).forEach((k) => {
+              if (!webhookForward[k]) {
+                webhookForward[k] = config[key][k]
+              }
+            });
+            configRedis[key] = webhookForward
+
           }
           logger.debug('Override env config by redis config in %s: %s => %s', phone, key, JSON.stringify(configRedis[key]));
           config[key] = configRedis[key];
