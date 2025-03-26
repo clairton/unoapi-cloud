@@ -31,7 +31,7 @@ import { LogoutAmqp } from './services/logout_amqp'
 import { Reload } from './services/reload'
 
 const reload = new Reload()
-const incoming: Incoming = new IncomingAmqp()
+const incoming: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
 const sessionStore: SessionStore = new SessionStoreRedis()
 const onNewLogin = onNewLoginGenerateToken(outgoing)
