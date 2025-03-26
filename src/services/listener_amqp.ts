@@ -1,6 +1,6 @@
 import { eventType, Listener } from './listener'
 import { PublishOption, amqpPublish } from '../amqp'
-import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER } from '../defaults'
+import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
 
 const priorities = {
   'qrcode': 5,
@@ -42,6 +42,12 @@ export class ListenerAmqp implements Listener {
     options.priority = options.priority || priorities[type] || 5
     options.delay = options.delay || delays[type](phone) || 0
     options.type = 'direct'
-    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, phone, { messages, type }, options)
+    await amqpPublish(
+      UNOAPI_EXCHANGE_BRIDGE_NAME,
+      `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
+      phone,
+      { messages, type }, 
+      options
+    )
   }
 }
