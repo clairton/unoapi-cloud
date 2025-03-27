@@ -1,14 +1,17 @@
 import { Client, Contact } from './client';
 import { getConfig } from './config';
+import { Listener } from './listener';
 import logger from './logger';
 
 export class ClientForward implements Client {
   private phone: string
+  private listener: Listener
   private getConfig: getConfig
 
-  constructor(phone: string, getConfig: getConfig) {
+  constructor(phone: string, getConfig: getConfig, listener: Listener) {
     this.phone = phone
     this.getConfig = getConfig
+    this.listener = listener
   }
 
   public async send(payload: any, _options: any) {
@@ -39,16 +42,21 @@ export class ClientForward implements Client {
     }
   }
 
+  public async connect(_time: number) {
+    const message = {
+      message: {
+        conversation: 'Starting unoapi forwarder......'
+      }
+    }
+    return this.listener.process(this.phone, [message] , 'status')
+  }
+
   public getMessageMetadata<T>(_message: T): Promise<T> {
     throw new Error('ClientCloudApi not getMessageMetadata')
   }
 
   public contacts(_numbers: string[]): Promise<Contact[]> {
     throw new Error('ClientCloudApi not contacts')
-  }
-
-  public async connect(_time: number) {
-    throw 'ClientCloudApi not connect'
   }
 
   public async disconnect() {

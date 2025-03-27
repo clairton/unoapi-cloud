@@ -53,17 +53,18 @@ export const getClientBaileys: getClient = async ({
     const config = await getConfig(phone)
     let client
     if (config.connectionType == 'forward') {
-      logger.info('Connecting client cloud api %s', phone)
-      client = new ClientForward(phone, getConfig)
+      logger.info('Connecting client forward %s', phone)
+      client = new ClientForward(phone, getConfig, listener)
     } else {
+      logger.info('Connecting client baileys %s', phone)
       client = new ClientBaileys(phone, listener, getConfig, onNewLogin)
-      if (config.autoConnect) {
-        logger.info('Connecting client baileys %s', phone)
-        await client.connect(1)
-        logger.info('Created and connected client baileys %s', phone)
-      } else {
-        logger.info('Config client baileys to not auto connect %s', phone)
-      }
+    }
+    if (config.autoConnect) {
+      logger.info('Connecting client %s', phone)
+      await client.connect(1)
+      logger.info('Created and connected client %s', phone)
+    } else {
+      logger.info('Config client to not auto connect %s', phone)
     }
     clients.set(phone, client)
   } else {

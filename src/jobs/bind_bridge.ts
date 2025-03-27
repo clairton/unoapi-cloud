@@ -40,8 +40,8 @@ const processeds = new Map<string, boolean>()
 export class BindBridgeJob {
   async consume(server: string, { routingKey }: { routingKey: string }) {
     const config = await getConfig(routingKey)
-    if (config.provider !== 'baileys') {
-      logger.info(`Ignore bing brigde routing key ${routingKey} is not provider baileys...`)
+    if (config.provider && !['forwarder', 'baileys'].includes(config.provider)) {
+      logger.info(`Ignore connecting routingKey ${routingKey} provider ${config.provider}...`)
       return;
     }
     if (config.server !== UNOAPI_SERVER_NAME) {

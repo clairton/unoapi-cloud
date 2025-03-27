@@ -21,8 +21,8 @@ export const autoConnect = async (
       const phone = phones[i]
       try {
         const config = await getConfig(phone)
-        if (config.provider !== 'baileys') {
-          logger.info(`Ignore connecting phone ${phone} is not provider baileys...`)
+        if (config.provider && !['forwarder', 'baileys'].includes(config.provider)) {
+          logger.info(`Ignore connecting phone ${phone} provider ${config.provider}...`)
           continue;
         }
         if (config.server !== UNOAPI_SERVER_NAME) {

@@ -13,9 +13,7 @@ import {
   CONSUMER_TIMEOUT_MS,
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BROKER_NAME,
-  UNOAPI_EXCHANGE_BRIDGE_NAME,
-  UNOAPI_QUEUE_RELOAD,
-  UNOAPI_QUEUE_LOGOUT,
+  UNOAPI_EXCHANGE_BRIDGE_NAME
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
