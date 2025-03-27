@@ -139,9 +139,10 @@ export class ClientBaileys implements Client {
   private onWebhookError = async (error: any) => {
     const { sessionStore } = this.store!
     if (!this.config.throwWebhookError && error.name === 'FetchError' && (await sessionStore.isStatusOnline(this.phone))) {
-      return this.send(
+      return this.sendMessage(
         phoneNumberToJid(this.phone),
-        { text: `Error on send message to webhook: ${error.message}`}
+        { text: `Error on send message to webhook: ${error.message}`},
+        {}
       )
     }
     if (this.config.throwWebhookError) {
