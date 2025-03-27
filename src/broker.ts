@@ -38,7 +38,7 @@ const reload = new Reload()
 const reloadJob = new ReloadJob(reload)
 const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
-const outgingJob = new OutgoingJob(outgoingCloudApi)
+const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
 const webhookerJob = new WebhookerJob(outgoingCloudApi)
 
 const startBroker = async () => {

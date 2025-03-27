@@ -38,7 +38,7 @@ export class IncomingJob {
     const timestamp = Math.floor(new Date().getTime() / 1000).toString()
     // const retries: number = a.retries ? a.retries + 1 : 1
     const response = await this.incoming.send(phone, payload, options)
-    logger.debug('Baileys response %s -> %s', phone, JSON.stringify(response))
+    logger.debug('%s response %s -> %s', config.provider, phone, JSON.stringify(response))
     const channelNumber = phone.replace('+', '')
     logger.debug('Compare to enqueue to commander %s == %s', channelNumber, payload?.to)
     if (channelNumber == payload?.to) {
@@ -48,11 +48,11 @@ export class IncomingJob {
     const { ok, error } = response
     const optionsOutgoing: Partial<PublishOption>  = {}
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {
-      const idBaileys: string = ok.messages[0].id
-      logger.debug('Baileys id %s to Unoapi id %s', idBaileys, idUno)
+      const idProvider: string = ok.messages[0].id
+      logger.debug('%s id %s to Unoapi id %s', config.provider, idProvider, idUno)
       const { dataStore } = await config.getStore(phone, config)
-      await dataStore.setUnoId(idBaileys, idUno)
-      const key = await dataStore.loadKey(idBaileys)
+      await dataStore.setUnoId(idProvider, idUno)
+      const key = await dataStore.loadKey(idProvider)
       if (key) {
         dataStore.setKey(idUno, key)
       }

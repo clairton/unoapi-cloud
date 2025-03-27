@@ -132,7 +132,7 @@ if (process.env.AMQP_URL) {
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
-  const outgingJob = new OutgoingJob(outgoingCloudApi)
+  const outgingJob = new OutgoingJob(getConfigVar, outgoingCloudApi)
   amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
   logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
   const webhookerJob = new WebhookerJob(outgoingCloudApi)
