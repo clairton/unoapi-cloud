@@ -40,7 +40,7 @@ const processeds = new Map<string, boolean>()
 export class BindBridgeJob {
   async consume(server: string, { routingKey }: { routingKey: string }) {
     const config = await getConfig(routingKey)
-    if (config.provider && !['forwarder', 'baileys'].includes(config.provider)) {
+    if (config.provider && !['forward', 'baileys'].includes(config.provider)) {
       logger.info(`Ignore connecting routingKey ${routingKey} provider ${config.provider}...`)
       return;
     }

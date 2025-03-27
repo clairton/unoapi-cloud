@@ -29,10 +29,6 @@ export const autoConnect = async (
           logger.info(`Ignore connecting phone ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
           continue;
         }
-        if (config.connectionType === 'forward') {
-          logger.info(`Ignore connecting phone ${phone} server ${config.server} is connetion type forward...`)
-          continue;
-        }
         if (await sessionStore.isStatusStandBy(phone)) {
           logger.info(`Session standby ${phone}...`)
           continue;
