@@ -70,7 +70,7 @@ export type Config = {
   sendProfilePicture: boolean
   authToken: string | undefined
   authHeader: string | undefined
-  provider: 'baileys' | undefined
+  provider: 'baileys' | 'forwarder' | undefined
   server:  string | undefined
   connectionType: connectionType
   wavoipToken:  string | undefined
