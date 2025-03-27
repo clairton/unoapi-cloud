@@ -27,9 +27,10 @@ export type Webhook = {
   sendNewsletterMessages: boolean
 }
 
-export type webhookForward = {
+export type WebhookForward = {
   url: string
-  phoneNumberId: string,
+  phoneNumberId: string
+  businessAccountId: string
   token: string
   version: string
   timeoutMs: number
@@ -61,7 +62,7 @@ export type Config = {
   getStore: getStore
   baseStore: string
   webhooks: Webhook[]
-  webhookForward: webhookForward | Partial<webhookForward>
+  webhookForward: WebhookForward | Partial<WebhookForward>
   logLevel: Level
   getMessageMetadata: GetMessageMetadata
   ignoreDataStore: boolean
