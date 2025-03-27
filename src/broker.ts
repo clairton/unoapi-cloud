@@ -6,7 +6,6 @@ import {
   UNOAPI_SERVER_NAME,
   UNOAPI_QUEUE_MEDIA,
   UNOAPI_QUEUE_OUTGOING,
-  UNOAPI_QUEUE_WEBHOOKER,
   UNOAPI_QUEUE_NOTIFICATION,
   UNOAPI_QUEUE_OUTGOING_PREFETCH,
   UNOAPI_QUEUE_BLACKLIST_ADD,
@@ -24,7 +23,6 @@ import { ReloadJob } from './jobs/reload'
 import { MediaJob } from './jobs/media'
 import { Reload } from './services/reload'
 import { OutgoingJob } from './jobs/outgoing'
-import { WebhookerJob } from './jobs/webhooker'
 import { IncomingAmqp } from './services/incoming_amqp'
 import { Incoming } from './services/incoming'
 import { Outgoing } from './services/outgoing'
@@ -39,7 +37,6 @@ const reloadJob = new ReloadJob(reload)
 const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
-const webhookerJob = new WebhookerJob(outgoingCloudApi)
 
 const startBroker = async () => {
   await startRedis()
@@ -60,9 +57,6 @@ const startBroker = async () => {
 
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
-
-  logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
 
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)

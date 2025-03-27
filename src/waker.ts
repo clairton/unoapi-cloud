@@ -2,13 +2,11 @@ import dotenv from 'dotenv'
 dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
 
 import {
-  AMQP_URL,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
   UNOAPI_EXCHANGE_BROKER_NAME,
   UNOAPI_QUEUE_INCOMING,
   UNOAPI_QUEUE_LISTENER,
   UNOAPI_QUEUE_OUTGOING,
-  UNOAPI_QUEUE_WEBHOOKER,
 } from './defaults'
 import { Channel, ConsumeMessage } from 'amqplib'
 
@@ -17,7 +15,7 @@ import { queueDeadName, amqpConnect, amqpPublish, extractRoutingKeyFromBindingKe
 
 logger.info('Starting with waker...')
 
-const brokerQueues = [UNOAPI_QUEUE_WEBHOOKER, UNOAPI_QUEUE_OUTGOING]
+const brokerQueues = [UNOAPI_QUEUE_OUTGOING]
 const bridgeQueues = [UNOAPI_QUEUE_LISTENER, UNOAPI_QUEUE_INCOMING]
 
 const queues = bridgeQueues.concat(brokerQueues)

@@ -15,7 +15,6 @@ import {
   UNOAPI_QUEUE_OUTGOING,
   UNOAPI_QUEUE_OUTGOING_PREFETCH,
   UNOAPI_QUEUE_RELOAD,
-  UNOAPI_QUEUE_WEBHOOKER,
   UNOAPI_SERVER_NAME,
 } from './defaults'
 
@@ -72,7 +71,6 @@ import { BindBridgeJob } from './jobs/bind_bridge'
 import atbl from './jobs/add_to_blacklist'
 import { MediaJob } from './jobs/media'
 import { OutgoingJob } from './jobs/outgoing'
-import { WebhookerJob } from './jobs/webhooker'
 import { NotificationJob } from './jobs/notification'
 
 const broadcast: Broadcast = new Broadcast()
@@ -132,11 +130,8 @@ if (process.env.AMQP_URL) {
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
-  const outgingJob = new OutgoingJob(getConfigVar, outgoingCloudApi)
-  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
-  logger.info('Starting webhooker consumer %s', UNOAPI_SERVER_NAME)
-  const webhookerJob = new WebhookerJob(outgoingCloudApi)
-  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOKER, '*', webhookerJob.consume.bind(webhookerJob), { notifyFailedMessages, prefetch })
+  const outgoinJob = new OutgoingJob(getConfigVar, outgoingCloudApi)
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgoinJob.consume.bind(outgoinJob), { notifyFailedMessages, prefetch })
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
     const notificationJob = new NotificationJob(incoming)

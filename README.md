@@ -319,7 +319,7 @@ Visit `http://localhost:9876/ping` wil be render a "pong!"
   - choose s3 when set STORAGE_ envs, if not use file system
 
 `yarn waker` 
-  - move all messages in dead queues(listener, incoming, outgoing, webhooker), to process retry
+  - move all messages in dead queues(listener, incoming, outgoing), to process retry
 
 
 ## Config Options
