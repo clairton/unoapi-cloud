@@ -1,5 +1,5 @@
 import { MessageFilter } from './message_filter'
-import { getConfig, defaultConfig, Config, configs, connectionType, webhookForward } from './config'
+import { getConfig, defaultConfig, Config, configs, connectionType } from './config'
 import logger from './logger'
 import { Level } from 'pino'
 
@@ -49,6 +49,7 @@ import {
   WEBHOOK_FORWARD_PHONE_NUMBER_ID,
   WEBHOOK_FORWARD_TOKEN,
   WEBHOOK_FORWARD_TIMEOUT_MS,
+  WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -100,6 +101,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhookForward.url = WEBHOOK_FORWARD_URL
     config.webhookForward.version = WEBHOOK_FORWARD_VERSION
     config.webhookForward.phoneNumberId = WEBHOOK_FORWARD_PHONE_NUMBER_ID
+    config.webhookForward.businessAccountId = WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID
     config.webhookForward.token = WEBHOOK_FORWARD_TOKEN
     config.webhookForward.version = WEBHOOK_FORWARD_VERSION
     config.webhookForward.timeoutMs = WEBHOOK_FORWARD_TIMEOUT_MS
