@@ -355,6 +355,10 @@ export const extractDestinyPhone = (payload: object) => {
         data.entry[0].changes[0].value.statuses
         && data.entry[0].changes[0].value.statuses[0]
         && data.entry[0].changes[0].value.statuses[0].recipient_id?.replace('+', '')
+      ) || (
+        data.entry[0].changes[0].value.messsages
+        && data.entry[0].changes[0].value.messsages[0]
+        && data.entry[0].changes[0].value.messsages[0].from?.replace('+', '')
       )
     )
   )
