@@ -71,6 +71,9 @@ export class OutgoingJob {
       const config = await this.getConfig(phone)
       if (config.provider == 'forwarder') {
         const store = await config.getStore(phone, config)
+
+        payload.entry[0].changes[0].value.metadata.phone_number_id = phone
+        
         const { dataStore } = store
         if (isUpdateMessage(payload)) {
           payload.entry[0].changes[0].value.statuses = await Promise.all(
