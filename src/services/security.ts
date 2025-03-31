@@ -12,6 +12,11 @@ const security = async (req: Request, res: Response, next: NextFunction) => {
     if (!httpAuthToken) {
       const message = `Please set Header ${UNOAPI_HEADER_NAME} query params or Authorization header`
       logger.warn(message)
+      logger.debug('method %s', req.method)
+      logger.debug('headers %s', JSON.stringify(req.headers))
+      logger.debug('params %s', JSON.stringify(req.params))
+      logger.debug('body %s', JSON.stringify(req.body))
+      logger.debug('query %s', JSON.stringify(req.query))
       res.status(401).json({
         error: {
           code: 0,
@@ -24,6 +29,11 @@ const security = async (req: Request, res: Response, next: NextFunction) => {
       logger.debug(`Retrieved auth token ${httpAuthToken}`)
       if (httpAuthToken.trim() != config?.authToken?.trim() && httpAuthToken.trim() != UNOAPI_AUTH_TOKEN) {
         const message = `Invalid token value ${httpAuthToken}`
+        logger.debug('method %s', req.method)
+        logger.debug('headers %s', JSON.stringify(req.headers))
+        logger.debug('params %s', JSON.stringify(req.params))
+        logger.debug('body %s', JSON.stringify(req.body))
+        logger.debug('query %s', JSON.stringify(req.query))
         logger.warn(message)
         res.status(403).json({
           error: {
@@ -47,6 +57,7 @@ const getAuthHeaderToken = (req: Request) => {
     req.headers[headerName] ||
     req.headers['authorization'] ||
     req.query['access_token'] ||
+    req.query['hub.verify_token'] ||
     req.headers['Authorization'] ||
     req.body['auth_token'] ||
     req.body['authToken'] ||
