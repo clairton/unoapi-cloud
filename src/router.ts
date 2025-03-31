@@ -57,12 +57,12 @@ export const router = (
 
 
   // Webhook for forward connection
-  router.post('/webhooks/whatsapp/:phone', middleware, webhookController.whatsapp.bind(webhookController))
+  router.post('/webhooks/whatsapp/:phone', webhookController.whatsapp.bind(webhookController))
   router.get('/webhooks/whatsapp/:phone', middleware, webhookController.whatsappVerify.bind(webhookController))
 
   // for default webhook
   const webhookFakeController = new WebhookFakeController()
-  router.post('/webhooks/fake/:phone', middleware, webhookFakeController.fake.bind(webhookFakeController))
+  router.post('/webhooks/fake/:phone', webhookFakeController.fake.bind(webhookFakeController))
 
   //Routes
   router.get('/', indexController.root)
