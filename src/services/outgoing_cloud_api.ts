@@ -65,7 +65,8 @@ export class OutgoingCloudApi implements Outgoing {
       }
       response = await fetch(url, options)
     } catch (error) {
-      logger.error(error, `Error on send to url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
+      logger.error('Error on send to url %s with headers %s and body %s', url, JSON.stringify(headers), body)
+      logger.error(error)
       throw error
     }
     logger.debug('Response: %s', response?.status)
