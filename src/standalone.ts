@@ -124,7 +124,7 @@ if (process.env.AMQP_URL) {
   amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`, '*', logoutJob.consume.bind(logoutJob), { type: 'direct' })
   logger.info('Starting media consumer')
   const mediaJob = new MediaJob(getConfigVar)
-  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '', mediaJob.consume.bind(mediaJob))
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob))
   const prefetch = UNOAPI_QUEUE_OUTGOING_PREFETCH
   logger.info('Binding queues consumer for server %s', UNOAPI_SERVER_NAME)
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES

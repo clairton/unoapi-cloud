@@ -64,7 +64,13 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     const abortSignal = AbortSignal.timeout(s3Config.timeoutMs)
     await s3Client.send(new PutObjectCommand(putParams), { abortSignal })
     logger.debug(`Uploaded file ${fileName} to bucket ${bucket}!`)
-    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000 })
+    await amqpPublish(
+      UNOAPI_EXCHANGE_BROKER_NAME,
+      UNOAPI_QUEUE_MEDIA,
+      phone,
+      { fileName: fileName },
+      { delay: DATA_TTL * 1000, type: 'topic' }
+    )
     return true
   }
 

@@ -204,7 +204,7 @@ export const amqpPublish = async (
 ) => {
   validateRoutingKey(routingKey)
   const channel = await amqpGetChannel()
-  logger.debug('Publishing at exchange %s, with queue: %s and routing key', exchange, queue, routingKey)
+  logger.debug('Publishing at exchange %s, with queue: %s and routing key %s', exchange, queue, routingKey)
   await amqpGetExchange(exchange, options.type!, options.prefetch!)
   const { queueMain, queueDead, queueDelayed } = await amqpGetQueue(exchange, queue, routingKey, options)
   const { delay, dead, maxRetries, countRetries } = options

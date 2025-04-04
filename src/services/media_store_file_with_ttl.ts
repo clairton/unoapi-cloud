@@ -25,7 +25,13 @@ const mediaStoreFileWithTTL = (phone: string, config: Config, getDataStore: getD
     const i = await saveMedia(waMessage)
     if (i) {
       const fileName = mediaStore.getFileName(phone, waMessage)
-      await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000 })
+      await amqpPublish(
+        UNOAPI_EXCHANGE_BROKER_NAME,
+        UNOAPI_QUEUE_MEDIA,
+        phone,
+        { fileName: fileName },
+        { delay: DATA_TTL * 1000, type: 'topic' }
+      )
     }
     return i
   }
