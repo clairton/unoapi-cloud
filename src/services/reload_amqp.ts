@@ -17,8 +17,7 @@ export class ReloadAmqp extends Reload {
       UNOAPI_EXCHANGE_BROKER_NAME,
       UNOAPI_QUEUE_RELOAD,
       phone,
-      { phone, ...params },
-      { type: 'direct' }
+      { phone, ...params }
     )
     await amqpPublish(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
