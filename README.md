@@ -153,12 +153,13 @@ To send media
 curl -i -X POST \
 http://localhost:9876/v15.0/5549988290955/messages \
 -H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
 -d '{
   "messaging_product": "whatsapp",
   "to": "5549988290955",
   "type": "image",
   "image": {
-    "link" : "https://github.githubassets.com/favicons/favicon-dark.png"
+    "link" : "https://github.githubassets.com/favicons/favicon.png"
   }
 }'
 ```

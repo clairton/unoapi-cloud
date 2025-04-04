@@ -1,4 +1,4 @@
-import { GroupMetadata, makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from 'baileys'
+import { Contact, GroupMetadata, makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from 'baileys'
 import { Config } from './config'
 
 export const dataStores: Map<string, DataStore> = new Map()
@@ -29,6 +29,8 @@ export type DataStore = ReturnType<typeof makeInMemoryStore> & {
   loadImageUrl: (jid: string, sock: Partial<WASocket>) => Promise<string | undefined>
   setGroupMetada: (jid: string, data: GroupMetadata) => Promise<void>
   getGroupMetada: (jid: string) => Promise<GroupMetadata | undefined>
+  setContact: (contact: Partial<Contact>) => Promise<void>
+  getContact: (id: string) => Promise<Contact | undefined>
   loadGroupMetada: (jid: string, sock: Partial<WASocket>) => Promise<GroupMetadata | undefined>
   loadUnoId: (id: string) => Promise<string | undefined>
   setStatus: (id: string, status: MessageStatus) => Promise<void>
