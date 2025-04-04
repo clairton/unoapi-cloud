@@ -204,6 +204,7 @@ export const amqpPublish = async (
 ) => {
   validateRoutingKey(routingKey)
   const channel = await amqpGetChannel()
+  logger.debug('Publishing at exchange %s, with queue: %s and routing key', exchange, queue, routingKey)
   await amqpGetExchange(exchange, options.type!, options.prefetch!)
   const { queueMain, queueDead, queueDelayed } = await amqpGetQueue(exchange, queue, routingKey, options)
   const { delay, dead, maxRetries, countRetries } = options
@@ -251,6 +252,7 @@ export const amqpConsume = async (
     type: 'topic'
   },
 ) => {
+  logger.debug('Configurate to consume exchange %s, queue %s and routing key %s', exchange, queue, routingKey)
   validateRoutingKey(routingKey)
   await amqpGetExchange(exchange, options.type!, options.prefetch!)
   const channel = await amqpGetChannel()
@@ -299,10 +301,10 @@ export const amqpConsume = async (
           )
           logger.info('Sent error to whatsapp!')
         }
-        await amqpPublish(exchange, queue, routingKey, data, { dead: true })
+        await amqpPublish(exchange, queue, routingKey, data, { ...options, dead: true })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
-        await amqpPublish(exchange, queue, routingKey, data, { delay: 60000, maxRetries, countRetries })
+        await amqpPublish(exchange, queue, routingKey, data, { ...options, delay: 60000, maxRetries, countRetries })
       }
       await channel.ack(payload)
     }
