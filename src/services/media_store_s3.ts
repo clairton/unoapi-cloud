@@ -26,6 +26,7 @@ export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, ge
   }
   return mediaStores.get(phone) as MediaStore
 }
+
 export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   const PROFILE_PICTURE_FOLDER = 'profile-pictures'
   const profilePictureFileName = (phone) => `${phone}.jpg`
@@ -138,6 +139,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       }
     }
   }
+ 
   mediaStore.getProfilePictureUrl = async (_baseUrl: string, jid: string) => {
     const phoneNumber = jidToPhoneNumberIfUser(jid)
     const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
@@ -151,6 +153,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       }
     }
   }
+
   mediaStore.saveProfilePicture = async (contact: Partial<Contact>) => {
     const phoneNumber = jidToPhoneNumberIfUser(contact.id)
     logger.debug('Received profile picture s3 %s with %s...', phoneNumber, contact.imgUrl)

@@ -9,7 +9,7 @@ import { getDataStore } from './data_store'
 import { Config } from './config'
 import logger from './logger'
 import { DATA_URL_TTL, FETCH_TIMEOUT_MS } from '../defaults'
-import fetch, { Response as FetchResponse } from 'node-fetch'
+import fetch, { Response as FetchResponse, RequestInit } from 'node-fetch'
 
 export const MEDIA_DIR = '/medias'
 
@@ -40,6 +40,47 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       return `${phone}/${key.id}.${extension}`
     }
     throw 'Not possible get file name'
+  }
+
+  mediaStore.getFileNameForwarder = (phone: string, message: any) => {
+    // "type"=>"audio", "audio"=>{"mime_type"=>"audio/ogg; codecs=opus", "sha256"=>"HgQo1XoLPSCGlIQYu7eukl4ty1yIu2kAWvoKgqLCnu4=", "id"=>"642476532090165", "voice"=>true}
+    const extension = mime.extension(message[message.type].mime_type)
+    return `${phone}/${message[message.type].id}.${extension}`
+  }
+
+  mediaStore.saveMediaForwarder = async (message: any) => {
+    const fileName = mediaStore.getFileNameForwarder(phone, message)
+    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${message[message.type].id}`
+    logger.debug('message_templates forward get templates in url %s', url)
+    const headers = {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Authorization': `Bearer ${config.webhookForward.token}`
+    }
+    const options: RequestInit = { method: 'GET', headers }
+    if (config.webhookForward?.timeoutMs) {
+      options.signal = AbortSignal.timeout(config.webhookForward?.timeoutMs)
+    }
+    let response: FetchResponse
+    try {
+      response = await fetch(url, options)
+    } catch (error) {
+      logger.error(`Error on get templantes to url ${url}`)
+      logger.error(error)
+      throw error
+    }
+    if (!response?.ok) {
+      throw await response.text()
+    }
+    const json = await response.json()
+    response = await fetch(json['url'], options)
+    if (!response?.ok) {
+      throw await response.text()
+    }
+    const arrayBuffer = await response.arrayBuffer()
+    const buffer = toBuffer(arrayBuffer)
+    await mediaStore.saveMediaBuffer(fileName, buffer)
+    message[message.type].id = `${phone}/${message[message.type].id}`
+    return message
   }
 
   mediaStore.getFileUrl = async (fileName: string, _expiresIn = DATA_URL_TTL) => {

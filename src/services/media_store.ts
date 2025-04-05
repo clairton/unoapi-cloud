@@ -13,6 +13,8 @@ export type MediaStore = {
   type: string
   getMedia: (baseUrl: string, mediaId: string) => Promise<object | void>
   saveMedia: (waMessage: WAMessage) => Promise<WAMessage>
+  saveMediaForwarder: <T>(message: T) => Promise<T>
+  getFileNameForwarder: <T>(phone: string, message: T) => string
   saveMediaBuffer: (fileName: string, buffer: Buffer) => Promise<boolean>
   removeMedia: (fileName: string) => Promise<void>
   downloadMedia: (resp: Response, fileName: string) => Promise<void>
