@@ -2,6 +2,7 @@ import { Contact, proto, WAMessage } from 'baileys'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'
+import { Readable } from 'stream'
 
 export const mediaStores: Map<string, MediaStore> = new Map()
 
@@ -18,6 +19,7 @@ export type MediaStore = {
   saveMediaBuffer: (fileName: string, buffer: Buffer) => Promise<boolean>
   removeMedia: (fileName: string) => Promise<void>
   downloadMedia: (resp: Response, fileName: string) => Promise<void>
+  downloadMediaStream: (fileName: string) => Promise<Readable | undefined>
   getFileName: (phone: string, waMessage: proto.IWebMessageInfo) => string
   getFileUrl: (fileName: string, expiresIn: number) => Promise<string>
   getDownloadUrl: (baseUrl: string, fileName: string) => Promise<string>

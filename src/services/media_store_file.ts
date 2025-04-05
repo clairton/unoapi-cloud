@@ -1,7 +1,7 @@
 import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
 import { getBinMessage, getMessageType, jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { writeFile } from 'fs/promises'
-import { existsSync, mkdirSync, rmSync } from 'fs'
+import { existsSync, mkdirSync, rmSync, createReadStream } from 'fs'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'
 import mime from 'mime-types'
 import { Response } from 'express'
@@ -104,9 +104,6 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
     await mediaStore.saveMediaBuffer(fileName, buffer)
-    if (binMessage?.messageType && waMessage.message) {
-      waMessage.message[binMessage?.messageType]['url'] = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
-    }
     return waMessage
   }
 
@@ -127,9 +124,16 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   }
 
   mediaStore.downloadMedia = async (res: Response, file: string) => {
-    const store = await getDataStore(phone, config)
+    const stream = await mediaStore.downloadMediaStream(file)
+    if (!stream) {
+      logger.error('Not retrieve the media: %', file)
+      res.sendStatus(404)
+      return
+    }
     const mediaId = file.split('.')[0]
-    let fileName = ''
+    const store = await getDataStore(phone, config)
+    let fileName = file
+    let contentType = mime.lookup(file)
     if (mediaId) {
       const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
       logger.debug('key %s for %s', JSON.stringify(key), mediaId)
@@ -144,13 +148,22 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const binMessage: any = message.message && messageType && message.message[messageType]
             fileName = binMessage.fileName
+            contentType = mime.lookup(fileName)
           }
         }
       }
     }
-    const filePath = await mediaStore.getFileUrl(`${phone}/${file}`, DATA_URL_TTL)
-    res.contentType(mime.lookup(filePath) || '')
-    res.download(filePath, fileName)
+    res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(fileName)}"`)
+    if (contentType) {
+      res.contentType(contentType)
+    }
+    logger.debug('file %s contentType %s', fileName, contentType)
+    stream.pipe(res)
+  }
+
+  mediaStore.downloadMediaStream = async (file: string) => {
+    const filePath = await mediaStore.getFileUrl(file, DATA_URL_TTL)
+    return createReadStream(filePath)
   }
 
   mediaStore.getMedia = async (baseUrl: string, mediaId: string) => {
