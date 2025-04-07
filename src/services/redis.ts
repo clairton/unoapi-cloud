@@ -443,11 +443,13 @@ export const setGroup = async (phone: string, jid: string, data: GroupMetadata) 
 
 export const setMedia = async (phone: string, id: string, payload: any) => {
   const key = mediaKey(phone, id)
+  logger.debug('setMedia with key %s', key)
   return redisSetAndExpire(key, JSON.stringify(payload), DATA_TTL)
 }
 
 export const getMedia = async (phone: string, id: string) => {
   const key = mediaKey(phone, id)
+  logger.debug('getMedia with key %s', key)
   const payload = await redisGet(key)
   return payload ? JSON.parse(payload) : undefined
 }
