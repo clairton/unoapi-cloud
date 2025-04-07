@@ -36,9 +36,9 @@ export class MediaController {
     logger.debug('media download headers %s', JSON.stringify(req.headers))
     logger.debug('media download params %s', JSON.stringify(req.params))
     logger.debug('media download body %s', JSON.stringify(req.body))
-    const { file, phone } = req.params
+    const { phone, file } = req.params
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
-    store.mediaStore.downloadMedia(res, file)
+    return store.mediaStore.downloadMedia(res, `${phone}/${file}`)
   }
 }

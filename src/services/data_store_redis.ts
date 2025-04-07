@@ -22,6 +22,8 @@ import {
   getGroup,
   delConfig,
   setTemplates,
+  setMedia,
+  getMedia,
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -43,6 +45,7 @@ export const getDataStoreRedis: getDataStore = async (phone: string, config: Con
 const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const store: DataStore = await getDataStoreFile(phone, config)
+  store.type = 'redis'
   store.loadKey = async (id: string) => {
     const key = await getKey(phone, id)
     const mkey: WAMessageKey = key as WAMessageKey
@@ -74,6 +77,8 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   }
   store.loadUnoId = async (id: string) => await getUnoId(phone, id)
   store.setUnoId = async (id: string, unoId: string) => setUnoId(phone, id, unoId)
+  store.loadMediaPayload = async (id: string) => getMedia(phone, id)
+  store.setMediaPayload = async (id: string, payload: string) => setMedia(phone, id, payload)
 
   store.getJid = async (phoneOrJid: string) => {
     return getJid(phone, phoneOrJid)

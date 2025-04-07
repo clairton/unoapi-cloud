@@ -147,6 +147,10 @@ const messageStatusKey = (phone: string, id: string) => {
   return `${BASE_KEY}message-status:${phone}:${id}`
 }
 
+const mediaKey = (phone: string, id: string) => {
+  return `${BASE_KEY}media:${phone}:${id}`
+}
+
 const bulkMessageKeyBase = (phone: string, bulkId: string) => {
   return `${BASE_KEY}bulk-message:${phone}:${bulkId}`
 }
@@ -435,6 +439,17 @@ export const getGroup = async (phone: string, jid: string) => {
 export const setGroup = async (phone: string, jid: string, data: GroupMetadata) => {
   const key = groupKey(phone, jid)
   return redisSetAndExpire(key, JSON.stringify(data), DATA_TTL)
+}
+
+export const setMedia = async (phone: string, id: string, payload: any) => {
+  const key = mediaKey(phone, id)
+  return redisSetAndExpire(key, JSON.stringify(payload), DATA_TTL)
+}
+
+export const getMedia = async (phone: string, id: string) => {
+  const key = mediaKey(phone, id)
+  const payload = await redisGet(key)
+  return payload ? JSON.parse(payload) : undefined
 }
 
 export const getUnoId = async (phone: string, idBaileys: string) => {

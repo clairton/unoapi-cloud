@@ -21,9 +21,12 @@ export type MessageStatus = 'scheduled'
       | 'deleted'
 
 export type DataStore = ReturnType<typeof makeInMemoryStore> & {
+  type: string
   loadKey: (id: string) => Promise<WAMessageKey | undefined>
   setKey: (id: string, key: WAMessageKey) => Promise<void>
   setUnoId: (id: string, unoId: string) => Promise<void>
+  setMediaPayload: (id: string, payload: any) => Promise<void>
+  loadMediaPayload: (id: string) => Promise<any>
   setImageUrl: (jid: string, url: string) => Promise<void>
   getImageUrl: (jid: string) => Promise<string | undefined>
   loadImageUrl: (jid: string, sock: Partial<WASocket>) => Promise<string | undefined>

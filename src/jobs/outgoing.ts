@@ -93,11 +93,6 @@ export class OutgoingJob {
                 const { mediaStore } = store
                 message = await mediaStore.saveMediaForwarder(message)
               }
-              // const currentId = message.id
-              // const unoId = await dataStore.loadUnoId(currentId)
-              // if (unoId) {
-              //   message.id = unoId
-              // }
               if (message.context && message.context.id) {
                 const unoId = await dataStore.loadUnoId(message.context.id)
                 if (unoId) {

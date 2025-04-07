@@ -53,14 +53,17 @@ const deepMerge = (obj1, obj2) => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> => {
+
   const keys: Map<string, proto.IMessageKey> = new Map()
   const jids: NodeCache = new NodeCache()
   const ids: Map<string, string> = new Map()
   const statuses: Map<string, string> = new Map()
+  const medias: Map<string, string> = new Map()
   const groups: NodeCache = new NodeCache()
   const baileysInMemoryStoreConfig: BaileysInMemoryStoreConfig = { logger }
   const store = makeInMemoryStore(baileysInMemoryStoreConfig)
   const dataStore = store as DataStore
+  dataStore.type = 'file'
   const { bind, toJSON, fromJSON } = store
   store.toJSON = () => {
     return {
@@ -70,6 +73,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       ids,
       statuses,
       groups,
+      medias,
     }
   }
   store.fromJSON = (json) => {
@@ -222,6 +226,13 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       }
     }
     return jid
+  }
+  dataStore.loadMediaPayload = async (id: string) => {
+    const string = medias.get(id)
+    return string ? JSON.parse(string) : undefined
+  }
+  dataStore.setMediaPayload = async (id: string, payload: string) => {
+    medias.set(id, JSON.stringify(payload))
   }
   dataStore.setJid = async (phoneOrJid: string, jid: string) => {
     jids.set(phoneOrJid, jid, HOUR)

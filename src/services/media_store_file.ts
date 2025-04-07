@@ -1,5 +1,5 @@
 import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
-import { getBinMessage, getMessageType, jidToPhoneNumberIfUser, toBuffer } from './transformer'
+import { getBinMessage, jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync, createReadStream } from 'fs'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'
@@ -79,7 +79,19 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     const arrayBuffer = await response.arrayBuffer()
     const buffer = toBuffer(arrayBuffer)
     await mediaStore.saveMediaBuffer(fileName, buffer)
-    message[message.type].id = `${phone}/${message[message.type].id}`
+    const mediaId = `${phone}/${message[message.type].id}`
+    // "type"=>"audio", "audio"=>{"mime_type"=>"audio/ogg; codecs=opus", "sha256"=>"HgQo1XoLPSCGlIQYu7eukl4ty1yIu2kAWvoKgqLCnu4=", "id"=>"642476532090165", "voice"=>true}}]
+    const payload = {
+      messaging_product: 'whatsapp',
+      mime_type: message[message.type].mime_type,
+      sha256: message[message.type].sha256,
+      // file_size: binMessage?.message?.fileLength,
+      id: mediaId,
+      file_name: fileName,
+    }
+    const dataStore = await getDataStore(phone, config)
+    await dataStore.setMediaPayload(message[message.type].id, payload)
+    message[message.type].id = mediaId
     return message
   }
 
@@ -103,7 +115,22 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
     const fileName = mediaStore.getFileName(phone, waMessage)
+
+    logger.debug('Saving %s...', fileName)
     await mediaStore.saveMediaBuffer(fileName, buffer)
+    logger.debug('Saved %s!', fileName)
+    const mediaId = waMessage.key.id
+    const mimeType = mime.lookup(fileName)
+    const payload = {
+      messaging_product: 'whatsapp',
+      mime_type: mimeType,
+      sha256: binMessage?.message?.fileSha256,
+      file_size: binMessage?.message?.fileLength,
+      id: `${phone}/${mediaId}`,
+      file_name: fileName,
+    }
+    const dataStore = await getDataStore(phone, config)
+    await dataStore.setMediaPayload(mediaId!, payload)
     return waMessage
   }
 
@@ -130,34 +157,15 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       res.sendStatus(404)
       return
     }
-    const mediaId = file.split('.')[0]
-    const store = await getDataStore(phone, config)
-    let fileName = file
-    let contentType = mime.lookup(file)
+    const mediaId = file.split('.')[0].split('/')[1]
     if (mediaId) {
-      const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
-      logger.debug('key %s for %s', JSON.stringify(key), mediaId)
-      if (key) {
-        const { remoteJid, id } = key
-        if (remoteJid && id) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const message: any = await store.loadMessage(remoteJid, id)
-          logger.debug('message %s for %s', JSON.stringify(message), JSON.stringify(key))
-          if (message) {
-            const messageType = getMessageType(message)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const binMessage: any = message.message && messageType && message.message[messageType]
-            fileName = binMessage.fileName
-            contentType = mime.lookup(fileName)
-          }
-        }
+      const dataStore = await getDataStore(phone, config)
+      const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
+      res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(mediaPayload.file_name)}"`)
+      if (mediaPayload.content_type) {
+        res.contentType(mediaPayload.content_type)
       }
     }
-    res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(fileName)}"`)
-    if (contentType) {
-      res.contentType(contentType)
-    }
-    logger.debug('file %s contentType %s', fileName, contentType)
     stream.pipe(res)
   }
 
@@ -167,33 +175,15 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   }
 
   mediaStore.getMedia = async (baseUrl: string, mediaId: string) => {
-    const store = await getDataStore(phone, config)
     if (mediaId) {
-      const key: proto.IMessageKey | undefined = await store.loadKey(mediaId)
-      logger.debug('key %s for %s', JSON.stringify(key), mediaId)
-      if (key) {
-        const { remoteJid, id } = key
-        if (remoteJid && id) {
-          const message: any = await store.loadMessage(remoteJid, id)
-          logger.debug('message %s for %s', JSON.stringify(message), id)
-          if (message) {
-            const binMessage = getBinMessage(message)
-            message.key.id = mediaId
-            const filePath = await mediaStore.getFileName(phone, message)
-            const mimeType = mime.lookup(filePath)
-            const url = await mediaStore.getDownloadUrl(baseUrl, filePath)
-            const payload = {
-              messaging_product: 'whatsapp',
-              url,
-              mime_type: mimeType,
-              sha256: binMessage?.message?.fileSha256,
-              file_size: binMessage?.message?.fileLength,
-              id: `${phone}/${mediaId}`,
-            }
-            return payload
-          }
-        }
+      const dataStore = await getDataStore(phone, config)
+      const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
+      const url = await mediaStore.getDownloadUrl(baseUrl, mediaPayload.file_name)
+      const payload = {
+        ...mediaPayload,
+        url,
       }
+      return payload
     }
   }
 

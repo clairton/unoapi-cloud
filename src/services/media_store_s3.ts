@@ -83,16 +83,14 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
   }
 
   mediaStore.downloadMediaStream = async (file: string) => {
-    const mediaId = file.split('.')[0]
-    if (mediaId) {
-      const params = {
-        Bucket: bucket,
-        Key: file,
-      }
-      logger.debug(`Downloading media ${file}...`)
-      const response = await s3Client.send(new GetObjectCommand(params))
-      return response.Body as Readable
+    const params = {
+      Bucket: bucket,
+      Key: file,
     }
+    logger.debug(`Downloading media ${file}...`)
+    const response = await s3Client.send(new GetObjectCommand(params))
+    logger.debug(`Downloaded media ${file}!`)
+    return response.Body as Readable
   }
  
   mediaStore.getProfilePictureUrl = async (_baseUrl: string, jid: string) => {
