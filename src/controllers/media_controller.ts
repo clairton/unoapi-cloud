@@ -16,18 +16,17 @@ export class MediaController {
     logger.debug('media index headers %s', JSON.stringify(req.headers))
     logger.debug('media index params %s', JSON.stringify(req.params))
     logger.debug('media index body %s', JSON.stringify(req.body))
-    const { media_id: mediaId, phone } = req.params
-    if (mediaId) {
-      const config = await this.getConfig(phone)
-      const store = await config.getStore(phone, config)
-      const mediaResult = await store.mediaStore.getMedia(this.baseUrl, mediaId)
-      if (mediaResult) {
-        logger.debug('media index response %s', JSON.stringify(mediaResult))
-        return res.status(200).json(mediaResult)
-      } else {
-        logger.debug('media index response 404')
-        return res.sendStatus(404)
-      }
+    const { phone, media_id: mediaId } = req.params
+    const config = await this.getConfig(phone)
+    const store = await config.getStore(phone, config)
+    const { mediaStore } = store
+    const mediaResult = await mediaStore.getMedia(this.baseUrl, mediaId)
+    if (mediaResult) {
+      logger.debug('media index response %s', JSON.stringify(mediaResult))
+      return res.status(200).json(mediaResult)
+    } else {
+      logger.debug('media index response 404')
+      return res.sendStatus(404)
     }
   }
 
@@ -39,6 +38,7 @@ export class MediaController {
     const { phone, file } = req.params
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
-    return store.mediaStore.downloadMedia(res, `${phone}/${file}`)
+    const { mediaStore } = store
+    return mediaStore.downloadMedia(res, `${phone}/${file}`)
   }
 }

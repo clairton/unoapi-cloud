@@ -32,26 +32,14 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   const mediaStore: MediaStore = {} as MediaStore
   mediaStore.type = 'file'
 
-  mediaStore.getFileName = (phone: string, waMessage: proto.IWebMessageInfo) => {
-    const { key } = waMessage
-    const binMessage = getBinMessage(waMessage)
-    if (binMessage?.message?.mimetype) {
-      const extension = mime.extension(binMessage?.message?.mimetype)
-      return `${phone}/${key.id}.${extension}`
-    }
-    throw 'Not possible get file name'
-  }
-
-  mediaStore.getFileNameForwarder = (phone: string, message: any) => {
-    // "type"=>"audio", "audio"=>{"mime_type"=>"audio/ogg; codecs=opus", "sha256"=>"HgQo1XoLPSCGlIQYu7eukl4ty1yIu2kAWvoKgqLCnu4=", "id"=>"642476532090165", "voice"=>true}
-    const extension = mime.extension(message[message.type].mime_type)
-    return `${phone}/${message[message.type].id}.${extension}`
+  mediaStore.getFilePath = (phone: string, mediaId: string, mimeType: string) => {
+    const extension = mime.extension(mimeType)
+    return `${phone}/${mediaId}.${extension}`
   }
 
   mediaStore.saveMediaForwarder = async (message: any) => {
-    const fileName = mediaStore.getFileNameForwarder(phone, message)
-    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${message[message.type].id}`
-    logger.debug('message_templates forward get templates in url %s', url)
+    const filePath = mediaStore.getFilePath(phone, message.id, message[message.type].mime_type)
+    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${message.id}`
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
       'Authorization': `Bearer ${config.webhookForward.token}`
@@ -64,7 +52,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     try {
       response = await fetch(url, options)
     } catch (error) {
-      logger.error(`Error on get templantes to url ${url}`)
+      logger.error(`Error on saveMediaForwarder to url ${url}`)
       logger.error(error)
       throw error
     }
@@ -78,8 +66,8 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     }
     const arrayBuffer = await response.arrayBuffer()
     const buffer = toBuffer(arrayBuffer)
-    await mediaStore.saveMediaBuffer(fileName, buffer)
-    const mediaId = `${phone}/${message[message.type].id}`
+    await mediaStore.saveMediaBuffer(filePath, buffer)
+    const mediaId = `${phone}/${message.id}`
     // "type"=>"audio", "audio"=>{"mime_type"=>"audio/ogg; codecs=opus", "sha256"=>"HgQo1XoLPSCGlIQYu7eukl4ty1yIu2kAWvoKgqLCnu4=", "id"=>"642476532090165", "voice"=>true}}]
     const payload = {
       messaging_product: 'whatsapp',
@@ -87,10 +75,10 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       sha256: message[message.type].sha256,
       // file_size: binMessage?.message?.fileLength,
       id: mediaId,
-      file_name: fileName,
+      filename: message[message.type].filename || filePath,
     }
     const dataStore = await getDataStore(phone, config)
-    await dataStore.setMediaPayload(message[message.type].id, payload)
+    await dataStore.setMediaPayload(message.id, payload)
     message[message.type].id = mediaId
     return message
   }
@@ -114,11 +102,10 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     } else {
       buffer = await downloadMediaMessage(waMessage, 'buffer', {})
     }
-    const fileName = mediaStore.getFileName(phone, waMessage)
-
-    logger.debug('Saving %s...', fileName)
+    const fileName = mediaStore.getFilePath(phone, waMessage.key.id!, binMessage?.message?.mimetype)
+    logger.debug('Saving buffer %s...', fileName)
     await mediaStore.saveMediaBuffer(fileName, buffer)
-    logger.debug('Saved %s!', fileName)
+    logger.debug('Saved buffer %s!', fileName)
     const mediaId = waMessage.key.id
     const mimeType = mime.lookup(fileName)
     const payload = {
@@ -127,7 +114,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       sha256: binMessage?.message?.fileSha256,
       file_size: binMessage?.message?.fileLength,
       id: `${phone}/${mediaId}`,
-      file_name: fileName,
+      filename: binMessage?.message?.fileName || fileName,
     }
     const dataStore = await getDataStore(phone, config)
     await dataStore.setMediaPayload(mediaId!, payload)
@@ -161,7 +148,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     if (mediaId) {
       const dataStore = await getDataStore(phone, config)
       const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
-      res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(mediaPayload.file_name)}"`)
+      res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(mediaPayload.filename)}"`)
       if (mediaPayload.content_type) {
         res.contentType(mediaPayload.content_type)
       }
@@ -175,16 +162,15 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   }
 
   mediaStore.getMedia = async (baseUrl: string, mediaId: string) => {
-    if (mediaId) {
-      const dataStore = await getDataStore(phone, config)
-      const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
-      const url = await mediaStore.getDownloadUrl(baseUrl, mediaPayload.file_name)
-      const payload = {
-        ...mediaPayload,
-        url,
-      }
-      return payload
+    const dataStore = await getDataStore(phone, config)
+    const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
+    const filePath = mediaStore.getFilePath(phone, mediaId!, mediaPayload.mime_type!)
+    const url = await mediaStore.getDownloadUrl(baseUrl, filePath)
+    const payload = {
+      ...mediaPayload,
+      url,
     }
+    return payload
   }
 
   mediaStore.getProfilePictureUrl = async (baseUrl: string, jid: string) => {
