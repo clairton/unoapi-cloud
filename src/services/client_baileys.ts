@@ -321,10 +321,10 @@ export class ClientBaileys implements Client {
   }
 
   async subscribe() {
-    this.event('messages.upsert', async (payload: { messages: []; type }) => {
+    this.event('messages.upsert', async (payload: { messages: any[]; type }) => {
       logger.debug('messages.upsert %s', this.phone, JSON.stringify(payload))
       await this.listener.process(this.phone, payload.messages, payload.type)
-      if (this.config.readOnReceipt) {
+      if (this.config.readOnReceipt && payload.messages[0] && !payload.messages[0]?.fromMe) {
         await Promise.all(
           payload.messages
             .filter((message: any) => {
