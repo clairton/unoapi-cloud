@@ -152,7 +152,8 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       res.sendStatus(404)
       return
     }
-    const mediaId = file.split('.')[0].split('/')[1]
+    const withoutExtension = file.replace(/\.[^/.]+$/, '')
+    const mediaId = withoutExtension.split('/')[1]
     if (mediaId) {
       const dataStore = await getDataStore(phone, config)
       const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
