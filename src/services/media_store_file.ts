@@ -157,8 +157,10 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     if (mediaId) {
       const dataStore = await getDataStore(phone, config)
       const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
-      res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(mediaPayload.filename)}"`)
-      if (mediaPayload.content_type) {
+      if (mediaPayload?.filename) {
+        res.setHeader('Content-disposition', `attachment; filename="${encodeURIComponent(mediaPayload.filename)}"`)
+      }
+      if (mediaPayload?.content_type) {
         res.contentType(mediaPayload.content_type)
       }
     }
