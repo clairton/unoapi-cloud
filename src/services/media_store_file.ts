@@ -39,7 +39,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
 
   mediaStore.saveMediaForwarder = async (message: any) => {
     const filePath = mediaStore.getFilePath(phone, message.id, message[message.type].mime_type)
-    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${message.id}`
+    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${ message[message.type].id}`
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
       'Authorization': `Bearer ${config.webhookForward.token}`
@@ -57,11 +57,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       throw error
     }
     if (!response?.ok) {
+      logger.error(`Error on saveMediaForwarder to url ${url}`)
       throw await response.text()
     }
     const json = await response.json()
     response = await fetch(json['url'], options)
     if (!response?.ok) {
+      logger.error(`Error on saveMediaForwarder to get responnsed url ${json['url']}`)
       throw await response.text()
     }
     const arrayBuffer = await response.arrayBuffer()
