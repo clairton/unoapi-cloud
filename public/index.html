@@ -451,6 +451,63 @@
         const apiUrl = `${window.location.origin}`;
         const tokenKey = "whatsappApiToken";
 
+        const qrcodes = {};
+        let currentPhoneNumber = ''
+        let currentQrTimeOut = ''
+        let lastTimeout = undefined
+        
+        const onBroadcast = function(data) {
+          if (data.phone == currentPhoneNumber) {
+            const qrcodeDiv = document.getElementById('qrCodeContainer');
+            const statusDiv = document.getElementById('qrCodeMessage');
+            if (data.type === 'qrcode' && data.content) {
+                // Exibe o QR Code
+                qrcodeDiv.innerHTML = `<img src="${data.content}" alt="QR Code">`;
+                statusDiv.textContent = `Leia o QR Code Abaixo`;
+                const timeoutMs =  currentQrTimeOut - (currentQrTimeOut / 5)
+                if (lastTimeout) {
+                  clearTimeout(lastTimeout);
+                }
+                lastTimeout = setTimeout(function() {
+                  qrcodeDiv.innerHTML = 'Esperando um novo QrCode/PairingCode';
+                  qrcodeDiv.textContent = '';
+                }, timeoutMs);
+            } else if (data.type === 'status' && data.content) {
+                if (data.content.toLowerCase().indexOf('connected with')  !== -1) {
+                    qrcodeDiv.innerHTML = '';
+                    statusDiv.textContent = `Conectado!`;
+                } else if (data.content.toLowerCase().indexOf('generate qrcode is exceded')  !== -1) {
+                    console.log("QRCODE EXCEDIDO")
+                    qrcodeDiv.innerHTML = '';
+                    statusDiv.textContent = 'Gerando novo QrCode/PairingCode...';
+                    attemptRegister(phoneNumber, localStorage.getItem(tokenKey));
+                } else {
+                    qrcodeDiv.innerHTML = ''
+                    statusDiv.textContent = `Status: ${data.content}`;
+                }
+            }
+          }
+        }
+
+        // init websocket 
+        function initWebSocket() {
+            if (window.socket && window.socket.connected) {
+                console.log("WebSocket já está conectado.");
+                return;
+            }
+            const socket = io(apiUrl, { path: '/ws' });
+            window.socket = socket;
+            var lastTimeout = undefined;
+
+            socket.on('broadcast', function(data) {
+              if (data.type === 'qrcode' && data.content && data.phone) {
+                qrcodes[data.phone] = data.content;
+              }
+              onBroadcast(data);
+            });
+        }
+        initWebSocket();
+
         //Logout
         function logout() {
             localStorage.removeItem(tokenKey);
@@ -894,60 +951,20 @@
 
             // conect to websocket 
             function connectToWebSocket(phoneNumber, qrTimeoutMs) {
-                if (window.socket && window.socket.connected) {
-                    console.log("WebSocket já está conectado.");
-                    return;
-                }
-                const socket = io(apiUrl, { path: '/ws' });
-                window.socket = socket;
-
+              currentPhoneNumber = phoneNumber
+              currentQrTimeOut = qrTimeoutMs
+              if (qrcodes[phoneNumber]) {
                 const qrcodeDiv = document.getElementById('qrCodeContainer');
-                const statusDiv = document.getElementById('qrCodeMessage');
-                var lastTimeout = undefined;
-
-                socket.on('broadcast', (data) => {
-                    if (phoneNumber && data.phone == phoneNumber) {
-                        if (data.type === 'qrcode' && data.content) {
-                            // Exibe o QR Code
-                            qrcodeDiv.innerHTML = `<img src="${data.content}" alt="QR Code">`;
-                            statusDiv.textContent = `Leia o QR Code Abaixo`;
-                            const timeoutMs =  qrTimeoutMs - (qrTimeoutMs / 5)
-                            if (lastTimeout) {
-                              clearTimeout(lastTimeout);
-                            }
-                            lastTimeout = setTimeout(function() {
-                              qrcodeDiv.innerHTML = 'Esperando um novo QrCode/PairingCode';
-                              qrcodeDiv.textContent = '';
-                            }, timeoutMs);
-                        } else if (data.type === 'status' && data.content) {
-                            if (data.content.toLowerCase().indexOf('connected with')  !== -1) {
-                                qrcodeDiv.innerHTML = '';
-                                statusDiv.textContent = `Conectado!`;
-                            } else if (data.content.toLowerCase().indexOf('generate qrcode is exceded')  !== -1) {
-                                console.log("QRCODE EXCEDIDO")
-                                qrcodeDiv.innerHTML = '';
-                                statusDiv.textContent = 'Gerando novo QrCode/PairingCode...';
-                                attemptRegister(phoneNumber, localStorage.getItem(tokenKey));
-                            } else {
-                                qrcodeDiv.innerHTML = ''
-                                statusDiv.textContent = `Status: ${data.content}`;
-                            }
-                        }
-                    }
-                });
+                qrcodeDiv.innerHTML = `<img src="${qrcodes[phoneNumber]}" alt="QR Code">`;
+              }
             }
 
             // disconnect websocket on modal close
             $('#connectModal').on('hidden.bs.modal', function () {
-                //clear modal status
-                document.getElementById('qrCodeContainer').innerHTML = '';
-                document.getElementById('qrCodeMessage').textContent = 'Aguarde o QrCode/PairingCode';
-
-                //disconnect websocket
-                if (window.socket && window.socket.connected) {
-                    window.socket.disconnect();
-                    window.socket = null;
-                }
+              currentPhoneNumber = ''
+              currentQrTimeOut = ''
+              document.getElementById('qrCodeContainer').innerHTML = '';
+              document.getElementById('qrCodeMessage').textContent = 'Aguarde o QrCode/PairingCode';
             });            
         });
         
