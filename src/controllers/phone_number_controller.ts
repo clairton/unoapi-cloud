@@ -52,7 +52,8 @@ export class PhoneNumberController {
         const config = await this.getConfig(phone)
         const store = await config.getStore(phone, config)
         const { sessionStore } = store
-        configs.push({ ...config, display_phone_number: phone, status: await sessionStore.getStatus(phone) })
+        const status = config.provider == 'forwarder' ? 'forwarder' : await sessionStore.getStatus(phone)
+        configs.push({ ...config, display_phone_number: phone, status })
       }
       logger.debug('Configs retrieved!')
       return res.status(200).json({ data: configs })
