@@ -188,6 +188,17 @@ export const amqpGetQueue = async (
   return queues.get(queue)!
 }
 
+
+const getExchangeType = (exchange): ExchagenType => {
+  if (UNOAPI_EXCHANGE_BRIDGE_NAME == exchange) {
+    return 'direct'
+  } else if (UNOAPI_EXCHANGE_BROKER_NAME == exchange) {
+    return 'topic'
+  } else {
+    throw `Unknow exchange ${exchange}`
+  }
+}
+
 export const amqpPublish = async (
   exchange: string,
   queue: string,
@@ -203,6 +214,7 @@ export const amqpPublish = async (
 ) => {
   validateRoutingKey(routingKey)
   const channel = await amqpGetChannel()
+  options.type = options.type || getExchangeType(exchange)
   logger.debug('Publishing at exchange: %s, with queue: %s, routing key: %s and type: %s', exchange, queue, routingKey, options.type)
   await amqpGetExchange(exchange, options.type!, options.prefetch!)
   const { queueMain, queueDead, queueDelayed } = await amqpGetQueue(exchange, queue, routingKey, options)
