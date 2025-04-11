@@ -18,10 +18,16 @@ export class OutgoingAmqp implements Outgoing {
 
   public async send(phone: string, payload: object) {
     const config = await this.getConfig(phone)
-    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { webhooks: config.webhooks, payload, split: true })
+    await amqpPublish(
+      UNOAPI_EXCHANGE_BROKER_NAME,
+      UNOAPI_QUEUE_OUTGOING, phone,
+      { webhooks: config.webhooks, payload, split: true },
+      { type: 'topic' }
+    )
   }
 
   public async sendHttp(phone: string, webhook: Webhook, payload: object, options: Partial<PublishOption> = {}) {
+    options.type = 'topic'
     await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { webhook, payload, split: false }, options)
   }
 }

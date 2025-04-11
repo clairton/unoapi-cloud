@@ -198,8 +198,7 @@ export const amqpPublish = async (
     dead: false,
     maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT,
     countRetries: 0,
-    priority: 0,
-    type: 'topic'
+    priority: 0
   },
 ) => {
   validateRoutingKey(routingKey)
@@ -248,8 +247,7 @@ export const amqpConsume = async (
   options: Partial<CreateOption> = {
     delay: UNOAPI_MESSAGE_RETRY_DELAY, 
     priority: 0,
-    notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
-    type: 'topic'
+    notifyFailedMessages: NOTIFY_FAILED_MESSAGES
   },
 ) => {
   logger.debug('Configurate to consume exchange: %s, queue: %s, routing key: %s and type: %s', exchange, queue, routingKey, options.type)
@@ -297,14 +295,14 @@ export const amqpConsume = async (
                 },
               },
             },
-            { maxRetries: 0 },
+            { maxRetries: 0, type: 'topic' },
           )
           logger.info('Sent error to whatsapp!')
         }
-        await amqpPublish(exchange, queue, routingKey, data, { dead: true })
+        await amqpPublish(exchange, queue, routingKey, data, { dead: true, type: options.type })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
-        await amqpPublish(exchange, queue, routingKey, data, { delay: 60000, maxRetries, countRetries })
+        await amqpPublish(exchange, queue, routingKey, data, { delay: 60000, maxRetries, countRetries, type: options.type })
       }
       await channel.ack(payload)
     }

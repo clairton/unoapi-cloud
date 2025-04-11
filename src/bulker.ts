@@ -40,22 +40,22 @@ const startBulker = async () => {
   logger.info('Unoapi Cloud version %s starting bulker...', version)
 
   logger.info('Starting commander consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_COMMANDER, '*', commanderJob.consume.bind(commanderJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_COMMANDER, '*', commanderJob.consume.bind(commanderJob), { type: 'topic' })
 
   logger.info('Starting bulk parser consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_PARSER, '*', bulkParserJob.consume.bind(bulkParserJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_PARSER, '*', bulkParserJob.consume.bind(bulkParserJob), { type: 'topic' })
 
   logger.info('Starting bulk sender consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_SENDER, '*', bulkSenderJob.consume.bind(bulkSenderJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_SENDER, '*', bulkSenderJob.consume.bind(bulkSenderJob), { type: 'topic' })
 
   logger.info('Starting bulk status consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_STATUS, '*', bulkStatusJob.consume.bind(bulkStatusJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_STATUS, '*', bulkStatusJob.consume.bind(bulkStatusJob), { type: 'topic' })
 
   logger.info('Starting bulk report consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, '*', bulkReportJob.consume.bind(bulkReportJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, '*', bulkReportJob.consume.bind(bulkReportJob), { type: 'topic' })
 
   logger.info('Starting bulk webhook consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_WEBHOOK, '*', bulkWebhookJob.consume.bind(bulkWebhookJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_WEBHOOK, '*', bulkWebhookJob.consume.bind(bulkWebhookJob), { type: 'topic' })
 }
 startBulker()
 

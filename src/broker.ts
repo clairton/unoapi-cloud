@@ -46,25 +46,55 @@ const startBroker = async () => {
   logger.info('Unoapi Cloud version %s starting broker...', version)
 
   logger.info('Starting reload consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '*', reloadJob.consume.bind(reloadJob))
+  await amqpConsume(
+    UNOAPI_EXCHANGE_BROKER_NAME,
+    UNOAPI_QUEUE_RELOAD,
+    '*',
+    reloadJob.consume.bind(reloadJob),
+    { type: 'topic' }
+  )
 
   logger.info('Starting media consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob))
+  await amqpConsume(
+    UNOAPI_EXCHANGE_BROKER_NAME,
+    UNOAPI_QUEUE_MEDIA,
+    '*',
+    mediaJob.consume.bind(mediaJob),
+    { type: 'topic' }
+  )
 
   logger.info('Binding queues consumer for server %s', UNOAPI_SERVER_NAME)
 
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
 
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgingJob.consume.bind(outgingJob), { notifyFailedMessages, prefetch })
+  await amqpConsume(
+    UNOAPI_EXCHANGE_BROKER_NAME,
+    UNOAPI_QUEUE_OUTGOING,
+    '*',
+    outgingJob.consume.bind(outgingJob),
+    { notifyFailedMessages, prefetch, type: 'topic' }
+  )
 
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
-    await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), { notifyFailedMessages: false })
+    await amqpConsume(
+      UNOAPI_EXCHANGE_BROKER_NAME,
+      UNOAPI_QUEUE_NOTIFICATION,
+      '*',
+      notificationJob.consume.bind(notificationJob),
+      { notifyFailedMessages: false, type: 'topic' }
+    )
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', addToBlacklist, { notifyFailedMessages, prefetch })
+  await amqpConsume(
+    UNOAPI_EXCHANGE_BROKER_NAME,
+    UNOAPI_QUEUE_BLACKLIST_ADD,
+    '*',
+    addToBlacklist,
+    { notifyFailedMessages, prefetch, type: 'topic' }
+  )
 
   logger.info('Unoapi Cloud version %s started broker!', version)
 }

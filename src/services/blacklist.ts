@@ -69,6 +69,6 @@ export const addToBlacklistRedis: addToBlacklist = async (from: string, webhookI
 }
 
 export const addToBlacklistJob: addToBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
-  await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, from, { from, webhookId, to, ttl })
+  await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, from, { from, webhookId, to, ttl }, { type: 'topic' })
   return true
 }

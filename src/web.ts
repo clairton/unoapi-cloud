@@ -48,7 +48,7 @@ const broadcastJob = new BroacastJob(broadcast)
 
 app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Starting broadcast consumer')
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob))
-  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '*', reload.run.bind(reloadJob))
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob), { type: 'topic' })
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '*', reload.run.bind(reloadJob), { type: 'topic' })
   logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
 })

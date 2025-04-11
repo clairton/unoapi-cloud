@@ -57,7 +57,7 @@ export class BulkSenderJob {
           {
             payload: { phone, messages: messagesToRenqueue, id, length },
           },
-          { delay: delayToResend },
+          { delay: delayToResend, type: 'topic' },
         )
         statusMessage = `Bulk ${id} phone ${phone} reenqueuing ${messagesToRenqueue.length} message(s) with delay ${delayToResend}...`
       } else {
@@ -66,7 +66,7 @@ export class BulkSenderJob {
           UNOAPI_EXCHANGE_BROKER_NAME,
           UNOAPI_QUEUE_BULK_REPORT, phone, 
           { payload: { id, length } }, 
-          { delay: UNOAPI_BULK_DELAY * 1000 }
+          { delay: UNOAPI_BULK_DELAY * 1000, type: 'topic' }
         )
       }
       const messageUpdate = {

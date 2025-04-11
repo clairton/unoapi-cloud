@@ -30,7 +30,13 @@ export class BulkReportJob {
           message = { body: `Bulk ${id} phone ${phone} with ${length}, has retried generate ${count} and not retried more` }
         } else {
           message = { body: `Bulk ${id} phone ${phone} with ${length}, some messages is already scheduled status, try again later, this is ${count} try...` }
-          await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, phone, { payload: { id, length, count } }, { delay: UNOAPI_BULK_DELAY * 1000 })
+          await amqpPublish(
+            UNOAPI_EXCHANGE_BROKER_NAME,
+            UNOAPI_QUEUE_BULK_REPORT,
+            phone,
+            { payload: { id, length, count } },
+            { delay: UNOAPI_BULK_DELAY * 1000, type: 'topic' }
+          )
         }
       } else {
         const caption = `Bulk ${id} phone ${phone} with ${length} message(s) status -> ${JSON.stringify(status)}`

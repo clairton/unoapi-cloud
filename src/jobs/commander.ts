@@ -48,7 +48,7 @@ export class CommanderJob {
               template: 'sisodonto',
               url: payload?.document?.link,
             },
-          }
+          }, { type: 'topic' }
         )
         const message = {
           type: 'text',
@@ -73,7 +73,7 @@ export class CommanderJob {
         const config = { webhooks }
         logger.debug('Template webhooks %s', phone, JSON.stringify(webhooks))
         await setConfig(phone, config)
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, `${UNOAPI_QUEUE_RELOAD}.${currentConfig.server!}`, phone , { phone })
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, `${UNOAPI_QUEUE_RELOAD}.${currentConfig.server!}`, phone , { phone }, { type: 'topic' })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
         logger.debug('Parsing bulk report template... %s', phone)
         const service = new Template(this.getConfig)
@@ -85,7 +85,7 @@ export class CommanderJob {
           throw new YamlParseError(doc.errors)
         }
         const { bulk } = doc.toJS()
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } })
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } }, { type: 'topic' })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
         logger.debug('Parsing config template... %s', phone)
         const service = new Template(this.getConfig)
