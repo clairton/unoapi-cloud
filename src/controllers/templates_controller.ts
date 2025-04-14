@@ -51,6 +51,7 @@ export class TemplatesController {
           logger.error(error)
           throw error
         }
+        res.setHeader('content-type', 'application/json; charset=UTF-8')
         return response.body.pipe(res)
       } else {
         const store = await config.getStore(phone, config)
