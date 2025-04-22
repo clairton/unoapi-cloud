@@ -3,7 +3,7 @@ import { Outgoing } from '../services/outgoing'
 import { UNOAPI_QUEUE_COMMANDER, UNOAPI_QUEUE_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
 import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
-import { jidToPhoneNumber, getMimetype, toBuffer } from '../services/transformer'
+import { jidToPhoneNumber, getMimetype, toBuffer, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
 import fetch, { Response } from 'node-fetch'
 import mime from 'mime-types'
@@ -57,7 +57,7 @@ export class IncomingJob {
         dataStore.setKey(idUno, key)
       }
       let messagePayload = payload[payload.type]
-      if (['image', 'audio', 'document', 'video'].includes(payload.type)) {
+      if (TYPE_MESSAGES_MEDIA.includes(payload.type)) {
         const { mediaStore } = await config.getStore(phone, config)
         const mediaKey = `${phone}/${idUno}`
         const link = payload[payload.type].link
@@ -74,6 +74,7 @@ export class IncomingJob {
           mime_type: mimetype,
         }
         delete messagePayload['link']
+        await dataStore.setMediaPayload(idUno, messagePayload)
       }
       const webhookMessage = {
         object: 'whatsapp_business_account',
@@ -175,7 +176,13 @@ export class IncomingJob {
         ],
       }
     }
-    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_STATUS, phone, { payload: outgingPayload, type: 'whatsapp' })
+    await amqpPublish(
+      UNOAPI_EXCHANGE_BROKER_NAME,
+      UNOAPI_QUEUE_BULK_STATUS,
+      phone,
+      { payload: outgingPayload, type: 'whatsapp' },
+      { type: 'topic' }
+    )
     await Promise.all(config.webhooks.map((w) => this.outgoing.sendHttp(phone, w, outgingPayload, optionsOutgoing)))
     return response
   }

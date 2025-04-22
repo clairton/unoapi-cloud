@@ -9,6 +9,7 @@ import { t } from '../i18n'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
 
+export const TYPE_MESSAGES_MEDIA = ['image', 'audio', 'document', 'video', 'sticker']
 
 const MESSAGE_STUB_TYPE_ERRORS = [
   'Message absent from node'.toLowerCase(),
