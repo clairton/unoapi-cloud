@@ -4,7 +4,6 @@ import { Listener } from './listener'
 import { Store } from './store'
 import {
   connect,
-  SendError,
   sendMessage,
   readMessages,
   rejectCall,
@@ -29,6 +28,8 @@ import logger from './logger'
 import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
 import { t } from '../i18n'
 import { ClientForward } from './client_forward'
+import { SendError } from './send_error'
+
 const attempts = 3
 
 interface Delay {

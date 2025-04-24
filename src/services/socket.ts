@@ -17,7 +17,7 @@ import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { Store } from './store'
 import NodeCache from 'node-cache'
-import { isIndividualJid, isValidPhoneNumber } from './transformer'
+import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
@@ -25,6 +25,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS, MAX_CONNECT_TIME, MAX_CONNECT_RETRY } from '../defaults'
 import { t } from '../i18n'
+import { SendError } from './send_error'
 
 const EVENTS = [
   'connection.update',
@@ -60,16 +61,6 @@ export type OnNotification = (text: string, important: boolean) => Promise<void>
 export type OnDisconnected = (phone: string, payload: any) => Promise<void>
 export type OnNewLogin = (phone: string) => Promise<void>
 export type OnReconnect = (time: number) => Promise<void>
-
-export class SendError extends Error {
-  readonly code: number
-  readonly title: string
-  constructor(code: number, title: string) {
-    super(`${code}: ${title}`)
-    this.code = code
-    this.title = title
-  }
-}
 
 export interface sendMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +125,25 @@ export const connect = async ({
   let sock: WASocket | undefined = undefined
   const msgRetryCounterCache = new NodeCache()
   const { dataStore, state, saveCreds, sessionStore } = store
+  const firstSaveCreds = async () => {
+    if (state?.creds?.me?.id) {
+      const phoneCreds = jidToPhoneNumber(state?.creds?.me?.id, '')
+      logger.info(`First save creds with number is ${phoneCreds} and configured number ${phone}`)
+      if (phoneCreds != phone) {
+        await logout()
+        currentSaveCreds = async () => {
+          const message =  t('session_conflict', phoneCreds, phone)
+          logger.error(message)
+          await onNotification(message, true)
+        }
+      } else {
+        logger.info(`Correct save creds with number is ${phoneCreds} and configured number ${phone}`)
+        currentSaveCreds = saveCreds
+      }
+    }
+  }
+  let currentSaveCreds = firstSaveCreds
+  const verifyAndSaveCreds = async () => currentSaveCreds()
   let connectingTimeout
 
   const status: Status = {
@@ -519,7 +529,7 @@ export const connect = async ({
     }
     if (sock) {
       dataStore.bind(sock.ev)
-      event('creds.update', saveCreds)
+      event('creds.update', verifyAndSaveCreds)
       logger.info('Connection type %s already creds %s', config.connectionType, sock?.authState?.creds?.registered)
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone}`)

@@ -8,7 +8,6 @@ import { Store } from '../../src/services/store'
 import {
   connect,
   Status,
-  SendError,
   sendMessage,
   readMessages,
   rejectCall,
@@ -25,6 +24,7 @@ import { Incoming } from '../../src/services/incoming'
 import { dataStores } from '../../src/services/data_store'
 import logger from '../../src/services/logger'
 import { SessionStore } from '../../src/services/session_store'
+import { SendError } from '../../src/services/send_error'
 
 const mockConnect = connect as jest.MockedFunction<typeof connect>
 

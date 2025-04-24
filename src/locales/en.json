@@ -24,5 +24,6 @@
 	"pairing_code": "Open your WhatsApp and go to: Connected Devices > Connect a new Device > Connect using phone number > And put your connection code > %s",
   "restart": "Restarting session",
   "standby": "Standby session, waiting for time configured to try connect again, %s error in %s seconds",
-  "proxy_error": "Error on connect to proxy: %s"
+  "proxy_error": "Error on connect to proxy: %s",
+  "session_conflict": "The session number is %s but the configured number %s"
 }

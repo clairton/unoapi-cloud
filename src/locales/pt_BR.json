@@ -24,5 +24,6 @@
 	"pairing_code": "Informe o código para conectar no whatsapp: %s",
   "restart": "Reiniciando sessão",
   "standby": "Sessão colocada em standby, esperando pelo tempo configurado para tentar conectar novamente: %s",
-  "proxy_error": "Erro ao conectar no proxy: %s"
+  "proxy_error": "Erro ao conectar no proxy: %s",
+  "session_conflict": "O número the sessão usado é o %s mas o número da configuração é %s"
 }
