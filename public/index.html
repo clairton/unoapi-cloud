@@ -836,7 +836,7 @@
                         };
                         sessionData.webhooks.push(webhook);
                     });
-
+                    sessionData.overrideWebhooks = true
                     fetch(`${apiUrl}/v15.0/${number}/register`, {
                         method: 'POST',
                         headers: {

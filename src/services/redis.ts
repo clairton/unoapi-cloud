@@ -289,10 +289,12 @@ export const setConfig = async (phone: string, value: any) => {
   const currentConfig = await getConfig(phone)
   const key = configKey(phone)
   const currentWebhooks: Webhook[] = currentConfig && currentConfig.webhooks || []
-  const newWebhooks: Webhook[] = value && value.webhooks || currentWebhooks
+  const newWebhooks: Webhook[] = value && value.webhooks || []
   const updatedWebooks: Webhook[] = []
-  newWebhooks.forEach(n => {
-    const c = currentWebhooks.find((c) => c.id === n.id)
+  const baseWebhook = value.overrideWebhooks ? newWebhooks : currentWebhooks
+  const searchWebhooks = value.overrideWebhooks ? currentWebhooks : newWebhooks
+  baseWebhook.forEach(n => {
+    const c = searchWebhooks.find((c) => c.id === n.id)
     if (c) {
       updatedWebooks.push({ ...c, ...n })
     } else {
@@ -301,6 +303,7 @@ export const setConfig = async (phone: string, value: any) => {
   })
   value.webhooks = updatedWebooks
   const config = { ...currentConfig, ...value }
+  delete config.overrideWebhooks
   await redisSetAndExpire(key, JSON.stringify(config), SESSION_TTL)
   configs.delete(phone)
   return config

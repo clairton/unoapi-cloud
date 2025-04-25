@@ -78,6 +78,7 @@ export type Config = {
   useS3: boolean
   qrTimeoutMs: number
   label: string
+  overrideWebhooks: boolean
 }
 
 export const defaultConfig: Config = {
@@ -138,6 +139,7 @@ export const defaultConfig: Config = {
   useS3: false,
   qrTimeoutMs: 60000,
   label: '',
+  overrideWebhooks: false
 }
 
 export interface getConfig {
