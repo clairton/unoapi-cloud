@@ -200,6 +200,7 @@
         <table id="sessionsTable" class="table table-striped table-bordered d-none" style="width: 100%;">
             <thead>
                 <tr>
+                    <th>Identificação</th>
                     <th>Número</th>
                     <th>Status</th>
                     <th>Server</th>
@@ -244,6 +245,10 @@
                 <div class="modal-body">
                     <form id="editForm">
                         <div class="row edit-form-row">
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="label" class="form-label">Identificação</label>
+                              <input type="text" class="form-control" id="label" name="lavel" placeholder="Identificação">
+                          </div>
                             <div class="col-12 col-md-12 col-lg-6">
                                 <label for="authToken" class="form-label">Auth Token</label>
                                 <input type="text" class="form-control" id="authToken" name="authToken" placeholder="Auth Token">
@@ -644,6 +649,7 @@
 
                 sessions.forEach(session => {
                     table.row.add([
+                        session.label,
                         session.display_phone_number,
                         session.status,
                         session.server,
@@ -789,6 +795,7 @@
 
                 if (token && number) {
                     const sessionData = {
+                        label: $('#label').val(),
                         authToken: $('#authToken').val(),
                         wavoipToken: $('#wavoipToken').val(),
                         rejectCalls: $('#rejectCalls').val(),

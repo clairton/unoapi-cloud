@@ -77,6 +77,7 @@ export type Config = {
   useRedis: boolean
   useS3: boolean
   qrTimeoutMs: number
+  label: string
 }
 
 export const defaultConfig: Config = {
@@ -135,7 +136,8 @@ export const defaultConfig: Config = {
   wavoipToken: '',
   useRedis: false,
   useS3: false,
-  qrTimeoutMs: 60000
+  qrTimeoutMs: 60000,
+  label: '',
 }
 
 export interface getConfig {
