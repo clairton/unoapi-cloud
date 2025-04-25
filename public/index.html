@@ -719,6 +719,7 @@
 
             //Edit form for session number
             function populateEditForm(session) {
+                $('#label').val(session.label);
                 $('#authToken').val(session.authToken);
                 $('#wavoipToken').val(session.wavoipToken);
                 $('#rejectCallsWebhook').val(session.rejectCallsWebhook);
