@@ -18,6 +18,7 @@ import { RegistrationController } from './controllers/registration_controller'
 import { SessionController } from './controllers/session_controller'
 import { BlacklistController } from './controllers/blacklist_controller'
 import { PairingCodeController } from './controllers/pairing_code_controller'
+import { ConnectController } from './controllers/connect_controller'
 import { Server } from 'socket.io'
 import { OnNewLogin } from './services/socket'
 import { addToBlacklist } from './services/blacklist'
@@ -67,6 +68,7 @@ export const router = (
   //Routes
   router.get('/', indexController.root)
   router.get('/index.html', indexController.root)
+  router.get('/socket.io.min.js', indexController.socket)
   router.get('/ping', indexController.ping)
   router.get('/:version/debug_token', indexController.debugToken)
   router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))

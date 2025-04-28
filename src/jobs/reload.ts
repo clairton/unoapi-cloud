@@ -1,3 +1,4 @@
+import logger from '../services/logger';
 import { Reload } from '../services/reload'
 
 export class ReloadJob {
@@ -8,6 +9,7 @@ export class ReloadJob {
   }
 
   async consume(_: string, { phone, params }: { phone: string, params: { force: boolean } }) {
+    logger.debug('Reload job run for phone %s', phone)
     await this.reload.run(phone, params);
   }
 }

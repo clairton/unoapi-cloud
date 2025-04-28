@@ -14,6 +14,14 @@ class IndexController {
     return res.sendFile(path.resolve('./public/index.html'))
   }
 
+  public socket(req: Request, res: Response) {
+    logger.debug('socket method %s', JSON.stringify(req.method))
+    logger.debug('socket headers %s', JSON.stringify(req.headers))
+    logger.debug('socket params %s', JSON.stringify(req.params))
+    logger.debug('socket body %s', JSON.stringify(req.body))
+    res.set('Content-Type', 'text/javascript')
+    return res.sendFile(path.resolve('./node_modules/socket.io-client/dist/socket.io.min.js'))
+  }
 
   public ping(req: Request, res: Response) {
     logger.debug('ping method %s', JSON.stringify(req.method))

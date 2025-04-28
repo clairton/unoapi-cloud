@@ -79,7 +79,7 @@ const qrcode = async (phone: string, getConfig: getConfig, onNewLogin: OnNewLogi
   })
 
   return `<!DOCTYPE html>
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io.min.js"></script>
     <script>
       var socket = io();
       socket.on('onNewLogin', function(msg){
