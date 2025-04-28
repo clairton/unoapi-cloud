@@ -24,6 +24,7 @@ export class ReloadBaileys extends Reload {
     logger.debug('Reload baileys run for phone %s', phone)
     const config = await this.getConfig(phone)
     if (config.server != UNOAPI_SERVER_NAME) {
+      logger.debug('Reload broker for phone %s', phone)
       return super.run(phone)
     }
     const currentClient = await this.getClient({

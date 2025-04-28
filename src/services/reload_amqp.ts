@@ -23,7 +23,7 @@ export class ReloadAmqp extends Reload {
     await amqpPublish(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
       `${UNOAPI_QUEUE_RELOAD}.${config.server!}`,
-      phone,
+      '',
       { phone },
       { type: 'direct' }
     )

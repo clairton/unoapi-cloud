@@ -15,7 +15,7 @@ export class LogoutAmqp implements Logout {
     await amqpPublish(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
       `${UNOAPI_QUEUE_LOGOUT}.${config.server!}`,
-      phone,
+      '',
       { phone },
       { type: 'direct' }
     )

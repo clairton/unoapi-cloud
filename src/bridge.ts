@@ -60,7 +60,7 @@ const startBrigde = async () => {
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME, 
     `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, 
-    '*', 
+    '', 
     reloadJob.consume.bind(reloadJob),
     {
       prefetch: 1,
@@ -72,7 +72,7 @@ const startBrigde = async () => {
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME,
     `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`,
-    '*', 
+    '', 
     logoutJob.consume.bind(logoutJob),
     {
       prefetch: 1,

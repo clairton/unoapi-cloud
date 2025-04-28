@@ -128,7 +128,7 @@ if (process.env.AMQP_URL) {
   amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME,
     `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`,
-    '*',
+    '',
     reloadJob.consume.bind(reloadJob),
     { type: 'direct' }
   )
@@ -136,7 +136,7 @@ if (process.env.AMQP_URL) {
   amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME,
     `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`,
-    '*',
+    '',
     logoutJob.consume.bind(logoutJob),
     { type: 'direct' }
   )
