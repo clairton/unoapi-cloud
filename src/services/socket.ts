@@ -131,11 +131,10 @@ export const connect = async ({
       logger.info(`First save creds with number is ${phoneCreds} and configured number ${phone}`)
       if (phoneCreds != phone) {
         await logout()
-        currentSaveCreds = async () => {
-          const message =  t('session_conflict', phoneCreds, phone)
-          logger.error(message)
-          await onNotification(message, true)
-        }
+        const message =  t('session_conflict', phoneCreds, phone)
+        logger.error(message)
+        await onNotification(message, true)
+        currentSaveCreds = async () => logger.error(message)
       } else {
         logger.info(`Correct save creds with number is ${phoneCreds} and configured number ${phone}`)
         currentSaveCreds = saveCreds
