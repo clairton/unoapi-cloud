@@ -9,7 +9,7 @@
 	"attempts_exceeded": "O limite de %s vezes de geração de qrcode foi excedida!",
 	"received_pending_notifications": "Recebendo mensagens enviadas enquanto estava offline",
 	"online_session": "Sessão está online",
-	"connection_timed_out": "Conectando sessão %s excedeu o tempo de %s ms, alterando para desconectado",
+	"connection_timed_out": "A sessão %s excedeu o tempo de %s ms para conectar, sessão alterada para estado Offline",
 	"connecting": "Conectando...",
 	"connected": "Conectado com o número %s utilizando a versao do Whatsapp v%s, e a útima versão seria v%s, hora atual %s",
 	"removed": "A sessão foi removida no aplicativo do Whatsapp, envie uma mesagem para gerar o qrcode e conectar novamente!",
