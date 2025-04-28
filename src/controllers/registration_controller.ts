@@ -25,7 +25,7 @@ export class RegistrationController {
     const { phone } = req.params
     try {
       await setConfig(phone, req.body)
-      await this.reload.run(phone, { force: true })
+      await this.reload.run(phone)
       const config = await this.getConfig(phone)
       return res.status(200).json(config)
     } catch (e) {
