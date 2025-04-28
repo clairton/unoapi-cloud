@@ -97,8 +97,8 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return setMessage(phone, newJid, message.key.id!, message)
   }
-  store.cleanSession = async () => {
-    if (CLEAN_CONFIG_ON_DISCONNECT) {
+  store.cleanSession = async (removeConfig = CLEAN_CONFIG_ON_DISCONNECT) => {
+    if (removeConfig) {
       await delConfig(phone)
     }
     await delAuth(phone)

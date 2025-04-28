@@ -270,7 +270,6 @@ export class ClientBaileys implements Client {
 
     const result = await connect({
       phone: this.phone,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       store: this.store!,
       attempts,
       time,
@@ -282,6 +281,7 @@ export class ClientBaileys implements Client {
       onReconnect: this.onReconnect,
     })
     if (!result) {
+      logger.error('Socket connect return empty %s', this.phone)
       return
     }
     const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout } = result

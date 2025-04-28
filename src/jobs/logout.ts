@@ -1,3 +1,4 @@
+import logger from '../services/logger'
 import { Logout } from '../services/logout'
 
 export class LogoutJob {
@@ -8,6 +9,7 @@ export class LogoutJob {
   }
 
   async consume(_: string, { phone }: { phone: string }) {
+    logger.debug('Logout service for phone %s', phone)
     this.logout.run(phone)
   }
 }

@@ -1,8 +1,12 @@
 import { Listener } from '../services/listener'
-import { getConfig } from '../services/config'
-import { getClient } from '../services/client'
+import { configs, getConfig } from '../services/config'
+import { clients, getClient } from '../services/client'
 import { OnNewLogin } from '../services/socket'
 import { Logout } from './logout'
+import logger from './logger'
+import { stores } from './store'
+import { dataStores } from './data_store'
+import { mediaStores } from './media_store'
 
 export class LogoutBaileys implements Logout {
   private getClient: getClient
@@ -18,19 +22,25 @@ export class LogoutBaileys implements Logout {
   }
 
   async run(phone: string) {
-    const client = await this.getClient({
-      phone,
-      listener: this.listener,
-      getConfig: this.getConfig,
-      onNewLogin: this.onNewLogin,
-    })
+    logger.debug('Logout baileys for phone %s', phone)
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     const { sessionStore, dataStore } = store
-    if (!await sessionStore.isStatusOnline(phone)) {
-      await dataStore.cleanSession()
-    } else {
+    if (await sessionStore.isStatusOnline(phone)) {
+      const client = await this.getClient({
+        phone,
+        listener: this.listener,
+        getConfig: this.getConfig,
+        onNewLogin: this.onNewLogin,
+      })
       await client.logout()
     }
+    await dataStore.cleanSession(true)
+    clients.delete(phone)
+    stores.delete(phone)
+    dataStores.delete(phone)
+    mediaStores.delete(phone)
+    configs.delete(phone)
+    sessionStore.setStatus(phone, 'disconnected')
   }
 }

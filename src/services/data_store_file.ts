@@ -246,7 +246,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     }
     store.messages[jid].upsert(message, 'append')
   }
-  dataStore.cleanSession = async () => {
+  dataStore.cleanSession = async (_removeConfig = false) => {
     const sessionDir = `${SESSION_DIR}/${phone}`
     if (existsSync(sessionDir)) {
       logger.info(`Clean session phone %s dir %s`, phone, sessionDir)

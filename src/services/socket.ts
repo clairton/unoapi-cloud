@@ -23,7 +23,7 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS, MAX_CONNECT_TIME, MAX_CONNECT_RETRY } from '../defaults'
+import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS, MAX_CONNECT_TIME, MAX_CONNECT_RETRY, CLEAN_CONFIG_ON_DISCONNECT } from '../defaults'
 import { t } from '../i18n'
 import { SendError } from './send_error'
 
@@ -363,7 +363,7 @@ export const connect = async ({
       // ignore de unique error if already diconected session
     } finally {
       logger.info(`${phone} destroyed`)
-      await dataStore.cleanSession()
+      await dataStore.cleanSession(CLEAN_CONFIG_ON_DISCONNECT)
     }
     await close()
     await sessionStore.setStatus(phone, 'disconnected')
