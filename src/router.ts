@@ -55,6 +55,7 @@ export const router = (
   const blacklistController = new BlacklistController(addToBlacklist)
   const contactsController = new ContactsController(contact)
   const pairingCodeController = new PairingCodeController(getConfig, incoming)
+  const connectController = new ConnectController(reload)
 
 
   // Webhook for forward connection
@@ -69,6 +70,7 @@ export const router = (
   router.get('/', indexController.root)
   router.get('/index.html', indexController.root)
   router.get('/socket.io.min.js', indexController.socket)
+  router.get('/connect/:phone', connectController.index.bind(connectController))
   router.get('/ping', indexController.ping)
   router.get('/:version/debug_token', indexController.debugToken)
   router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))

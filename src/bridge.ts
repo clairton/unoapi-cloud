@@ -44,7 +44,7 @@ const startBrigde = async () => {
 
   logger.info('Unoapi Cloud version %s starting bridge...', version)
 
-  logger.info('Starting bind listener consumer')
+  logger.info('Starting bind consumer')
   await amqpConsume(
     UNOAPI_EXCHANGE_BRIDGE_NAME, 
     `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, 

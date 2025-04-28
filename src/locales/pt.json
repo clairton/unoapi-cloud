@@ -25,5 +25,7 @@
   "restart": "Reiniciando sessão",
   "standby": "Sessão colocada em standby, esperando pelo tempo configurado para tentar conectar novamente: %s",
   "proxy_error": "Erro ao conectar no proxy: %s",
-  "session_conflict": "O número the sessão usado é o %s mas o número da configuração é %s"
+  "session_conflict": "O número the sessão usado é o %s mas o número da configuração é %s",
+  "waiting_information": "Esperando por qrcode/pairing code",
+  "reload": "Recarregar"
 }
