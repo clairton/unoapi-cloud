@@ -447,6 +447,33 @@
         </div>
     </div>
 
+    <!-- Modal Mensagem -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="messageModalLabel">Testar Sessão</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <form id="messageModalForm">
+                    <div class="mb-3">
+                        <label for="messageModalNumber" class="form-label">Whatsapp Destinatário</label>
+                        <input type="number" class="form-control" id="messageModalNumber" placeholder="Número no formato 55 DDD NUMERO" required>
+                    </div>
+                      <div class="mb-3">
+                          <label for="messageModalText" class="form-label">Mensagem em texto</label>
+                          <input type="text" class="form-control" id="messageModalText" placeholder="" required>
+                      </div>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-primary" onclick="submitMessage()">Enviar</button>
+              </div>
+          </div>
+      </div>
+    </div>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- Bootstrap Bundle with Popper -->
@@ -663,6 +690,9 @@
                         </button>
                         <button class="btn btn-sm btn-danger delete-btn" data-number="${session.display_phone_number}">
                             <i class="fas fa-trash"></i> Deletar
+                        </button>
+                        <button class="btn btn-sm btn-success message-btn" data-bs-target="#messageModal" data-number="${session.display_phone_number}">
+                            <i class="fas fa-message"></i> Testar
                         </button>`
                     ]).draw(false);
                 });
@@ -716,6 +746,13 @@
                     })
                     .catch(error => alert(error.message));
                 }
+            });
+
+            //Message button
+            $('#sessionsTable tbody').on('click', '.message-btn', function () {
+                const number = $(this).data('number');
+                $('#messageModal').data('number', number); 
+                $('#messageModal').modal('show');
             });
 
             //Edit form for session number
@@ -998,6 +1035,30 @@
 
             } else {
                 alert('Por favor, insira um número válido.');
+            }
+        }
+
+        function submitMessage() {
+            const numberInput = document.getElementById('messageModalNumber').value;
+            const messageInput = document.getElementById('messageModalText').value;
+            const token = localStorage.getItem(tokenKey);
+            if (numberInput && messageInput) {
+                const headers = { 
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                };
+                const number = $('#messageModal').data('number');
+                const body = JSON.stringify({
+                  messaging_product: 'whatsapp',
+                  to: numberInput,
+                  type: 'text',
+                  text: {
+                    body: messageInput
+                  } 
+                })
+                fetch(apiUrl + '/v15.0/' + number + '/messages', { method: 'POST', headers, body })
+            } else {
+                alert('Por favor, insira um número válido e a mensagem para enviar.');
             }
         }
     </script>
