@@ -151,7 +151,7 @@ export const connect = async ({
   }
 
   const onConnectionUpdate = async (event: Partial<ConnectionState>) => {
-    logger.debug('onConnectionUpdate ==> %s %s', phone, JSON.stringify(event))
+    logger.debug('onConnectionUpdate connectionType %s ==> %s %s', config.connectionType, phone, JSON.stringify(event))
     if (event.qr && config.connectionType == 'qrcode') {
       if (status.attempt > attempts) {
         const message =  t('attempts_exceeded', attempts)
@@ -513,8 +513,23 @@ export const connect = async ({
     }
 
     try {
-      sock = makeWASocket(socketConfig)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const proxy = makeWASocket(socketConfig)
+      const handler = {
+        apply: (target, _thisArg, argumentsList) => {
+          try {
+            return target(...argumentsList)
+          } catch (error) {
+            console.error(error, error.isBoom, !error.isServer)
+            if (error && error.isBoom && !error.isServer) {
+              onClose({ lastDisconnect: { error } })
+              return
+            } else {
+              throw error
+            }
+          }
+        }
+      }
+      sock = new Proxy(proxy, handler)
     } catch (error: any) {
       console.log(error, error.isBoom, !error.isServer)
       if (error && error.isBoom && !error.isServer) {
