@@ -291,7 +291,7 @@ export const setConfig = async (phone: string, value: any) => {
   const currentWebhooks: Webhook[] = currentConfig && currentConfig.webhooks || []
   const newWebhooks: Webhook[] = value && value.webhooks || []
   const updatedWebooks: Webhook[] = []
-  const baseWebhook = value.overrideWebhooks ? newWebhooks : currentWebhooks
+  const baseWebhook = value.overrideWebhooks || currentWebhooks.length == 0 ? newWebhooks : currentWebhooks
   const searchWebhooks = value.overrideWebhooks ? currentWebhooks : newWebhooks
   baseWebhook.forEach(n => {
     const c = searchWebhooks.find((c) => c.id === n.id)
