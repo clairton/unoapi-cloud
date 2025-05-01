@@ -1,5 +1,4 @@
 import {
-  makeInMemoryStore,
   BaileysEventEmitter,
   proto,
   Chat,
@@ -11,9 +10,9 @@ import {
   WAMessageUpdate,
   GroupMetadata,
 } from 'baileys'
-import makeOrderedDictionary from 'baileys/lib/Store/make-ordered-dictionary'
-import { BaileysInMemoryStoreConfig, waMessageID } from 'baileys/lib/Store/make-in-memory-store'
-import { isIndividualJid, isSaveMedia, jidToPhoneNumber, phoneNumberToJid } from './transformer'
+import makeOrderedDictionary from '../store/make-ordered-dictionary'
+import { BaileysInMemoryStoreConfig, waMessageID } from '../store/make-in-memory-store'
+import { isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
 import { DataStore, MessageStatus } from './data_store'
 import { SESSION_DIR } from './session_store_file'
@@ -22,6 +21,7 @@ import { Config } from './config'
 import logger from './logger'
 import NodeCache from 'node-cache'
 import { BASE_URL } from '../defaults'
+import makeInMemoryStore from '../store/make-in-memory-store'
 
 export const MEDIA_DIR = './data/medias'
 const HOUR = 60 * 60

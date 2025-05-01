@@ -1,5 +1,6 @@
-import { GroupMetadata, makeInMemoryStore, WAMessage, WAMessageKey, WASocket } from 'baileys'
+import { GroupMetadata, WAMessage, WAMessageKey, WASocket } from 'baileys'
 import { Config } from './config'
+import makeInMemoryStore from '../store/make-in-memory-store'
 
 export const dataStores: Map<string, DataStore> = new Map()
 
