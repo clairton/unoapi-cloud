@@ -535,7 +535,7 @@ export const connect = async ({
         await onClose({ lastDisconnect: { error } })
         return false
       } else {
-        logger.error('Baileys Socket error: %s %s', error, error.stack)
+        logger.error('baileys Socket error: %s %s', error, error.stack)
         const message = t('error', error.message)
         await onNotification(message, true)
         throw error

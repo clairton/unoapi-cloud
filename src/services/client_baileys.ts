@@ -414,18 +414,18 @@ export class ClientBaileys implements Client {
                 if (key?.id.indexOf('-') > 0) {
                   logger.debug('Ignore read message for %s with key id %s reading message key %s...', this.phone, key?.id)
                 } else {
-                  logger.debug('Baileys %s reading message key %s...', this.phone, JSON.stringify(key))
+                  logger.debug('baileys %s reading message key %s...', this.phone, JSON.stringify(key))
                   if (await this.readMessages([key])) {
                     await this.store?.dataStore?.setStatus(payload?.message_id, status)
-                    logger.debug('Baileys %s read message key %s!', this.phone, JSON.stringify(key))
+                    logger.debug('baileys %s read message key %s!', this.phone, JSON.stringify(key))
                   } else {
-                    logger.debug('Baileys %s not read message key %s!', this.phone, JSON.stringify(key))
+                    logger.debug('baileys %s not read message key %s!', this.phone, JSON.stringify(key))
                     throw `not online session ${this.phone}`
                   }
                 }
               }
             } else {
-              logger.debug('Baileys %s already read message id %s!', this.phone, payload?.message_id)
+              logger.debug('baileys %s already read message id %s!', this.phone, payload?.message_id)
             }
           } else if (status == 'deleted') {
             const key = await this.store?.dataStore?.loadKey(payload?.message_id)
@@ -434,12 +434,12 @@ export class ClientBaileys implements Client {
               if (key?.id.indexOf('-') > 0) {
                 logger.debug('Ignore delete message for %s with key id %s reading message key %s...', this.phone, key?.id)
               } else {
-                logger.debug('Baileys %s deleting message key %s...', this.phone, JSON.stringify(key))
+                logger.debug('baileys %s deleting message key %s...', this.phone, JSON.stringify(key))
                 if (await this.sendMessage(key.remoteJid!, { delete: key }, {})) {
                   await this.store?.dataStore?.setStatus(payload?.message_id, status)
-                  logger.debug('Baileys %s delete message key %s!', this.phone, JSON.stringify(key))
+                  logger.debug('baileys %s delete message key %s!', this.phone, JSON.stringify(key))
                 } else {
-                  logger.debug('Baileys %s not delete message key %s!', this.phone, JSON.stringify(key))
+                  logger.debug('baileys %s not delete message key %s!', this.phone, JSON.stringify(key))
                   throw `not online session ${this.phone}`
                 }
               }
@@ -649,6 +649,7 @@ export class ClientBaileys implements Client {
         logger.debug(groupMetadata, 'Retrieved group metadata!')
       } else {
         groupMetadata = {
+          addressingMode: 'pn',
           id: key.remoteJid,
           owner: '',
           subject: key.remoteJid,
