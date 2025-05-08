@@ -2,7 +2,7 @@ import { Webhook } from '../services/config'
 import { Outgoing } from '../services/outgoing'
 import { amqpPublish } from '../amqp'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS, UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING } from '../defaults'
-import { extractDestinyPhone, TYPE_MESSAGES_MEDIA } from '../services/transformer'
+import { extractDestinyPhone, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
 import { getConfig } from '../services/config'
 import { isUpdateMessage } from '../services/transformer'
@@ -87,6 +87,13 @@ export class OutgoingJob {
             })
           )
         } else {
+          payload.entry[0].changes[0].value.contacts = await Promise.all(
+            payload.entry[0].changes[0].value.contacts.map(async contact => {
+              contact.wa_id = jidToPhoneNumber(contact.wa_id, '')
+              return contact
+            })
+          )
+
           payload.entry[0].changes[0].value.messages = await Promise.all(
             payload.entry[0].changes[0].value.messages.map(async message => {
               if (TYPE_MESSAGES_MEDIA.includes(message.type)) {
@@ -105,6 +112,7 @@ export class OutgoingJob {
                   message.reaction.id = unoId
                 }
               }
+              message.from = jidToPhoneNumber(message.from, '')
               return message
             })
           )
