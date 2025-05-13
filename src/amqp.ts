@@ -13,10 +13,12 @@ import {
   CONSUMER_TIMEOUT_MS,
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BROKER_NAME,
-  UNOAPI_EXCHANGE_BRIDGE_NAME
+  UNOAPI_EXCHANGE_BRIDGE_NAME,
+  IGNORED_TO_NUMBERS
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
+import { extractDestinyPhone } from './services/transformer'
 
 const withTimeout = (millis, error, promise) => {
   let timeoutPid
@@ -281,6 +283,8 @@ export const amqpConsume = async (
       logger.debug('Received in queue %s, with routing key: %s, with message: %s with headers: %s', queue, routingKey, content, JSON.stringify(payload.properties.headers))
       if (IGNORED_CONNECTIONS_NUMBERS.includes(routingKey)) {
         logger.info(`Ignore messages from ${routingKey}`)
+      } else if (IGNORED_TO_NUMBERS.length > 0 && IGNORED_TO_NUMBERS.includes(extractDestinyPhone(data.payload, false))) {
+        logger.info(`Ignore messages to ${extractDestinyPhone(data.payload)}`)
       } else {
         const timeoutError = `timeout ${CONSUMER_TIMEOUT_MS} is exceeded consume queue: ${queue}, routing key: ${routingKey}, payload: ${content}`
         await withTimeout(CONSUMER_TIMEOUT_MS, timeoutError, callback(routingKey, data, { countRetries, maxRetries }))
