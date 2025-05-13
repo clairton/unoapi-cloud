@@ -338,7 +338,7 @@ export const isValidPhoneNumber = (value: string, nine = false): boolean => {
   return !isInValid
 }
 
-export const extractDestinyPhone = (payload: object) => {
+export const extractDestinyPhone = (payload: object, throwError = true) => {
   const data = payload as any
   const number = data?.to || (
     (
@@ -363,7 +363,7 @@ export const extractDestinyPhone = (payload: object) => {
       )
     )
   )
-  if (!number) {
+  if (!number && throwError) {
     throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
   }
   return number
