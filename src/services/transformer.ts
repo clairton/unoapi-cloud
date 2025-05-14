@@ -342,7 +342,7 @@ export const extractDestinyPhone = (payload: object, throwError = true) => {
   const data = payload as any
   const number = data?.to || (
     (
-      data.entry
+      data?.entry
       && data.entry[0]
       && data.entry[0].changes
       && data.entry[0].changes[0]

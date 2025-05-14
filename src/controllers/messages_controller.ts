@@ -39,6 +39,7 @@ import { Outgoing } from '../services/outgoing'
 import logger from '../services/logger'
 
 export class MessagesController {
+  protected endpoint = 'messages'
   private incoming: Incoming
   private outgoing: Outgoing
 
@@ -48,18 +49,18 @@ export class MessagesController {
   }
 
   public async index(req: Request, res: Response) {
-    logger.debug('messages method %s', req.method)
-    logger.debug('messages headers %s', JSON.stringify(req.headers))
-    logger.debug('messages params %s', JSON.stringify(req.params))
-    logger.debug('messages body %s', JSON.stringify(req.body))
+    logger.debug('%s method %s', this.endpoint, req.method)
+    logger.debug('%s headers %s', this.endpoint, JSON.stringify(req.headers))
+    logger.debug('%s params %s', this.endpoint, JSON.stringify(req.params))
+    logger.debug('%s body %s', this.endpoint, JSON.stringify(req.body))
     const { phone } = req.params
     const payload: object = req.body
     try {
-      const response: ResponseUno = await this.incoming.send(phone, payload, {})
-      logger.debug('messages response %s', JSON.stringify(response.ok))
+      const response: ResponseUno = await this.incoming.send(phone, payload, { endpoint: this.endpoint })
+      logger.debug('%s response %s', this.endpoint, JSON.stringify(response.ok))
       await res.status(200).json(response.ok)
       if (response.error) {
-        logger.debug('messages return status %s', JSON.stringify(response.error))
+        logger.debug('%s return status %s', this.endpoint, JSON.stringify(response.error))
         await this.outgoing.send(phone, response.error)
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
