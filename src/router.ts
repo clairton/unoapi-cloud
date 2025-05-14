@@ -12,6 +12,7 @@ import { WebhookFakeController } from './controllers/webhook_fake_controller'
 import { ContactsController } from './controllers/contacts_controller'
 import { TemplatesController } from './controllers/templates_controller'
 import { MessagesController } from './controllers/messages_controller'
+import { MarketingMessagesController } from './controllers/marketing_messages_controller'
 import { MediaController } from './controllers/media_controller'
 import { PhoneNumberController } from './controllers/phone_number_controller'
 import { RegistrationController } from './controllers/registration_controller'
@@ -46,6 +47,7 @@ export const router = (
 ) => {
   const router: Router = Router()
   const messagesController = new MessagesController(incoming, outgoing)
+  const marketingMessagesController = new MarketingMessagesController(incoming, outgoing)
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
   const registrationController = new RegistrationController(getConfig, reload, logout)
@@ -84,6 +86,7 @@ export const router = (
   router.get('/:version/:phone/message_templates', middleware, templatesController.index.bind(templatesController))
   router.post('/:version/:phone/templates', middleware, templatesController.templates.bind(templatesController))
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))
+  router.post('/:version/:phone/marketing_messages', middleware, marketingMessagesController.index.bind(marketingMessagesController))
   router.get('/:version/:phone/:media_id', middleware, mediaController.index.bind(mediaController))
   router.get('/:version/download/:phone/:file', middleware, mediaController.download.bind(mediaController))
   router.post('/:phone/blacklist/:webhook_id', middleware, blacklistController.update.bind(blacklistController))

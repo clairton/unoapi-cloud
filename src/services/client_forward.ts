@@ -14,14 +14,15 @@ export class ClientForward implements Client {
     this.listener = listener
   }
 
-  public async send(payload: any, _options: any) {
+  public async send(payload: any, options: any) {
     const config = await this.getConfig(this.phone)
     const body = JSON.stringify(payload)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
       'Authorization': `Bearer ${config.webhookForward.token}`
     }
-    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${config.webhookForward.phoneNumberId}/messages`
+    const endpoint = options.endpoint && payload.type ? options.endpoint : 'messages'
+    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${config.webhookForward.phoneNumberId}/${endpoint}`
     logger.debug(`Send url ${url} with headers %s and body %s`, JSON.stringify(headers), body)
     let response: Response
     try {
