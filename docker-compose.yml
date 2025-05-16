@@ -50,7 +50,7 @@ services:
     restart: on-failure
 
   rabbitmq:
-    image: rabbitmq:4.0-management-alpine
+    image: rabbitmq:4-management-alpine
     hostname: rabbitmq
     ports:
       - 5672:5672
@@ -75,20 +75,29 @@ services:
       - 9001:9001
     restart: on-failure
     volumes:
-      - storage1:/data
-
-  minio-mc:
-    image: quay.io/minio/mc:latest
-    env_file: .env
-    depends_on:
-      - minio
-    entrypoint: >
+      - minio:/data
+    entrypoint: |
       /bin/sh -c "
-      /usr/bin/mc alias set local $STORAGE_ENDPOINT $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD;
-      /usr/bin/mc mb local/$STORAGE_BUCKET_NAME;
+      echo 'Starting Minio and setting up project bucket...' &&
+      /usr/bin/minio server --console-address ':9001' --address ':9000' /data &
+      ## Wait for minio to be ready
+      until (echo > /dev/tcp/localhost/9000) >/dev/null 2>&1; do
+        echo 'Waiting for minio to be ready...'
+        sleep 5
+      done &&
+      ## Configure bucket
+      /usr/bin/mc alias set local http://localhost:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD &&
+      if ! /usr/bin/mc ls local/$STORAGE_BUCKET_NAME > /dev/null 2>&1; then
+        /usr/bin/mc mb local/$STORAGE_BUCKET_NAME &&
+        echo 'Bucket created successfully'
+      else
+        echo 'Bucket already exists, skipping creation'
+      fi &&
+      ## Keep container running
+      wait
       "
 
 volumes:
   rabbitmq:
   redis:
-  storage1:
+  minio:
