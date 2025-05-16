@@ -11,7 +11,7 @@ x-base: &base
   working_dir: /app
   environment:
     NODE_ENV: development
-    AMQP_URL: amqp://guest:guest@rabbitmq:5672
+    AMQP_URL: amqp://guest:guest@rabbitmq:5672?frameMax=8192
     BASE_URL: http://web:9876
     REDIS_URL: redis://redis:6379
     STORAGE_ENDPOINT: http://minio:9000
