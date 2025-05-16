@@ -16,9 +16,6 @@ x-base: &base
     REDIS_URL: redis://redis:6379
     STORAGE_ENDPOINT: http://minio:9000
     GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
-  depends_on:
-    - redis
-    - rabbitmq
 
 x-minio: &minio
   image: quay.io/minio/minio:latest
@@ -39,41 +36,45 @@ x-minio: &minio
 services:
   web:
     <<: *base
-    entrypoint: yarn web-dev
     restart: on-failure
+    entrypoint: yarn web-dev
     ports:
       - 9876:9876
+    depends_on:
+      - worker
 
   worker:
     <<: *base
-    entrypoint: sh -c 'wait-for redis:6379 rabbitmq:5672 -- yarn worker-dev'
     restart: on-failure
+    entrypoint: sh -c 'wait-for redis:6379 rabbitmq:5672 -- yarn worker-dev'
+    depends_on:
+      - redis
+      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:4-management-alpine
-    hostname: rabbitmq
+    restart: on-failure
     ports:
       - 5672:5672
       - 15672:15672
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    restart: on-failure
 
   redis:
     image: redis:7-alpine
+    restart: on-failure
     volumes:
       - redis:/data
     command: redis-server --appendonly yes
     ports:
       - 6379:6379
-    restart: on-failure
 
   minio:
     <<: *minio
+    restart: on-failure
     ports:
       - 9000:9000
       - 9001:9001
-    restart: on-failure
     volumes:
       - minio:/data
     entrypoint: |
