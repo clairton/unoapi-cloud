@@ -34,7 +34,7 @@ services:
   web:
     <<: *base
     restart: on-failure
-    entrypoint: yarn web-dev
+    entrypoint: sh -c 'wait-for redis:6379 rabbitmq:5672 -- yarn web-dev'
     ports:
       - 9876:9876
     depends_on:
