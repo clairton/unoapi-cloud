@@ -21,9 +21,6 @@ x-minio: &minio
   image: quay.io/minio/minio:latest
   command: server --console-address ":9001" --address ":9000" /data
   env_file: .env
-  environment:
-    MINIO_SERVER_URL: http://localhost:9000
-    MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
   expose:
     - 9000:9000
     - 9001:9001
