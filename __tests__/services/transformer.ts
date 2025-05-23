@@ -1418,4 +1418,25 @@ describe('service transformer', () => {
     }
     expect(toBaileysMessageContent(input)).toEqual(output)
   })
+
+
+  test('fromBaileysMessageContent participant outside key', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '11115551212'
+    const input = {
+      key: {
+        remoteJid: '554988189915-1593526912@g.us',
+        fromMe: false, 
+        id: '583871ED40A7FBC09B5C3A7C2CC760A0'
+      },
+      message: {
+        conversation: '🤷‍♂️'
+      },
+      participant: `${remotePhoneNumber}@s.whatsapp.net`,
+      isMentionedInStatus :false
+    }
+    const resp = fromBaileysMessageContent(phoneNumer, input)
+    const from = resp.entry[0].changes[0].value.messages[0].from
+    expect(from).toEqual(remotePhoneNumber)
+  })
 })
