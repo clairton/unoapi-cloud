@@ -478,8 +478,9 @@ export const jidToPhoneNumberIfUser = (value: any): string => {
 export const fromBaileysMessageContent = (phone: string, payload: any, config?: Partial<Config>): any => {
   try {
     const {
-      key: { remoteJid, id: whatsappMessageId, participant, fromMe },
+      key: { remoteJid, id: whatsappMessageId, participant: participant1, fromMe }, participant: participant2
     } = payload
+    const participant = participant1 || participant2
     const chatJid = formatJid(remoteJid)
     const isIndividual = isIndividualJid(chatJid)
     const senderJid = isIndividual ? chatJid : (participant && formatJid(participant)) || chatJid
