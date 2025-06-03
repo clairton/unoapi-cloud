@@ -126,6 +126,9 @@ export const amqpGetExchange = async (exchange: string, type: ExchagenType, pref
     await channel.prefetch(prefetch)
     await channel.assertExchange(exchange, type, { durable: true,  arguments: { 'x-max-priority': 5 }})
 
+    const exchangeDeadId = queueDeadName(exchange)
+    await amqpChannel.assertExchange(exchangeDeadId, 'topic', { durable: true })
+
     const exchangeDelayedId = queueDelayedName(exchange)
     await amqpChannel.assertExchange(exchangeDelayedId, 'topic', { durable: true , arguments: {
       'x-dead-letter-exchange': exchange
@@ -167,8 +170,9 @@ export const amqpGetQueue = async (
     let deadLetterExchange = exchange
 
     const queueDeadId = queueDeadName(queue)
+    const exchangeDeadId = queueDeadName(exchange)
     const queueDead = await channel.assertQueue(queueDeadId, { durable: true })
-    await amqpChannel.bindQueue(queueDeadId, exchange, `${queueDeadId}.*`)
+    await amqpChannel.bindQueue(queueDeadId, exchangeDeadId, `${queueDeadId}.*`)
 
     const exchangeDelayedId = queueDelayedName(exchange)
     const queueDelayedId = queueDelayedName(queue)
@@ -241,6 +245,7 @@ export const amqpPublish = async (
     queueUsed = queueDelayed
   } else if (dead) {
     queueUsed = queueDead
+    exchangeUsed = queueDeadName(exchange)
   }
   const destiny = bindingKey(queueUsed.queue, routingKey)
   await channel.publish(exchangeUsed, destiny, Buffer.from(JSON.stringify(payload)), properties)
