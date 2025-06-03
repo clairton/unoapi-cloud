@@ -17,6 +17,7 @@ export class BlacklistController {
     const to = req.body.to || req.query.to
     const ttl = req.body.ttl || req.query.ttl || 0
     if (!to) {
+      logger.info('blacklist error: to param is required')
       return res.status(400).send(`{"error": "to param is required"}`)
     }
     const { webhook_id, phone } = req.params
