@@ -29,23 +29,14 @@ const getExchangeName = queue => {
     throw `Unknow queue ${queue}`
   }
 }
-const getExchangeType = (queue): ExchagenType => {
-  if (bridgeQueues.includes(queue)) {
-    return 'direct'
-  } else if (brokerQueues.includes(queue)) {
-    return 'topic'
-  } else {
-    throw `Unknow queue ${queue}`
-  }
-}
 
 (async () => {
   return Promise.all(
     queues.map(async queue => {
       const connection =  await amqpConnect()
-      const exchangeName = getExchangeName(queue)
       const queueName = queueDeadName(queue)
-      const exchangeType = getExchangeType(queue)
+      const exchangeName = queueDeadName(getExchangeName(queue))
+      const exchangeType = 'topic'
       logger.info('Waker exchange %s queue %s type %s', exchangeName, queueName, exchangeType)
       const channel: Channel = await connection.createChannel()
       await channel.assertExchange(exchangeName, exchangeType, { durable: true })
