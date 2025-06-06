@@ -23,7 +23,16 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { DEFAULT_BROWSER, WHATSAPP_VERSION, LOG_LEVEL, CONNECTING_TIMEOUT_MS, MAX_CONNECT_TIME, MAX_CONNECT_RETRY, CLEAN_CONFIG_ON_DISCONNECT } from '../defaults'
+import { 
+  DEFAULT_BROWSER,
+  WHATSAPP_VERSION,
+  LOG_LEVEL,
+  CONNECTING_TIMEOUT_MS,
+  MAX_CONNECT_TIME,
+  MAX_CONNECT_RETRY,
+  CLEAN_CONFIG_ON_DISCONNECT,
+  VALIDATE_SESSION_NUMBER,
+} from '../defaults'
 import { t } from '../i18n'
 import { SendError } from './send_error'
 
@@ -129,7 +138,7 @@ export const connect = async ({
     if (state?.creds?.me?.id) {
       const phoneCreds = jidToPhoneNumber(state?.creds?.me?.id, '')
       logger.info(`First save creds with number is ${phoneCreds} and configured number ${phone}`)
-      if (phoneCreds != phone) {
+      if (VALIDATE_SESSION_NUMBER && phoneCreds != phone) {
         await logout()
         const message =  t('session_conflict', phoneCreds, phone)
         logger.error(message)

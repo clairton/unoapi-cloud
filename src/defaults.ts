@@ -147,6 +147,9 @@ export const ONLY_HELLO_TEMPLATE: boolean = process.env.ONLY_HELLO_TEMPLATE === 
 export const DEFAULT_BROWSER = [CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, release()]
 export const QR_TIMEOUT_MS = parseInt(process.env.QR_TIMEOUT_MS || '60000')
 
+export const VALIDATE_SESSION_NUMBER: boolean =
+  process.env.VALIDATE_SESSION_NUMBER === _undefined ? false : process.env.VALIDATE_SESSION_NUMBER == 'true'
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const STORAGE_OPTIONS = (storage: any) => {
   storage = storage || { credentials: {} }

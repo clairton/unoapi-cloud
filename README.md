@@ -352,6 +352,7 @@ CLEAN_CONFIG_ON_DISCONNECT=true to clean all saved redis configurations on disco
 CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone connection
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
 WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version. Format is `[2, 3000, 1019810866]`
+VALIDATE_SESSION_NUMBER=validate the number in session and config is equals, default true
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
