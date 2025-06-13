@@ -603,7 +603,7 @@ export class ClientBaileys implements Client {
                     statuses: [
                       {
                         id,
-                        recipient_id: jidToPhoneNumber(to, ''),
+                        recipient_id: jidToPhoneNumber(to || this.phone, ''),
                         status: 'failed',
                         timestamp: Math.floor(Date.now() / 1000),
                         errors: [

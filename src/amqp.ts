@@ -289,7 +289,7 @@ export const amqpConsume = async (
       if (IGNORED_CONNECTIONS_NUMBERS.includes(routingKey)) {
         logger.info(`Ignore messages from ${routingKey}`)
       } else if (IGNORED_TO_NUMBERS.length > 0 && IGNORED_TO_NUMBERS.includes(extractDestinyPhone(data.payload, false))) {
-        logger.info(`Ignore messages to ${extractDestinyPhone(data.payload)}`)
+        logger.info(`Ignore messages to ${extractDestinyPhone(data.payload, false)}`)
       } else {
         const timeoutError = `timeout ${CONSUMER_TIMEOUT_MS} is exceeded consume queue: ${queue}, routing key: ${routingKey}, payload: ${content}`
         await withTimeout(CONSUMER_TIMEOUT_MS, timeoutError, callback(routingKey, data, { countRetries, maxRetries }))
