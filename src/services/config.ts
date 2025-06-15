@@ -79,6 +79,8 @@ export type Config = {
   qrTimeoutMs: number
   label: string
   overrideWebhooks: boolean
+  customMessageCharacters: string[]
+  customMessageCharactersFunction: (message: string) => string
 }
 
 export const defaultConfig: Config = {
@@ -139,7 +141,9 @@ export const defaultConfig: Config = {
   useS3: false,
   qrTimeoutMs: 60000,
   label: '',
-  overrideWebhooks: false
+  overrideWebhooks: false,
+  customMessageCharacters: [],
+  customMessageCharactersFunction: (message: string) => message
 }
 
 export interface getConfig {

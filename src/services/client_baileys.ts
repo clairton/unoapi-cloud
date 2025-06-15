@@ -468,7 +468,7 @@ export class ClientBaileys implements Client {
                 }
               }
             }
-            content = toBaileysMessageContent(payload)
+            content = toBaileysMessageContent(payload, this.config.customMessageCharactersFunction)
           }
           let quoted: WAMessage | undefined = undefined
           let disappearingMessagesInChat: boolean | number = false

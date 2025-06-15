@@ -50,6 +50,7 @@ import {
   WEBHOOK_FORWARD_TOKEN,
   WEBHOOK_FORWARD_TIMEOUT_MS,
   WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID,
+  CUSTOM_MESSAGE_CHARACTERS,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -105,6 +106,17 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhookForward.token = WEBHOOK_FORWARD_TOKEN
     config.webhookForward.version = WEBHOOK_FORWARD_VERSION
     config.webhookForward.timeoutMs = WEBHOOK_FORWARD_TIMEOUT_MS
+    config.customMessageCharacters = CUSTOM_MESSAGE_CHARACTERS
+
+    if (config.customMessageCharacters.length > 0) {
+      const getRandomChar = () => {
+        const randomIndex = Math.floor(Math.random() * config.customMessageCharacters.length);
+        return config.customMessageCharacters[randomIndex]
+      }
+      config.customMessageCharactersFunction = (message: string) => {
+        return message.replace(' ', ` ${getRandomChar()}`)
+      }
+    }
 
     const filter: MessageFilter = new MessageFilter(phone, config)
     config.shouldIgnoreJid = filter.isIgnoreJid.bind(filter)

@@ -190,13 +190,13 @@ export const completeCloudApiWebHook = (phone, to: string, message: object) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
+export const toBaileysMessageContent = (payload: any, customMessageCharactersFunction = (m) => m): AnyMessageContent => {
   const { type } = payload
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response: any = {}
   switch (type) {
     case 'text':
-      response.text = payload.text.body
+      response.text = customMessageCharactersFunction(payload.text.body)
       break
     case 'interactive':
       let listMessage = {}
@@ -262,7 +262,7 @@ export const toBaileysMessageContent = (payload: any): AnyMessageContent => {
           response.mimetype = mimetype
         }
         if (payload[type].caption) {
-          response.caption = payload[type].caption
+          response.caption = customMessageCharactersFunction(payload[type].caption)
         }
         response[type] = { url: link }
         break
