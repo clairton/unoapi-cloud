@@ -406,10 +406,16 @@ export const isOutgoingMessage = (payload: object) => {
   return session && from && `${session}`.replaceAll('+', '') == `${from}`.replaceAll('+', '')
 }
 
-
 export const isUpdateMessage = (payload: object) => {
   const data = payload as any
   return data.entry[0].changes[0].value.statuses && data.entry[0].changes[0].value.statuses[0]
+}
+
+export const isFailedStatus = (payload: object) => {
+  const data = payload as any
+  return 'failed' == (data.entry[0].changes[0].value.statuses
+                        && data.entry[0].changes[0].value.statuses[0]
+                        && data.entry[0].changes[0].value.statuses[0].status)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

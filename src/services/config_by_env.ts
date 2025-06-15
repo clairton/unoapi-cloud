@@ -51,6 +51,7 @@ import {
   WEBHOOK_FORWARD_TIMEOUT_MS,
   WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID,
   CUSTOM_MESSAGE_CHARACTERS,
+  LISTENER_STATUS_FAILED,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -107,6 +108,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhookForward.version = WEBHOOK_FORWARD_VERSION
     config.webhookForward.timeoutMs = WEBHOOK_FORWARD_TIMEOUT_MS
     config.customMessageCharacters = CUSTOM_MESSAGE_CHARACTERS
+    config.listenerStatusFailed = LISTENER_STATUS_FAILED
 
     if (config.customMessageCharacters.length > 0) {
       const getRandomChar = () => {

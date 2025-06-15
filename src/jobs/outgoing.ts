@@ -1,11 +1,16 @@
 import { Webhook } from '../services/config'
 import { Outgoing } from '../services/outgoing'
 import { amqpPublish } from '../amqp'
-import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS, UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING } from '../defaults'
+import { 
+  UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS,
+  UNOAPI_EXCHANGE_BROKER_NAME, 
+  UNOAPI_QUEUE_OUTGOING, 
+  UNOAPI_QUEUE_STATUS_FAILED
+} from '../defaults'
 import { extractDestinyPhone, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
 import { getConfig } from '../services/config'
-import { isUpdateMessage } from '../services/transformer'
+import { isUpdateMessage, isFailedStatus } from '../services/transformer'
 
 const  dUntil: Map<string, number> = new Map()
 const  dVerified: Map<string, boolean> = new Map()
@@ -15,14 +20,9 @@ const sleep = (ms) => {
 }
 
 const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, payload) => {
-  let to = ''
-  try {
-    to = extractDestinyPhone(payload)
-  } catch (error) {
-    logger.error('Error on extract to from payload', error)
-  }
+  const to = extractDestinyPhone(payload, false)
  
-  if (to) { 
+  if (to) {
     const key = `${phone}:${to}`
     if (!dVerified.get(key)) {
       let nextMessageTime = dUntil.get(key)
@@ -61,6 +61,16 @@ export class OutgoingJob {
     const payload: any = a.payload
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
+      const config = await this.getConfig(phone)
+      if (isFailedStatus(payload) && config.listenerStatusFailed) {
+        await amqpPublish(
+          UNOAPI_EXCHANGE_BROKER_NAME,
+          UNOAPI_QUEUE_STATUS_FAILED,
+          phone,
+          { payload }, 
+          { type: 'topic' }
+        )
+      }
       await Promise.all(
         webhooks.map(async (webhook) => {
           return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME,  UNOAPI_QUEUE_OUTGOING, phone, { payload, webhook })
