@@ -30,6 +30,14 @@ import { ReloadAmqp } from './services/reload_amqp'
 import { LogoutAmqp } from './services/logout_amqp'
 import { Reload } from './services/reload'
 
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    sendDefaultPii: true,
+  })
+}
+
 const reload = new Reload()
 const incoming: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
@@ -51,4 +59,13 @@ app.server.listen(PORT, '0.0.0.0', async () => {
   await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob), { type: 'topic' })
   await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '*', reload.run.bind(reloadJob), { type: 'topic' })
   logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
+})
+
+
+process.on('uncaughtException', (reason: any) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('uncaughtException web: %s %s %s', reason, reason.stack)
+  throw reason
 })

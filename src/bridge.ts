@@ -39,6 +39,14 @@ const reloadJob = new ReloadJob(reload)
 const logout = new LogoutBaileys(getClientBaileys, getConfig, listenerAmqp, onNewLogin)
 const logoutJob = new LogoutJob(logout)
 
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    sendDefaultPii: true,
+  })
+}
+
 const startBrigde = async () => {
   await startRedis()
 
@@ -88,7 +96,10 @@ const startBrigde = async () => {
 }
 startBrigde()
 
-process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection bridge: %s %s %s', reason, reason.stack, promise)
+process.on('uncaughtException', (reason: any) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('uncaughtException bridge: %s %s %s', reason, reason.stack)
   throw reason
 })

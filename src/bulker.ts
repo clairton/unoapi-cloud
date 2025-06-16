@@ -24,6 +24,14 @@ import logger from './services/logger'
 import { isInBlacklistInRedis } from './services/blacklist'
 import { version } from '../package.json'
 
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    sendDefaultPii: true,
+  })
+}
+
 const getConfig: getConfig = getConfigRedis
 const incomingAmqp: Incoming = new IncomingAmqp(getConfig)
 
@@ -59,7 +67,10 @@ const startBulker = async () => {
 }
 startBulker()
 
-process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection bulker: %s %s %s', reason, reason.stack, promise)
+process.on('uncaughtException', (reason: any) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('uncaughtException bulker: %s %s %s', reason, reason.stack)
   throw reason
 })

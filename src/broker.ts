@@ -38,6 +38,14 @@ const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
 
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    sendDefaultPii: true,
+  })
+}
+
 const startBroker = async () => {
   await startRedis()
 
@@ -100,7 +108,10 @@ const startBroker = async () => {
 }
 startBroker()
 
-process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection broker: %s %s %s', reason, reason.stack, promise)
+process.on('uncaughtException', (reason: any) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('uncaughtException broker: %s %s %s', reason, reason.stack)
   throw reason
 })

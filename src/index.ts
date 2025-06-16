@@ -24,6 +24,14 @@ import { BASE_URL, PORT } from './defaults'
 import { ReloadBaileys } from './services/reload_baileys'
 import { LogoutBaileys } from './services/logout_baileys'
 
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    sendDefaultPii: true,
+  })
+}
+
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistInMemory)
 
 const broadcast: Broadcast = new Broadcast()
@@ -45,9 +53,10 @@ app.server.listen(PORT, '0.0.0.0', async () => {
 
 export default app
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection: %s', reason.stack)
-  logger.error('promise: %s', promise)
+process.on('uncaughtException', (reason: any) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('uncaughtException index: %s %s %s', reason, reason.stack)
   throw reason
 })

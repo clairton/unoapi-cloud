@@ -73,6 +73,14 @@ import { MediaJob } from './jobs/media'
 import { OutgoingJob } from './jobs/outgoing'
 import { NotificationJob } from './jobs/notification'
 
+import * as Sentry from '@sentry/node'
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    sendDefaultPii: true,
+  })
+}
+
 const broadcast: Broadcast = new Broadcast()
 
 let addToBlacklistVar: addToBlacklist = addToBlacklistInMemory
@@ -210,9 +218,10 @@ app.server.listen(PORT, '0.0.0.0', async () => {
   autoConnect(sessionStore, listener, getConfigVar, getClientBaileys, onNewLoginn)
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-process.on('unhandledRejection', (reason: any, promise) => {
-  logger.error('unhandledRejection: %s', reason.stack)
-  logger.error('promise: %s', promise)
+process.on('uncaughtException', (reason: any) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('uncaughtException stadalone: %s %s %s', reason, reason.stack)
   throw reason
 })
