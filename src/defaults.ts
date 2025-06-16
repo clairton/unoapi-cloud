@@ -66,7 +66,7 @@ export const UNOAPI_EXCHANGE_BRIDGE_NAME = `${UNOAPI_EXCHANGE_NAME}.brigde`
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
 export const UNOAPI_QUEUE_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_QUEUE_OUTGOING_PREFETCH || '1')
 export const UNOAPI_QUEUE_DELAYED = `${UNOAPI_QUEUE_NAME}.delayed`
-export const UNOAPI_QUEUE_STATUS_FAILED = `${UNOAPI_QUEUE_NAME}.status.failed`
+export const UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED = `${UNOAPI_QUEUE_NAME}.webhook.status.failed`
 export const UNOAPI_QUEUE_MEDIA = `${UNOAPI_QUEUE_NAME}.media`
 export const UNOAPI_QUEUE_NOTIFICATION = `${UNOAPI_QUEUE_NAME}.notification`
 export const UNOAPI_QUEUE_LISTENER = `${UNOAPI_QUEUE_NAME}.listener`
@@ -122,7 +122,6 @@ export const IGNORE_OWN_MESSAGES: boolean = process.env.IGNORE_OWN_MESSAGES === 
 export const SEND_CONNECTION_STATUS: boolean = process.env.SEND_CONNECTION_STATUS === _undefined ? true : process.env.SEND_CONNECTION_STATUS == 'true'
 export const NOTIFY_FAILED_MESSAGES: boolean = process.env.NOTIFY_FAILED_MESSAGES === _undefined ? true : process.env.NOTIFY_FAILED_MESSAGES == 'true'
 export const THROW_WEBHOOK_ERROR: boolean = process.env.THROW_WEBHOOK_ERROR === _undefined ? false : process.env.THROW_WEBHOOK_ERROR == 'true'
-export const LISTENER_STATUS_FAILED: boolean = process.env.LISTENER_STATUS_FAILED === _undefined ? false : process.env.LISTENER_STATUS_FAILED == 'true'
 export const SEND_REACTION_AS_REPLY: boolean =
   process.env.SEND_REACTION_AS_REPLY === _undefined ? false : process.env.SEND_REACTION_AS_REPLY == 'true'
 export const STORAGE_BUCKET_NAME = process.env.STORAGE_BUCKET_NAME || 'unoapi'
@@ -148,6 +147,7 @@ export const WAVOIP_TOKEN = process.env.WAVOIP_TOKEN || ''
 export const ONLY_HELLO_TEMPLATE: boolean = process.env.ONLY_HELLO_TEMPLATE === _undefined ? false : process.env.ONLY_HELLO_TEMPLATE == 'true'
 export const DEFAULT_BROWSER = [CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME, release()]
 export const QR_TIMEOUT_MS = parseInt(process.env.QR_TIMEOUT_MS || '60000')
+export const STATUS_FAILED_WEBHOOK_URL = process.env.STATUS_FAILED_WEBHOOK_URL || ''
 
 export const VALIDATE_SESSION_NUMBER: boolean =
   process.env.VALIDATE_SESSION_NUMBER === _undefined ? false : process.env.VALIDATE_SESSION_NUMBER == 'true'

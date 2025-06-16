@@ -2,10 +2,11 @@ import { Webhook } from '../services/config'
 import { Outgoing } from '../services/outgoing'
 import { amqpPublish } from '../amqp'
 import { 
+  STATUS_FAILED_WEBHOOK_URL,
   UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS,
   UNOAPI_EXCHANGE_BROKER_NAME, 
   UNOAPI_QUEUE_OUTGOING, 
-  UNOAPI_QUEUE_STATUS_FAILED
+  UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED
 } from '../defaults'
 import { extractDestinyPhone, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
@@ -61,11 +62,10 @@ export class OutgoingJob {
     const payload: any = a.payload
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
-      const config = await this.getConfig(phone)
-      if (isFailedStatus(payload) && config.listenerStatusFailed) {
+      if (isFailedStatus(payload) && STATUS_FAILED_WEBHOOK_URL) {
         await amqpPublish(
           UNOAPI_EXCHANGE_BROKER_NAME,
-          UNOAPI_QUEUE_STATUS_FAILED,
+          UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
           phone,
           { payload }, 
           { type: 'topic' }

@@ -11,6 +11,8 @@ import {
   UNOAPI_QUEUE_BLACKLIST_ADD,
   NOTIFY_FAILED_MESSAGES,
   UNOAPI_EXCHANGE_BROKER_NAME,
+  STATUS_FAILED_WEBHOOK_URL,
+  UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
 } from './defaults'
 
 import { amqpConsume } from './amqp'
@@ -28,6 +30,7 @@ import { Incoming } from './services/incoming'
 import { Outgoing } from './services/outgoing'
 import { isInBlacklistInRedis } from './services/blacklist'
 import { NotificationJob } from './jobs/notification'
+import { WebhookStatusFailedJob } from './jobs/webhook_status_failed'
 import { addToBlacklist } from './jobs/add_to_blacklist'
 
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
@@ -91,6 +94,18 @@ const startBroker = async () => {
       UNOAPI_QUEUE_NOTIFICATION,
       '*',
       notificationJob.consume.bind(notificationJob),
+      { notifyFailedMessages: false, type: 'topic' }
+    )
+  }
+
+  if (STATUS_FAILED_WEBHOOK_URL) {
+    const job = new WebhookStatusFailedJob(STATUS_FAILED_WEBHOOK_URL)
+    logger.debug('Starting webhook status failed consumer %s', UNOAPI_SERVER_NAME)
+    await amqpConsume(
+      UNOAPI_EXCHANGE_BROKER_NAME,
+      UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
+      '*',
+      job.consume.bind(job),
       { notifyFailedMessages: false, type: 'topic' }
     )
   }

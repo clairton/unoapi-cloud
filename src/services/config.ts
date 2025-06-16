@@ -81,7 +81,6 @@ export type Config = {
   overrideWebhooks: boolean
   customMessageCharacters: string[]
   customMessageCharactersFunction: (message: string) => string
-  listenerStatusFailed: boolean
 }
 
 export const defaultConfig: Config = {
@@ -145,7 +144,6 @@ export const defaultConfig: Config = {
   overrideWebhooks: false,
   customMessageCharacters: [],
   customMessageCharactersFunction: (message: string) => message,
-  listenerStatusFailed: false,
 }
 
 export interface getConfig {
