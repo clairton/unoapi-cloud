@@ -1439,4 +1439,76 @@ describe('service transformer', () => {
     const from = resp.entry[0].changes[0].value.messages[0].from
     expect(from).toEqual(remotePhoneNumber)
   })
+
+  test('fromBaileysMessageContent statusMentionMessage', async () => {
+    const remotePhoneNumber = '11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const body = `ladiuad87hodlnkd ${new Date().getTime()} askpdasioashfjh`
+    const stanzaId = `wa.${new Date().getTime()}`
+    const pushName = `Mary ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const phoneNumer = '5549998360838'
+    const input = {
+      key:{
+        remoteJid,
+        fromMe: false,
+        id
+      },
+      message: {
+        extendedTextMessage: {
+          text: body,
+          contextInfo: {
+            stanzaId,
+            participant: remoteJid,
+            quotedMessage: {
+              statusMentionMessage: {
+                message: {
+                  protocolMessage: {
+                    type: 'STATUS_MENTION_MESSAGE'
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: phoneNumer,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    context: {
+                      message_id: stanzaId,
+                      id: stanzaId,
+                    },
+                    from: remotePhoneNumber,
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body },
+                    type: 'text',
+                  },
+                ],
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber }],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+  })
 })

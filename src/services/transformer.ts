@@ -784,6 +784,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         message.type = 'text'
         break
 
+      case 'statusMentionMessage':
+        break
+
       case 'messageContextInfo':
       case 'senderKeyDistributionMessage':
       case 'albumMessage':
