@@ -111,8 +111,8 @@ export class ListenerBaileys implements Listener {
     }
 
     const key = i.key
-    // possible update message
-    if (key?.fromMe && key?.id) {
+    // possible update message or delete message
+    if (key?.id && (key?.fromMe || (!key?.fromMe && ((message as any)?.update?.messageStubType == 1)))) {
       const idUno = await store.dataStore.loadUnoId(key.id)
       logger.debug('Unoapi id %s to Baileys id %s', idUno, key.id)
       if (idUno) {
