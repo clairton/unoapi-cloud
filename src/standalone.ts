@@ -223,5 +223,5 @@ process.on('uncaughtException', (reason: any) => {
     Sentry.captureException(reason)
   }
   logger.error('uncaughtException stadalone: %s %s %s', reason, reason.stack)
-  throw reason
+  process.exit(1)
 })

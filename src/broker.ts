@@ -128,5 +128,5 @@ process.on('uncaughtException', (reason: any) => {
     Sentry.captureException(reason)
   }
   logger.error('uncaughtException broker: %s %s %s', reason, reason.stack)
-  throw reason
+  process.exit(1)
 })

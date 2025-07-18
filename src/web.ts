@@ -67,5 +67,5 @@ process.on('uncaughtException', (reason: any) => {
     Sentry.captureException(reason)
   }
   logger.error('uncaughtException web: %s %s %s', reason, reason.stack)
-  throw reason
+  process.exit(1)
 })
