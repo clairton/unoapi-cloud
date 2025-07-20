@@ -1,4 +1,4 @@
-import { connect, Connection, Channel, Queue, Exchange, Options, ConsumeMessage, abc } from 'amqplib'
+import { connect, Connection, Channel, Queue, Options, ConsumeMessage, abc } from 'amqplib'
 import {
   AMQP_URL,
   UNOAPI_X_COUNT_RETRIES,
