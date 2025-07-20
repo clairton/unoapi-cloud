@@ -340,7 +340,7 @@ export const getPn = (payload: any) => {
     participantPn: participantPn2
   } = payload
 
-  return jidToPhoneNumber(participantPn || senderPn || participant || participant2 || participantPn2 || remoteJid)
+  return jidToPhoneNumber(participantPn || senderPn || participant || participant2 || participantPn2 || remoteJid, '')
 }
 
 export const formatJid = (jid: string) => {

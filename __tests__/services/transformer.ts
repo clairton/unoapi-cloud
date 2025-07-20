@@ -15,6 +15,7 @@ import {
   extractDestinyPhone,
   isGroupMessage,
   isOutgoingMessage,
+  getChatAndPn,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -102,6 +103,25 @@ describe('service transformer', () => {
       ],
     }
     expect(isGroupMessage(payload)).toBe(false)
+  })
+
+  test('return getChatAndPn with lid and without group', async () => {
+    const senderPn = '554988290955'
+    const remoteJid = '24788516941@lid'
+    const payload = { key: { remoteJid, senderPn }}
+    const a = getChatAndPn(payload)
+    expect(a[0]).toBe(remoteJid)
+    expect(a[1]).toBe('5549988290955')
+  })
+
+  test('return getChatAndPn with lid and with group', async () => {
+    const participantPn = '554988290955'
+    const remoteJid = '24788516941@g.us'
+    const participant = '24788516941@lid'
+    const payload = { key: { remoteJid, participant, participantPn }}
+    const a = getChatAndPn(payload)
+    expect(a[0]).toBe(remoteJid)
+    expect(a[1]).toBe('5549988290955')
   })
 
   test('return isGroupMessage true', async () => {
