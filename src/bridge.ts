@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
+import process from 'node:process'
 
 import { BindBridgeJob } from './jobs/bind_bridge'
 import { SessionStoreRedis } from './services/session_store_redis'
@@ -100,6 +101,15 @@ process.on('uncaughtException', (reason: any) => {
   if (process.env.SENTRY_DSN) {
     Sentry.captureException(reason)
   }
-  logger.error('uncaughtException bridge: %s %s %s', reason, reason.stack)
+  logger.error('uncaughtException bridge: %s %s', reason, reason.stack)
+  process.exit(1)
+})
+
+process.on('unhandledRejection', (reason: any, promise) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('unhandledRejection: %s', reason.stack)
+  logger.error('promise: %s', promise)
   process.exit(1)
 })

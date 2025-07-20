@@ -222,6 +222,15 @@ process.on('uncaughtException', (reason: any) => {
   if (process.env.SENTRY_DSN) {
     Sentry.captureException(reason)
   }
-  logger.error('uncaughtException stadalone: %s %s %s', reason, reason.stack)
+  logger.error('uncaughtException stadalone: %s %s', reason, reason.stack)
+  process.exit(1)
+})
+
+process.on('unhandledRejection', (reason: any, promise) => {
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(reason)
+  }
+  logger.error('unhandledRejection: %s', reason.stack)
+  logger.error('promise: %s', promise)
   process.exit(1)
 })
