@@ -6,6 +6,7 @@ import logger from './logger'
 import { Config } from './config'
 import { MESSAGE_CHECK_WAAPP } from '../defaults'
 import { t } from '../i18n'
+import { isJidGroup } from 'baileys'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
 
@@ -321,6 +322,29 @@ export const isIndividualMessage = (payload: any) => {
   return isIndividualJid(remoteJid)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getChatAndPn = (payload: any) => {
+  const {
+    key: { remoteJid },
+  } = payload
+  if (isIndividualJid(remoteJid)) {
+    return [remoteJid, jidToPhoneNumber(payload)]
+  } else {
+    return [remoteJid, getPn(payload)]
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getPn = (payload: any) => {
+  const {
+    key: { remoteJid, senderPn, participantPn, participant },
+    participant: participant2,
+    participantPn: participantPn2
+  } = payload
+
+  return jidToPhoneNumber(participantPn || senderPn || participant || participant2 || participantPn2 || remoteJid)
+}
+
 export const formatJid = (jid: string) => {
   const jidSplit = jid.split('@')
   return `${jidSplit[0].split(':')[0]}@${jidSplit[1]}`
@@ -483,14 +507,8 @@ export const jidToPhoneNumberIfUser = (value: any): string => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fromBaileysMessageContent = (phone: string, payload: any, config?: Partial<Config>): any => {
   try {
-    const {
-      key: { remoteJid, id: whatsappMessageId, participant: participant1, fromMe }, participant: participant2
-    } = payload
-    const participant = participant1 || participant2
-    const chatJid = formatJid(remoteJid)
-    const isIndividual = isIndividualJid(chatJid)
-    const senderJid = isIndividual ? chatJid : (participant && formatJid(participant)) || chatJid
-    const senderPhone = jidToPhoneNumber(senderJid)
+    const { key: { id: whatsappMessageId, fromMe } } = payload
+    const [chatJid, senderPhone] = getChatAndPn(payload)
     const messageType = getMessageType(payload)
     const binMessage = payload.update || payload.receipt || (messageType && payload.message && payload.message[messageType])
     let profileName
