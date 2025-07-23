@@ -235,7 +235,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     medias.set(id, JSON.stringify(payload))
   }
   dataStore.setJid = async (phoneOrJid: string, jid: string) => {
-    jids.set(phoneOrJid, jid, HOUR)
+    jids.set(phoneOrJid, jid)
   }
   dataStore.getJid = async (phoneOrJid: string) => {
     return jids.get(phoneOrJid)

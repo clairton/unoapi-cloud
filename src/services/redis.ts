@@ -202,7 +202,7 @@ export const getJid = async (phone: string, jid: any) => {
 
 export const setJid = async (phone: string, jid: string, validJid: string) => {
   const key = jidKey(phone, jid)
-  await client.set(key, validJid, { EX: DATA_JID_TTL })
+  await client.set(key, validJid)
 }
 
 export const setBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {

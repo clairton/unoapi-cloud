@@ -15,7 +15,7 @@ import {
   extractDestinyPhone,
   isGroupMessage,
   isOutgoingMessage,
-  getChatAndPn,
+  getChatAndNumberAndId,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -105,23 +105,46 @@ describe('service transformer', () => {
     expect(isGroupMessage(payload)).toBe(false)
   })
 
-  test('return getChatAndPn with lid and without group', async () => {
+  test('getChatAndNumberAndId with lid and without group', async () => {
     const senderPn = '554988290955'
     const remoteJid = '24788516941@lid'
     const payload = { key: { remoteJid, senderPn }}
-    const a = getChatAndPn(payload)
+    const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
+    expect(a[2]).toBe(remoteJid)
   })
 
-  test('return getChatAndPn with lid and with group', async () => {
+  test('getChatAndNumberAndId with participant and and with group', async () => {
     const participantPn = '554988290955'
     const remoteJid = '24788516941@g.us'
-    const participant = '24788516941@lid'
+    const participant = '554988290955@s.whatsapp.net'
     const payload = { key: { remoteJid, participant, participantPn }}
-    const a = getChatAndPn(payload)
+    const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
+    expect(a[2]).toBe(participant)
+  })
+
+  test('getChatAndNumberAndId with lid and with group', async () => {
+    const participantPn = '554988290955'
+    const remoteJid = '24788516941@g.us'
+    const participantLid = '24788516941@lid'
+    const payload = { key: { remoteJid, participantLid, participantPn }}
+    const a = getChatAndNumberAndId(payload)
+    expect(a[0]).toBe(remoteJid)
+    expect(a[1]).toBe('5549988290955')
+    expect(a[2]).toBe(participantLid)
+  })
+
+  test('getChatAndNumberAndId with senderLid and without group', async () => {
+    const senderPn = '554988290955'
+    const remoteJid = '24788516941@lid'
+    const payload = { key: { remoteJid, senderLid: remoteJid, senderPn }}
+    const a = getChatAndNumberAndId(payload)
+    expect(a[0]).toBe(remoteJid)
+    expect(a[1]).toBe('5549988290955')
+    expect(a[2]).toBe(remoteJid)
   })
 
   test('return isGroupMessage true', async () => {
@@ -338,7 +361,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with messageContextInfo', async () => {
@@ -393,7 +416,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with text', async () => {
@@ -445,7 +468,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with quoted', async () => {
@@ -507,7 +530,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with media', async () => {
@@ -574,7 +597,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with contact', async () => {
@@ -638,7 +661,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with update', async () => {
@@ -692,7 +715,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with status pending', async () => {
@@ -750,7 +773,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with deleted', async () => {
@@ -804,7 +827,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with starred', async () => {
@@ -858,7 +881,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with failed', async () => {
@@ -918,7 +941,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with receipt read', async () => {
@@ -972,7 +995,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with receipt read', async () => {
@@ -1026,7 +1049,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('getMessageType with viewOnceMessage', async () => {
@@ -1106,7 +1129,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent protocolMessage editedMessage', async () => {
@@ -1169,7 +1192,7 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
   test('getMessageType with viewOnceMessage', async () => {
@@ -1455,7 +1478,7 @@ describe('service transformer', () => {
       participant: `${remotePhoneNumber}@s.whatsapp.net`,
       isMentionedInStatus :false
     }
-    const resp = fromBaileysMessageContent(phoneNumer, input)
+    const resp = fromBaileysMessageContent(phoneNumer, input)[0]
     const from = resp.entry[0].changes[0].value.messages[0].from
     expect(from).toEqual(remotePhoneNumber)
   })
@@ -1529,6 +1552,6 @@ describe('service transformer', () => {
         },
       ],
     }
-    expect(fromBaileysMessageContent(phoneNumer, input)).toEqual(output)
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 })

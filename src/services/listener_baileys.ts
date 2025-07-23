@@ -147,7 +147,12 @@ export class ListenerBaileys implements Listener {
 
     let data
     try {
-      data = fromBaileysMessageContent(phone, i, config)
+      const resp = fromBaileysMessageContent(phone, i, config)
+      data = resp[0]
+      const senderPhone = resp[1]
+      const senderId = resp[2]
+      const { dataStore } = await config.getStore(phone, config)
+      await dataStore.setJid(senderPhone, senderId)
     } catch (error) {
       if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)
