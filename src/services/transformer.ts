@@ -340,7 +340,9 @@ export const getNumberAndId = (payload: any): [string, string] => {
     participantPn: participantPn2
   } = payload
 
-  const id = senderLid || participantLid || participant || participant2 || remoteJid
+  const value = senderLid || participantLid || participant || participant2 || remoteJid
+  const split = value.split('@')
+  const id = `${split.split(':')[0]}@${split[1]}`
   const phone = jidToPhoneNumber(participantPn || senderPn || participant || participant2 || participantPn2 || remoteJid, '')
   return [phone, id]
 }
