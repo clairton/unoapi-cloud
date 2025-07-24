@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 ENV NODE_ENV=development
 
@@ -15,7 +15,7 @@ ADD ./public ./public
 ADD ./tsconfig.json ./tsconfig.json
 RUN yarn build
 
-FROM node:22-alpine
+FROM node:24-alpine
 
 LABEL \
   maintainer="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
@@ -23,7 +23,7 @@ LABEL \
   org.opencontainers.image.description="Unoapi Cloud" \
   org.opencontainers.image.authors="Clairton Rodrigo Heinzen <clairton.rodrigo@gmail.com>" \
   org.opencontainers.image.url="https://github.com/clairton/unoapi-cloud" \
-  org.opencontainers.image.vendor="https://clairton.eti.br" \
+  org.opencontainers.image.vendor="https://uno.ltd" \
   org.opencontainers.image.licenses="GPLv3"
 
 ENV NODE_ENV=production
