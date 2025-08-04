@@ -7,3 +7,5 @@ data/medias/*
 data/stores/*
 data/sessions/*
 .env
+.yarn/*
+.yarnrc.yml

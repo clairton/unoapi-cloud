@@ -649,7 +649,7 @@ export class ClientBaileys implements Client {
         logger.debug(groupMetadata, 'Retrieved group metadata!')
       } else {
         groupMetadata = {
-          addressingMode: 'pn',
+          // addressingMode: 'pn',
           id: key.remoteJid,
           owner: '',
           subject: key.remoteJid,
