@@ -139,6 +139,10 @@ const connectCountKey = (phone: string, ordinal: number | string) => {
   return `${BASE_KEY}connect-count:${phone}:${ordinal}`
 }
 
+const timerKeyExpired = (phone: string, id: string) => {
+  return `${BASE_KEY}timer:${phone}:${id}`
+}
+
 export const sessionStatusKey = (phone: string) => {
   return `${BASE_KEY}status:${phone}`
 }
@@ -442,6 +446,24 @@ export const getGroup = async (phone: string, jid: string) => {
 export const setGroup = async (phone: string, jid: string, data: GroupMetadata) => {
   const key = groupKey(phone, jid)
   return redisSetAndExpire(key, JSON.stringify(data), DATA_TTL)
+}
+
+export const setTimerExpired = async (phone: string, id: string, expired: boolean) => {
+  const key = timerKeyExpired(phone, id)
+  logger.debug('setTimerExpired with key %s', key)
+  return redisSet(key, expired)
+}
+
+export const getTimerExpired = async (phone: string, id: string) => {
+  const key = timerKeyExpired(phone, id)
+  logger.debug('getTimerExpired with key %s', key)
+  return redisGet(key)
+}
+
+export const delTimerExpired = async (phone: string, id: string) => {
+  const key = timerKeyExpired(phone, id)
+  logger.debug('delTimerExpired with key %s', key)
+  return redisDel(key)
 }
 
 export const setMedia = async (phone: string, id: string, payload: any) => {

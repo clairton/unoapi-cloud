@@ -13,6 +13,7 @@ import {
   UNOAPI_EXCHANGE_BROKER_NAME,
   STATUS_FAILED_WEBHOOK_URL,
   UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
+  UNOAPI_QUEUE_TIMER,
 } from './defaults'
 
 import { amqpConsume } from './amqp'
@@ -42,6 +43,7 @@ const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
 
 import * as Sentry from '@sentry/node'
+import { consumer } from './services/timer'
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
@@ -84,6 +86,15 @@ const startBroker = async () => {
     UNOAPI_QUEUE_OUTGOING,
     '*',
     outgingJob.consume.bind(outgingJob),
+    { notifyFailedMessages, prefetch, type: 'topic' }
+  )
+
+  logger.info('Starting timer consumer %s', UNOAPI_SERVER_NAME)
+  await amqpConsume(
+    UNOAPI_EXCHANGE_BROKER_NAME,
+    UNOAPI_QUEUE_TIMER,
+    '*',
+    consumer,
     { notifyFailedMessages, prefetch, type: 'topic' }
   )
 

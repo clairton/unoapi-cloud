@@ -28,6 +28,8 @@ import { Logout } from './services/logout'
 import { Contact } from './services/contact'
 import { ContactDummy } from './services/contact_dummy'
 import { middlewareNext } from './services/middleware_next'
+import { TimerController } from './controllers/timer_controller'
+
 
 export const router = (
   incoming: Incoming,
@@ -58,6 +60,7 @@ export const router = (
   const contactsController = new ContactsController(contact)
   const pairingCodeController = new PairingCodeController(getConfig, incoming)
   const connectController = new ConnectController(reload)
+  const timerController = new TimerController()
 
 
   // Webhook for forward connection
@@ -93,6 +96,11 @@ export const router = (
 
   // https://developers.facebook.com/docs/whatsapp/cloud-api/reference/phone-numbers/
   router.post('/:phone/request_code', middleware, pairingCodeController.request.bind(pairingCodeController))
+
+  // when session send reply, wait timeout to send message
+  router.post('/timer/:phone', middleware, timerController.start.bind(timerController))
+  // when client reply, stop timer
+  router.delete('/timer/:phone/:id', middleware, timerController.stop.bind(timerController))
 
   injectRoute(router)
 

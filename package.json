@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "2.5.0-dev-13",
+  "version": "2.5.0-dev-14",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -82,7 +82,7 @@
     "@sentry/node": "^9.29.0",
     "amqplib": "^0.10.8",
     "awesome-phonenumber": "^6.8.0",
-    "baileys": "^6.7.19-alpha.0",
+    "baileys": "github:whiskeysockets/baileys#b7876da2e5d8d4d4b391e215b48b668517b86f3e",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "i18n": "^0.15.1",
