@@ -11,7 +11,7 @@
 	"online_session": "Sessão está online",
 	"connection_timed_out": "A sessão %s excedeu o tempo de %s ms para conectar, sessão alterada para estado Offline",
 	"connecting": "Conectando...",
-	"connected": "Conectado com o número %s utilizando a versao do Whatsapp v%s, e a útima versão seria v%s, hora atual %s",
+	"connected": "Conectado com o número %s utilizando a versao do Whatsapp v%s,hora atual %s",
 	"removed": "A sessão foi removida no aplicativo do Whatsapp, envie uma mesagem para gerar o qrcode e conectar novamente!",
 	"unique": "A sessão só pode ser conectado uma vez, saindo da atual, envia uma mensagem para conectar novamente!",
 	"closed": "A sessão for encerrada com status: %s, detalhe: %s!",

@@ -32,11 +32,11 @@ if (process.env.SENTRY_DSN) {
   })
 }
 
-const getConfig: getConfig = getConfigRedis
-const incomingAmqp: Incoming = new IncomingAmqp(getConfig)
+const getConfigLocal: getConfig = getConfigRedis
+const incomingAmqp: Incoming = new IncomingAmqp(getConfigLocal)
 
 
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigLocal, isInBlacklistInRedis)
 const commanderJob = new CommanderJob(outgoingCloudApi, getConfigRedis)
 const bulkParserJob = new BulkParserJob(outgoingCloudApi, getConfigRedis)
 const bulkSenderJob = new BulkSenderJob(incomingAmqp, outgoingCloudApi)

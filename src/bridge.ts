@@ -30,14 +30,14 @@ import { LogoutBaileys } from './services/logout_baileys'
 import { ReloadJob } from './jobs/reload'
 import { LogoutJob } from './jobs/logout'
 
-const getConfig: getConfig = getConfigRedis
-const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfig)
+const getConfigLocal: getConfig = getConfigRedis
+const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigLocal)
 const listenerAmqp: Listener = new ListenerAmqp()
 const onNewLogin = onNewLoginGenerateToken(outgoingAmqp)
 const bindJob = new BindBridgeJob()
-const reload = new ReloadBaileys(getClientBaileys, getConfig, listenerAmqp, onNewLogin)
+const reload = new ReloadBaileys(getClientBaileys, getConfigLocal, listenerAmqp, onNewLogin)
 const reloadJob = new ReloadJob(reload)
-const logout = new LogoutBaileys(getClientBaileys, getConfig, listenerAmqp, onNewLogin)
+const logout = new LogoutBaileys(getClientBaileys, getConfigLocal, listenerAmqp, onNewLogin)
 const logoutJob = new LogoutJob(logout)
 
 import * as Sentry from '@sentry/node'

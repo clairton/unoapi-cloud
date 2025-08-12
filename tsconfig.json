@@ -15,7 +15,8 @@
     "esModuleInterop": true,
     "declaration": true,
     "resolveJsonModule": true,
-    "lib": ["es2020", "esnext.array", "DOM", "ES2021.String"]
+    "lib": ["es2020", "esnext.array", "DOM", "ES2021.String"],
+    "isolatedModules": true
   },
   "include": ["src/**/*.ts", "src/**/*.json"],
   "ts-node": {

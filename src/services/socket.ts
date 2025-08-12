@@ -12,6 +12,8 @@ import makeWASocket, {
   Browsers,
   ConnectionState,
   UserFacingSocketConfig,
+  fetchLatestWaWebVersion,
+  WAVersion,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
@@ -25,13 +27,13 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import { 
   DEFAULT_BROWSER,
-  WHATSAPP_VERSION,
   LOG_LEVEL,
   CONNECTING_TIMEOUT_MS,
   MAX_CONNECT_TIME,
   MAX_CONNECT_RETRY,
   CLEAN_CONFIG_ON_DISCONNECT,
   VALIDATE_SESSION_NUMBER,
+  WHATSAPP_VERSION,
 } from '../defaults'
 import { t } from '../i18n'
 import { SendError } from './send_error'
@@ -133,6 +135,8 @@ export const connect = async ({
 }) => {
   let sock: WASocket | undefined = undefined
   const msgRetryCounterCache = new NodeCache()
+  const whatsappVersion = config.whatsappVersion || (await fetchLatestWaWebVersion({})).version
+  const eventsMap = new Map()
   const { dataStore, state, saveCreds, sessionStore } = store
   const firstSaveCreds = async () => {
     if (state?.creds?.me?.id) {
@@ -236,7 +240,7 @@ export const connect = async ({
     await sessionStore.setStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version } = await fetchLatestBaileysVersion()
-    const message = t('connected', phone, WHATSAPP_VERSION.join('.'), version.join('.'), new Date().toUTCString())
+    const message = t('connected', phone, whatsappVersion.join('.'), version.join('.'), new Date().toUTCString())
     await onNotification(message, false)
   }
 
@@ -309,8 +313,8 @@ export const connect = async ({
   }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
-    logger.info('Subscribe %s event: %s sock: %s', phone, event, sock?.user?.id)
-    return sock?.ev?.on(event, callback)
+    logger.info('Subscribe %s event: %s', phone, event)
+    eventsMap.set(event, callback)
   }
 
   const reconnect = async () => {
@@ -499,7 +503,7 @@ export const connect = async ({
       auth: state,
       logger: loggerBaileys,
       syncFullHistory: !config.ignoreHistoryMessages,
-      version: WHATSAPP_VERSION,
+      version: whatsappVersion,
       getMessage,
       shouldIgnoreJid: config.shouldIgnoreJid,
       retryRequestDelayMs: config.retryRequestDelayMs,
@@ -551,8 +555,17 @@ export const connect = async ({
       }
     }
     if (sock) {
-      dataStore.bind(sock.ev)
+      event('connection.update', onConnectionUpdate)
       event('creds.update', verifyAndSaveCreds)
+      sock.ev.process(async(events) => {
+        const keys = Object.keys(events)
+        for(const i in keys) {
+          const key = keys[i]
+          if (eventsMap.has(key)) {
+            eventsMap.get(key)(events[key])
+          }
+        }
+      })
       logger.info('Connection type %s already creds %s', config.connectionType, sock?.authState?.creds?.registered)
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone}`)
@@ -563,13 +576,10 @@ export const connect = async ({
           const beatyCode = `${code?.match(/.{1,4}/g)?.join('-')}`
           const message = t('pairing_code', beatyCode)
           await onNotification(message, true)
-          event('connection.update', onConnectionUpdate)
         } catch (error) {
           console.error(error)
           throw error
         }
-      } else {
-        event('connection.update', onConnectionUpdate)
       }
       if (config.wavoipToken) {
         useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)

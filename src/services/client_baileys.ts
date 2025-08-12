@@ -25,7 +25,7 @@ import { Response } from './response'
 import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
-import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
+import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND, WHATSAPP_VERSION } from '../defaults'
 import { t } from '../i18n'
 import { ClientForward } from './client_forward'
 import { SendError } from './send_error'
@@ -127,7 +127,7 @@ export class ClientBaileys implements Client {
   private event
   private fetchImageUrl = fetchImageUrlDefault
   private exists = existsDefault
-  private socketLogout = logoutDefault
+  private socketLogout: logout = logoutDefault
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
@@ -278,7 +278,7 @@ export class ClientBaileys implements Client {
       onNewLogin: this.onNewLogin,
       config: this.config,
       onDisconnected: async () => this.disconnect(),
-      onReconnect: this.onReconnect,
+      onReconnect: this.onReconnect
     })
     if (!result) {
       logger.error('Socket connect return empty %s', this.phone)
@@ -649,7 +649,7 @@ export class ClientBaileys implements Client {
         logger.debug(groupMetadata, 'Retrieved group metadata!')
       } else {
         groupMetadata = {
-          // addressingMode: 'pn',
+          // addressingMode: isLidUser(key.remoteJid) ? 'lid' : 'pn',
           id: key.remoteJid,
           owner: '',
           subject: key.remoteJid,

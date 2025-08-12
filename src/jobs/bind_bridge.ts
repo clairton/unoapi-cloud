@@ -24,22 +24,22 @@ import { ListenerAmqp } from '../services/listener_amqp'
 import { OutgoingCloudApi } from '../services/outgoing_cloud_api'
 import { IncomingBaileys } from '../services/incoming_baileys'
 
-const getConfig: getConfig = getConfigRedis
-const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfig)
+const getConfigLocal: getConfig = getConfigRedis
+const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigLocal)
 const listenerAmqp: Listener = new ListenerAmqp()
 const broadcastAmqp: Broadcast = new BroadcastAmqp()
-const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfig)
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfig, isInBlacklistInRedis)
+const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigLocal)
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigLocal, isInBlacklistInRedis)
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
-const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfig, getClientBaileys, onNewLogin)
-const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfig, UNOAPI_QUEUE_COMMANDER)
-const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi, getConfig)
+const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigLocal, getClientBaileys, onNewLogin)
+const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfigLocal, UNOAPI_QUEUE_COMMANDER)
+const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi, getConfigLocal)
 
 const processeds = new Map<string, boolean>()
 
 export class BindBridgeJob {
   async consume(server: string, { routingKey }: { routingKey: string }) {
-    const config = await getConfig(routingKey)
+    const config = await getConfigLocal(routingKey)
     if (config.provider && !['forwarder', 'baileys'].includes(config.provider!)) {
       logger.info(`Ignore connecting routingKey ${routingKey} provider ${config.provider}...`)
       return

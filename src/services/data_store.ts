@@ -1,6 +1,5 @@
-import { GroupMetadata, WAMessage, WAMessageKey, WASocket } from 'baileys'
+import { AuthenticationState, GroupMetadata, useMultiFileAuthState, WAMessage, WAMessageKey, WASocket } from 'baileys'
 import { Config } from './config'
-import makeInMemoryStore from '../store/make-in-memory-store'
 
 export const dataStores: Map<string, DataStore> = new Map()
 
@@ -21,10 +20,17 @@ export type MessageStatus = 'scheduled'
       | 'accepted'
       | 'deleted'
 
-export type DataStore = ReturnType<typeof makeInMemoryStore> & {
+export type DataStore  = {
+  state: AuthenticationState
+  saveCreds: () => Promise<void>
   type: string
   loadKey: (id: string) => Promise<WAMessageKey | undefined>
   setKey: (id: string, key: WAMessageKey) => Promise<void>
+  writeToFile: (path: string) => void
+  readFromFile: (path: string) => any
+  toJSON: () => any
+  fromJSON: (json: any) => void
+  loadMessage: (jid: string, id: string) => Promise<any | undefined>
   setUnoId: (id: string, unoId: string) => Promise<void>
   setMediaPayload: (id: string, payload: any) => Promise<void>
   loadMediaPayload: (id: string) => Promise<any>

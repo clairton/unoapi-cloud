@@ -1,6 +1,6 @@
 jest.mock('baileys')
 import { OnDisconnected, OnQrCode, OnReconnect, OnNotification, connect } from '../../src/services/socket'
-import makeWASocket, { WASocket } from 'baileys'
+import makeWASocket, { WASocket, WAVersion } from 'baileys'
 import { mock } from 'jest-mock-extended'
 import { Store } from '../../src/services/store'
 import { defaultConfig } from '../../src/services/config'
@@ -18,6 +18,7 @@ describe('service socket', () => {
   let onNotification: OnNotification
   let onDisconnected: OnDisconnected
   let onReconnect: OnReconnect
+  let whatsappVersion = [1, 1, 1] as WAVersion
   const onNewLogin = async (phone: string) => {
     logger.info('New login', phone)
   }
@@ -29,7 +30,7 @@ describe('service socket', () => {
     mockWaSocket = mock<WASocket>()
     mockBaileysEventEmitter = mock<typeof mockWaSocket.ev>()
     Reflect.set(mockWaSocket, 'ev', mockBaileysEventEmitter)
-    mockOn = jest.spyOn(mockWaSocket.ev, 'on')
+    mockOn = jest.spyOn(mockWaSocket.ev, 'process')
     mockMakeWASocket.mockReturnValue(mockWaSocket)
     onQrCode = jest.fn()
     onNotification = jest.fn()
@@ -48,13 +49,24 @@ describe('service socket', () => {
       onNewLogin,
       attempts: 1,
       time: 1,
-      config: defaultConfig,
+      config: { ...defaultConfig, whatsappVersion }
     })
     expect(response && response.status.attempt).toBe(1)
   })
 
-  test('call connect and subscribe 2 events', async () => {
-    await connect({ phone, store, onQrCode, onNotification, onDisconnected, onReconnect, onNewLogin, attempts: 1, time: 1, config: defaultConfig })
-    expect(mockOn).toHaveBeenCalledTimes(2)
+  test('call connect and process', async () => {
+    await connect({
+      phone,
+      store,
+      onQrCode,
+      onNotification,
+      onDisconnected,
+      onReconnect,
+      onNewLogin,
+      attempts: 1,
+      time: 1,
+      config: { ...defaultConfig, whatsappVersion } 
+    })
+    expect(mockOn).toHaveBeenCalled()
   })
 })

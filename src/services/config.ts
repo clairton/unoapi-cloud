@@ -1,6 +1,6 @@
 import { getStore } from './store'
 import { getStoreFile } from './store_file'
-import { WAMessageKey } from 'baileys'
+import { WAMessageKey, WAVersion } from 'baileys'
 import { Level } from 'pino'
 
 export const configs: Map<string, Config> = new Map()
@@ -80,7 +80,8 @@ export type Config = {
   label: string
   overrideWebhooks: boolean
   customMessageCharacters: string[]
-  customMessageCharactersFunction: (message: string) => string
+  customMessageCharactersFunction: (message: string) => string,
+  whatsappVersion: WAVersion | undefined,
 }
 
 export const defaultConfig: Config = {
@@ -144,6 +145,7 @@ export const defaultConfig: Config = {
   overrideWebhooks: false,
   customMessageCharacters: [],
   customMessageCharactersFunction: (message: string) => message,
+  whatsappVersion: undefined
 }
 
 export interface getConfig {
