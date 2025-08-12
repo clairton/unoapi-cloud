@@ -451,7 +451,7 @@ export const setGroup = async (phone: string, jid: string, data: GroupMetadata) 
 export const setTimerExpired = async (phone: string, id: string, expired: boolean) => {
   const key = timerKeyExpired(phone, id)
   logger.debug('setTimerExpired with key %s', key)
-  return redisSet(key, expired)
+  return redisSet(key, expired ? 'true' : 'false')
 }
 
 export const getTimerExpired = async (phone: string, id: string) => {

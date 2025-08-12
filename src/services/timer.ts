@@ -1,5 +1,5 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_TIMER, UNOAPI_QUEUE_OUTGOING } from '../defaults'
+import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_TIMER, UNOAPI_QUEUE_OUTGOING, UNOAPI_QUEUE_INCOMING, UNOAPI_EXCHANGE_BRIDGE_NAME } from '../defaults'
 import { v1 as uuid } from 'uuid'
 import { setTimerExpired, getTimerExpired, delTimerExpired } from './redis'
 import { getConfigRedis } from './config_redis'
@@ -19,6 +19,7 @@ export const start = async (phone, to, timeout, message) => {
     { payload }, 
     { type: 'topic', delay: timeout }
   )
+  return id
 }
 
 export const stop = async (from, id) => {
@@ -44,9 +45,10 @@ export const consumer = async (phone: string, data: object) => {
       } 
     }
     await amqpPublish(
-      UNOAPI_EXCHANGE_BROKER_NAME,
-      UNOAPI_QUEUE_OUTGOING, phone,
-      { webhooks: config.webhooks, payload: body, split: true },
+      UNOAPI_EXCHANGE_BRIDGE_NAME,
+      `${UNOAPI_QUEUE_INCOMING}.${config.server!}`,
+      phone,
+      { payload: body },
       { type: 'topic' }
     )
   }
