@@ -33,6 +33,7 @@ import { isInBlacklistInRedis } from './services/blacklist'
 import { NotificationJob } from './jobs/notification'
 import { WebhookStatusFailedJob } from './jobs/webhook_status_failed'
 import { addToBlacklist } from './jobs/add_to_blacklist'
+import { TimerJob } from './jobs/timer'
 
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
@@ -41,9 +42,9 @@ const reloadJob = new ReloadJob(reload)
 const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
+const timerJob = new TimerJob(incomingAmqp)
 
 import * as Sentry from '@sentry/node'
-import { consumer } from './services/timer'
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
@@ -94,7 +95,7 @@ const startBroker = async () => {
     UNOAPI_EXCHANGE_BROKER_NAME,
     UNOAPI_QUEUE_TIMER,
     '*',
-    consumer,
+    timerJob.consume.bind(timerJob),
     { notifyFailedMessages, prefetch, type: 'topic' }
   )
 
