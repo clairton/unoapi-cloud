@@ -98,9 +98,9 @@ export const router = (
   router.post('/:phone/request_code', middleware, pairingCodeController.request.bind(pairingCodeController))
 
   // when session send reply, wait timeout to send message
-  router.post('/timer/:phone', middleware, timerController.start.bind(timerController))
+  router.post('/timer/:phone/:to', middleware, timerController.start.bind(timerController))
   // when client reply, stop timer
-  router.delete('/timer/:phone/:id', middleware, timerController.stop.bind(timerController))
+  router.delete('/timer/:phone/:to', middleware, timerController.stop.bind(timerController))
 
   injectRoute(router)
 

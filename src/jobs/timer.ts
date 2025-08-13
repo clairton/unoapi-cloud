@@ -12,12 +12,12 @@ export class TimerJob {
   async consume(phone: string, data: object) {
     const a = data as any
     const payload: any = a.payload
-    const { id, message, to } = payload
-    if (await getTimerExpired(phone, id)) {
-      logger.debug('timer comsumer phone %s to %s id %s already deleted', phone, to, id)
-      await delTimerExpired(phone, id)
+    const { message, to } = payload
+    if (await getTimerExpired(phone, to)) {
+      logger.debug('timer comsumer phone %s to %s already deleted', phone, to)
+      await delTimerExpired(phone, to)
     } else {
-      logger.debug('timer consumer phone %s to %s id %s enqueue', phone, to, id)
+      logger.debug('timer consumer phone %s to %s enqueue', phone, to)
       const body = {
         messaging_product: 'whatsapp',
         to,
