@@ -49,7 +49,7 @@ export const consumer = async (phone: string, data: object) => {
       `${UNOAPI_QUEUE_INCOMING}.${config.server!}`,
       phone,
       { payload: body },
-      { type: 'topic' }
+      { type: 'direct' }
     )
   }
 }
