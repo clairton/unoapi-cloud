@@ -139,7 +139,7 @@ const connectCountKey = (phone: string, ordinal: number | string) => {
   return `${BASE_KEY}connect-count:${phone}:${ordinal}`
 }
 
-export const timerKeyExpired = (from: string, to: string) => {
+export const lastTimerKey = (from: string, to: string) => {
   return `${BASE_KEY}timer:${from}:${to}`
 }
 
@@ -448,21 +448,21 @@ export const setGroup = async (phone: string, jid: string, data: GroupMetadata) 
   return redisSetAndExpire(key, JSON.stringify(data), DATA_TTL)
 }
 
-export const setTimerExpired = async (phone: string, to: string, expired: boolean) => {
-  const key = timerKeyExpired(phone, to)
-  logger.debug('setTimerExpired with key %s', key)
-  return redisSet(key, expired ? 'true' : 'false')
+export const setLastTimer = async (phone: string, to: string, current: Date) => {
+  const key = lastTimerKey(phone, to)
+  logger.debug('setLastTimer with key %s', key)
+  return redisSet(key, current.toISOString())
 }
 
-export const getTimerExpired = async (phone: string, to: string) => {
-  const key = timerKeyExpired(phone, to)
-  logger.debug('getTimerExpired with key %s', key)
+export const getLastTimer = async (phone: string, to: string) => {
+  const key = lastTimerKey(phone, to)
+  logger.debug('getLastTimer with key %s', key)
   return redisGet(key)
 }
 
-export const delTimerExpired = async (phone: string, to: string) => {
-  const key = timerKeyExpired(phone, to)
-  logger.debug('delTimerExpired with key %s', key)
+export const delLastTimer = async (phone: string, to: string) => {
+  const key = lastTimerKey(phone, to)
+  logger.debug('delLastTimer with key %s', key)
   return redisDel(key)
 }
 

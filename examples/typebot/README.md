@@ -74,32 +74,25 @@ For exemplo, if your session number is Y and you want to send a message ? after 
 
 ```sh
 curl -i -X POST \
-'http://localhost:9876/timer/Y' \
+'http://localhost:9876/timer/Y/X' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1' \
 -d '{ 
-  "timeout": 36000, 
-  "to": "X",
+  "timeout": 36000,
   "message": "?"
 }'
 ```
 
 Or in url format
 ```sh
-curl -i -X POST 'http://localhost:9876/timer/Y?to=X&timetout=360&message=hummm&access_token=1'
+curl -i -X POST 'http://localhost:9876/timer/Y/X?timetout=360&message=hummm&access_token=1'
 ```
 
-It returns the id, like
-
-```json
-{"success": true, "id": "c7432e20-77b5-11f0-ae49-df27bd736f74"}
-```
-
-Where has a response, dont forgot remove the timer sending this id
+Where has a response, dont forgot remove the timer sending with
 
 ```sh
 curl -i -X DELETE \
-'http://localhost:9876/timer/Y/c7432e20-77b5-11f0-ae49-df27bd736f74' \
+'http://localhost:9876/timer/Y/X' \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1'
 ```
