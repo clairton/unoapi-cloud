@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent, isLidUser } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Listener } from './listener'
 import { Store } from './store'
@@ -649,7 +649,8 @@ export class ClientBaileys implements Client {
         logger.debug(groupMetadata, 'Retrieved group metadata!')
       } else {
         groupMetadata = {
-          // addressingMode: isLidUser(key.remoteJid) ? 'lid' : 'pn',
+          owner_country_code: '55',
+          addressingMode: isLidUser(key.remoteJid) ? 'lid' : 'pn',
           id: key.remoteJid,
           owner: '',
           subject: key.remoteJid,
