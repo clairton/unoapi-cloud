@@ -810,6 +810,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       case 'messageContextInfo':
       case 'senderKeyDistributionMessage':
       case 'albumMessage':
+      case 'keepInChatMessage':
         logger.debug(`Ignore message type ${messageType}`)
         return [null, senderPhone, senderId]
 
