@@ -13,7 +13,6 @@ import makeWASocket, {
   ConnectionState,
   UserFacingSocketConfig,
   fetchLatestWaWebVersion,
-  WAVersion,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
@@ -33,7 +32,6 @@ import {
   MAX_CONNECT_RETRY,
   CLEAN_CONFIG_ON_DISCONNECT,
   VALIDATE_SESSION_NUMBER,
-  WHATSAPP_VERSION,
 } from '../defaults'
 import { t } from '../i18n'
 import { SendError } from './send_error'

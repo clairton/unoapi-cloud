@@ -29,7 +29,7 @@ export class TimerController {
       logger.warn('timer start error: timeout param is required')
       return res.status(400).send(`{"error": "timeout param is required"}`)
     }
-    const id = await start(phone, to, timeout, message)
+    await start(phone, to, timeout, message)
     res.status(200).send(`{"success": true}`)
   }
 }
