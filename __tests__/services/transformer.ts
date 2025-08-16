@@ -165,7 +165,7 @@ describe('service transformer', () => {
   })
 
   test('return isOutgoingMessage true', async () => {
-    const number = new Date().getTime()
+    const number = `${new Date().getTime()}`
     const payload = {
       entry: [
         {

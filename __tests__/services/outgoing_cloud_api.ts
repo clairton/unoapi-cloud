@@ -23,15 +23,9 @@ const url = 'http://example.com'
 let phone
 let service: Outgoing
 
-const textPayload = {
-  text: {
-    body: 'test'
-  },
-  type: 'text',
-  to: 'abc',
-}
-
 describe('service outgoing whatsapp cloud api', () => {
+  let textPayload, outgoingPayload, updatePayload
+
   beforeEach(() => {
     config = defaultConfig
     config.ignoreGroupMessages = true
@@ -48,6 +42,42 @@ describe('service outgoing whatsapp cloud api', () => {
     store.mediaStore = mock<MediaStore>()
     phone = `${new Date().getMilliseconds()}`
     service = new OutgoingCloudApi(getConfig, isInBlacklistInMemory)
+    textPayload = {
+      text: {
+        body: 'test'
+      },
+      type: 'text',
+      to: 'abc',
+    }
+    outgoingPayload = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                metadata: { display_phone_number: 'abc' },
+                messages: [ { from: 'abc' }, ]
+              }
+            },
+          ],
+        },
+      ],
+    }
+    updatePayload = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                statuses: [ { status: 'deleted' } ]
+              },
+            },
+          ],
+        },
+      ],
+    }
   })
 
   test('send text with success', async () => {
@@ -67,6 +97,49 @@ describe('service outgoing whatsapp cloud api', () => {
     expect(mockFetch).toHaveBeenCalledTimes(0)
     isInBlacklistMock.mockResolvedValue(Promise.resolve('1'))
     await service.sendHttp(phone, webhook, textPayload, {})
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  test('not sendHttp in webhook when is sendGroupMessages false', async () => {
+    webhook.sendGroupMessages = false
+    textPayload.to = 'um@g.us'
+    mockFetch.mockReset()
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+    await service.sendHttp(phone, webhook, textPayload, {})
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  test('not sendHttp in webhook when is sendNewsletterMessages false', async () => {
+    webhook.sendNewsletterMessages = false
+    textPayload.to = 'um@newsletter'
+    mockFetch.mockReset()
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+    await service.sendHttp(phone, webhook, textPayload, {})
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  test('not sendHttp in webhook when is sendOutgoingMessages false', async () => {
+    webhook.sendOutgoingMessages = false
+    mockFetch.mockReset()
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+    await service.sendHttp(phone, webhook, outgoingPayload, {})
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  test('not sendHttp in webhook when is sendUpdateMessages false', async () => {
+    webhook.sendUpdateMessages = false
+    mockFetch.mockReset()
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+    await service.sendHttp(phone, webhook, updatePayload, {})
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  test('not sendHttp in webhook when is sendIncomingMessages false', async () => {
+    webhook.sendIncomingMessages = false
+    outgoingPayload.entry[0].changes[0].value.messages[0].to = phone
+    mockFetch.mockReset()
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+    await service.sendHttp(phone, webhook, outgoingPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 })

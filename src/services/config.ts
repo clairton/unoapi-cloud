@@ -25,6 +25,7 @@ export type Webhook = {
   sendGroupMessages: boolean
   sendOutgoingMessages: boolean
   sendNewsletterMessages: boolean
+  sendIncomingMessages: boolean
 }
 
 export type WebhookForward = {
@@ -124,6 +125,7 @@ export const defaultConfig: Config = {
       sendGroupMessages: true,
       sendOutgoingMessages: true,
       sendUpdateMessages: true,
+      sendIncomingMessages: true,
     },
   ],
   webhookForward: {},

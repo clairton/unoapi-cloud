@@ -12,7 +12,6 @@ import { OnNewLogin } from '../../src/services/socket'
 import { addToBlacklist } from '../../src/services/blacklist'
 import { Reload } from '../../src/services/reload'
 import { Logout } from '../../src/services/logout'
-import { getLastTimer } from '../../src/services/redis'
 const addToBlacklist = mock<addToBlacklist>()
 const startMock = start as jest.MockedFunction<typeof start>
 const stopMock = start as jest.MockedFunction<typeof stop>

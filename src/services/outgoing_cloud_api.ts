@@ -2,7 +2,7 @@ import { Outgoing } from './outgoing'
 import fetch, { Response, RequestInit } from 'node-fetch'
 import { Webhook, getConfig } from './config'
 import logger from './logger'
-import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage } from './transformer'
+import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, isIncomingMessage } from './transformer'
 import { isInBlacklist } from './blacklist'
 import { PublishOption } from '../amqp'
 
@@ -46,6 +46,10 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (!webhook.sendUpdateMessages && isUpdateMessage(message)) {
       logger.info(`Session phone %s webhook %s configured to not send update message for this webhook`, phone, webhook.id)
+      return
+    }
+    if (!webhook.sendIncomingMessages && isIncomingMessage(message)) {
+      logger.info(`Session phone %s webhook %s configured to not send incoming message for this webhook`, phone, webhook.id)
       return
     }
     const body = JSON.stringify(message)

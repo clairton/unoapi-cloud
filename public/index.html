@@ -413,6 +413,11 @@
                                     <input type="checkbox" class="webhook-sendOutgoingMessages">
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="sendIncomingMessages" class="form-label">Enviar Mensagens de Entrada</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendIncomingMessages">
+                                    <span class="slider round"></span>
+                                </label>
                                 <label for="sendUpdateMessages" class="form-label">Enviar Atualização de Mensagens</label>
                                 <label class="switch">
                                     <input type="checkbox" class="webhook-sendUpdateMessages">
@@ -595,6 +600,11 @@
                         <label for="sendOutgoingMessages" class="form-label">Enviar Mensagens de Saída</label>
                         <label class="switch">
                             <input type="checkbox" class="webhook-sendOutgoingMessages">
+                            <span class="slider round"></span>
+                        </label>
+                        <label for="sendIncomingMessages" class="form-label">Enviar Mensagens de Entrada</label>
+                        <label class="switch">
+                            <input type="checkbox" class="webhook-sendIncomingMessages">
                             <span class="slider round"></span>
                         </label>
                         <label for="sendUpdateMessages" class="form-label">Enviar Atualização de Mensagens</label>
@@ -815,6 +825,11 @@
                                     <input type="checkbox" class="webhook-sendOutgoingMessages" ${webhook.sendOutgoingMessages ? 'checked' : ''}>
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="sendIncomingMessages" class="form-label">Enviar Mensagens de Entrada</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendIncomingMessages" ${webhook.sendIncomingMessages ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
                                 <label for="sendUpdateMessages" class="form-label">Enviar Atualização de Mensagens</label>
                                 <label class="switch">
                                     <input type="checkbox" class="webhook-sendUpdateMessages" ${webhook.sendUpdateMessages ? 'checked' : ''}>
@@ -869,6 +884,7 @@
                             sendGroupMessages: $(this).find('.webhook-sendGroupMessages').is(':checked'),
                             sendNewsletterMessages: $(this).find('.webhook-sendNewsletterMessages').is(':checked'),
                             sendOutgoingMessages: $(this).find('.webhook-sendOutgoingMessages').is(':checked'),
+                            sendIncomingMessages: $(this).find('.webhook-sendIncomingMessages').is(':checked'),
                             sendUpdateMessages: $(this).find('.webhook-sendUpdateMessages').is(':checked'),
                         };
                         sessionData.webhooks.push(webhook);
