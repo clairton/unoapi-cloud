@@ -18,10 +18,11 @@ export class TimerJob {
     const messageDate = Date.parse(time)
     const string = await this.getLastTimerFunction(phone, to)
     const lastTime = string ? Date.parse(string) : undefined
-    if (lastTime && lastTime > messageDate) {
-      logger.debug('timer comsumer phone %s to %s already expired', phone, to)
+    logger.debug('timer comsumer phone %s to %s time %s last time %s', phone, to, time, lastTime)
+    if (!lastTime || (lastTime > messageDate)) {
+      logger.debug('timer comsumer expired phone %s to %s', phone, to)
     } else {
-      logger.debug('timer consumer phone %s to %s enqueue', phone, to)
+      logger.debug('timer consumer enqueue phone %s to %s', phone, to)
       const body = {
         messaging_product: 'whatsapp',
         to,

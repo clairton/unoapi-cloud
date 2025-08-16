@@ -39,7 +39,7 @@ describe('timer', () => {
   test('consumer without expired date', async () => {
     mockGetLastTimer.mockReturnValueOnce(new Promise((resolve) => resolve(undefined)))
     await job.consume(phone, { payload })
-    expect(sendSpy).toHaveBeenCalledWith(...incomingPayload)
+    expect(sendSpy).not.toHaveBeenCalled()
   })
 
   test('consumer with greather expired date', async () => {
