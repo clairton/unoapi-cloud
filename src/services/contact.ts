@@ -5,5 +5,5 @@ export interface ContactResponse {
 }
 
 export interface Contact {
-  verify(phone: string, numbers: String[]): Promise<ContactResponse>
+  verify(phone: string, numbers: String[], webhook: string | undefined): Promise<ContactResponse>
 }

@@ -15,7 +15,7 @@ export class ContactsController {
     logger.debug('contacts post params %s', JSON.stringify(req.params))
     logger.debug('contacts post body %s', JSON.stringify(req.body))
     const { phone } = req.params
-    const contacts = await this.service.verify(phone, req.body.contacts || [])
+    const contacts = await this.service.verify(phone, req.body.contacts || [], req.body.webhook)
     res.status(200).send({ contacts })
   }
 }
