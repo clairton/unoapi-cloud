@@ -353,6 +353,7 @@ CONFIG_SESSION_PHONE_CLIENT=Unoapi Name that will be displayed on smartphone con
 CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera | Safari
 WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version. Format is `[2, 3000, 1019810866]`
 VALIDATE_SESSION_NUMBER=validate the number in session and config is equals, default true
+OPENAI_API_KEY=openai api key to transcribe audio
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
@@ -385,6 +386,8 @@ WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
+WEBHOOK_SEND_INCOMING_MESSAGES=true, send incoming messages to webhook, default is true
+WEBHOOK_SEND_TRANSCRIBE_AUDIO=false, send trancription audio messages to webhook, needs OPENAI_API_KEY, default is false
 WEBHOOK_SEND_UPDATE_MESSAGES=true, send update messages sent, delivered, read
 IGNORE_GROUP_MESSAGES=false to send group messages received in socket to webhook, default true
 IGNORE_BROADCAST_STATUSES=false to send stories in socket to webhook, default true

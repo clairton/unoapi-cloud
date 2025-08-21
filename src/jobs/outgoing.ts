@@ -1,14 +1,15 @@
 import { Webhook } from '../services/config'
 import { Outgoing } from '../services/outgoing'
 import { amqpPublish } from '../amqp'
-import { 
+import {
   STATUS_FAILED_WEBHOOK_URL,
   UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS,
-  UNOAPI_EXCHANGE_BROKER_NAME, 
-  UNOAPI_QUEUE_OUTGOING, 
+  UNOAPI_EXCHANGE_BROKER_NAME,
+  UNOAPI_QUEUE_OUTGOING,
+  UNOAPI_QUEUE_TRANSCRIBER,
   UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED
 } from '../defaults'
-import { extractDestinyPhone, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
+import { extractDestinyPhone, isAudioMessage, isIncomingMessage, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
 import { getConfig } from '../services/config'
 import { isUpdateMessage, isFailedStatus } from '../services/transformer'
@@ -31,14 +32,14 @@ const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, pa
       if (nextMessageTime === undefined) {
         nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
         dUntil.set(key, nextMessageTime);
-        logger.debug(`Key %s First message`, key)
+        logger.debug('Key %s First message', key)
       } else {
         const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
         if (thisMessageDelay > 0) {
-          logger.debug(`Key %s Message delayed by %s ms`, key, thisMessageDelay)
+          logger.debug('Key %s Message delayed by %s ms', key, thisMessageDelay)
           await sleep(thisMessageDelay)
         } else {
-          logger.debug(`Key %s doesn't need more delays`, key)
+          logger.debug('Key %s doesn\'t need more delays', key)
           dVerified.set(key, true);
           dUntil.delete(key);
         }
@@ -76,14 +77,23 @@ export class OutgoingJob {
           return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME,  UNOAPI_QUEUE_OUTGOING, phone, { payload, webhook })
         }),
       )
+      if (isAudioMessage(payload)) {
+        const webhooks = a.webhooks.filter(w => {
+          if (w.sendTranscribeAudio) {
+            logger.debug('Session phone %s webhook %s configured to send transcribe audio message for this webhook', phone, w.id)
+            return true
+          }
+        })
+        if (webhooks.length > 0) {
+          await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME,  UNOAPI_QUEUE_TRANSCRIBER, phone, { payload, webhooks }, { type: 'topic' })
+        }
+      }
     } else if (a.webhook) {
       await delayFunc(phone, payload)
       const config = await this.getConfig(phone)
       if (config.provider == 'forwarder') {
         const store = await config.getStore(phone, config)
-
         payload.entry[0].changes[0].value.metadata.phone_number_id = phone
-        
         const { dataStore } = store
         if (isUpdateMessage(payload)) {
           payload.entry[0].changes[0].value.statuses = await Promise.all(

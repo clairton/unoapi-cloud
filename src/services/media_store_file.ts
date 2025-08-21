@@ -9,7 +9,8 @@ import { getDataStore } from './data_store'
 import { Config } from './config'
 import logger from './logger'
 import { DATA_URL_TTL, FETCH_TIMEOUT_MS } from '../defaults'
-import fetch, { Response as FetchResponse, RequestInit } from 'node-fetch'
+import fetch, { Response as FetchResponse } from 'node-fetch'
+import mediaToBuffer from '../utils/media_to_buffer'
 
 export const MEDIA_DIR = '/medias'
 
@@ -40,38 +41,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
   mediaStore.saveMediaForwarder = async (message: any) => {
     const filePath = mediaStore.getFilePath(phone, message.id, message[message.type].mime_type)
     const url = `${config.webhookForward.url}/${config.webhookForward.version}/${ message[message.type].id}`
-    const headers = {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Authorization': `Bearer ${config.webhookForward.token}`
-    }
-    const options: RequestInit = { method: 'GET', headers }
-    if (config.webhookForward?.timeoutMs) {
-      options.signal = AbortSignal.timeout(config.webhookForward?.timeoutMs)
-    }
-    let response: FetchResponse
-    try {
-      logger.debug('Requesting to url to save media forwarded with url %s...', url)
-      response = await fetch(url, options)
-      logger.debug('Requested to url to save media forwarded with url %s!', url)
-    } catch (error) {
-      logger.error(`Error on saveMediaForwarder to url ${url}`)
-      logger.error(error)
-      throw error
-    }
-    if (!response?.ok) {
-      logger.error(`Error on saveMediaForwarder to url ${url}`)
-      throw await response.text()
-    }
-    const json = await response.json()
-    logger.debug('Downloading to save media forwarded with url %s...', json['url'])
-    response = await fetch(json['url'], options)
-    logger.debug('Downloaded to save media forwarded with url %s!', json['url'])
-    if (!response?.ok) {
-      logger.error(`Error on saveMediaForwarder to get responnsed url ${json['url']}`)
-      throw await response.text()
-    }
-    const arrayBuffer = await response.arrayBuffer()
-    const buffer = toBuffer(arrayBuffer)
+    const { buffer } = await mediaToBuffer(url, config.webhookForward.token!, config.webhookForward?.timeoutMs || 0)
     logger.debug('Saving buffer %s...', filePath)
     await mediaStore.saveMediaBuffer(filePath, buffer)
     logger.debug('Saved buffer %s!', filePath)

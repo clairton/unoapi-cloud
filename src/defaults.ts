@@ -6,6 +6,7 @@ const _undefined: any = undefined
 
 // security
 export const UNOAPI_AUTH_TOKEN = process.env.UNOAPI_AUTH_TOKEN
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorization'
 
 export const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
@@ -39,6 +40,8 @@ export const WEBHOOK_SEND_INCOMING_MESSAGES = process.env.WEBHOOK_SEND_INCOMING_
 export const WEBHOOK_SEND_GROUP_MESSAGES = process.env.WEBHOOK_SEND_GROUP_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_GROUP_MESSAGES == 'true'
 export const WEBHOOK_SEND_OUTGOING_MESSAGES =
   process.env.WEBHOOK_SEND_OUTGOING_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_OUTGOING_MESSAGES == 'true'
+export const WEBHOOK_SEND_TRANSCRIBE_AUDIO =
+  process.env.WEBHOOK_SEND_TRANSCRIBE_AUDIO == _undefined ? false : process.env.WEBHOOK_SEND_TRANSCRIBE_AUDIO == 'true'
 export const WEBHOOK_SEND_UPDATE_MESSAGES =
   process.env.WEBHOOK_SEND_UPDATE_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_UPDATE_MESSAGES == 'true'
 export const WEBHOOK_SEND_NEWSLETTER_MESSAGES =
@@ -87,6 +90,7 @@ export const UNOAPI_QUEUE_BULK_REPORT = `${UNOAPI_QUEUE_NAME}.bulk.report`
 export const UNOAPI_QUEUE_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
 export const UNOAPI_QUEUE_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
 export const UNOAPI_QUEUE_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
+export const UNOAPI_QUEUE_TRANSCRIBER = `${UNOAPI_QUEUE_NAME}.transcribe`
 export const UNOAPI_MESSAGE_RETRY_LIMIT = parseInt(process.env.UNOAPI_MESSAGE_RETRY_LIMIT || '5')
 export const UNOAPI_MESSAGE_RETRY_DELAY = parseInt(process.env.UNOAPI_MESSAGE_RETRY_DELAY || '10000')
 export const UNOAPI_DELAY_BETWEEN_MESSAGES_MS = parseInt(process.env.UNOAPI_DELAY_BETWEEN_MESSAGES_MS || '0')

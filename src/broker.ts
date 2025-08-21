@@ -14,6 +14,7 @@ import {
   STATUS_FAILED_WEBHOOK_URL,
   UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
   UNOAPI_QUEUE_TIMER,
+  UNOAPI_QUEUE_TRANSCRIBER,
 } from './defaults'
 
 import { amqpConsume } from './amqp'
@@ -34,15 +35,19 @@ import { NotificationJob } from './jobs/notification'
 import { WebhookStatusFailedJob } from './jobs/webhook_status_failed'
 import { addToBlacklist } from './jobs/add_to_blacklist'
 import { TimerJob } from './jobs/timer'
+import { TranscriberJob } from './jobs/transcriber'
+import { OutgoingAmqp } from './services/outgoing_amqp'
 
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
+const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const reload = new Reload()
 const reloadJob = new ReloadJob(reload)
 const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
 const timerJob = new TimerJob(incomingAmqp)
+const transcriberJob = new TranscriberJob(outgoingAmqp)
 
 import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
@@ -87,6 +92,15 @@ const startBroker = async () => {
     UNOAPI_QUEUE_OUTGOING,
     '*',
     outgingJob.consume.bind(outgingJob),
+    { notifyFailedMessages, prefetch, type: 'topic' }
+  )
+
+  logger.info('Starting transcriber consumer %s', UNOAPI_SERVER_NAME)
+  await amqpConsume(
+    UNOAPI_EXCHANGE_BROKER_NAME,
+    UNOAPI_QUEUE_TRANSCRIBER,
+    '*',
+    transcriberJob.consume.bind(transcriberJob),
     { notifyFailedMessages, prefetch, type: 'topic' }
   )
 

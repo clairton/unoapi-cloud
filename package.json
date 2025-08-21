@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "2.5.0-alpha-10",
+  "version": "2.5.0-alpha-11",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -81,6 +81,7 @@
     "@redis/client": "^1.5.14",
     "@sentry/node": "^9.29.0",
     "amqplib": "^0.10.8",
+    "audio2textjs": "^1.0.5",
     "awesome-phonenumber": "^6.8.0",
     "baileys": "git+https://github.com/WhiskeySockets/Baileys#19124426b2ded31f6d28ed60c53b75f101865bc3",
     "dotenv": "^16.4.5",
@@ -93,6 +94,7 @@
     "node-cache": "^5.1.2",
     "node-fetch": "^2.7.0",
     "node-xlsx": "^0.24.0",
+    "openai": "^5.13.1",
     "pino": "^7.0.0",
     "qrcode": "^1.5.3",
     "qrcode-terminal": "^0.12.0",
