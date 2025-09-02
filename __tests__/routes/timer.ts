@@ -12,7 +12,7 @@ import { OnNewLogin } from '../../src/services/socket'
 import { addToBlacklist } from '../../src/services/blacklist'
 import { Reload } from '../../src/services/reload'
 import { Logout } from '../../src/services/logout'
-const addToBlacklist = mock<addToBlacklist>()
+const addToBlacklistMock = mock<addToBlacklist>()
 const startMock = start as jest.MockedFunction<typeof start>
 const stopMock = start as jest.MockedFunction<typeof stop>
 
@@ -28,7 +28,7 @@ describe('timer routes', () => {
     const onNewLogin = mock<OnNewLogin>()
     const reload = mock<Reload>()
     const logout = mock<Logout>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklistMock, reload, logout)
     const phone = 'x'
     const to = 'y'
     const json = {
@@ -46,7 +46,7 @@ describe('timer routes', () => {
     const onNewLogin = mock<OnNewLogin>()
     const reload = mock<Reload>()
     const logout = mock<Logout>()
-    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
+    const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklistMock, reload, logout)
     const phone = 'x'
     const to = 'y'
     stopMock.mockResolvedValue(Promise.resolve())
