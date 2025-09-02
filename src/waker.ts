@@ -19,7 +19,7 @@ if (process.env.SENTRY_DSN) {
 }
 
 import logger from './services/logger'
-import { queueDeadName, amqpConnect, amqpPublish, extractRoutingKeyFromBindingKey, ExchagenType } from './amqp'
+import { queueDeadName, amqpConnect, amqpPublish, extractRoutingKeyFromBindingKey, ExchangeType } from './amqp'
 
 logger.info('Starting with waker...')
 
@@ -49,7 +49,7 @@ const getExchangeName = queue => {
       const channel: Channel = await connection.createChannel()
       await channel.assertExchange(exchangeName, exchangeType, { durable: true })
       await channel.assertQueue(queueName, { durable: true })
-      await channel.bindQueue(queueName, exchangeName)
+      await channel.bindQueue(queueName, exchangeName, queueName)
       channel.consume(queueName, async (payload: ConsumeMessage | null) => {
         if (!payload) {
           throw 'payload not be null'
@@ -63,7 +63,7 @@ const getExchangeName = queue => {
         )
         return channel.ack(payload)
       })
-      await channel.unbindQueue(queueName, exchangeName)
+      await channel.unbindQueue(queueName, exchangeName, queueName)
     })
   )
 })()
