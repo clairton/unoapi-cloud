@@ -1,4 +1,4 @@
-import { connect, Connection, Channel, Queue, Options, ConsumeMessage, abc } from 'amqplib'
+import { connect, Connection, Channel, Replies, Options, ConsumeMessage, ChannelModel } from 'amqplib'
 import {
   AMQP_URL,
   UNOAPI_X_COUNT_RETRIES,
@@ -39,13 +39,13 @@ const withTimeout = (millis, error, promise) => {
 export const queueDeadName = (queue: string) => `${queue}.dead`
 export const queueDelayedName = (queue: string) => `${queue}.delayed`
 
-let amqpConnection: Connection | undefined
+let amqpChannelModel: ChannelModel | undefined
 let amqpChannel: Channel | undefined
 
 type QueueObject = {
-  queueMain: Queue
-  queueDead: Queue
-  queueDelayed: Queue
+  queueMain: Replies.AssertQueue
+  queueDead: Replies.AssertQueue
+  queueDelayed: Replies.AssertQueue
 }
 const exchanges = new Map<string, boolean>()
 const queues = new Map<string, QueueObject>()
@@ -64,14 +64,14 @@ const validateFormatNumber = (v: string) => {
 }
 const validateRoutingKey = VALIDATE_ROUTING_KEY ? validateFormatNumber : (_) => _
 
-export type ExchagenType = 'direct' | 'topic'
+export type ExchangeType = 'direct' | 'topic'
 
 export type CreateOption = {
   delay: number
   priority: number
   notifyFailedMessages: boolean
   prefetch: number
-  type: ExchagenType
+  type: ExchangeType
 }
 
 export type PublishOption = CreateOption & {
@@ -85,28 +85,28 @@ export interface ConsumeCallback {
 }
 
 export const amqpConnect = async (amqpUrl = AMQP_URL) => {
-  if (!amqpConnection) {
+  if (!amqpChannelModel) {
     logger.info(`Connecting RabbitMQ at ${amqpUrl}...`)
-    amqpConnection = await connect(amqpUrl)
+    amqpChannelModel = await connect(amqpUrl)
   } else {
     logger.info(`Already connected RabbitMQ!`)
   }
 
-  amqpConnection.on('error', (err) => {
+  amqpChannelModel.on('error', (err) => {
     logger.error(err, 'Connection Error')
-    amqpConnection = undefined
+    amqpChannelModel = undefined
   })
-  amqpConnection.on('close', (err) => {
+  amqpChannelModel.on('close', (err) => {
     logger.error(err, 'Connection Closed')
-    amqpConnection = undefined
+    amqpChannelModel = undefined
   })
 
-  return amqpConnection
+  return amqpChannelModel
 }
 
-export const amqpDisconnect = async (connection: Connection) => {
+export const amqpDisconnect = async (amqpChannelModel: ChannelModel) => {
   logger.debug('Disconnecting RabbitMQ')
-  return connection.close()
+  return amqpChannelModel.close()
 }
 
 export const amqpGetChannel = async () => {
@@ -119,7 +119,7 @@ export const amqpGetChannel = async () => {
   return amqpChannel
 }
 
-export const amqpGetExchange = async (exchange: string, type: ExchagenType, prefetch: number) => {
+export const amqpGetExchange = async (exchange: string, type: ExchangeType, prefetch: number) => {
   if (!exchanges.get(exchange)) {
     logger.info('Creating exchange %s...', exchange)
     const channel = await amqpGetChannel()
@@ -127,10 +127,10 @@ export const amqpGetExchange = async (exchange: string, type: ExchagenType, pref
     await channel.assertExchange(exchange, type, { durable: true,  arguments: { 'x-max-priority': 5 }})
 
     const exchangeDeadId = queueDeadName(exchange)
-    await amqpChannel.assertExchange(exchangeDeadId, 'topic', { durable: true })
+    await amqpChannel?.assertExchange(exchangeDeadId, 'topic', { durable: true })
 
     const exchangeDelayedId = queueDelayedName(exchange)
-    await amqpChannel.assertExchange(exchangeDelayedId, 'topic', { durable: true , arguments: {
+    await amqpChannel?.assertExchange(exchangeDelayedId, 'topic', { durable: true , arguments: {
       'x-dead-letter-exchange': exchange
     }})
     logger.info('Created exchange %s!', exchange)
@@ -172,14 +172,14 @@ export const amqpGetQueue = async (
     const queueDeadId = queueDeadName(queue)
     const exchangeDeadId = queueDeadName(exchange)
     const queueDead = await channel.assertQueue(queueDeadId, { durable: true })
-    await amqpChannel.bindQueue(queueDeadId, exchangeDeadId, `${queueDeadId}.*`)
+    await amqpChannel?.bindQueue(queueDeadId, exchangeDeadId, `${queueDeadId}.*`)
 
     const exchangeDelayedId = queueDelayedName(exchange)
     const queueDelayedId = queueDelayedName(queue)
-    const queueDelayed = await amqpChannel.assertQueue(queueDelayedId, { durable: true, arguments: {
+    const queueDelayed = await channel?.assertQueue(queueDelayedId, { durable: true, arguments: {
       'x-dead-letter-exchange': deadLetterExchange
     }})
-    await amqpChannel.bindQueue(queueDelayedId, exchangeDelayedId, `${queueDelayedId}.*`)
+    await amqpChannel?.bindQueue(queueDelayedId, exchangeDelayedId, `${queueDelayedId}.*`)
 
     queues.set(queue, { queueMain, queueDead, queueDelayed })
     logger.info('Created queue %s!', queue)
@@ -195,7 +195,7 @@ export const amqpGetQueue = async (
 }
 
 
-const getExchangeType = (exchange): ExchagenType => {
+const getExchangeType = (exchange): ExchangeType => {
   if (UNOAPI_EXCHANGE_BRIDGE_NAME == exchange) {
     return 'direct'
   } else if (UNOAPI_EXCHANGE_BROKER_NAME == exchange) {

@@ -6,7 +6,6 @@ import logger from './logger'
 import { Config } from './config'
 import { MESSAGE_CHECK_WAAPP } from '../defaults'
 import { t } from '../i18n'
-import { isJidGroup } from 'baileys'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
 
