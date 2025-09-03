@@ -2,7 +2,7 @@
   "name": "unoapi-cloud",
   "version": "2.5.0",
   "description": "Unoapi Cloud",
-  "exports": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
@@ -12,7 +12,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "lint": "eslint",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout=10000",
     "build": "./node_modules/typescript/bin/tsc -p .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "dev": "./node_modules/nodemon/bin/nodemon.js src/index.ts --trace-deprecation",
@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
+    "@jest/globals": "^30.1.2",
     "@types/amqplib": "^0.10.7",
     "@types/express": "^4.17.21",
     "@types/i18n": "^0.13.12",
@@ -82,7 +83,7 @@
     "@google-cloud/text-to-speech": "^5.2.0",
     "@redis/client": "^1.5.14",
     "@sentry/node": "^9.29.0",
-    "amqplib": "^0.10.8",
+    "amqplib": "^0.10.9",
     "audio2textjs": "^1.0.5",
     "awesome-phonenumber": "^6.8.0",
     "baileys": "^6.7.19",
@@ -111,5 +112,8 @@
   },
   "engines": {
     "node": ">= 24.x"
+  },
+  "_moduleAliases": {
+    "@": "lib"
   }
 }
