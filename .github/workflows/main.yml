@@ -10,21 +10,21 @@ on:
     branches: [ main develop ]
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps: 
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 24
-  #         cache: yarn
-  #     - run: yarn install
-  #     - run: yarn lint
-  #     - run: yarn format
-  #     - run: yarn test
+  test:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+      - run: yarn install
+      - run: yarn lint
+      - run: yarn format
+      - run: yarn test
 
   build:
-    # needs: test
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

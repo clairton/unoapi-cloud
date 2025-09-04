@@ -5952,9 +5952,9 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-"libsignal@git+https://github.com/whiskeysockets/libsignal-node":
+"libsignal@git+https://github.com/whiskeysockets/libsignal-node.git":
   version "2.0.1"
-  resolved "git+https://github.com/whiskeysockets/libsignal-node#4d08331a833727c338c1a90041d17b870210dfae"
+  resolved "git+https://github.com/whiskeysockets/libsignal-node.git#4d08331a833727c338c1a90041d17b870210dfae"
   dependencies:
     curve25519-js "^0.0.4"
     protobufjs "6.8.8"
