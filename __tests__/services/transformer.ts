@@ -1,5 +1,3 @@
-import { describe, expect, test } from '@jest/globals'
-
 import { WAMessage, proto } from 'baileys'
 import {
   phoneNumberToJid,
