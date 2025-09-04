@@ -2,10 +2,10 @@
   "exclude": ["./coverage", "./dist", "__tests__", "jest.config.js"],
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "experimentalDecorators": true,
-    "allowJs": false,
+    "allowJs": true,
     "checkJs": false,
     "outDir": "dist",
     "strict": false,
@@ -21,7 +21,7 @@
   "include": ["src/**/*.ts", "src/**/*.json"],
   "ts-node": {
     "compilerOptions": {
-      "esModuleInterop": true,
+      "esModuleInterop": true
     }
   }
 }

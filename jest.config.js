@@ -1,12 +1,12 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'node'],
-  extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true,
-    }]
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'ts-jest',
   },
+  transformIgnorePatterns: [
+    '/node_modules/(?!(baileys|@adiwajshing/keyed-db|pino|pino-pretty)/)',
+  ],
 };

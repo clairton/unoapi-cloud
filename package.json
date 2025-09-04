@@ -2,7 +2,7 @@
   "name": "unoapi-cloud",
   "version": "2.5.0",
   "description": "Unoapi Cloud",
-  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "./dist"
@@ -12,7 +12,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "lint": "eslint",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout=10000",
+    "test": "node_modules/jest/bin/jest.js --coverage",
     "build": "./node_modules/typescript/bin/tsc -p .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "dev": "./node_modules/nodemon/bin/nodemon.js src/index.ts --trace-deprecation",
@@ -112,8 +112,5 @@
   },
   "engines": {
     "node": ">= 24.x"
-  },
-  "_moduleAliases": {
-    "@": "lib"
   }
 }
