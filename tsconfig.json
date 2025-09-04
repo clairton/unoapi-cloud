@@ -1,9 +1,9 @@
 {
   "exclude": ["./coverage", "./dist", "__tests__", "jest.config.js"],
   "compilerOptions": {
+    "module": "nodenext", // Or "nodenext"
     "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "node",
+    // "moduleResolution": "node",
     "experimentalDecorators": true,
     "allowJs": false,
     "checkJs": false,
