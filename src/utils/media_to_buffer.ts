@@ -26,14 +26,21 @@ export default async function (url: string, token: string, timeoutMs: number) {
     logger.error(`Error on Request media url ${url}`)
     throw await response.text()
   }
+  const clonedResponse = response.clone()
   const json = await response.json()
-  logger.debug('Downloading media url %s...', json['url'])
-  response = await fetch(json['url'], options)
-  logger.debug('Downloaded media url %s!', json['url'])
+  const link = json['url']
+  if (!link) {
+    const message = `Error on retrieve media url on response: ${await clonedResponse.text()}`
+    logger.error(message)
+    throw message
+  }
+  logger.debug('Downloading media url %s...', link)
+  response = await fetch(link, options)
+  logger.debug('Downloaded media url %s!', link)
   if (!response?.ok) {
-    logger.error(`Error on download media url ${json['url']}`)
+    logger.error(`Error on download media url ${link}`)
     throw await response.text()
   }
   const arrayBuffer = await response.arrayBuffer()
-  return { buffer: toBuffer(arrayBuffer), link: json['url'] }
+  return { buffer: toBuffer(arrayBuffer), link, mimeType: json['mime_type'] }
 }

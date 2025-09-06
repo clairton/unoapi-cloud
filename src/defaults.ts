@@ -7,6 +7,7 @@ const _undefined: any = undefined
 // security
 export const UNOAPI_AUTH_TOKEN = process.env.UNOAPI_AUTH_TOKEN
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY
+export const OPENAI_API_TRANSCRIBE_MODEL = process.env.OPENAI_API_TRANSCRIBE_MODEL || 'whisper-1'
 export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorization'
 
 export const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')

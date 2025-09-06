@@ -1,20 +1,23 @@
 import OpenAI, { toFile } from 'openai'
-import { Webhook } from '../services/config'
+import { getConfig, Webhook } from '../services/config'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
-import { BASE_URL, OPENAI_API_KEY, UNOAPI_AUTH_TOKEN } from '../defaults'
+import { BASE_URL, OPENAI_API_KEY, OPENAI_API_TRANSCRIBE_MODEL } from '../defaults'
 import mediaToBuffer from '../utils/media_to_buffer'
 import { extractDestinyPhone } from '../services/transformer'
 import { v1 as uuid } from 'uuid'
 import Audio2TextJS from 'audio2textjs'
 import { writeFileSync, rmSync, existsSync, mkdirSync } from 'fs'
 import { SESSION_DIR } from '../services/session_store_file'
+import mime from 'mime'
 
 export class TranscriberJob {
   private service: Outgoing
+  private getConfig: getConfig
 
-  constructor(service: Outgoing) {
+  constructor(service: Outgoing, getConfig: getConfig) {
     this.service = service
+    this.getConfig = getConfig
   }
 
   async consume(phone: string, data: object) {
@@ -29,22 +32,30 @@ export class TranscriberJob {
       const audioMessage = payloadValue &&
         payload.entry[0].changes[0].value.messages &&
         payload.entry[0].changes[0].value.messages[0]
+       
+      const config = await this.getConfig(phone)
       const mediaKey = audioMessage.audio.id
-      const mediaUrl = `${BASE_URL}/v13.0/${mediaKey}`
-      const { buffer, link }= await mediaToBuffer(
+      let token = config.authToken
+      let mediaUrl = `${BASE_URL}/v13.0/${mediaKey}`
+      if (config.connectionType == 'forward') {
+        mediaUrl = `${config.webhookForward.url}/${config.webhookForward.version}/${mediaKey}`
+        token = config.webhookForward.token
+      }
+      const { buffer, link, mimeType } = await mediaToBuffer(
         mediaUrl,
-        UNOAPI_AUTH_TOKEN!,
+        token!,
         webhooks[0].timeoutMs || 0,
       )
+      const extension = config.connectionType == 'forward' ? `.${mime.extension(mimeType)}` : ''
       let transcriptionText = ''
       if (OPENAI_API_KEY) {
         logger.debug('Transcriber audio with OpenAI for session %s to %s', phone, destinyPhone)
         const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
         const splitedLink = link.split('/')
-        const fileName = splitedLink[splitedLink.length - 1]
+        const fileName = `${splitedLink[splitedLink.length - 1]}${extension}`
         const transcription = await openai.audio.transcriptions.create({
           file: await toFile(buffer, fileName),
-          model: 'whisper-1',
+          model: OPENAI_API_TRANSCRIBE_MODEL,
         })
         transcriptionText = transcription.text
       } else {

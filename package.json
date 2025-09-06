@@ -1,6 +1,6 @@
 {
   "name": "unoapi-cloud",
-  "version": "2.5.0-alpha-11",
+  "version": "2.5.0-alpha-12",
   "description": "Unoapi Cloud",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -32,6 +32,7 @@
     "standalone-ts": "node --experimental-strip-types --experimental-transform-types src/standalone.ts",
     "web": "node dist/src/web.js",
     "waker": "node dist/src/waker.js",
+    "waker-ts": "node --experimental-strip-types --experimental-transform-types src/waker.ts",
     "web-ts": "node --experimental-strip-types --experimental-transform-types src/web.ts",
     "worker": "node dist/src/worker.js",
     "worker-ts": "node --experimental-strip-types --experimental-transform-types src/worker.ts",

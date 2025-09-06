@@ -47,7 +47,7 @@ const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
 const timerJob = new TimerJob(incomingAmqp)
-const transcriberJob = new TranscriberJob(outgoingAmqp)
+const transcriberJob = new TranscriberJob(outgoingAmqp, getConfigRedis)
 
 import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
