@@ -52,7 +52,7 @@ import { Listener } from './services/listener'
 import { ListenerBaileys } from './services/listener_baileys'
 import middleware from './services/middleware'
 import { middlewareNext } from './services/middleware_next'
-import security from './services/security'
+import Security from './services/security'
 import { ReloadBaileys } from './services/reload_baileys'
 import { LogoutBaileys } from './services/logout_baileys'
 import { ListenerAmqp } from './services/listener_amqp'
@@ -94,7 +94,6 @@ let incoming: Incoming = new IncomingBaileys(listener, getConfigVar, getClientBa
 let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)
 let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)
 let middlewareVar: middleware = middlewareNext
-
 if (process.env.REDIS_URL) {
   logger.info('Starting with redis')
   startRedis().catch( error => {
@@ -105,6 +104,8 @@ if (process.env.REDIS_URL) {
   getConfigVar = getConfigRedis
   outgoing = new OutgoingCloudApi(getConfigVar, isInBlacklistInRedis)
   sessionStore = new SessionStoreRedis()
+  const securityVar = new Security(sessionStore)
+  middlewareVar = securityVar.run.bind(securityVar) as middleware
 } else {
   logger.info('Starting with file system')
 }
@@ -190,7 +191,8 @@ if (process.env.AMQP_URL) {
 if (process.env.UNOAPI_AUTH_TOKEN) {
   logger.info('Starting http security')
   onNewLoginn = onNewLoginGenerateToken(outgoing)
-  middlewareVar = security
+  const securityVar = new Security(sessionStore)
+  middlewareVar = securityVar.run.bind(securityVar) as middleware
 } else {
   logger.info('Starting without http security')
 }

@@ -1,3 +1,4 @@
+import { UNOAPI_AUTH_TOKEN } from '../defaults'
 import { SessionStore } from './session_store'
 import { Dirent, existsSync, readdirSync } from 'fs'
 
@@ -9,6 +10,10 @@ export class SessionStoreFile extends SessionStore {
   constructor(sessionDir: string = SESSION_DIR) {
     super()
     this.sessionDir = sessionDir
+  }
+
+  async getTokens(_phone: string): Promise<string[]> {
+    return [UNOAPI_AUTH_TOKEN!]
   }
 
   async getPhones(): Promise<string[]> {
