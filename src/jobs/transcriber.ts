@@ -2,7 +2,7 @@ import OpenAI, { toFile } from 'openai'
 import { getConfig, Webhook } from '../services/config'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
-import { BASE_URL, OPENAI_API_KEY, OPENAI_API_TRANSCRIBE_MODEL } from '../defaults'
+import { BASE_URL } from '../defaults'
 import mediaToBuffer from '../utils/media_to_buffer'
 import { extractDestinyPhone } from '../services/transformer'
 import { v1 as uuid } from 'uuid'
@@ -48,14 +48,14 @@ export class TranscriberJob {
       )
       const extension = config.connectionType == 'forward' ? `.${mime.extension(mimeType)}` : ''
       let transcriptionText = ''
-      if (OPENAI_API_KEY) {
+      if (config.openaiApiKey) {
         logger.debug('Transcriber audio with OpenAI for session %s to %s', phone, destinyPhone)
-        const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
+        const openai = new OpenAI({ apiKey: config.openaiApiKey })
         const splitedLink = link.split('/')
         const fileName = `${splitedLink[splitedLink.length - 1]}${extension}`
         const transcription = await openai.audio.transcriptions.create({
           file: await toFile(buffer, fileName),
-          model: OPENAI_API_TRANSCRIBE_MODEL,
+          model: config.openaiApiTranscribeModel!,
         })
         transcriptionText = transcription.text
       } else {

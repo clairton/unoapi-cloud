@@ -54,6 +54,9 @@ import {
   WHATSAPP_VERSION,
   WEBHOOK_SEND_INCOMING_MESSAGES,
   WEBHOOK_SEND_TRANSCRIBE_AUDIO,
+  OPENAI_API_KEY,
+  OPENAI_API_TRANSCRIBE_MODEL,
+  OPENAI_API_ASSISTANT_ID,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -89,6 +92,9 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.authToken = UNOAPI_AUTH_TOKEN
     config.authHeader = UNOAPI_HEADER_NAME
     config.wavoipToken = WAVOIP_TOKEN
+    config.openaiApiKey = OPENAI_API_KEY
+    config.openaiApiTranscribeModel = OPENAI_API_TRANSCRIBE_MODEL
+    config.openaiAssistantId = OPENAI_API_ASSISTANT_ID
     config.useRedis = !!process.env.REDIS_URL
     config.useS3 = !!process.env.STORAGE_ENDPOINT
     config.webhooks[0].url = WEBHOOK_URL

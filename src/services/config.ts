@@ -84,6 +84,9 @@ export type Config = {
   customMessageCharacters: string[]
   customMessageCharactersFunction: (message: string) => string,
   whatsappVersion: WAVersion | undefined,
+  openaiApiKey: string | undefined
+  openaiApiTranscribeModel: string | undefined
+  openaiAssistantId: string | undefined
 }
 
 export const defaultConfig: Config = {
@@ -149,7 +152,10 @@ export const defaultConfig: Config = {
   overrideWebhooks: false,
   customMessageCharacters: [],
   customMessageCharactersFunction: (message: string) => message,
-  whatsappVersion: undefined
+  whatsappVersion: undefined,
+  openaiApiKey: undefined,
+  openaiApiTranscribeModel: undefined,
+  openaiAssistantId: undefined
 }
 
 export interface getConfig {

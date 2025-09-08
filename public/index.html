@@ -254,6 +254,18 @@
                                 <input type="text" class="form-control" id="authToken" name="authToken" placeholder="Auth Token">
                             </div>
                             <div class="col-12 col-md-12 col-lg-6">
+                                <label for="authToken" class="form-label">Auth Token</label>
+                                <input type="text" class="form-control" id="authToken" name="authToken" placeholder="Auth Token">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="openaiApiKey" class="form-label">Openai Api Key</label>
+                                <input type="text" class="form-control" id="openaiApiKey" name="openaiApiKey" placeholder="Openai Api Key">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="openaiApiTranscribeModel" class="form-label">Openai Transcribe Model</label>
+                                <input type="text" class="form-control" id="openaiApiTranscribeModel" name="openaiApiTranscribeModel" placeholder="Openai Transcribe Model">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
                                 <label for="wavoipToken" class="form-label">Token Wavoip</label>
                                 <input type="text" class="form-control" id="wavoipToken" name="wavoipToken" placeholder="Token WAVOIP...">
                             </div>
@@ -780,6 +792,8 @@
                 $('#label').val(session.label);
                 $('#authToken').val(session.authToken);
                 $('#wavoipToken').val(session.wavoipToken);
+                $('#openaiApiKey').val(session.openaiApiKey);
+                $('#openaiApiTranscribeModel').val(session.openaiApiTranscribeModel);
                 $('#rejectCallsWebhook').val(session.rejectCallsWebhook);
                 $('#rejectCalls').val(session.rejectCalls);
                 $('#ignoreGroupMessages').prop('checked', session.ignoreGroupMessages);
@@ -867,6 +881,8 @@
                         label: $('#label').val(),
                         authToken: $('#authToken').val(),
                         wavoipToken: $('#wavoipToken').val(),
+                        openaiApiKey: $('#openaiApiKey').val(),
+                        openaiApiTranscribeModel: $('#openaiApiTranscribeModel').val(),
                         rejectCalls: $('#rejectCalls').val(),
                         rejectCallsWebhook: $('#rejectCallsWebhook').val(),
                         ignoreGroupMessages: $('#ignoreGroupMessages').is(':checked'),
