@@ -581,7 +581,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
               picture: payload.profilePicture,
             },
             ...groupMetadata,
-            wa_id: jidToPhoneNumber(senderPhone, ''),
+            wa_id: senderPhone.replace('+', '') || senderId,
           },
         ],
         statuses,
@@ -600,7 +600,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const message: any = {
-      from: (fromMe ? phone : senderPhone).replace('+', ''),
+      from: (fromMe ? phone.replace('+', '') : senderPhone.replace('+', '') || senderId),
       id: whatsappMessageId,
     }
     if (payload.messageTimestamp) {
@@ -865,7 +865,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
         },
         id: messageId,
-        recipient_id: senderPhone.replace('+', ''),
+        recipient_id: senderPhone.replace('+', '') || senderId,
         status: cloudApiStatus,
       }
       if (payload.messageTimestamp) {
