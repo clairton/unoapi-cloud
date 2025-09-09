@@ -16,7 +16,7 @@ export const authState = async (session: session, phone: string) => {
           const key = getKey(type, id)
           const value = await readData(key)
           if (type === 'app-state-sync-key' && value) {
-            data[id] = proto.Message.AppStateSyncKeyData.fromObject(value)
+            data[id] = proto.Message.AppStateSyncKeyData.create(value)
           } else {
             data[id] = value
           }

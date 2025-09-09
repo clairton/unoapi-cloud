@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, normalizeMessageContent, proto } from 'baileys'
+import { AnyMessageContent, WAMessage, isJidNewsletter, isLidUser, normalizeMessageContent, proto } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -310,7 +310,7 @@ export const phoneNumberToJid = (phoneNumber: string) => {
 }
 
 export const isIndividualJid = (jid: string) => {
-  const isIndividual = isJidUser(jid) || jid.indexOf('@') < 0
+  const isIndividual = jid.endsWith('@s.whatsapp.net') || jid.indexOf('@') < 0
   logger.debug('jid %s is individual? %s', jid, isIndividual)
   return isIndividual
 }

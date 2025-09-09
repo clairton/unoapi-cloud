@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent, isLidUser } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent, isLidUser, WAMessageAddressingMode } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Listener } from './listener'
 import { Store } from './store'
@@ -650,7 +650,7 @@ export class ClientBaileys implements Client {
       } else {
         groupMetadata = {
           owner_country_code: '55',
-          addressingMode: isLidUser(key.remoteJid) ? 'lid' : 'pn',
+          addressingMode: isLidUser(key.remoteJid) ? WAMessageAddressingMode.LID : WAMessageAddressingMode.PN,
           id: key.remoteJid,
           owner: '',
           subject: key.remoteJid,
