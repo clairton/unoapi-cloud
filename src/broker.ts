@@ -30,7 +30,7 @@ import { OutgoingJob } from './jobs/outgoing'
 import { IncomingAmqp } from './services/incoming_amqp'
 import { Incoming } from './services/incoming'
 import { Outgoing } from './services/outgoing'
-import { isInBlacklistInRedis } from './services/blacklist'
+import { addToBlacklistRedis, isInBlacklistInRedis } from './services/blacklist'
 import { NotificationJob } from './jobs/notification'
 import { WebhookStatusFailedJob } from './jobs/webhook_status_failed'
 import { addToBlacklist } from './jobs/add_to_blacklist'
@@ -39,7 +39,7 @@ import { TranscriberJob } from './jobs/transcriber'
 import { OutgoingAmqp } from './services/outgoing_amqp'
 
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis, addToBlacklistRedis)
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigRedis)
 const reload = new Reload()
 const reloadJob = new ReloadJob(reload)

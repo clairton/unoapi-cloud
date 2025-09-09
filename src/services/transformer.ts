@@ -423,7 +423,10 @@ export const isNewsletterMessage = (payload: object) => {
 
 export const extractSessionPhone  = (payload: object) => {
   const data = payload as any
-  const session = data.entry[0].changes[0].value.messages
+  const session = data.entry
+                && data.entry[0]
+                && data.entry[0].changes 
+                && data.entry[0].changes[0].value.messages
                 && data.entry[0].changes[0].value.metadata
                 && data.entry[0].changes[0].value.metadata.display_phone_number
 

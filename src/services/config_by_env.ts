@@ -57,6 +57,7 @@ import {
   OPENAI_API_KEY,
   OPENAI_API_TRANSCRIBE_MODEL,
   OPENAI_API_ASSISTANT_ID,
+  WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -109,6 +110,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].sendUpdateMessages = WEBHOOK_SEND_UPDATE_MESSAGES
     config.webhooks[0].sendIncomingMessages = WEBHOOK_SEND_INCOMING_MESSAGES
     config.webhooks[0].sendTranscribeAudio = WEBHOOK_SEND_TRANSCRIBE_AUDIO
+    config.webhooks[0].addToBlackListOnOutgoingMessageWithTtl = WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL
 
     config.webhookForward.url = WEBHOOK_FORWARD_URL
     config.webhookForward.version = WEBHOOK_FORWARD_VERSION
