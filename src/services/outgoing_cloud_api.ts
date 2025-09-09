@@ -2,17 +2,19 @@ import { Outgoing } from './outgoing'
 import fetch, { Response, RequestInit } from 'node-fetch'
 import { Webhook, getConfig } from './config'
 import logger from './logger'
-import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, isIncomingMessage } from './transformer'
-import { isInBlacklist } from './blacklist'
+import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, isIncomingMessage, extractDestinyPhone } from './transformer'
+import { addToBlacklist, isInBlacklist } from './blacklist'
 import { PublishOption } from '../amqp'
 
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
   private isInBlacklist: isInBlacklist
+  private addToBlacklist: addToBlacklist
 
-  constructor(getConfig: getConfig, isInBlacklist: isInBlacklist) {
+  constructor(getConfig: getConfig, isInBlacklist: isInBlacklist, addToBlacklist: addToBlacklist) {
     this.getConfig = getConfig
     this.isInBlacklist = isInBlacklist
+    this.addToBlacklist = addToBlacklist
   }
 
   public async formatAndSend(phone: string, to: string, message: object) {
@@ -40,15 +42,22 @@ export class OutgoingCloudApi implements Outgoing {
       logger.info(`Session phone %s webhook %s configured to not send newsletter message for this webhook`, phone, webhook.id)
       return
     }
-    if (!webhook.sendOutgoingMessages && isOutgoingMessage(message)) {
-      logger.info(`Session phone %s webhook %s configured to not send outgoing message for this webhook`, phone, webhook.id)
-      return
+    if (isOutgoingMessage(message)) {
+      if (webhook.addToBlackListOnOutgoingMessageWithTtl) {
+        logger.info(`Session phone %s webhook %s configured to add to blacklist when outgoing message for this webhook`, phone, webhook.id)
+        const to = extractDestinyPhone(message, false)
+        await this.addToBlacklist(phone, webhook.id, to, webhook.addToBlackListOnOutgoingMessageWithTtl!)
+      }
+      if (!webhook.sendOutgoingMessages) {
+        logger.info(`Session phone %s webhook %s configured to not send outgoing message for this webhook`, phone, webhook.id)
+        return
+      }
     }
     if (!webhook.sendUpdateMessages && isUpdateMessage(message)) {
       logger.info(`Session phone %s webhook %s configured to not send update message for this webhook`, phone, webhook.id)
       return
     }
-    if (!webhook.sendIncomingMessages && isIncomingMessage(message)) {
+    if (!webhook.sendIncomingMessages) {
       logger.info(`Session phone %s webhook %s configured to not send incoming message for this webhook`, phone, webhook.id)
       return
     }

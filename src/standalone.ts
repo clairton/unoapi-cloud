@@ -85,7 +85,7 @@ const broadcast: Broadcast = new Broadcast()
 
 let addToBlacklistVar: addToBlacklist = addToBlacklistInMemory
 let isInBlacklistVar: isInBlacklist = isInBlacklistInMemory
-let outgoing: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistVar)
+let outgoing: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistVar, addToBlacklistVar)
 let getConfigVar: getConfig = getConfigByEnv
 let sessionStore: SessionStore = new SessionStoreFile()
 let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigVar)
@@ -102,7 +102,7 @@ if (process.env.REDIS_URL) {
   })
   addToBlacklistVar = addToBlacklistRedis
   getConfigVar = getConfigRedis
-  outgoing = new OutgoingCloudApi(getConfigVar, isInBlacklistInRedis)
+  outgoing = new OutgoingCloudApi(getConfigVar, isInBlacklistInRedis, addToBlacklistVar)
   sessionStore = new SessionStoreRedis()
   const securityVar = new Security(sessionStore)
   middlewareVar = securityVar.run.bind(securityVar) as middleware
@@ -156,7 +156,7 @@ if (process.env.AMQP_URL) {
   logger.info('Binding queues consumer for server %s', UNOAPI_SERVER_NAME)
   const notifyFailedMessages = NOTIFY_FAILED_MESSAGES
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
-  const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis)
+  const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis, addToBlacklistRedis)
   const outgoinJob = new OutgoingJob(getConfigVar, outgoingCloudApi)
   amqpConsume(
     UNOAPI_EXCHANGE_BROKER_NAME,

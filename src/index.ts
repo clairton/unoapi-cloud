@@ -13,7 +13,7 @@ import { getConfigByEnv } from './services/config_by_env'
 import { getClientBaileys } from './services/client_baileys'
 import { onNewLoginAlert } from './services/on_new_login_alert'
 import { Broadcast } from './services/broadcast'
-import { isInBlacklistInMemory, addToBlacklistInMemory } from './services/blacklist'
+import { isInBlacklistInMemory, addToBlacklistInMemory, addToBlacklistRedis } from './services/blacklist'
 import { version } from '../package.json'
 
 import logger from './services/logger'
@@ -32,7 +32,7 @@ if (process.env.SENTRY_DSN) {
   })
 }
 
-const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistInMemory)
+const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistInMemory, addToBlacklistRedis)
 
 const broadcast: Broadcast = new Broadcast()
 const listenerBaileys: Listener = new ListenerBaileys(outgoingCloudApi, broadcast, getConfigByEnv)

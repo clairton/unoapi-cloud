@@ -440,6 +440,11 @@
                                     <input type="checkbox" class="webhook-sendTranscribeAudio">
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="addToBlackListOnOutgoingMessageWithTtl" class="form-label">Adicionar ao blacklits quando ouver uma mensagem de saida por X segundos</label>
+                                <label>
+                                    <input type="number" class="webhook-addToBlackListOnOutgoingMessageWithTtl">
+                                    <span class="slider round"></span>
+                                </label>
                                 <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
                             </div>
                         </div>
@@ -632,6 +637,11 @@
                         <label for="sendTranscribeAudio" class="form-label">Enviar Transcrição de Áudio</label>
                         <label class="switch">
                             <input type="checkbox" class="webhook-sendTranscribeAudio">
+                            <span class="slider round"></span>
+                        </label>
+                        <label for="addToBlackListOnOutgoingMessageWithTtl" class="form-label">Adicionar ao blacklits quando ouver uma mensagem de saida por X segundos</label>
+                        <label>
+                            <input type="number" class="webhook-addToBlackListOnOutgoingMessageWithTtl">
                             <span class="slider round"></span>
                         </label>
                         <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
@@ -864,6 +874,10 @@
                                     <input type="checkbox" class="webhook-sendTranscribeAudio" ${webhook.sendTranscribeAudio ? 'checked' : ''}>
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="addToBlackListOnOutgoingMessageWithTtl" class="form-label">Adicionar ao blacklits quando ouver uma mensagem de saida por X segundos</label>
+                                <label>
+                                    <input type="text" class="webhook-addToBlackListOnOutgoingMessageWithTtl" value="${webhook.addToBlackListOnOutgoingMessageWithTtl || ''}" class="form-control">
+                                </label>
                                 <button type="button" class="btn btn-danger btn-sm mt-2 remove-webhook">Remover</button>
                             </div>`;
                         $('#webhooksContainer').append(webhookTemplate);
@@ -918,6 +932,7 @@
                             sendIncomingMessages: $(this).find('.webhook-sendIncomingMessages').is(':checked'),
                             sendUpdateMessages: $(this).find('.webhook-sendUpdateMessages').is(':checked'),
                             sendTranscribeAudio: $(this).find('.webhook-sendTranscribeAudio').is(':checked'),
+                            addToBlackListOnOutgoingMessageWithTtl: $(this).find('.webhook-addToBlackListOnOutgoingMessageWithTtl').val(),
                         };
                         sessionData.webhooks.push(webhook);
                     });

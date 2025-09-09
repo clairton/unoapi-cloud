@@ -9,10 +9,11 @@ import { DataStore } from '../../src/services/data_store'
 import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig, getMessageMetadataDefault, Webhook } from '../../src/services/config'
 import logger from '../../src/services/logger'
-import { isInBlacklistInMemory } from '../../src/services/blacklist'
+import { isInBlacklistInMemory, addToBlacklistInMemory } from '../../src/services/blacklist'
 
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>
 const isInBlacklistMock = isInBlacklistInMemory as jest.MockedFunction<typeof isInBlacklistInMemory>
+const addToBlacklistInMemoryMock = addToBlacklistInMemory as jest.MockedFunction<typeof addToBlacklistInMemory>
 const webhook = mock<Webhook>()
 
 let store: Store
@@ -41,7 +42,7 @@ describe('service outgoing whatsapp cloud api', () => {
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
     phone = `${new Date().getMilliseconds()}`
-    service = new OutgoingCloudApi(getConfig, isInBlacklistInMemory)
+    service = new OutgoingCloudApi(getConfig, isInBlacklistInMemory, addToBlacklistInMemoryMock)
     textPayload = {
       text: {
         body: 'test'
