@@ -6,7 +6,6 @@ import logger from './logger'
 import { Config } from './config'
 import { MESSAGE_CHECK_WAAPP } from '../defaults'
 import { t } from '../i18n'
-import { isJidGroup } from 'baileys'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
 
@@ -340,10 +339,11 @@ export const getNumberAndId = (payload: any): [string, string] => {
     participantPn: participantPn2
   } = payload
 
-  const value = senderLid || participantLid || participant || participant2 || remoteJid
-  const split = value.split('@')
+  const lid = senderLid || participantLid || participant || participant2 || remoteJid
+  const split = lid.split('@')
   const id = `${split[0].split(':')[0]}@${split[1]}`
-  const phone = jidToPhoneNumber(participantPn || senderPn || participant || participant2 || participantPn2 || remoteJid, '')
+  const pn = participantPn || senderPn || participantPn2 || participant || participant2
+  const phone = pn ? jidToPhoneNumber(pn, '') : id
   return [phone, id]
 }
 
