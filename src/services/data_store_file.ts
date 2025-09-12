@@ -222,6 +222,12 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   dataStore.setJid = async (phoneOrJid: string, jid: string) => {
     jids.set(phoneOrJid, jid)
   }
+  dataStore.setJidIfNotFound = async (phoneOrJid: string, jid: string) => {
+    if (await dataStore.getJid(jid)) {
+      return
+    }
+    return dataStore.setJid(phoneOrJid, jid)
+  }
   dataStore.getJid = async (phoneOrJid: string) => {
     return jids.get(phoneOrJid)
   }
