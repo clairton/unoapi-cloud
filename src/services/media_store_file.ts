@@ -78,7 +78,8 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       const base64 = parts[1]
       buffer = Buffer.from(base64, 'base64')
     } else {
-      buffer = await downloadMediaMessage(waMessage, 'buffer', {})
+      const toDownloadMessage = { key: waMessage.key, message: { [binMessage?.messageType!]: binMessage?.message }} as WAMessage
+      buffer = await downloadMediaMessage(toDownloadMessage, 'buffer', {}) 
     }
     const filePath = mediaStore.getFilePath(phone, waMessage.key.id!, binMessage?.message?.mimetype)
     logger.debug('Saving buffer %s...', filePath)

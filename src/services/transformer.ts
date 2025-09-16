@@ -163,7 +163,7 @@ export const getNormalizedMessage = (waMessage: WAMessage): WAMessage | undefine
     let { message } = binMessage
     if (message.editedMessage) {
       message = message.protocolMessage?.editedMessage
-    }else if (message.protocolMessage?.editedMessage) {
+    } else if (message.protocolMessage?.editedMessage) {
       message = message.protocolMessage?.editedMessage
     }
     return { key: waMessage.key, message: { [binMessage.messageType]: message } }
