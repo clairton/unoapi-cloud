@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, normalizeMessageContent, proto } from 'baileys'
+import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, proto } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -132,6 +132,21 @@ export const isSaveMedia = (message: WAMessage) => {
   const messageType = normalizedMessage && getMessageType(normalizedMessage)
   return messageType && TYPE_MESSAGES_TO_PROCESS_FILE.includes(messageType)
 }
+
+export const normalizeMessageContent = (
+  content: WAMessageContent | null | undefined
+): WAMessageContent | undefined => {
+  content =
+    content?.ephemeralMessage?.message?.viewOnceMessage?.message ||
+    content?.ephemeralMessage?.message ||
+    content?.viewOnceMessage?.message ||
+    content?.viewOnceMessageV2Extension?.message ||
+    content?.viewOnceMessageV2?.message ||
+		content?.documentWithCaptionMessage?.message ||
+    content ||
+    undefined;
+  return content;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getBinMessage = (waMessage: WAMessage): { messageType: string; message: any } | undefined => {
