@@ -4,7 +4,7 @@ import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
 import logger from './logger'
 import { Config } from './config'
-import { MESSAGE_CHECK_WAAPP } from '../defaults'
+import { MESSAGE_CHECK_WAAPP, SEND_AUDIO_MESSAGE_AS_PTT } from '../defaults'
 import { t } from '../i18n'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
@@ -268,7 +268,7 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
       if (link) {
         let mimetype: string = getMimetype(payload)
         if (type == 'audio') {
-          response.ptt = true
+          response.ptt = SEND_AUDIO_MESSAGE_AS_PTT
         }
         if (payload[type].filename) {
           response.fileName = payload[type].filename
