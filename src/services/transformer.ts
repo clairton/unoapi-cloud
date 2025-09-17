@@ -267,8 +267,8 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
       const link = payload[type].link
       if (link) {
         let mimetype: string = getMimetype(payload)
-        if (type == 'audio') {
-          response.ptt = SEND_AUDIO_MESSAGE_AS_PTT
+        if (type == 'audio' && SEND_AUDIO_MESSAGE_AS_PTT) {
+          response.ptt = true
         }
         if (payload[type].filename) {
           response.fileName = payload[type].filename
