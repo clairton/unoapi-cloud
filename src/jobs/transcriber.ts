@@ -55,7 +55,7 @@ export class TranscriberJob {
         const fileName = `${splitedLink[splitedLink.length - 1]}${extension}`
         const transcription = await openai.audio.transcriptions.create({
           file: await toFile(buffer, fileName),
-          model: config.openaiApiTranscribeModel!,
+          model: config.openaiApiTranscribeModel || 'gpt-4o-mini-transcribe',
         })
         transcriptionText = transcription.text
       } else {
