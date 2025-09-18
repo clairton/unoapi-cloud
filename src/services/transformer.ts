@@ -397,13 +397,25 @@ export const extractDestinyPhone = (payload: object, throwError = true) => {
         data.entry[0].changes[0].value.statuses
         && data.entry[0].changes[0].value.statuses[0]
         && data.entry[0].changes[0].value.statuses[0].recipient_id?.replace('+', '')
-      ) || (
-        data.entry[0].changes[0].value.messages
-        && data.entry[0].changes[0].value.messages[0]
-        && data.entry[0].changes[0].value.messages[0].from?.replace('+', '')
       )
     )
   )
+  if (!number && throwError) {
+    throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
+  }
+  return number
+}
+export const extractFromPhone = (payload: object, throwError = true) => {
+  const data = payload as any
+  const number =
+    data?.entry
+    && data.entry[0]
+    && data.entry[0].changes
+    && data.entry[0].changes[0]
+    && data.entry[0].changes[0].value
+    && data.entry[0].changes[0].value.messages
+    && data.entry[0].changes[0].value.messages[0]
+    && data.entry[0].changes[0].value.messages[0].from?.replace('+', '')
   if (!number && throwError) {
     throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
   }
@@ -449,7 +461,7 @@ export const extractSessionPhone  = (payload: object) => {
 }
 
 export const isOutgoingMessage = (payload: object) => {
-  const from = extractDestinyPhone(payload, false)
+  const from = extractFromPhone(payload, false)
   const session = extractSessionPhone(payload)
   return session && from && session == from
 }
@@ -460,9 +472,7 @@ export const isUpdateMessage = (payload: object) => {
 }
 
 export const isIncomingMessage = (payload: object) => {
-  const from = extractDestinyPhone(payload, false)
-  const session = extractSessionPhone(payload)
-  return session && from && session != from
+  return !isOutgoingMessage(payload)
 }
 
 export const extractTypeMessage = (payload: object) => {

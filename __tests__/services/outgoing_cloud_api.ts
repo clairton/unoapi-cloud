@@ -9,27 +9,29 @@ import { DataStore } from '../../src/services/data_store'
 import { MediaStore } from '../../src/services/media_store'
 import { Config, getConfig, defaultConfig, getMessageMetadataDefault, Webhook } from '../../src/services/config'
 import logger from '../../src/services/logger'
-import { isInBlacklistInMemory, addToBlacklistInMemory } from '../../src/services/blacklist'
+import { isInBlacklistInMemory, addToBlacklistInMemory, isInBlacklist } from '../../src/services/blacklist'
 
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>
-const isInBlacklistMock = isInBlacklistInMemory as jest.MockedFunction<typeof isInBlacklistInMemory>
-const addToBlacklistInMemoryMock = addToBlacklistInMemory as jest.MockedFunction<typeof addToBlacklistInMemory>
+const addToBlacklistMock = addToBlacklistInMemory as jest.MockedFunction<typeof addToBlacklistInMemory>
 const webhook = mock<Webhook>()
 
+let isInBlacklistMock = jest.fn()
 let store: Store
 let getConfig: getConfig
 let config: Config
 let getStore: getStore
 const url = 'http://example.com'
-let phone
+let phone: string | undefined
+let wa_id: string | undefined
 let service: Outgoing
 
 describe('service outgoing whatsapp cloud api', () => {
-  let textPayload, outgoingPayload, updatePayload
+  let textPayload: any, outgoingPayload: any, updatePayload: any
 
   beforeEach(() => {
     config = defaultConfig
     config.ignoreGroupMessages = true
+    webhook.timeoutMs = 1
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getStore = async (_phone: string): Promise<Store> => store
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,8 +43,10 @@ describe('service outgoing whatsapp cloud api', () => {
     store = mock<Store>()
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
-    phone = `${new Date().getMilliseconds()}`
-    service = new OutgoingCloudApi(getConfig, isInBlacklistInMemory, addToBlacklistInMemoryMock)
+    isInBlacklistMock = jest.fn()
+    phone = `${new Date().getTime() / 4}`
+    wa_id = `${new Date().getTime() / 2}`
+    service = new OutgoingCloudApi(getConfig, isInBlacklistMock, addToBlacklistMock)
     textPayload = {
       text: {
         body: 'test'
@@ -57,6 +61,7 @@ describe('service outgoing whatsapp cloud api', () => {
           changes: [
             {
               value: {
+                contacts: [{ wa_id }],
                 metadata: { display_phone_number: 'abc' },
                 messages: [ { from: 'abc' }, ]
               }
@@ -89,33 +94,34 @@ describe('service outgoing whatsapp cloud api', () => {
     const response = new Response('ok', { status: 200 })
     response.ok = true
     mockFetch.mockResolvedValue(response)
-    await service.send(phone, textPayload)
+    await service.send(phone!, textPayload)
     expect(fetch).toHaveBeenCalledTimes(1)
   })
 
   test('not sendHttp in webhook when is in blacklist', async () => {
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
-    isInBlacklistMock.mockResolvedValue(Promise.resolve('1'))
-    await service.sendHttp(phone, webhook, textPayload, {})
+    isInBlacklistMock.mockReturnValueOnce(Promise.resolve('1'))
+    await service.sendHttp(phone!, webhook, textPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 
   test('not sendHttp in webhook when is sendGroupMessages false', async () => {
     webhook.sendGroupMessages = false
-    textPayload.to = 'um@g.us'
+    outgoingPayload.entry[0].changes[0].value.contacts[0].group_id = 'um@g.us'
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
-    await service.sendHttp(phone, webhook, textPayload, {})
+    await service.sendHttp(phone!, webhook, outgoingPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 
   test('not sendHttp in webhook when is sendNewsletterMessages false', async () => {
     webhook.sendNewsletterMessages = false
-    textPayload.to = 'um@newsletter'
+    outgoingPayload.entry[0].changes[0].value.contacts[0].group_id = 'um@newsletter'
+    outgoingPayload
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
-    await service.sendHttp(phone, webhook, textPayload, {})
+    await service.sendHttp(phone!, webhook, outgoingPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 
@@ -123,7 +129,7 @@ describe('service outgoing whatsapp cloud api', () => {
     webhook.sendOutgoingMessages = false
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
-    await service.sendHttp(phone, webhook, outgoingPayload, {})
+    await service.sendHttp(phone!, webhook, outgoingPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 
@@ -131,16 +137,27 @@ describe('service outgoing whatsapp cloud api', () => {
     webhook.sendUpdateMessages = false
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
-    await service.sendHttp(phone, webhook, updatePayload, {})
+    await service.sendHttp(phone!, webhook, updatePayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
   })
 
   test('not sendHttp in webhook when is sendIncomingMessages false', async () => {
     webhook.sendIncomingMessages = false
-    outgoingPayload.entry[0].changes[0].value.messages[0].to = phone
+    // outgoingPayload.entry[0].changes[0].value.messages[0].from = phone
     mockFetch.mockReset()
     expect(mockFetch).toHaveBeenCalledTimes(0)
-    await service.sendHttp(phone, webhook, outgoingPayload, {})
+    await service.sendHttp(phone!, webhook, outgoingPayload, {})
     expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  test('add to blacklist where addToBlackListOnOutgoingMessageWithTtl', async () => {
+    const ttl = 1
+    const w: Partial<Webhook> = {
+      id: `${new Date().getTime() / 5}`,
+      addToBlackListOnOutgoingMessageWithTtl: ttl
+    }
+    mockFetch.mockReset()
+    await service.sendHttp(phone!, w as Webhook, outgoingPayload, {})
+    expect(addToBlacklistMock).toHaveBeenCalledWith(phone!, w.id, wa_id, ttl)
   })
 })
