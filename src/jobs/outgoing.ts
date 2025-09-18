@@ -59,7 +59,7 @@ export class OutgoingJob {
 
   async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = data as any
+    const a = { ...data as any }
     const payload: any = a.payload
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
