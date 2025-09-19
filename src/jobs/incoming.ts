@@ -30,7 +30,7 @@ export class IncomingJob {
     }
     // e se for atualização, onde pega o id?
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = data as any
+    const a = { ...data as any }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = a.payload
     const options: object = a.options
