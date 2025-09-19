@@ -28,6 +28,7 @@ export class IncomingJob {
       logger.info(`Ignore incoming with ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
       return;
     }
+    // e se for atualização, onde pega o id?
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = data as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
