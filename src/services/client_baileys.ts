@@ -697,7 +697,7 @@ export class ClientBaileys implements Client {
     const contacts: Contact[] = []
     for (let index = 0; index < numbers.length; index++) {
       const number = numbers[index]
-      const testJid = phoneNumberToJid(number)
+      const testJid = jidToPhoneNumber(number, '')
       const realJid = await this.exists(testJid)
       contacts.push({
         wa_id: realJid,
