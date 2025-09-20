@@ -413,12 +413,15 @@ export const connect = async ({
   const send: sendMessage = async (
     to: string,
     message: AnyMessageContent,
-    options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
+    // allow passing through any Baileys MiscMessageGenerationOptions plus our custom 'composing'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    options: any = { composing: false },
   ) => {
     await validateStatus()
     const id =  isIndividualJid(to) ? await exists(to) : to
     if (id) {
-      if (options.composing) {
+      const { composing, ...restOptions } = options || {}
+      if (composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
         const time = (i?.text?.length || i?.caption?.length || 1) * Math.floor(Math.random() * 100)
@@ -429,10 +432,7 @@ export const connect = async ({
         await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
-      const opts = {}
-      if (options.quoted) {
-        opts['quoted'] = options.quoted
-      }
+      const opts = { ...restOptions }
       logger.debug('Send baileys from %s to %s -> %s', phone, id, JSON.stringify(message))
       return sock?.sendMessage(id, message, opts)
     }
