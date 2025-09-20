@@ -339,10 +339,12 @@ export const isIndividualMessage = (payload: any) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getChatAndNumberAndId = (payload: any): [string, string, string] => {
   const { key: { remoteJid } } = payload
+  const split = remoteJid.split('@')
+  const id = `${split[0].split(':')[0]}@${split[1]}`
   if (isIndividualJid(remoteJid)) {
-    return [remoteJid, jidToPhoneNumber(remoteJid), remoteJid]
+    return [id, jidToPhoneNumber(remoteJid, ''), id]
   } else {
-    return [remoteJid, ...getNumberAndId(payload)]
+    return [id, ...getNumberAndId(payload)]
   }
 }
 
