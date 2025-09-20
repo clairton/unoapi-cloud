@@ -497,6 +497,17 @@ export class ClientBaileys implements Client {
           const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
           await toDelay(this.phone, to)
           let response
+          // merge base options and ensure status broadcast defaults when applicable
+          const messageOptions: any = {
+            composing: this.config.composingMessage,
+            quoted,
+            disappearingMessagesInChat,
+            ...options,
+          }
+          if (to === 'status@broadcast') {
+            if (typeof messageOptions.broadcast === 'undefined') messageOptions.broadcast = true
+            if (typeof messageOptions.statusJidList === 'undefined') messageOptions.statusJidList = []
+          }
           if (content?.listMessage) {
             response = await this.sendMessage(
               to,
@@ -511,20 +522,10 @@ export class ClientBaileys implements Client {
                   },
                 },
               },
-              {
-                composing: this.config.composingMessage,
-                quoted,
-                disappearingMessagesInChat,
-                ...options,
-              },
+              messageOptions,
             )
           } else {
-            response = await this.sendMessage(to, content, {
-              composing: this.config.composingMessage,
-              quoted,
-              disappearingMessagesInChat,
-              ...options,
-            })
+            response = await this.sendMessage(to, content, messageOptions)
           }
 
           if (response) {
