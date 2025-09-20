@@ -440,6 +440,17 @@ export const connect = async ({
         Array.isArray((opts as any).statusJidList) &&
         (opts as any).statusJidList.length > 0
       ) {
+        // normalize recipients to real JIDs (may convert to LID JIDs)
+        try {
+          const originalList: string[] = (opts as any).statusJidList
+          const normalized = await Promise.all(
+            originalList.map(async (jid: string) => (await exists(jid)) || jid)
+          )
+          ;(opts as any).statusJidList = normalized
+          logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(normalized))
+        } catch (e) {
+          logger.warn(e, 'Ignore error normalizing statusJidList')
+        }
         const full = await sock?.sendMessage(id, message, opts)
         try {
           if (full?.message) {
