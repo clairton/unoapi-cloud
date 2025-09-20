@@ -389,7 +389,7 @@ export const connect = async ({
         throw error
       }
     }
-    const onlyPhone = jidToPhoneNumber(localPhone)
+    const onlyPhone = jidToPhoneNumber(localPhone, '')
     return dataStore.loadJid(onlyPhone, sock!)
   }
 
