@@ -434,6 +434,25 @@ export const connect = async ({
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
       const opts = { ...restOptions }
       logger.debug('Send baileys from %s to %s -> %s', phone, id, JSON.stringify(message))
+      // Workaround for Stories/Status: current Baileys sendMessage() does not pass statusJidList to relayMessage
+      if (
+        id === 'status@broadcast' &&
+        Array.isArray((opts as any).statusJidList) &&
+        (opts as any).statusJidList.length > 0
+      ) {
+        const full = await sock?.sendMessage(id, message, opts)
+        try {
+          if (full?.message) {
+            await sock?.relayMessage(id, full.message, {
+              messageId: (full.key.id || undefined) as string | undefined,
+              statusJidList: (opts as any).statusJidList,
+            })
+          }
+        } catch (error) {
+          logger.warn(error, 'Ignore error on relayMessage for status broadcast')
+        }
+        return full
+      }
       return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
