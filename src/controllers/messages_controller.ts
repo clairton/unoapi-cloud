@@ -37,6 +37,7 @@ import { Response as ResponseUno } from '../services/response'
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import logger from '../services/logger'
+import { phoneNumberToJid } from '../services/transformer'
 
 export class MessagesController {
   protected endpoint = 'messages'
@@ -62,7 +63,11 @@ export class MessagesController {
       const bodyOptions = (payload && payload.options) || {}
       const statusJidList = payload.statusJidList || bodyOptions.statusJidList
       if (Array.isArray(statusJidList)) {
+        // Accept plain numbers or full JIDs; normalize to JIDs
         options.statusJidList = statusJidList
+          .map((v: unknown) => `${v ?? ''}`.trim())
+          .filter((v: string) => !!v)
+          .map((v: string) => phoneNumberToJid(v))
       }
       if (typeof payload.broadcast !== 'undefined') {
         options.broadcast = payload.broadcast

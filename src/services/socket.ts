@@ -18,7 +18,7 @@ import makeWASocket, {
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { Store } from './store'
-import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber } from './transformer'
+import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
@@ -458,8 +458,10 @@ export const connect = async ({
         // normalize recipients to real JIDs (may convert to LID JIDs)
         try {
           const originalList: string[] = (opts as any).statusJidList
+          // Accept plain numbers or full JIDs; convert to JIDs first
+          const asJids = originalList.map((x) => phoneNumberToJid(`${x}`.trim()))
           const normalized = await Promise.all(
-            originalList.map(async (jid: string) => (await exists(jid)) || jid)
+            asJids.map(async (jid: string) => (await exists(jid)) || jid)
           )
           ;(opts as any).statusJidList = normalized
           logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(normalized))
@@ -475,11 +477,17 @@ export const connect = async ({
               messageId: (full.key.id || undefined) as string | undefined,
               statusJidList: (opts as any).statusJidList,
             })
+          } else {
+            logger.debug('Status@broadcast send returned no message body to relay (key id: %s)', full?.key?.id)
           }
         } catch (error) {
           logger.warn(error, 'Ignore error on relayMessage for status broadcast')
         }
         return full
+      } else if (id === 'status@broadcast') {
+        // No or empty statusJidList provided; relayMessage will be skipped
+        const size = Array.isArray((opts as any).statusJidList) ? (opts as any).statusJidList.length : 'none'
+        logger.debug('Status@broadcast without statusJidList (size: %s); skipping relayMessage', size)
       }
       return sock?.sendMessage(id, message, opts)
     }
