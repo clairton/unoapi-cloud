@@ -25,6 +25,10 @@ import { version } from '../package.json'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import { addToBlacklistJob } from './services/blacklist'
 import { Broadcast } from './services/broadcast'
+import ContactBaileys from './services/contact_baileys'
+import { Listener } from './services/listener'
+import { ListenerBaileys } from './services/listener_baileys'
+import { getClientBaileys } from './services/client_baileys'
 import { BroacastJob } from './jobs/broadcast'
 import { ReloadAmqp } from './services/reload_amqp'
 import { LogoutAmqp } from './services/logout_amqp'
@@ -44,6 +48,7 @@ const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
 const sessionStore: SessionStore = new SessionStoreRedis()
 const onNewLogin = onNewLoginGenerateToken(outgoing)
 const broadcast: Broadcast = new Broadcast()
+const listenerBaileys: Listener = new ListenerBaileys(outgoing, broadcast, getConfigRedis)
 const reloadAmqp = new ReloadAmqp(getConfigRedis)
 const logout = new LogoutAmqp(getConfigRedis)
 import { ReloadJob } from './jobs/reload'
@@ -53,7 +58,8 @@ const reloadJob = new ReloadJob(reloadAmqp)
 const securityVar = new Security(sessionStore)
 const middlewareVar = securityVar.run.bind(securityVar) as middleware
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar)
+const contact = new ContactBaileys(listenerBaileys, getConfigRedis, getClientBaileys, onNewLogin)
+const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar, undefined, contact)
 broadcast.setSever(app.socket)
 
 const broadcastJob = new BroacastJob(broadcast)
