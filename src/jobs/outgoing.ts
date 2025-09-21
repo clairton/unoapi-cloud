@@ -9,7 +9,7 @@ import {
   UNOAPI_QUEUE_TRANSCRIBER,
   UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED
 } from '../defaults'
-import { extractDestinyPhone, isAudioMessage, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
+import { extractDestinyPhone, isAudioMessage, isIncomingMessage, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
 import { getConfig } from '../services/config'
 import { isUpdateMessage, isFailedStatus } from '../services/transformer'
@@ -59,7 +59,7 @@ export class OutgoingJob {
 
   async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = data as any
+    const a = { ...data as any }
     const payload: any = a.payload
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
@@ -113,10 +113,10 @@ export class OutgoingJob {
               return contact
             })
           )
-
+          const isIncoming = isIncomingMessage(payload)
           payload.entry[0].changes[0].value.messages = await Promise.all(
             payload.entry[0].changes[0].value.messages.map(async message => {
-              if (TYPE_MESSAGES_MEDIA.includes(message.type)) {
+              if (TYPE_MESSAGES_MEDIA.includes(message.type) && isIncoming) {
                 const { mediaStore } = store
                 message = await mediaStore.saveMediaForwarder(message)
               }

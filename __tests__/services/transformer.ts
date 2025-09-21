@@ -105,6 +105,15 @@ describe('service transformer', () => {
     expect(isGroupMessage(payload)).toBe(false)
   })
 
+  test('getChatAndNumberAndId with jid and :', async () => {
+    const remoteJid = '554988290955@s.whatsapp.net'
+    const payload = { key: { remoteJid: '554988290955:25@s.whatsapp.net' }}
+    const a = getChatAndNumberAndId(payload)
+    expect(a[0]).toBe(remoteJid)
+    expect(a[1]).toBe('5549988290955')
+    expect(a[2]).toBe(remoteJid)
+  })
+
   test('getChatAndNumberAndId with lid and without group', async () => {
     const senderPn = '554988290955'
     const remoteJid = '24788516941@lid'
@@ -1133,7 +1142,7 @@ describe('service transformer', () => {
   })
 
   test('fromBaileysMessageContent protocolMessage editedMessage', async () => {
-    const remotePhoneNumber = '+11115551212'
+    const remotePhoneNumber = '11115551212'
     const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
     const id = `wa.${new Date().getTime()}`
     const id2 = `wa.${new Date().getTime()}`

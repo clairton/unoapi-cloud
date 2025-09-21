@@ -404,8 +404,8 @@ export const connect = async ({
         throw error
       }
     }
-
-    return dataStore.loadJid(localPhone, sock!)
+    const onlyPhone = jidToPhoneNumber(localPhone, '')
+    return dataStore.loadJid(onlyPhone, sock!)
   }
 
   const validateStatus = async () => {

@@ -28,8 +28,9 @@ export class IncomingJob {
       logger.info(`Ignore incoming with ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
       return;
     }
+    // e se for atualização, onde pega o id?
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = data as any
+    const a = { ...data as any }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = a.payload
     const options: object = a.options
@@ -46,7 +47,7 @@ export class IncomingJob {
       await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, this.queueCommander, phone, { payload }, { type: 'topic' })
     }
     const { ok, error } = response
-    const optionsOutgoing: Partial<PublishOption>  = {}
+    const optionsOutgoing: Partial<PublishOption>  =  { delay: 1000 } // to send status after message
     if (ok && ok.messages && ok.messages[0] && ok.messages[0].id) {
       const idProvider: string = ok.messages[0].id
       logger.debug('%s id %s to Unoapi id %s', config.provider, idProvider, idUno)
@@ -129,7 +130,6 @@ export class IncomingJob {
         error.entry[0].changes[0].value.statuses[0].id = idUno
       }
       outgingPayload = error
-      optionsOutgoing.delay = 1000
       optionsOutgoing.priority = 1
       // const status = error.entry[0].changes[0].value.statuses[0]
       // const code = status?.errors[0]?.code
@@ -173,7 +173,7 @@ export class IncomingJob {
               },
             ],
           },
-        ],
+        ], 
       }
     }
     await amqpPublish(
