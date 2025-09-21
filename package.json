@@ -109,5 +109,9 @@
   },
   "engines": {
     "node": ">= 24.x"
+  },
+  "resolutions": {
+    "libsignal": "https://codeload.github.com/whiskeysockets/libsignal-node/tar.gz/e81ecfc32eb74951d789ab37f7e341ab66d5fff1",
+    "@whiskeysockets/libsignal-node": "https://codeload.github.com/whiskeysockets/libsignal-node/tar.gz/e81ecfc32eb74951d789ab37f7e341ab66d5fff1"
   }
 }
