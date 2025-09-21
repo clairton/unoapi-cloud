@@ -33,6 +33,7 @@ import {
   CLEAN_CONFIG_ON_DISCONNECT,
   VALIDATE_SESSION_NUMBER,
 } from '../defaults'
+import { STATUS_ALLOW_LID } from '../defaults'
 import { t } from '../i18n'
 import { SendError } from './send_error'
 
@@ -404,8 +405,7 @@ export const connect = async ({
         throw error
       }
     }
-    const onlyPhone = jidToPhoneNumber(localPhone, '')
-    return dataStore.loadJid(onlyPhone, sock!)
+    return dataStore.loadJid(localPhone, sock!)
   }
 
   const validateStatus = async () => {
@@ -462,16 +462,18 @@ export const connect = async ({
           const normalized = await Promise.all(
             originalList.map(async (v: string) => (await exists(`${v}`.trim())) || phoneNumberToJid(`${v}`.trim()))
           )
-          // Force to s.whatsapp.net if any recipient is LID
-          const normalizedSw = normalized.map((jid: string) => {
-            if ((jid || '').includes('@lid')) {
-              const num = jidToPhoneNumber(jid, '')
-              return phoneNumberToJid(num)
-            }
-            return jid
-          })
-          ;(opts as any).statusJidList = normalizedSw
-          logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(normalizedSw))
+          // Optionally keep LID JIDs; otherwise force s.whatsapp.net
+          const finalList = STATUS_ALLOW_LID
+            ? normalized
+            : normalized.map((jid: string) => {
+                if ((jid || '').includes('@lid')) {
+                  const num = jidToPhoneNumber(jid, '')
+                  return phoneNumberToJid(num)
+                }
+                return jid
+              })
+          ;(opts as any).statusJidList = finalList
+          logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(finalList))
         } catch (e) {
           logger.warn(e, 'Ignore error normalizing statusJidList')
         }
