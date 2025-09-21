@@ -30,7 +30,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+          cache: yarn
 
       - name: Configure Git
         run: |
@@ -48,10 +49,10 @@ jobs:
           git checkout -b "$BRANCH"
           git merge --no-ff -m "merge: upstream ${{ inputs.tag }}" "tags/${{ inputs.tag }}"
 
-      - name: Install dependencies
+      - name: Install Yarn (classic) and dependencies
         run: |
-          corepack enable
-          yarn install --frozen-lockfile
+          npm i -g yarn@1.22.22
+          yarn install
 
       - name: Build
         run: yarn build
@@ -73,4 +74,3 @@ jobs:
           body: |
             Automated upstream merge from ${{ inputs.upstream_repo }} tag ${{ inputs.tag }}.
             CI built and tested this branch before opening the PR.
-
