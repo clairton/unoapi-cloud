@@ -287,10 +287,25 @@ export const connect = async ({
   }
 
   const getMessage = async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
-    const { remoteJid, id } = key
-    logger.debug('load message for jid %s id %s', remoteJid, id)
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const message = await dataStore.loadMessage(remoteJid!, id!)
+    let { remoteJid, id, participant } = key
+    // handle status@broadcast retries where WA doesn't include remoteJid
+    let jid = remoteJid
+    if (!jid && participant) {
+      logger.debug('Retry without remoteJid; using participant %s for id %s', participant, id)
+      jid = participant
+    }
+    jid = jid || 'status@broadcast'
+    logger.debug('load message for jid %s id %s', jid, id)
+    let message = await dataStore.loadMessage(jid, id!)
+    if (!message && jid !== 'status@broadcast') {
+      logger.debug('Not found under %s; trying status@broadcast for id %s', jid, id)
+      message = await dataStore.loadMessage('status@broadcast', id!)
+      if (message) {
+        logger.debug('Found message id %s under status@broadcast', id)
+      } else {
+        logger.debug('Message id %s not found under %s nor status@broadcast', id, jid)
+      }
+    }
     return message?.message || undefined
   }
 
@@ -454,6 +469,8 @@ export const connect = async ({
         const full = await sock?.sendMessage(id, message, opts)
         try {
           if (full?.message) {
+            const list: string[] = (opts as any).statusJidList || []
+            logger.debug('Relaying status to %s recipients', list.length)
             await sock?.relayMessage(id, full.message, {
               messageId: (full.key.id || undefined) as string | undefined,
               statusJidList: (opts as any).statusJidList,
