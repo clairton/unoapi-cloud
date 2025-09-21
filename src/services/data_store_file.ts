@@ -175,10 +175,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     ids.set(`${phone}-${id}`, unoId)
   }
   dataStore.loadJid = async (phoneOrJid: string, sock: Partial<WASocket>) => {
-    // If already a JID (e.g., 556699999999@s.whatsapp.net), return as-is
-    if ((phoneOrJid || '').indexOf('@') >= 0) {
-      return phoneOrJid
-    }
     if (!isIndividualJid(phoneOrJid)) {
       return phoneOrJid
     }

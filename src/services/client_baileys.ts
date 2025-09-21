@@ -698,8 +698,8 @@ export class ClientBaileys implements Client {
     const contacts: Contact[] = []
     for (let index = 0; index < numbers.length; index++) {
       const number = numbers[index]
-      const testJid = phoneNumberToJid(number)
-      const realJid = await this.exists(testJid)
+      // Let exists() resolve using the raw number; avoids incorrect digit insertion
+      const realJid = await this.exists(`${number}`.trim())
       contacts.push({
         wa_id: realJid,
         input: number,

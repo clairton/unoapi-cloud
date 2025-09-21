@@ -458,10 +458,9 @@ export const connect = async ({
         // normalize recipients to real JIDs (may convert to LID JIDs)
         try {
           const originalList: string[] = (opts as any).statusJidList
-          // Accept plain numbers or full JIDs; convert to JIDs first
-          const asJids = originalList.map((x) => phoneNumberToJid(`${x}`.trim()))
+          // Accept plain numbers or full JIDs; resolve via exists on raw input first
           const normalized = await Promise.all(
-            asJids.map(async (jid: string) => (await exists(jid)) || jid)
+            originalList.map(async (v: string) => (await exists(`${v}`.trim())) || phoneNumberToJid(`${v}`.trim()))
           )
           ;(opts as any).statusJidList = normalized
           logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(normalized))

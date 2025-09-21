@@ -312,14 +312,15 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
 }
 
 export const phoneNumberToJid = (phoneNumber: string) => {
-  if (phoneNumber.indexOf('@') >= 0) {
+  // Accept either a JID or a raw phone; never change digits (no auto '9' insertion)
+  if ((phoneNumber || '').indexOf('@') >= 0) {
     logger.debug('%s already is jid', phoneNumber)
     return phoneNumber
-  } else {
-    const jid = `${jidToPhoneNumber(phoneNumber, '')}@s.whatsapp.net`
-    logger.debug('transform %s to %s', phoneNumber, jid)
-    return jid
   }
+  const digits = (phoneNumber || '').replace(/[^0-9]/g, '')
+  const jid = `${digits}@s.whatsapp.net`
+  logger.debug('transform %s to %s', phoneNumber, jid)
+  return jid
 }
 
 export const isIndividualJid = (jid: string) => {
