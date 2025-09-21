@@ -1,0 +1,76 @@
+name: Sync Upstream + Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      upstream_repo:
+        description: "Upstream repo (owner/name)"
+        required: true
+        default: "clairton/unoapi-cloud"
+      tag:
+        description: "Tag to merge (e.g., v2.5.0-alpha-33)"
+        required: true
+      base_branch:
+        description: "Base branch to merge into"
+        required: false
+        default: "fixStatusBroadcast"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.base_branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configure Git
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+
+      - name: Add upstream and fetch tags
+        run: |
+          git remote add upstream https://github.com/${{ inputs.upstream_repo }}.git
+          git fetch upstream --tags --prune
+
+      - name: Create merge branch and merge tag
+        run: |
+          BRANCH="merge/${{ inputs.tag }}"
+          git checkout -b "$BRANCH"
+          git merge --no-ff -m "merge: upstream ${{ inputs.tag }}" "tags/${{ inputs.tag }}"
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test --coverage
+
+      - name: Push branch
+        run: |
+          git push -u origin "merge/${{ inputs.tag }}"
+
+      - name: Open Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: ${{ inputs.base_branch }}
+          branch: merge/${{ inputs.tag }}
+          title: "Merge upstream ${{ inputs.tag }} into ${{ inputs.base_branch }}"
+          body: |
+            Automated upstream merge from ${{ inputs.upstream_repo }} tag ${{ inputs.tag }}.
+            CI built and tested this branch before opening the PR.
+

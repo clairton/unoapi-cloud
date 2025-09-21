@@ -462,8 +462,16 @@ export const connect = async ({
           const normalized = await Promise.all(
             originalList.map(async (v: string) => (await exists(`${v}`.trim())) || phoneNumberToJid(`${v}`.trim()))
           )
-          ;(opts as any).statusJidList = normalized
-          logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(normalized))
+          // Force to s.whatsapp.net if any recipient is LID
+          const normalizedSw = normalized.map((jid: string) => {
+            if ((jid || '').includes('@lid')) {
+              const num = jidToPhoneNumber(jid, '')
+              return phoneNumberToJid(num)
+            }
+            return jid
+          })
+          ;(opts as any).statusJidList = normalizedSw
+          logger.debug('Status@broadcast normalized recipients %s', JSON.stringify(normalizedSw))
         } catch (e) {
           logger.warn(e, 'Ignore error normalizing statusJidList')
         }
