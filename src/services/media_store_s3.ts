@@ -1,4 +1,4 @@
-import { Contact } from 'baileys'
+import { Contact } from '@whiskeysockets/baileys'
 import { jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { UNOAPI_QUEUE_MEDIA, DATA_TTL, FETCH_TIMEOUT_MS, DATA_URL_TTL, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
 import { mediaStores, MediaStore, getMediaStore } from './media_store'

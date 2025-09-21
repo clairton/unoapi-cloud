@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, proto } from 'baileys'
+import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isPnUser, isLidUser, proto } from '@whiskeysockets/baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -323,7 +323,8 @@ export const phoneNumberToJid = (phoneNumber: string) => {
 }
 
 export const isIndividualJid = (jid: string) => {
-  const isIndividual = isJidUser(jid) || jid.indexOf('@') < 0
+  // Treat only PN JIDs (or raw numbers) as individual for phone extraction paths
+  const isIndividual = isPnUser(jid) || jid.indexOf('@') < 0
   logger.debug('jid %s is individual? %s', jid, isIndividual)
   return isIndividual
 }

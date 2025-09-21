@@ -1,7 +1,7 @@
 import { createClient } from '@redis/client'
 import { REDIS_URL, DATA_TTL, SESSION_TTL, DATA_URL_TTL } from '../defaults'
 import logger from './logger'
-import { GroupMetadata } from 'baileys'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 import { Webhook, configs } from './config'
 
 export const BASE_KEY = 'unoapi-'

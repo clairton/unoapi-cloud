@@ -1,4 +1,4 @@
-import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds, makeCacheableSignalKeyStore } from 'baileys'
+import { initAuthCreds, proto, AuthenticationState, AuthenticationCreds, makeCacheableSignalKeyStore } from '@whiskeysockets/baileys'
 import { session } from './session'
 import logger from './logger'
 
@@ -16,7 +16,7 @@ export const authState = async (session: session, phone: string) => {
           const key = getKey(type, id)
           const value = await readData(key)
           if (type === 'app-state-sync-key' && value) {
-            data[id] = proto.Message.AppStateSyncKeyData.fromObject(value)
+            data[id] = proto.Message.AppStateSyncKeyData.create(value)
           } else {
             data[id] = value
           }

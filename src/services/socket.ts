@@ -13,9 +13,8 @@ import makeWASocket, {
   ConnectionState,
   UserFacingSocketConfig,
   fetchLatestWaWebVersion,
-  MessageRetryMap,
-} from 'baileys'
-import MAIN_LOGGER from 'baileys/lib/Utils/logger'
+} from '@whiskeysockets/baileys'
+import MAIN_LOGGER from '@whiskeysockets/baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { Store } from './store'
 import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber, phoneNumberToJid } from './transformer'
@@ -23,7 +22,6 @@ import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import { 
   DEFAULT_BROWSER,
   LOG_LEVEL,
@@ -63,6 +61,7 @@ const EVENTS = [
   'labels.edit',
   'labels.association',
   'offline.preview',
+  'lid-mapping.update',
 ]
 
 export type OnQrCode = (qrCode: string, time: number, limit: number) => Promise<void>
@@ -133,7 +132,17 @@ export const connect = async ({
   config: Partial<Config>
 }) => {
   let sock: WASocket | undefined = undefined
-  const msgRetryCounterMap: MessageRetryMap = {}
+  const msgRetryCounterCache = (() => {
+    const store = new Map<string, unknown>()
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      get: <T = any>(key: string): T | undefined => store.get(key) as T | undefined,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      set: <T = any>(key: string, value: T) => (store.set(key, value), true as const),
+      del: (key: string) => store.delete(key),
+      flushAll: () => store.clear(),
+    }
+  })()
   const whatsappVersion = config.whatsappVersion
   const eventsMap = new Map()
   const { dataStore, state, saveCreds, sessionStore } = store
@@ -288,7 +297,12 @@ export const connect = async ({
   }
 
   const getMessage = async (key: proto.IMessageKey): Promise<proto.IMessage | undefined> => {
-    let { remoteJid, id, participant } = key
+    // Consider new Alt addressing fields introduced with LIDs
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const k: any = key as any
+    let remoteJid = key.remoteJid || k.remoteJidAlt
+    const id = key.id
+    let participant = key.participant || k.participantAlt
     // handle status@broadcast retries where WA doesn't include remoteJid
     let jid = remoteJid
     if (!jid && participant) {
@@ -568,7 +582,7 @@ export const connect = async ({
       getMessage,
       shouldIgnoreJid: config.shouldIgnoreJid,
       retryRequestDelayMs: config.retryRequestDelayMs,
-      msgRetryCounterMap,
+      msgRetryCounterCache,
       // patchMessageBeforeSending,
       agent,
       fetchAgent,
@@ -645,9 +659,7 @@ export const connect = async ({
           throw error
         }
       }
-      if (config.wavoipToken) {
-        useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
-      }
+      // voice-calls-baileys disabled in this branch pending v7 compatibility
       return true
     }
     return false

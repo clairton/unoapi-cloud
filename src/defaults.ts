@@ -1,4 +1,4 @@
-import { WAVersion } from 'baileys'
+import { WAVersion } from '@whiskeysockets/baileys'
 import { release } from 'os'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

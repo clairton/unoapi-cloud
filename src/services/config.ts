@@ -1,6 +1,6 @@
 import { getStore } from './store'
 import { getStoreFile } from './store_file'
-import { WAMessageKey, WAVersion } from 'baileys'
+import { WAMessageKey, WAVersion } from '@whiskeysockets/baileys'
 import { Level } from 'pino'
 
 export const configs: Map<string, Config> = new Map()

@@ -1,4 +1,4 @@
-import { WAMessage, proto } from 'baileys'
+import { WAMessage, proto } from '@whiskeysockets/baileys'
 import {
   phoneNumberToJid,
   getMessageType,

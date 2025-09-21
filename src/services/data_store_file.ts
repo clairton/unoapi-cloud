@@ -6,7 +6,7 @@ import {
   useMultiFileAuthState,
   GroupMetadata,
   isLidUser
-} from 'baileys'
+} from '@whiskeysockets/baileys'
 import { isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
 import { DataStore, MessageStatus } from './data_store'
