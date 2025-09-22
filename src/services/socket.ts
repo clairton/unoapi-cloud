@@ -22,6 +22,7 @@ import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
+import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import { 
   DEFAULT_BROWSER,
   LOG_LEVEL,
@@ -659,7 +660,13 @@ export const connect = async ({
           throw error
         }
       }
-      // voice-calls-baileys disabled in this branch pending v7 compatibility
+      if (config.wavoipToken) {
+        try {
+          useVoiceCallsBaileys(config.wavoipToken, sock as any, 'close', true)
+        } catch (e) {
+          logger.warn(e, 'Ignore voice-calls-baileys error')
+        }
+      }
       return true
     }
     return false

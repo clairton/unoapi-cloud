@@ -6855,6 +6855,12 @@ vcf@^2.1.2:
     camelcase "^5.0.0"
     foldline "^1.1.0"
 
+"voice-calls-baileys@file:vendor/voice-calls-baileys":
+  version "1.0.7-uno-v7"
+  resolved "file:vendor/voice-calls-baileys"
+  dependencies:
+    socket.io-client "^4.7.5"
+
 walker@^1.0.8:
   version "1.0.8"
   resolved "https://registry.npmjs.org/walker/-/walker-1.0.8.tgz"

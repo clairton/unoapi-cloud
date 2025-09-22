@@ -106,7 +106,8 @@
     "uuid": "^9.0.1",
     "vcf": "^2.1.2",
     "xlsx": "^0.18.5",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.0",
+    "voice-calls-baileys": "file:vendor/voice-calls-baileys"
   },
   "engines": {
     "node": ">= 24.x"

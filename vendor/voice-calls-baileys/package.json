@@ -1,0 +1,15 @@
+{
+  "name": "voice-calls-baileys",
+  "version": "1.0.7-uno-v7",
+  "description": "Voice calls integration for Baileys v7 (Uno patched)",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "license": "ISC",
+  "peerDependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.3 || ^7"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.5"
+  }
+}
+
