@@ -13,11 +13,11 @@ import makeWASocket, {
   ConnectionState,
   UserFacingSocketConfig,
   fetchLatestWaWebVersion,
+  MessageRetryMap,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { Store } from './store'
-import NodeCache from 'node-cache'
 import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
@@ -132,8 +132,8 @@ export const connect = async ({
   config: Partial<Config>
 }) => {
   let sock: WASocket | undefined = undefined
-  const msgRetryCounterCache = new NodeCache()
-  const whatsappVersion = config.whatsappVersion || (await fetchLatestWaWebVersion({})).version
+  const msgRetryCounterMap: MessageRetryMap = {}
+  const whatsappVersion = config.whatsappVersion
   const eventsMap = new Map()
   const { dataStore, state, saveCreds, sessionStore } = store
   const firstSaveCreds = async () => {
@@ -238,7 +238,7 @@ export const connect = async ({
     await sessionStore.setStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version } = await fetchLatestBaileysVersion()
-    const message = t('connected', phone, whatsappVersion.join('.'), version.join('.'), new Date().toUTCString())
+    const message = t('connected', phone, whatsappVersion ? whatsappVersion.join('.') : 'auto', version.join('.'), new Date().toUTCString())
     await onNotification(message, false)
   }
 
@@ -257,7 +257,7 @@ export const connect = async ({
     const { lastDisconnect } = payload
     const statusCode = lastDisconnect?.error?.output?.statusCode
     logger.info(`${phone} disconnected with status: ${statusCode}`)
-    if ([DisconnectReason.loggedOut, DisconnectReason.forbidden].includes(statusCode)) {
+    if ([DisconnectReason.loggedOut, 403].includes(statusCode)) {
       status.attempt = 1
       if (!await sessionStore.isStatusConnecting(phone)) {
         const message = t('removed')
@@ -294,21 +294,21 @@ export const connect = async ({
     return message?.message || undefined
   }
 
-  const patchMessageBeforeSending = (msg: proto.IMessage) => {
-    const isProductList = (listMessage: proto.Message.IListMessage | null | undefined) =>
-      listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST
+  // const patchMessageBeforeSending = (msg: proto.IMessage) => {
+  //   const isProductList = (listMessage: proto.Message.IListMessage | null | undefined) =>
+  //     listMessage?.listType === proto.Message.ListMessage.ListType.PRODUCT_LIST
 
-    if (isProductList(msg.deviceSentMessage?.message?.listMessage) || isProductList(msg.listMessage)) {
-      msg = JSON.parse(JSON.stringify(msg))
-      if (msg.deviceSentMessage?.message?.listMessage) {
-        msg.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
-      }
-      if (msg.listMessage) {
-        msg.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
-      }
-    }
-    return msg
-  }
+  //   if (isProductList(msg.deviceSentMessage?.message?.listMessage) || isProductList(msg.listMessage)) {
+  //     msg = JSON.parse(JSON.stringify(msg))
+  //     if (msg.deviceSentMessage?.message?.listMessage) {
+  //       msg.deviceSentMessage.message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
+  //     }
+  //     if (msg.listMessage) {
+  //       msg.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT
+  //     }
+  //   }
+  //   return msg
+  // }
 
   const event = <T extends keyof BaileysEventMap>(event: T, callback: (arg: BaileysEventMap[T]) => void) => {
     logger.info('Subscribe %s event: %s', phone, event)
@@ -389,8 +389,8 @@ export const connect = async ({
         throw error
       }
     }
-
-    return dataStore.loadJid(localPhone, sock!)
+    const onlyPhone = jidToPhoneNumber(localPhone, '')
+    return dataStore.loadJid(onlyPhone, sock!)
   }
 
   const validateStatus = async () => {
@@ -429,7 +429,7 @@ export const connect = async ({
         await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
-      const opts = { backgroundColor: '' }
+      const opts = {}
       if (options.quoted) {
         opts['quoted'] = options.quoted
       }
@@ -501,15 +501,17 @@ export const connect = async ({
       auth: state,
       logger: loggerBaileys,
       syncFullHistory: !config.ignoreHistoryMessages,
-      version: whatsappVersion,
       getMessage,
       shouldIgnoreJid: config.shouldIgnoreJid,
       retryRequestDelayMs: config.retryRequestDelayMs,
-      msgRetryCounterCache,
-      patchMessageBeforeSending,
+      msgRetryCounterMap,
+      // patchMessageBeforeSending,
       agent,
       fetchAgent,
       qrTimeout: config.qrTimeoutMs,
+    }
+    if (whatsappVersion) {
+      socketConfig.version = whatsappVersion
     }
     if (config.connectionType == 'pairing_code') {
       socketConfig.printQRInTerminal = false
@@ -568,7 +570,7 @@ export const connect = async ({
       if (config.connectionType == 'pairing_code' && !sock?.authState?.creds?.registered) {
         logger.info(`Requesting pairing code ${phone}`)
         try {
-          await sock.waitForConnectionUpdate(async (update) => !!update.qr)
+          // await sock.waitForConnectionUpdate(async (update) => !!update.qr)
           const onlyNumbers = phone.replace(/[^0-9]/g, '')
           const code = await sock?.requestPairingCode(onlyNumbers)
           const beatyCode = `${code?.match(/.{1,4}/g)?.join('-')}`

@@ -1,7 +1,9 @@
 import { Request, Response } from 'express'
-import { Config, getConfig } from '../services/config'
+import { getConfig } from '../services/config'
 import { SessionStore } from '../services/session_store'
 import logger from '../services/logger'
+import { getAuthHeaderToken } from '../services/security'
+import { UNOAPI_AUTH_TOKEN } from '../defaults'
 
 export class PhoneNumberController {
   private getConfig: getConfig
@@ -43,6 +45,7 @@ export class PhoneNumberController {
     logger.debug('phone number list params %s', JSON.stringify(req.params))
     logger.debug('phone number list body %s', JSON.stringify(req.body))
     logger.debug('phone number list query', JSON.stringify(req.query))
+    const token = getAuthHeaderToken(req)
     try {
       const phones = await this.sessionStore.getPhones()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +56,9 @@ export class PhoneNumberController {
         const store = await config.getStore(phone, config)
         const { sessionStore } = store
         const status = config.provider == 'forwarder' ? 'forwarder' : await sessionStore.getStatus(phone)
-        configs.push({ ...config, display_phone_number: phone, status })
+        if ([UNOAPI_AUTH_TOKEN, config.authToken].includes(token)) {
+          configs.push({ ...config, display_phone_number: phone, status })
+        }
       }
       logger.debug('Configs retrieved!')
       return res.status(200).json({ data: configs })

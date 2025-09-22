@@ -13,7 +13,18 @@ export class SessionStoreRedis extends SessionStore {
       const keys = await redisKeys(pattern)
       return keys.map((key: string) => key.replace(toReplaceConfig, ''))
     } catch (error) {
-      logger.error(error, 'Erro on get configs')
+      logger.error(error, 'Erro on get phones')
+      throw error
+    }
+  }
+
+  async getTokens(phone: string): Promise<string[]> {
+    try {
+      const pattern = configKey(phone)
+      const keys = await redisKeys(pattern)
+      return Promise.all(keys.map(async (k: string) => JSON.parse(await redisGet(k) || '{}')?.authToken))
+    } catch (error) {
+      logger.error(error, 'Erro on get tokens')
       throw error
     }
   }

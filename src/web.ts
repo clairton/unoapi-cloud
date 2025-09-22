@@ -47,9 +47,13 @@ const broadcast: Broadcast = new Broadcast()
 const reloadAmqp = new ReloadAmqp(getConfigRedis)
 const logout = new LogoutAmqp(getConfigRedis)
 import { ReloadJob } from './jobs/reload'
+import Security from './services/security'
+import middleware from './services/middleware'
 const reloadJob = new ReloadJob(reloadAmqp)
+const securityVar = new Security(sessionStore)
+const middlewareVar = securityVar.run.bind(securityVar) as middleware
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, security)
+const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar)
 broadcast.setSever(app.socket)
 
 const broadcastJob = new BroacastJob(broadcast)

@@ -1,4 +1,4 @@
-import { proto, WAMessage, downloadMediaMessage, Contact } from 'baileys'
+import { proto, WAMessage, downloadMediaMessage, downloadContentFromMessage, Contact } from 'baileys'
 import { getBinMessage, jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync, createReadStream } from 'fs'
@@ -69,16 +69,57 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     return `${baseUrl}/v15.0/download/${filePath}`
   }
 
+  const mapMediaType = {
+    imageMessage: 'image',
+    videoMessage: 'video',
+    documentMessage: 'document',
+    stickerMessage: 'sticker',
+    audioMessage: 'audio',
+    ptvMessage: 'video',
+  }
+
   mediaStore.saveMedia = async (waMessage: WAMessage) => {
     let buffer
     const binMessage = getBinMessage(waMessage)
     const url = binMessage?.message?.url
+
+    if (typeof binMessage?.message?.mediaKey === 'object') {
+      binMessage.message.mediaKey = Uint8Array.from(Object.values(binMessage?.message?.mediaKey))
+    }
+    
     if (url.indexOf('base64') >= 0) {
       const parts = url.split(',')
       const base64 = parts[1]
       buffer = Buffer.from(base64, 'base64')
     } else {
-      buffer = await downloadMediaMessage(waMessage, 'buffer', {})
+      const toDownloadMessage = { key: waMessage.key, message: { [binMessage?.messageType!]: binMessage?.message }} as WAMessage
+      try {
+        buffer = await downloadMediaMessage(toDownloadMessage, 'buffer', {})
+      } catch (err) {
+        logger.error('Download Media failed, trying to retry in 5 seconds in fallback...')
+        await new Promise((resolve) => setTimeout(resolve, 5000))
+        if (!binMessage?.messageType) throw new Error('Could not determine messageType for fallback')
+        try {
+          const media = await downloadContentFromMessage(
+            {
+              mediaKey: binMessage?.message?.mediaKey,
+              directPath: binMessage?.message?.directPath,
+              url: `https://mmg.whatsapp.net${binMessage?.message?.directPath}`,
+            },
+            mapMediaType[binMessage?.messageType],
+            {},
+          )
+          const chunks: any[] = []
+          for await (const chunk of media) {
+            chunks.push(chunk)
+          }
+          buffer = Buffer.concat(chunks)
+          logger.info('Download Media fallback with downloadContentFromMessage was successful!')
+        } catch (fallbackErr) {
+          logger.error('Download Media fallback with downloadContentFromMessage also failed!')
+          throw fallbackErr
+        }
+      }
     }
     const filePath = mediaStore.getFilePath(phone, waMessage.key.id!, binMessage?.message?.mimetype)
     logger.debug('Saving buffer %s...', filePath)

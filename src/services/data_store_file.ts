@@ -4,7 +4,8 @@ import {
   WAMessageKey,
   WASocket,
   useMultiFileAuthState,
-  GroupMetadata
+  GroupMetadata,
+  isLidUser
 } from 'baileys'
 import { isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
@@ -179,7 +180,11 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
       return phoneOrJid
     }
     let jid = await dataStore.getJid(phoneOrJid)
-    if (!jid) {
+    let lid
+    if (isLidUser(jid)) {
+      lid = jid
+    }
+    if (!jid || lid) {
       let results: unknown
       try {
         logger.debug(`Verifing if ${phoneOrJid} exist on WhatsApp`)
@@ -207,7 +212,12 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
         jid = result.jid
         await dataStore.setJid(phoneOrJid, jid!)
       } else {
-        logger.warn(`${phoneOrJid} not exists on WhatsApp baileys onWhatsApp return results ${results ? JSON.stringify(results) : null}`)
+        if (lid) {
+          logger.warn(`${phoneOrJid} not retrieve jid on WhatsApp baileys return lid ${lid}`)
+          return lid
+        } else {
+          logger.warn(`${phoneOrJid} not exists on WhatsApp baileys onWhatsApp return results ${results ? JSON.stringify(results) : null}`)
+        }
       }
     }
     return jid
@@ -221,6 +231,12 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   }
   dataStore.setJid = async (phoneOrJid: string, jid: string) => {
     jids.set(phoneOrJid, jid)
+  }
+  dataStore.setJidIfNotFound = async (phoneOrJid: string, jid: string) => {
+    if (await dataStore.getJid(jid)) {
+      return
+    }
+    return dataStore.setJid(phoneOrJid, jid)
   }
   dataStore.getJid = async (phoneOrJid: string) => {
     return jids.get(phoneOrJid)

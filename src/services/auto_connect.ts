@@ -24,7 +24,7 @@ export const autoConnect = async (
           logger.info(`Ignore connecting phone ${phone} provider ${config.provider}...`)
           continue;
         }
-        if (config.server !== UNOAPI_SERVER_NAME) {
+        if (config.server && config.server !== UNOAPI_SERVER_NAME) {
           logger.info(`Ignore connecting phone ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
           continue;
         }
