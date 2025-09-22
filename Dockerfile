@@ -8,6 +8,7 @@ WORKDIR /app
 
 ADD ./package.json ./package.json
 ADD ./yarn.lock ./yarn.lock
+ADD ./vendor ./vendor
 RUN yarn
 
 ADD ./src ./src
@@ -35,6 +36,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/yarn.lock ./yarn.lock
+COPY --from=builder /app/vendor ./vendor
 
 
 RUN apk --update --no-cache add git ffmpeg
