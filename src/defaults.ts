@@ -119,6 +119,8 @@ export const AUTO_CONNECT: boolean = process.env.AUTO_CONNECT === _undefined ? t
 export const COMPOSING_MESSAGE: boolean = process.env.COMPOSING_MESSAGE === _undefined ? false : process.env.COMPOSING_MESSAGE == 'true'
 export const IGNORE_GROUP_MESSAGES: boolean = process.env.IGNORE_GROUP_MESSAGES == _undefined ? true : process.env.IGNORE_GROUP_MESSAGES == 'true'
 export const IGNORE_NEWSLETTER_MESSAGES: boolean = process.env.IGNORE_NEWSLETTER_MESSAGES == _undefined ? true : process.env.IGNORE_NEWSLETTER_MESSAGES == 'true'
+export const IGNORE_OWN_MESSAGES_DECRYPT_ERROR: boolean =
+  process.env.IGNORE_OWN_MESSAGES_DECRYPT_ERROR === _undefined ? false : process.env.IGNORE_OWN_MESSAGES_DECRYPT_ERROR == 'true'
 export const IGNORE_BROADCAST_STATUSES: boolean =
   process.env.IGNORE_BROADCAST_STATUSES === _undefined ? true : process.env.IGNORE_BROADCAST_STATUSES == 'true'
 export const READ_ON_RECEIPT: boolean = process.env.READ_ON_RECEIPT === _undefined ? false : process.env.READ_ON_RECEIPT == 'true'

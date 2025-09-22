@@ -4,7 +4,7 @@ import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
 import logger from './logger'
 import { Config } from './config'
-import { MESSAGE_CHECK_WAAPP, SEND_AUDIO_MESSAGE_AS_PTT } from '../defaults'
+import { IGNORE_OWN_MESSAGES_DECRYPT_ERROR, MESSAGE_CHECK_WAAPP, SEND_AUDIO_MESSAGE_AS_PTT } from '../defaults'
 import { t } from '../i18n'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
@@ -786,7 +786,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         break
 
       case 'messageStubType':
-        MESSAGE_STUB_TYPE_ERRORS
+        if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && fromMe) {
+          logger.debug('Ignore decrypt messageStubType from me')
+          return [null, senderPhone, senderId] 
+        }
         if (payload.messageStubType == 2 && 
             payload.messageStubParameters &&
             payload.messageStubParameters[0] &&

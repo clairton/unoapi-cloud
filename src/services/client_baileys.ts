@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent, isLidUser, WAMessageAddressingMode } from 'baileys'
+import { GroupMetadata, WAMessage, proto, delay, isJidGroup, jidNormalizedUser, AnyMessageContent, isLidUser } from 'baileys'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 import { Listener } from './listener'
 import { Store } from './store'
