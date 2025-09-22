@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import logger from '../services/logger'
 import path from 'path'
+import { createRequire } from 'module'
 
 class IndexController {
 
@@ -20,10 +21,10 @@ class IndexController {
     logger.debug('socket params %s', JSON.stringify(req.params))
     logger.debug('socket body %s', JSON.stringify(req.body))
     try {
-      // prefer resolving via Node to avoid path issues in different runners
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const clientPath = require.resolve('socket.io-client/dist/socket.io.min.js')
-      res.set('Content-Type', 'application/javascript')
+      // use __filename to support CommonJS output as configured by the build
+      const reqr = createRequire(__filename as unknown as string)
+      const clientPath = reqr.resolve('socket.io-client/dist/socket.io.min.js')
+      res.type('application/javascript')
       return res.sendFile(clientPath)
     } catch (e) {
       logger.error(e, 'Socket.io client not found')
