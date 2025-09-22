@@ -52,8 +52,145 @@ http://localhost:9876/v15.0/554931978550/messages \
   } 
 }'
 ```
+To Send a Status
+Requisitos:
+to = 'status@broadcast'
+type is content (ex.: image, video ou text)
+statusJidList = ['5511999999999, ...] with at least 1 JID valid
 
+Image sample
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data-raw '
+{
+"messaging_product": 
+"whatsapp",
+"recipient_type": 
+"individual",
+"to": 
+"status@broadcast",
+"context": 
+{
+"message_id": 
+"8e401d25-89e8-4b9d-aa10-373e2ee1a5555"
+},
+"type": 
+"image",
+"image": 
+{
+"link": 
+"https://r2.vipertec.net/6YLUsdJFWE1SRdTcuGpi.png",
+"caption": 
+"wificam"
+},
+"statusJidList": 
+[
+"5566996269251",
+"5566997195718",
+"5566996222471"
+]
+}
+```
+Video sample
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data-raw '
+{
+"messaging_product": 
+"whatsapp",
+"recipient_type": 
+"individual",
+"to": 
+"status@broadcast",
+"context": 
+{
+"message_id": 
+"8e401d25-89e8-4b9d-aa10-373e2ee1a5555"
+},
+"type": 
+"video",
+"video": 
+{
+"link": 
+"https://r2.vipertec.net/fyHiN0XTnKtnDXbUwX9A.mp4",
+"caption": 
+"AutoMonitoramento"
+},
+"statusJidList": 
+[
+"5566996269251",
+"5566997195718",
+"5566996222471"
+]
+}
+```
+Text sample
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data-raw '
+{
+"messaging_product": 
+"whatsapp",
+"recipient_type": 
+"individual",
+"to": 
+"status@broadcast",
+"context": 
+{
+"message_id": 
+"8e401d25-89e8-4b9d-aa10-373e2ee1a5555"
+},
+"type": "text",
+  "text": {
+    "body": "hello"
+  },
+"statusJidList": 
+[
+"5566996269251",
+"5566997195718",
+"5566996222471"
+],
+"backgroundColor":
+"#000000",
+"font": 
+1
+}
+```
+Note: 
+Your number's WhatsApp status privacy must allow delivery to the provided JIDs.
+If you provide an empty JIDList, the status will not be delivered.
 To send a contact
+![Imagem do WhatsApp de 2025-09-21 à(s) 20 03 33_a199430a](https://github.com/user-attachments/assets/c498de41-b8dc-4368-98b0-737b2fee4735)
+
+New endpoint Preflight  
+
+How to use for diagnostics
+
+Call preflight and check:
+session.online = true (session connected)
+counts.valid == counts.normalized (all counts exist in WhatsApp)
+ready = true (prerequisites met)
+If "ready" is false:
+session.online = false → reconnect the session.
+There are invalid numbers → the number doesn't have WhatsApp (correct or remove from the list).
+Even with ready=true, Status may not appear due to privacy/saved contacts (not something the API can confirm).
+
+```sh
+curl --location 'http://localhost:9876/v15.0/v15.0/5566996222471/preflight/status' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: ••••••' \
+--data '{ "statusJidList": ["5566996269251","5566997195718","5566996222471"] }
+'
+```
 
 ```sh
 curl -i -X POST \
