@@ -19,8 +19,16 @@ class IndexController {
     logger.debug('socket headers %s', JSON.stringify(req.headers))
     logger.debug('socket params %s', JSON.stringify(req.params))
     logger.debug('socket body %s', JSON.stringify(req.body))
-    res.set('Content-Type', 'text/javascript')
-    return res.sendFile(path.resolve('./node_modules/socket.io-client/dist/socket.io.min.js'))
+    try {
+      // prefer resolving via Node to avoid path issues in different runners
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const clientPath = require.resolve('socket.io-client/dist/socket.io.min.js')
+      res.set('Content-Type', 'application/javascript')
+      return res.sendFile(clientPath)
+    } catch (e) {
+      logger.error(e, 'Socket.io client not found')
+      return res.status(404).send('socket.io-client not installed')
+    }
   }
 
   public ping(req: Request, res: Response) {
