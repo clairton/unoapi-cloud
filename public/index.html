@@ -12,7 +12,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 
     <!-- Socket IO-->
-    <script src="/socket.io.min.js"></script>
+    <script src="/socket.io.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js';s.crossOrigin='anonymous';document.head.appendChild(s)})();"></script>
+    <script>
+      // Extra guard in case the browser blocked execution without firing onerror
+      if (typeof window.io === 'undefined') {
+        document.write('<' + 'script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js" crossorigin="anonymous"><' + '/script>')
+      }
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
