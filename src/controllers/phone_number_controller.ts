@@ -29,7 +29,7 @@ export class PhoneNumberController {
       const templates = await store.dataStore.loadTemplates()
       logger.debug('Templates retrieved!')
       return res.status(200).json({
-        display_phone_number: phone,
+        display_phone_number: phone.replace('+', ''),
         status: await sessionStore.getStatus(phone),
         message_templates: { data: templates },
         ...config,
@@ -57,7 +57,7 @@ export class PhoneNumberController {
         const { sessionStore } = store
         const status = config.provider == 'forwarder' ? 'forwarder' : await sessionStore.getStatus(phone)
         if ([UNOAPI_AUTH_TOKEN, config.authToken].includes(token)) {
-          configs.push({ ...config, display_phone_number: phone, status })
+          configs.push({ ...config, display_phone_number: phone.replace('+', ''), status })
         }
       }
       logger.debug('Configs retrieved!')

@@ -1,9 +1,9 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
+import { IGNORE_OWN_MESSAGES_DECRYPT_ERROR, UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_LISTENER, UNOAPI_SERVER_NAME } from '../defaults'
 import { Listener } from '../services/listener'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
-import { DecryptError } from '../services/transformer'
+import { DecryptError, isOutgoingMessage } from '../services/transformer'
 import { getConfig } from '../services/config'
 
 export class ListenerJob {
@@ -35,9 +35,14 @@ export class ListenerJob {
         await this.listener.process(phone, messages, type)
       } catch (error) {
         if (error instanceof DecryptError && options && options?.countRetries >= options?.maxRetries) {
-          // send message asking to open whatsapp to see
-          await this.outgoing.send(phone, error.getContent())
+          if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
+            logger.warn('Ignore decrypt erro for own message')
+          } else {
+            // send message asking to open whatsapp to see
+            await this.outgoing.send(phone, error.getContent())
+          }
         } else {
+          logger.warn('Decrypt error message, try again...')
           throw error
         }
       }

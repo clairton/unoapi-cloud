@@ -148,8 +148,8 @@ export class IncomingJob {
                 value: {
                   messaging_product: 'whatsapp',
                   metadata: {
-                    display_phone_number: phone,
-                    phone_number_id: phone,
+                    display_phone_number: phone.replace('+', ''),
+                    phone_number_id: phone.replace('+', ''),
                   },
                   contacts: [
                     {

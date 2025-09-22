@@ -597,8 +597,8 @@ export class ClientBaileys implements Client {
                   value: {
                     messaging_product: 'whatsapp',
                     metadata: {
-                      display_phone_number: this.phone,
-                      phone_number_id: this.phone,
+                      display_phone_number: this.phone.replace('+', ''),
+                      phone_number_id: this.phone.replace('+', ''),
                     },
                     statuses: [
                       {
