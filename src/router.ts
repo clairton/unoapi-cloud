@@ -77,6 +77,7 @@ export const router = (
   router.get('/', indexController.root)
   router.get('/index.html', indexController.root)
   router.get('/socket.io.min.js', indexController.socket)
+  router.get('/favicon.ico', indexController.favicon)
   router.get('/connect/:phone', connectController.index.bind(connectController))
   router.get('/ping', indexController.ping)
   router.get('/:version/debug_token', indexController.debugToken)

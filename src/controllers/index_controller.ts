@@ -27,9 +27,14 @@ class IndexController {
       res.type('application/javascript')
       return res.sendFile(clientPath)
     } catch (e) {
-      logger.error(e, 'Socket.io client not found')
-      return res.status(404).send('socket.io-client not installed')
+      logger.error(e, 'Socket.io client not found; redirecting to CDN')
+      return res.redirect(302, 'https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js')
     }
+  }
+
+  public favicon(_req: Request, res: Response) {
+    // respond with no content to avoid 404 noise if favicon is not present
+    return res.sendStatus(204)
   }
 
   public ping(req: Request, res: Response) {
