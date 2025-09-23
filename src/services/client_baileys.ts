@@ -494,7 +494,7 @@ export class ClientBaileys implements Client {
           }
           if (CONVERT_AUDIO_MESSAGE_TO_OGG && content.audio && content.ptt) {
             try {
-              const url = content.audio.link
+              const url = string | undefined = content?.audio?.url
               if (url) {
                 content.audio = await audioConverter(url)
                 content.ptt = true
