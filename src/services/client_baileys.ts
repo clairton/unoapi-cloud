@@ -25,10 +25,11 @@ import { Response } from './response'
 import QRCode from 'qrcode'
 import { Template } from './template'
 import logger from './logger'
-import { FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND, WHATSAPP_VERSION } from '../defaults'
+import { CONVERT_AUDIO_MESSAGE_TO_OGG, FETCH_TIMEOUT_MS, VALIDATE_MEDIA_LINK_BEFORE_SEND } from '../defaults'
 import { t } from '../i18n'
 import { ClientForward } from './client_forward'
 import { SendError } from './send_error'
+import audioConverter from '../utils/audio_converter'
 
 const attempts = 3
 
@@ -491,6 +492,20 @@ export class ClientBaileys implements Client {
           if (payload?.ttl) {
             disappearingMessagesInChat = payload.ttl
           }
+          if (CONVERT_AUDIO_MESSAGE_TO_OGG && content.audio && content.ptt) {
+            try {
+              const url = content.audio.link
+              if (url) {
+                content.audio = await audioConverter(url)
+                content.ptt = true
+                logger.debug('Audio converted to OGG/Opus PTT for %s', url)
+              } else {
+                logger.debug('Skip audio conversion (not mp3 or missing url). url: %s', url)
+              }
+            } catch (err) {
+              logger.warn(err, 'Ignore error converting audio to ogg sending original')
+            }
+          }
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -708,3 +723,4 @@ export class ClientBaileys implements Client {
     return contacts
   }
 }
+

@@ -20,6 +20,8 @@ export const VALIDATE_MEDIA_LINK_BEFORE_SEND =
   process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == _undefined ? false : process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == 'true'
 export const SEND_AUDIO_MESSAGE_AS_PTT = 
   process.env.SEND_AUDIO_MESSAGE_AS_PTT == _undefined ? false : process.env.SEND_AUDIO_MESSAGE_AS_PTT == 'true'
+export const CONVERT_AUDIO_MESSAGE_TO_OGG =
+  process.env.CONVERT_AUDIO_MESSAGE_TO_OGG == _undefined ? false : process.env.CONVERT_AUDIO_MESSAGE_TO_OGG == 'true'
 
 export const WEBHOOK_FORWARD_PHONE_NUMBER_ID = process.env.WEBHOOK_FORWARD_PHONE_NUMBER_ID || ''
 export const WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID = process.env.WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID || ''
