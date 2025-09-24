@@ -231,7 +231,7 @@ export const getMessageDecrypted = async (phone: string, id: string) => {
 
 export const setMessageDecrypted = async (phone: string, id: string) => {
   const key = messageDecryptedKey(phone, id)
-  await client.set(key, true, { EX: DATA_TTL })
+  await client.set(key, 'true', { EX: DATA_TTL / 10 })
 }
 
 export const getSessionStatus = async (phone: string) => {

@@ -38,17 +38,18 @@ export class ListenerJob {
         const { dataStore } = store
         if (error instanceof DecryptError) {
           if (await dataStore.getMessageDecrypted(error.getOriginalId())) {
-
+            logger.debug('Ignore decrypt error because already drecrypted %s', error.getOriginalId())
+            return
           } else if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
-            logger.warn('Ignore decrypt erro for own message')
+            logger.warn('Ignore decrypt error for own message %s', error.getOriginalId())
+            return
           } else if (options && options?.countRetries >= options?.maxRetries) {
             // send message asking to open whatsapp to see
-            await this.outgoing.send(phone, error.getContent())
+            return this.outgoing.send(phone, error.getContent())
           }
-        } else {
-          logger.warn('Decrypt error message, try again...')
-          throw error
         }
+        logger.warn('Decrypt error message, try again...')
+        throw error
       }
     } else {
       if (type == 'delete' && messages.keys) {
