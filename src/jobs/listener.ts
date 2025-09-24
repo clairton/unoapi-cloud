@@ -28,16 +28,20 @@ export class ListenerJob {
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = data as any
+    const a = { ...data as any }
     const { messages, type } = a
     if (a.splited) {
       try {
         await this.listener.process(phone, messages, type)
       } catch (error) {
-        if (error instanceof DecryptError && options && options?.countRetries >= options?.maxRetries) {
-          if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
+        const store = await config.getStore(phone, config)
+        const { dataStore } = store
+        if (error instanceof DecryptError) {
+          if (await dataStore.getMessageDecrypted(error.getOriginalId())) {
+
+          } else if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
             logger.warn('Ignore decrypt erro for own message')
-          } else {
+          } else if (options && options?.countRetries >= options?.maxRetries) {
             // send message asking to open whatsapp to see
             await this.outgoing.send(phone, error.getContent())
           }

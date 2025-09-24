@@ -195,6 +195,10 @@ export const groupKey = (phone: string, jid: string) => {
   return `${BASE_KEY}group:${phone}:${jid}`
 }
 
+export const messageDecryptedKey = (phone: string, jid: string) => {
+  return `${BASE_KEY}message-decrypted:${phone}:${jid}`
+}
+
 export const blacklist = (from: string, webhookId: string, to: string) => {
   return `${BASE_KEY}blacklist:${from}:${webhookId}:${to}`
 }
@@ -218,6 +222,16 @@ export const setBlacklist = async (from: string, webhookId: string, to: string, 
   } else {
     return client.set(key, '1')
   }
+}
+
+export const getMessageDecrypted = async (phone: string, id: string) => {
+  const key = messageDecryptedKey(phone, id)
+  return redisGet(key)
+}
+
+export const setMessageDecrypted = async (phone: string, id: string) => {
+  const key = messageDecryptedKey(phone, id)
+  await client.set(key, true, { EX: DATA_TTL })
 }
 
 export const getSessionStatus = async (phone: string) => {

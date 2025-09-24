@@ -153,6 +153,9 @@ export class ListenerBaileys implements Listener {
       const senderId = resp[2]
       const { dataStore } = await config.getStore(phone, config)
       await dataStore.setJidIfNotFound(jidToPhoneNumber(senderPhone, ''), senderId)
+      if (messageType && !['update', 'receipt'].includes(messageType) && i.key && i.key.id) {
+        await store?.dataStore.setMessageDecrypted(i.key.id)
+      }
     } catch (error) {
       if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)

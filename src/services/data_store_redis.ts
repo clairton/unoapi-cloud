@@ -24,6 +24,8 @@ import {
   setTemplates,
   setMedia,
   getMedia,
+  getMessageDecrypted,
+  setMessageDecrypted,
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -79,7 +81,12 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   store.setUnoId = async (id: string, unoId: string) => setUnoId(phone, id, unoId)
   store.loadMediaPayload = async (id: string) => getMedia(phone, id)
   store.setMediaPayload = async (id: string, payload: string) => setMedia(phone, id, payload)
-
+  store.getMessageDecrypted = async (id: string) => {
+    return getMessageDecrypted(phone, id)
+  }
+  store.setMessageDecrypted = async (id: string) => {
+    return setMessageDecrypted(phone, id)
+  }
   store.getJid = async (phoneOrJid: string) => {
     const jid = await getJid(phone, phoneOrJid)
     logger.debug('Found session %s phone %s wa_id %s', phone, phoneOrJid, jid)

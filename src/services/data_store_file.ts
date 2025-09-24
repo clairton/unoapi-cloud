@@ -51,6 +51,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   const jids: Map<string, string> = new Map()
   const ids: Map<string, string> = new Map()
   const statuses: Map<string, string> = new Map()
+  const messagesDecrypted: Map<string, boolean> = new Map()
   const medias: Map<string, string> = new Map()
   const messages: Map<string, any> = new Map()
   const groups: NodeCache = new NodeCache()
@@ -77,6 +78,9 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     json?.messages.entries().forEach(([key, value]) => {
       messages.set(key, value)
     })
+    json?.messagesDecrypted.entries().forEach(([key, value]) => {
+      messagesDecrypted.set(key, value)
+    })
     json?.keys.entries().forEach(([key, value]) => {
       keys.set(key, value)
     })
@@ -97,10 +101,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     })
   }
 	dataStore.writeToFile = (path: string) => {
-    const { writeFileSync } = require('fs')
-    // for(const a in Object.keys(dataStore.toJSON())) {
-    //   console.log(a)
-    // }
     writeFileSync(path, JSON.stringify(dataStore.toJSON()))
   }
   dataStore.readFromFile = (path: string) => {
@@ -117,6 +117,12 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   }
   dataStore.setKey = async (id: string, key: WAMessageKey) => {
     return new Promise<void>((resolve) => keys.set(id, key) && resolve())
+  }
+  dataStore.getMessageDecrypted = async (id: string) => {
+    return messagesDecrypted.get(id)
+  }
+  dataStore.setMessageDecrypted = async (id: string) => {
+    return new Promise<void>((resolve) => messagesDecrypted.set(id, true) && resolve())
   }
   dataStore.getImageUrl = async (jid: string) => {
     const phoneNumber = jidToPhoneNumber(jid)

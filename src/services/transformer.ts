@@ -28,14 +28,20 @@ export class BindTemplateError extends Error {
 
 export class DecryptError extends Error {
   private content: object
+  private originalId: string
 
-  constructor(content: object) {
+  constructor(content: object, originalId) {
     super('')
     this.content = content
+    this.originalId = originalId
   }
 
   getContent() {
     return this.content
+  }
+
+  getOriginalId() {
+    return this.originalId
   }
 }
 
@@ -793,7 +799,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           }
           message.type = 'text'
           change.value.messages.push(message)
-          throw new DecryptError(data)
+          throw new DecryptError(data, whatsappMessageId)
         } else {
           return [null, senderPhone, senderId]
         }
