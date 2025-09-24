@@ -16,7 +16,7 @@ export default async function(url: string): Promise<{ buffer: Buffer, waveform: 
   const inputBuffer = Buffer.from(await response.arrayBuffer())
   const inputFile = path.join(os.tmpdir(), `${uuid()}`)
   const outputFile = path.join(os.tmpdir(), `${uuid()}`)
-  writeFileSync(inputFile, inputBuffer)
+  await writeFileSync(inputFile, inputBuffer)
   return new Promise<{ buffer: Buffer, waveform: Uint8Array | undefined }>(async (resolve, reject) => {
     const ff = await spawn(
       'ffmpeg',
@@ -28,13 +28,13 @@ export default async function(url: string): Promise<{ buffer: Buffer, waveform: 
         code = parseInt(signal)
       }
       if (code === 0) {
-        const buffer = readFileSync(outputFile)
+        const buffer = await readFileSync(outputFile)
         let waveform
         if (SEND_AUDIO_WAVEFORM) {
           waveform = await getAudioWaveform(buffer)
         }
-        unlinkSync(outputFile)
-        unlinkSync(inputFile)
+        await unlinkSync(outputFile)
+        await unlinkSync(inputFile)
         return resolve({ buffer, waveform })
       }
       reject(code)
