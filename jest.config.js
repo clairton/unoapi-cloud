@@ -7,6 +7,6 @@ module.exports = {
     '^.+\\.(js|jsx)$': 'ts-jest',
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(baileys|@adiwajshing/keyed-db|pino|pino-pretty)/)',
+    '/node_modules/(?!(baileys|@adiwajshing/keyed-db|pino|pino-pretty|audio-decode|audio-type|audio-buffer|mpg123-decoder|@wasm-audio-decoders)/)',
   ],
 };

@@ -531,7 +531,6 @@ export const connect = async ({
           try {
             return target(...argumentsList)
           } catch (error) {
-            console.error(error, error.isBoom, !error.isServer)
             if (error && error.isBoom && !error.isServer) {
               onClose({ lastDisconnect: { error } })
               return
@@ -543,7 +542,6 @@ export const connect = async ({
       }
       sock = new Proxy(proxy, handler)
     } catch (error: any) {
-      console.log(error, error.isBoom, !error.isServer)
       if (error && error.isBoom && !error.isServer) {
         await onClose({ lastDisconnect: { error } })
         return false
@@ -577,7 +575,6 @@ export const connect = async ({
           const message = t('pairing_code', beatyCode)
           await onNotification(message, true)
         } catch (error) {
-          console.error(error)
           throw error
         }
       }

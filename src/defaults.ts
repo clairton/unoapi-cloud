@@ -22,7 +22,8 @@ export const SEND_AUDIO_MESSAGE_AS_PTT =
   process.env.SEND_AUDIO_MESSAGE_AS_PTT == _undefined ? false : process.env.SEND_AUDIO_MESSAGE_AS_PTT == 'true'
 export const CONVERT_AUDIO_MESSAGE_TO_OGG =
   process.env.CONVERT_AUDIO_MESSAGE_TO_OGG == _undefined ? false : process.env.CONVERT_AUDIO_MESSAGE_TO_OGG == 'true'
-export const CONVERT_AUDIO_FFMPEG_PARAMS = JSON.parse(process.env.CONVERT_AUDIO_FFMPEG_PARAMS || '["-ac", "1", "-ar", "16000", "-c:a", "libopus", "-b:a", "64k", "-vn", "-f", "ogg"]')
+export const CONVERT_AUDIO_FFMPEG_PARAMS = JSON.parse(process.env.CONVERT_AUDIO_FFMPEG_PARAMS || '["-vn","-ar","48000","-ac","1","-c:a","libopus","-b:a","64k","-application","voip","-avoid_negative_ts","make_zero","-map_metadata","-1","-f","ogg"]')
+export const SEND_AUDIO_WAVEFORM = process.env.SEND_AUDIO_WAVEFORM == _undefined ? false : process.env.SEND_AUDIO_WAVEFORM == 'true'
 
 export const WEBHOOK_FORWARD_PHONE_NUMBER_ID = process.env.WEBHOOK_FORWARD_PHONE_NUMBER_ID || ''
 export const WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID = process.env.WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID || ''
