@@ -113,9 +113,7 @@ export const getMimetype = (payload: any) => {
 export const getMessageType = (payload: any) => {
   if (payload.update) {
     return 'update'
-  // } else if (payload.status && ![2, '2', 'SERVER_ACK'].includes(payload.status) && !payload.key.fromMe) {
-  // && [1, '1', 'PENDING', '2', 'SERVER_ACK', 3, '3', 'DELIVERY_ACK'].includes(payload.status)
-  } else if (payload.status) {
+  } else if (payload.status && ![2, '2', 'SERVER_ACK'].includes(payload.status) && !payload.key.fromMe) {
     return 'update'
   } else if (payload.receipt) {
     return 'receipt'

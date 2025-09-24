@@ -227,38 +227,6 @@ describe('service transformer', () => {
     expect(phoneNumberToJid('554936213155')).toEqual('554936213155@s.whatsapp.net')
   })
 
-  test('getMessageType with status PENDING', async () => {
-    const payload = {
-      key: {
-        fromMe: true
-      },
-      message: {
-        extendedTextMessage: {
-          text: 'testinhoooootestinhooooo'
-        }
-      },
-      messageTimestamp: '1756989961',
-      status: 'PENDING'
-    }
-    expect(getMessageType(payload)).toEqual('update')
-  })
-
-  test('getMessageType with status SERVER_ACK', async () => {
-    const payload = {
-      key: {
-        fromMe: true
-      },
-      message: {
-        extendedTextMessage: {
-          text: 'testinhoooootestinhooooo'}
-        },
-        messageTimestamp: '1756989961',
-        status: 'SERVER_ACK'
-    }
-    expect(getMessageType(payload)).toEqual('update')
-  })
-
-
   test('getMessageType with conversation', async () => {
     expect(getMessageType({ message: { conversation: 'test' } })).toEqual('conversation')
   })
@@ -267,11 +235,11 @@ describe('service transformer', () => {
     expect(getMessageType({ message: { imageMessage: {} } })).toEqual('imageMessage')
   })
 
-  test('getMessageType with status 3 and fromMe true', async () => {
+  test('getMessageType with status 3 and fromMe false', async () => {
     const input = {
       key: {
         remoteJid: '554988290955@s.whatsapp.net',
-        fromMe: true,
+        fromMe: false,
         id: '3AB4BB2F72F2D4692924',
       },
       status: 3,
@@ -289,7 +257,7 @@ describe('service transformer', () => {
         fromMe: false,
         id: '3AB4BB2F72F2D4692924',
       },
-      // status: 2,
+      status: 2,
       message: {
         conversation: 'Iiiiiiiiiiiiii',
       },
@@ -300,7 +268,7 @@ describe('service transformer', () => {
   test('getMessageType with update', async () => {
     const input = {
       key: {
-        fromMe: true,
+        fromMe: false,
       },
       status: 3,
       message: {
