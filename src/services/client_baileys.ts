@@ -499,6 +499,7 @@ export class ClientBaileys implements Client {
                 const { buffer, waveform } = await audioConverter(url)
                 content.audio = buffer
                 content.waveform = waveform
+                content.mimetype = 'audio/ogg; codecs=opus'
                 content.ptt = true
                 logger.debug('Audio converted to OGG/Opus PTT for %s', url)
               } else {
