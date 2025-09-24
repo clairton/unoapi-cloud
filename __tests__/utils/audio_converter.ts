@@ -1,6 +1,6 @@
 
 jest.mock('../../src/services/redis')
-import audioConverter from '../../src/utils/audio_converter'
+// import audioConverter from '../../src/utils/audio_converter'
 
 describe('service utils audio converter', () => {
   test('conver mp3 and return buffer', async () => {
