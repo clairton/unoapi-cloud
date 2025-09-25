@@ -18,6 +18,7 @@ const MESSAGE_STUB_TYPE_ERRORS = [
   'No SenderKeyRecord found for decryption'.toLowerCase(),
   'No session record'.toLowerCase(),
   'No matching sessions found for message'.toLowerCase(),
+  'No sender key for'.toLowerCase()
 ]
 
 export class BindTemplateError extends Error {
@@ -793,7 +794,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         if (payload.messageStubType == 2 && 
             payload.messageStubParameters &&
             payload.messageStubParameters[0] &&
-            MESSAGE_STUB_TYPE_ERRORS.includes(payload.messageStubParameters[0].toLowerCase())) {
+            MESSAGE_STUB_TYPE_ERRORS.filter(s => payload.messageStubParameters[0].toLowerCase().indexOf(s) >= 0).length > 0) {
           message.text = {
             body: MESSAGE_CHECK_WAAPP || t('failed_decrypt'),
           }
