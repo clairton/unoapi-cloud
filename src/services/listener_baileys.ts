@@ -95,16 +95,16 @@ export class ListenerBaileys implements Listener {
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
-        const idUno = uuid()
-        const idBaileys = i.key.id
-        await store.dataStore.setUnoId(idBaileys, idUno)
-        if (idBaileys.indexOf('-') < 0) {
+        if (i.key.id.indexOf('-') < 0) {
+          const idUno = uuid()
+          const idBaileys = i.key.id
           await store.dataStore.setUnoId(idUno, idBaileys)
+          await store.dataStore.setUnoId(idBaileys, idUno)
+          await store.dataStore.setKey(idBaileys, i.key)
+          i.key.id = idUno
         }
-        await store.dataStore.setKey(idUno, i.key)
-        await store.dataStore.setKey(idBaileys, i.key)
+        await store.dataStore.setKey(i.key.id, i.key)
         await store.dataStore.setMessage(i.key.remoteJid!, i)
-        i.key.id = idUno
         if (isSaveMedia(i)) {
           logger.debug(`Saving media...`)
           i = await store?.mediaStore.saveMedia(i)
