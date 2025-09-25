@@ -19,6 +19,8 @@ export type MessageStatus = 'scheduled'
       | 'played'
       | 'accepted'
       | 'deleted'
+      | 'decrypted'
+      | 'decryption_failed'
 
 export type DataStore  = {
   state: AuthenticationState
@@ -32,8 +34,6 @@ export type DataStore  = {
   fromJSON: (json: any) => void
   loadMessage: (jid: string, id: string) => Promise<any | undefined>
   setUnoId: (id: string, unoId: string) => Promise<void>
-  setMessageDecrypted: (id: string) => Promise<void>
-  getMessageDecrypted: (id: string) => Promise<boolean | undefined>
   setMediaPayload: (id: string, payload: any) => Promise<void>
   loadMediaPayload: (id: string) => Promise<any>
   setImageUrl: (jid: string, url: string) => Promise<void>
@@ -44,7 +44,7 @@ export type DataStore  = {
   loadGroupMetada: (jid: string, sock: Partial<WASocket>) => Promise<GroupMetadata | undefined>
   loadUnoId: (id: string) => Promise<string | undefined>
   setStatus: (id: string, status: MessageStatus) => Promise<void>
-  loadStatus: (id: string) => Promise<string | undefined>
+  loadStatus: (id: string) => Promise<MessageStatus | undefined>
   getJid: (phone: string) => Promise<string | undefined>
   loadJid: (phone: string, sock: WASocket) => Promise<string | undefined>
   setJid: (phone: string, jid: string) => Promise<void>

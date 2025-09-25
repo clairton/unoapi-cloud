@@ -3,7 +3,7 @@ import logger from './logger'
 import { Outgoing } from './outgoing'
 import { Broadcast } from './broadcast'
 import { getConfig } from './config'
-import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia, jidToPhoneNumber } from './transformer'
+import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia, jidToPhoneNumber, DecryptError } from './transformer'
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
@@ -153,11 +153,11 @@ export class ListenerBaileys implements Listener {
       const senderId = resp[2]
       const { dataStore } = await config.getStore(phone, config)
       await dataStore.setJidIfNotFound(jidToPhoneNumber(senderPhone, ''), senderId)
-      if (messageType && !['update', 'receipt'].includes(messageType) && i.key && i.key.id) {
-        await store?.dataStore.setMessageDecrypted(i.key.id)
-      }
+      await store.dataStore.setStatus(i.key.id!, 'decrypted')
     } catch (error) {
-      if (error instanceof BindTemplateError) {
+      if (error instanceof DecryptError) {
+        await store.dataStore.setStatus(i.key.id!, 'decryption_failed')
+      } else if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
@@ -171,7 +171,7 @@ export class ListenerBaileys implements Listener {
         const status = state.status || 'error'
         const id = state.id
         logger.debug(`Set status message %s to %s`, id, status)
-        await store?.dataStore?.setStatus(id, status)
+        await store.dataStore.setStatus(id, status)
       }
     }
     if (data) {

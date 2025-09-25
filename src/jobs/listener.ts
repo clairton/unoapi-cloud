@@ -37,8 +37,8 @@ export class ListenerJob {
         const store = await config.getStore(phone, config)
         const { dataStore } = store
         if (error instanceof DecryptError) {
-          if (await dataStore.getMessageDecrypted(error.getOriginalId())) {
-            logger.debug('Ignore decrypt error because already drecrypted %s', error.getOriginalId())
+          if ((await dataStore.loadStatus(error.getOriginalId())) != 'decryption_failed') {
+            logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getOriginalId())
             return
           } else if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
             logger.warn('Ignore decrypt error for own message %s', error.getOriginalId())
