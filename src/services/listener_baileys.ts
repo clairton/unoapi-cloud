@@ -95,6 +95,7 @@ export class ListenerBaileys implements Listener {
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
       if (i.key && i.key.id) {
+        await store.dataStore.setMessage(i.key.remoteJid!, i)
         if (i.key.id.indexOf('-') < 0) {
           const idUno = uuid()
           const idBaileys = i.key.id
@@ -102,9 +103,9 @@ export class ListenerBaileys implements Listener {
           await store.dataStore.setUnoId(idBaileys, idUno)
           await store.dataStore.setKey(idBaileys, i.key)
           i.key.id = idUno
+          await store.dataStore.setMessage(i.key.remoteJid!, i)
         }
         await store.dataStore.setKey(i.key.id, i.key)
-        await store.dataStore.setMessage(i.key.remoteJid!, i)
         if (isSaveMedia(i)) {
           logger.debug(`Saving media...`)
           i = await store?.mediaStore.saveMedia(i)
@@ -112,7 +113,6 @@ export class ListenerBaileys implements Listener {
         }
       }
     }
-
     const key = i.key
     // possible update message or delete message
     if (key?.id && (key?.fromMe || (!key?.fromMe && ((message as any)?.update?.messageStubType == 1)))) {
@@ -160,7 +160,8 @@ export class ListenerBaileys implements Listener {
     } catch (error) {
       if (error instanceof DecryptError) {
         await store.dataStore.setStatus(i.key.id!, 'decryption_failed')
-      } else if (error instanceof BindTemplateError) {
+      }
+      if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
