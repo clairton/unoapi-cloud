@@ -86,20 +86,23 @@ export class ListenerBaileys implements Listener {
   }
 
   public async sendOne(phone: string, message: object) {
-    logger.debug(`Listener receive message %s`, JSON.stringify(message))
+    logger.debug('Listener receive message %s', JSON.stringify(message))
     let i: WAMessage = message as WAMessage
     const messageType = getMessageType(message)
-    logger.debug(`messageType %s...`, messageType)
+    logger.debug('messageType %s...', messageType)
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
-      if (i.key && i.key) {
+      if (i.key && i.key.id) {
         const idUno = uuid()
-        const idBaileys = i.key.id!
-        await store?.dataStore.setUnoId(idBaileys, idUno)
-        await store?.dataStore.setKey(idUno, i.key)
-        await store?.dataStore.setKey(idBaileys, i.key)
+        const idBaileys = i.key.id
+        await store.dataStore.setUnoId(idBaileys, idUno)
+        if (idBaileys.indexOf('-') < 0) {
+          await store.dataStore.setUnoId(idUno, idBaileys)
+        }
+        await store.dataStore.setKey(idUno, i.key)
+        await store.dataStore.setKey(idBaileys, i.key)
         await store.dataStore.setMessage(i.key.remoteJid!, i)
         i.key.id = idUno
         if (isSaveMedia(i)) {

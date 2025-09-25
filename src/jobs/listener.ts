@@ -37,11 +37,11 @@ export class ListenerJob {
         const store = await config.getStore(phone, config)
         const { dataStore } = store
         if (error instanceof DecryptError) {
-          if ((await dataStore.loadStatus(error.getOriginalId())) != 'decryption_failed') {
-            logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getOriginalId())
+          if ((await dataStore.loadStatus(error.getMessageId())) != 'decryption_failed') {
+            logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getMessageId())
             return
           } else if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
-            logger.warn('Ignore decrypt error for own message %s', error.getOriginalId())
+            logger.warn('Ignore decrypt error for own message %s', error.getMessageId())
             return
           } else if (options && options?.countRetries >= options?.maxRetries) {
             // send message asking to open whatsapp to see

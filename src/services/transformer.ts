@@ -28,20 +28,20 @@ export class BindTemplateError extends Error {
 
 export class DecryptError extends Error {
   private content: object
-  private originalId: string
+  private messageId: string
 
-  constructor(content: object, originalId) {
+  constructor(content: object, messageId) {
     super('')
     this.content = content
-    this.originalId = originalId
+    this.messageId = messageId
   }
 
   getContent() {
     return this.content
   }
 
-  getOriginalId() {
-    return this.originalId
+  getMessageId() {
+    return this.messageId
   }
 }
 
