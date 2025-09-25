@@ -18,7 +18,8 @@ const MESSAGE_STUB_TYPE_ERRORS = [
   'No SenderKeyRecord found for decryption'.toLowerCase(),
   'No session record'.toLowerCase(),
   'No matching sessions found for message'.toLowerCase(),
-  'No sender key for'.toLowerCase()
+  'No sender key for'.toLowerCase(),
+  'Cannot create property'.toLowerCase(),
 ]
 
 export class BindTemplateError extends Error {
