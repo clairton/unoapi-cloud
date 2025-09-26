@@ -92,25 +92,24 @@ export class ListenerBaileys implements Listener {
     logger.debug('messageType %s...', messageType)
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
+    const idBaileys = i.key.id!
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
-      if (i.key && i.key.id) {
+      await store.dataStore.setMessage(i.key.remoteJid!, i)
+      if (!i.key['originalId']) {
+        i.key['originalId'] = idBaileys
+        const idUno = uuid()
+        await store.dataStore.setUnoId(idUno, idBaileys)
+        await store.dataStore.setUnoId(idBaileys, idUno)
+        await store.dataStore.setKey(idBaileys, i.key)
+        i.key.id = idUno
         await store.dataStore.setMessage(i.key.remoteJid!, i)
-        if (i.key.id.indexOf('-') < 0) {
-          const idUno = uuid()
-          const idBaileys = i.key.id
-          await store.dataStore.setUnoId(idUno, idBaileys)
-          await store.dataStore.setUnoId(idBaileys, idUno)
-          await store.dataStore.setKey(idBaileys, i.key)
-          i.key.id = idUno
-          await store.dataStore.setMessage(i.key.remoteJid!, i)
-        }
-        await store.dataStore.setKey(i.key.id, i.key)
-        if (isSaveMedia(i)) {
-          logger.debug(`Saving media...`)
-          i = await store?.mediaStore.saveMedia(i)
-          logger.debug(`Saved media!`)
-        }
+      }
+      await store.dataStore.setKey(i.key.id!, i.key)
+      if (isSaveMedia(i)) {
+        logger.debug('Saving media message id %s...', idBaileys)
+        i = await store?.mediaStore.saveMedia(i)
+        logger.debug('Saved media message id %s!', idBaileys)
       }
     }
     const key = i.key
@@ -156,10 +155,10 @@ export class ListenerBaileys implements Listener {
       const senderId = resp[2]
       const { dataStore } = await config.getStore(phone, config)
       await dataStore.setJidIfNotFound(jidToPhoneNumber(senderPhone, ''), senderId)
-      await store.dataStore.setStatus(i.key.id!, 'decrypted')
+      await store.dataStore.setStatus(idBaileys, 'decrypted')
     } catch (error) {
       if (error instanceof DecryptError) {
-        await store.dataStore.setStatus(i.key.id!, 'decryption_failed')
+        await store.dataStore.setStatus(idBaileys, 'decryption_failed')
       }
       if (error instanceof BindTemplateError) {
         const template = new Template(this.getConfig)

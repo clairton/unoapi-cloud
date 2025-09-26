@@ -579,7 +579,7 @@ export const jidToPhoneNumberIfUser = (value: any): string => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fromBaileysMessageContent = (phone: string, payload: any, config?: Partial<Config>): [any, string, string] => {
   try {
-    const { key: { id: whatsappMessageId, fromMe } } = payload
+    const { key: { id: whatsappMessageId, originalId, fromMe } } = payload
     const [chatJid, senderPhone, senderId] = getChatAndNumberAndId(payload)
     const messageType = getMessageType(payload)
     const binMessage = payload.update || payload.receipt || (messageType && payload.message && payload.message[messageType])
@@ -801,7 +801,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           }
           message.type = 'text'
           change.value.messages.push(message)
-          throw new DecryptError(data, whatsappMessageId)
+          throw new DecryptError(data, originalId || whatsappMessageId)
         } else {
           return [null, senderPhone, senderId]
         }

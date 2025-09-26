@@ -7,6 +7,7 @@ import { ListenerBaileys } from '../../src/services/listener_baileys'
 import { Outgoing } from '../../src/services/outgoing'
 import { Broadcast } from '../../src/services/broadcast'
 import { v1 as uuid } from 'uuid'
+import { DecryptError } from '../../src/services/transformer'
 
 let store: Store
 let getConfig: getConfig
@@ -17,7 +18,7 @@ let outgoing: Outgoing
 let service: ListenerBaileys
 let broadcast: Broadcast
 
-const id = uuid()
+const id = uuid().replaceAll('-', '')
 const remoteJid = `${uuid()}@s.whatsapp.net`
 const key = {
   remoteJid,
@@ -71,25 +72,27 @@ describe('service listener baileys', () => {
   })
 
   test('send call sendOne when text', async () => {
+    const payload = JSON.parse(JSON.stringify(textPayload))
     const func = jest.spyOn(service, 'sendOne')
-    await service.process(phone, [textPayload], 'notify')
+    await service.process(phone, [payload], 'notify')
     expect(func).toHaveBeenCalledTimes(1)
   })
 
-  // test('not change message id on failed decrypt error', async () => {
-  //   const id = uuid().replaceAll('-', '')
-  //   const payload = { ...messageStubTypePayload }
-  //   payload.key.id = id
-  //   try {
-  //     await service.process(phone, [payload], 'notify')
-  //   } catch (error) {
-  //     expect(payload.key.id).toBe(id)
-  //   }
-  // })
+  test('not change message id when already originalId', async () => {
+    const id = uuid().replaceAll('-', '')
+    const payload = JSON.parse(JSON.stringify(messageStubTypePayload))
+    payload['key']['originalId'] = uuid().replaceAll('-', '')
+    payload.key.id = id
+    try {
+      await service.process(phone, [payload], 'notify')
+    } catch (error) {
+      expect(payload.key.id).toBe(id)
+    }
+  })
 
   test('call dataStore setStatus on decrypt error', async () => {
     const spy = jest.spyOn(store.dataStore, 'setStatus')
-    const payload = { ...messageStubTypePayload }
+    const payload = JSON.parse(JSON.stringify(messageStubTypePayload))
     try {
       await service.process(phone, [payload], 'notify')
     } catch (error) {
@@ -97,17 +100,24 @@ describe('service listener baileys', () => {
     }
   })
 
+  test('decrypt error message id with originalId', async () => {
+    const payload = JSON.parse(JSON.stringify(messageStubTypePayload))
+    try {
+      await service.process(phone, [payload], 'notify')
+    } catch (error) {
+      expect((error as DecryptError).getMessageId()).toBe(id)
+    }
+  })
+
   test('call dataStore setStatus decrypted on success', async () => {
-    const payload = { ...textPayload }
+    const payload = JSON.parse(JSON.stringify(textPayload))
     const spy = jest.spyOn(store.dataStore, 'setStatus')
     await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(id, 'decrypted')
   })
 
   test('call dataStore setUnoId with id baileys', async () => {
-    const id = uuid().replaceAll('-', '')
-    const payload = { ...textPayload }
-    payload.key.id = id
+    const payload = JSON.parse(JSON.stringify(textPayload))
     const spy = jest.spyOn(store.dataStore, 'setUnoId')
     await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(id, expect.stringContaining('-'))
@@ -115,18 +125,14 @@ describe('service listener baileys', () => {
   })
 
   test('call dataStore setKey', async () => {
-    const id = uuid().replaceAll('-', '')
-    const payload = { ...textPayload }
-    payload.key.id = id
+    const payload = JSON.parse(JSON.stringify(textPayload))
     const spy = jest.spyOn(store.dataStore, 'setKey')
     await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(id, expect.objectContaining({ fromMe: false }))
   })
 
   test('call dataStore setMessage', async () => {
-    const id = uuid().replaceAll('-', '')
-    const payload = { ...textPayload }
-    payload.key.id = id
+    const payload = JSON.parse(JSON.stringify(textPayload))
     const spy = jest.spyOn(store.dataStore, 'setMessage')
     await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(remoteJid, expect.objectContaining({ message }))
