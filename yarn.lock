@@ -3837,10 +3837,10 @@ baileys@^6.7.8:
     uuid "^10.0.0"
     ws "^8.13.0"
 
-"baileys@npm:whaileys@6.2.2":
-  version "6.2.2"
-  resolved "https://registry.yarnpkg.com/whaileys/-/whaileys-6.2.2.tgz#8fcf0a4ba1f1e02351e9a4205b9d7259795a34a2"
-  integrity sha512-YrjkwAzvK6ty4YJnZEIUkuaMHb2ymAfrmYy4rWhpLbSSI1CJbL6zRzpKluOdPg146yRER1A4YQcrLzYyjFQWdQ==
+"baileys@npm:whaileys@6.2.3":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/whaileys/-/whaileys-6.2.3.tgz#9367d023b142a06c580a3f49cfdd2db1933b12f5"
+  integrity sha512-3A80fEVPeLwsXgqzaGocshbTM++Do4pkiPbwG/Q7k9KXXBYj5d0nVTWUZPIRmmV6Y+KF0Gzf23bUP+lzgCMVaQ==
   dependencies:
     "@hapi/boom" "^9.1.3"
     axios "^0.24.0"

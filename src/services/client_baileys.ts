@@ -652,6 +652,17 @@ export class ClientBaileys implements Client {
     const isOnline = await this.store?.sessionStore?.isStatusOnline(this.phone)
     if (!isOnline) {
       logger.debug('Skip retrieving group metadata store present: %s status: %s', !!this.store, isOnline)
+      if (message['key'] && message['key']['remoteJid'] && isJidGroup(message['key']['remoteJid'])) {
+        const groupMetadata = {
+          // owner_country_code: '55',
+          addressingMode: isLidUser(message['key']['remoteJid']) ? 'lid' : 'pn',
+          id: message['key']['remoteJid'],
+          owner: '',
+          subject: message['key']['remoteJid'],
+          participants: [],
+        }
+        message['groupMetadata'] = groupMetadata!
+      }
       return message
     }
     const key = message && message['key']
