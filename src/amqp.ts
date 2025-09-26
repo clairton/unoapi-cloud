@@ -325,7 +325,8 @@ export const amqpConsume = async (
         await amqpPublish(exchange, queue, routingKey, data, { dead: true, type: options.type })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
-        await amqpPublish(exchange, queue, routingKey, data, { delay: 60000, maxRetries, countRetries, type: options.type })
+        const delay = (options.delay || UNOAPI_MESSAGE_RETRY_DELAY) * countRetries
+        await amqpPublish(exchange, queue, routingKey, data, { delay, maxRetries, countRetries, type: options.type })
       }
       await channel?.ack(payload)
     }
