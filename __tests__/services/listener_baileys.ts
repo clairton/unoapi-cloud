@@ -76,49 +76,63 @@ describe('service listener baileys', () => {
     expect(func).toHaveBeenCalledTimes(1)
   })
 
+  // test('not change message id on failed decrypt error', async () => {
+  //   const id = uuid().replaceAll('-', '')
+  //   const payload = { ...messageStubTypePayload }
+  //   payload.key.id = id
+  //   try {
+  //     await service.process(phone, [payload], 'notify')
+  //   } catch (error) {
+  //     expect(payload.key.id).toBe(id)
+  //   }
+  // })
+
   test('call dataStore setStatus on decrypt error', async () => {
     const spy = jest.spyOn(store.dataStore, 'setStatus')
+    const payload = { ...messageStubTypePayload }
     try {
-      await service.process(phone, [messageStubTypePayload], 'notify')
+      await service.process(phone, [payload], 'notify')
     } catch (error) {
       expect(spy).toHaveBeenCalledWith(id, 'decryption_failed')
     }
   })
 
   test('call dataStore setStatus decrypted on success', async () => {
+    const payload = { ...textPayload }
     const spy = jest.spyOn(store.dataStore, 'setStatus')
-    await service.process(phone, [textPayload], 'notify')
+    await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(id, 'decrypted')
   })
 
   test('call dataStore setUnoId with id baileys', async () => {
     const id = uuid().replaceAll('-', '')
-    textPayload.key.id = id
+    const payload = { ...textPayload }
+    payload.key.id = id
     const spy = jest.spyOn(store.dataStore, 'setUnoId')
-    await service.process(phone, [textPayload], 'notify')
+    await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(id, expect.stringContaining('-'))
     expect(spy).toHaveBeenCalledWith(expect.stringContaining('-'), id)
   })
 
   test('call dataStore setKey', async () => {
     const id = uuid().replaceAll('-', '')
-    textPayload.key.id = id
+    const payload = { ...textPayload }
+    payload.key.id = id
     const spy = jest.spyOn(store.dataStore, 'setKey')
-    await service.process(phone, [textPayload], 'notify')
+    await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(id, expect.objectContaining({ fromMe: false }))
   })
 
   test('call dataStore setMessage', async () => {
     const id = uuid().replaceAll('-', '')
-    textPayload.key.id = id
+    const payload = { ...textPayload }
+    payload.key.id = id
     const spy = jest.spyOn(store.dataStore, 'setMessage')
-    await service.process(phone, [textPayload], 'notify')
+    await service.process(phone, [payload], 'notify')
     expect(spy).toHaveBeenCalledWith(remoteJid, expect.objectContaining({ message }))
   })
 
   test('call mediaStore isSaveMedia', async () => {
-    const id = uuid().replaceAll('-', '')
-    textPayload.key.id = id
     const spy = jest.spyOn(store.mediaStore, 'saveMedia').mockResolvedValueOnce(mediaPayload)
     await service.process(phone, [mediaPayload], 'notify')
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({ message: { documentMessage } }))
