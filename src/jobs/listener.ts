@@ -41,9 +41,10 @@ export class ListenerJob {
             logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getMessageId())
             return
           } else if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {
-            logger.warn('Ignore decrypt error for own message %s', error.getMessageId())
+            logger.debug('Ignore decrypt error for own message %s', error.getMessageId())
             return
           } else if (options && options?.countRetries >= options?.maxRetries) {
+            logger.warn('Decryption error overread max retries message %s', error.getMessageId())
             // send message asking to open whatsapp to see
             return this.outgoing.send(phone, error.getContent())
           }
