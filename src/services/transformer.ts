@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, proto } from 'baileys'
+import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, proto, isJidGroup } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -577,7 +577,7 @@ export const jidToPhoneNumberIfUser = (value: any): string => {
  }
 */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const fromBaileysMessageContent = (phone: string, payload: any, config?: Partial<Config>): [any, string, string] => {
+export const fromBaileysMessageContent = (phone: string, payload: any, config?: Partial<Config>): [any, string, string, string] => {
   try {
     const { key: { id: whatsappMessageId, originalId, fromMe } } = payload
     const [chatJid, senderPhone, senderId] = getChatAndNumberAndId(payload)
@@ -597,6 +597,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       groupMetadata.group_subject = payload.groupMetadata.subject
       groupMetadata.group_id = chatJid
       groupMetadata.group_picture = payload.groupMetadata.profilePicture
+    } else if (isJidGroup(chatJid)) {
+      groupMetadata.group_subject = chatJid
+      groupMetadata.group_id = chatJid
+      groupMetadata.group_picture = ''
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statuses: any[] = []
@@ -631,7 +635,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       object: 'whatsapp_business_account',
       entry: [
         {
-          id: phone,
+          id: chatJid,
           changes: [change],
         },
       ],
@@ -722,7 +726,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           return fromBaileysMessageContent(phone, { ...payload, message: { editedMessage: { message: { protocolMessage: binMessage }}}}, config)
         } else {
           logger.debug(`Ignore message type ${messageType}`)
-          return [null, senderPhone, senderId]
+          return [null, senderPhone, senderId, chatJid]
         }
 
       case 'ephemeralMessage':
@@ -803,13 +807,13 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           change.value.messages.push(message)
           throw new DecryptError(data, originalId || whatsappMessageId)
         } else {
-          return [null, senderPhone, senderId]
+          return [null, senderPhone, senderId, chatJid]
         }
 
       case 'update':
         const baileysStatus = payload.status || payload.update.status
         if (!baileysStatus && payload.update.status != 0 && !payload?.update?.messageStubType && !payload?.update?.starred) {
-          return [null, senderPhone, senderId]
+          return [null, senderPhone, senderId, chatJid]
         }
         switch (baileysStatus) {
           case 0:
@@ -881,7 +885,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       case 'albumMessage':
       case 'keepInChatMessage':
         logger.debug(`Ignore message type ${messageType}`)
-        return [null, senderPhone, senderId]
+        return [null, senderPhone, senderId, chatJid]
 
       default:
         cloudApiStatus = 'failed'
@@ -962,7 +966,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       change.value.messages.push(message)
     }
     logger.debug('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
-    return [data, senderPhone, senderId]
+    return [data, senderPhone, senderId, chatJid]
   } catch (e) {
     logger.error(e, 'Error on convert baileys to cloud-api')
     throw e

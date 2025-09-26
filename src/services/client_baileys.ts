@@ -649,13 +649,15 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
-    if (!this.store || !await this.store.sessionStore.isStatusOnline(this.phone)) {
+    const isOnline = await this.store?.sessionStore?.isStatusOnline(this.phone)
+    if (!isOnline) {
+      logger.debug('Skip retrieving group metadata store present: %s status: %s', !!this.store, isOnline)
       return message
     }
     const key = message && message['key']
     let remoteJid
     if (key.remoteJid && isJidGroup(key.remoteJid)) {
-      logger.debug(`Retrieving group metadata...`)
+      logger.debug('Retrieving group metadata...')
       remoteJid = key.participant
       let groupMetadata: GroupMetadata | undefined
       try {
