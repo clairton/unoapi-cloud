@@ -138,7 +138,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         ],
       }
 
-      if(!ONLY_HELLO_TEMPLATE) {
+      if (!ONLY_HELLO_TEMPLATE) {
         const bulkReport = {
           id: 2,
           name: 'unoapi-bulk-report',
@@ -215,7 +215,6 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
       } else {
         return [hello]
       }
-      
     }
   }
   return store

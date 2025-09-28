@@ -1,4 +1,3 @@
-
 jest.mock('../../src/services/redis')
 import { isInBlacklistInMemory, addToBlacklistInMemory, cleanBlackList, isInBlacklistInRedis } from '../../src/services/blacklist'
 import { redisGet, redisKeys, blacklist } from '../../src/services/redis'

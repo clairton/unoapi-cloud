@@ -29,7 +29,7 @@ export default class ContactBaileys implements Contact {
     if (webhook) {
       const body = JSON.stringify({ contacts })
       const headers = {
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
       }
       let response: Response
       try {

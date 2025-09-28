@@ -81,7 +81,7 @@ const storeFile: store = async (phone: string, config: Config): Promise<Store> =
       }
     }
     setInterval(() => {
-      dataStore.writeToFile(dataFile), 10_0000
+      ;(dataStore.writeToFile(dataFile), 10_0000)
     })
   } else {
     logger.info('Store data not save')

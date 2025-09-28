@@ -12,7 +12,7 @@ const i18n = new I18n({
 
 i18n.setLocale(DEFAULT_LOCALE)
 
-export const t =  (phraseOrOptions: string | TranslateOptions, ...replace: any[]) => {
+export const t = (phraseOrOptions: string | TranslateOptions, ...replace: any[]) => {
   const string = i18n.__(phraseOrOptions, ...replace)
   return string
 }

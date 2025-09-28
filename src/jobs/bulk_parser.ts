@@ -235,9 +235,15 @@ export class BulkParserJob {
         },
       }
       this.outgoing.formatAndSend(phone, phone, message)
-      await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, this.queueBulkSender, phone, {
-        payload: { messages, id, length: messages.length },
-      }, { type: 'topic' })
+      await amqpPublish(
+        UNOAPI_EXCHANGE_BROKER_NAME,
+        this.queueBulkSender,
+        phone,
+        {
+          payload: { messages, id, length: messages.length },
+        },
+        { type: 'topic' },
+      )
     } catch (error) {
       logger.error(error, 'Error on parse bulk')
       const message = {

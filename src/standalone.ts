@@ -39,14 +39,14 @@ import { OnNewLogin } from './services/socket'
 import { onNewLoginAlert } from './services/on_new_login_alert'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import { Broadcast } from './services/broadcast'
-import { 
+import {
   isInBlacklistInMemory,
   addToBlacklistInMemory,
   addToBlacklist,
   addToBlacklistRedis,
   addToBlacklistJob,
   isInBlacklist,
-  isInBlacklistInRedis
+  isInBlacklistInRedis,
 } from './services/blacklist'
 import { Listener } from './services/listener'
 import { ListenerBaileys } from './services/listener_baileys'
@@ -61,7 +61,7 @@ import { Reload } from './services/reload'
 import { Logout } from './services/logout'
 import { LogoutAmqp } from './services/logout_amqp'
 import { ReloadJob } from './jobs/reload'
-import { amqpConnect, amqpConsume } from './amqp'
+import { amqpConnect, amqpConsume, amqpGetChannel, extractRoutingKeyFromBindingKey } from './amqp'
 import { startRedis } from './services/redis'
 import ContactBaileys from './services/contact_baileys'
 import injectRouteDummy from './services/inject_route_dummy'
@@ -72,6 +72,7 @@ import atbl from './jobs/add_to_blacklist'
 import { MediaJob } from './jobs/media'
 import { OutgoingJob } from './jobs/outgoing'
 import { NotificationJob } from './jobs/notification'
+import { IncomingJob } from './jobs/incoming'
 
 import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
@@ -96,7 +97,7 @@ let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener,
 let middlewareVar: middleware = middlewareNext
 if (process.env.REDIS_URL) {
   logger.info('Starting with redis')
-  startRedis().catch( error => {
+  startRedis().catch((error) => {
     console.error(error, 'Erro on start')
     process.exit(1)
   })
@@ -112,7 +113,7 @@ if (process.env.REDIS_URL) {
 
 if (process.env.AMQP_URL) {
   logger.info('Starting with broker')
-  amqpConnect().catch( error => {
+  amqpConnect().catch((error) => {
     console.error(error, 'Erro on start rabbitmq')
     process.exit(1)
   })
@@ -126,29 +127,13 @@ if (process.env.AMQP_URL) {
   const bindBridgeJob = new BindBridgeJob()
   const logoutJob = new LogoutJob(logout)
   logger.info('Starting bind bridge consumer')
-  amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`,
-    '*',
-    bindBridgeJob.consume.bind(bindBridgeJob),
-    { type: 'direct' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '*', bindBridgeJob.consume.bind(bindBridgeJob), {
+    type: 'direct',
+  })
   logger.info('Starting reload consumer')
-  amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`,
-    '',
-    reloadJob.consume.bind(reloadJob),
-    { type: 'direct' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, '', reloadJob.consume.bind(reloadJob), { type: 'direct' })
   logger.info('Starting logout consumer')
-  amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`,
-    '',
-    logoutJob.consume.bind(logoutJob),
-    { type: 'direct' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`, '', logoutJob.consume.bind(logoutJob), { type: 'direct' })
   logger.info('Starting media consumer')
   const mediaJob = new MediaJob(getConfigVar)
   amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob), { type: 'topic' })
@@ -158,32 +143,50 @@ if (process.env.AMQP_URL) {
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis, addToBlacklistRedis)
   const outgoinJob = new OutgoingJob(getConfigVar, outgoingCloudApi)
-  amqpConsume(
-    UNOAPI_EXCHANGE_BROKER_NAME,
-    UNOAPI_QUEUE_OUTGOING,
-    '*',
-    outgoinJob.consume.bind(outgoinJob), 
-    { notifyFailedMessages, prefetch, type: 'topic' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgoinJob.consume.bind(outgoinJob), {
+    notifyFailedMessages,
+    prefetch,
+    type: 'topic',
+  })
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
     const notificationJob = new NotificationJob(incoming)
-    amqpConsume(
-      UNOAPI_EXCHANGE_BROKER_NAME,
-      UNOAPI_QUEUE_NOTIFICATION,
-      '*',
-      notificationJob.consume.bind(notificationJob),
-      { notifyFailedMessages: false, type: 'topic' })
+    amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), {
+      notifyFailedMessages: false,
+      type: 'topic',
+    })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  amqpConsume(
-    UNOAPI_EXCHANGE_BROKER_NAME,
-    UNOAPI_QUEUE_BLACKLIST_ADD,
-    '*',
-    atbl,
-    { notifyFailedMessages, prefetch, type: 'topic' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', atbl, { notifyFailedMessages, prefetch, type: 'topic' })
+
+  // Consume provider-specific outgoing messages for Baileys sessions
+  ;(async () => {
+    const channel = await amqpGetChannel()
+    await channel?.assertExchange('unoapi.outgoing', 'topic', { durable: true })
+    await channel?.assertQueue('outgoing.baileys', { durable: true })
+    await channel?.bindQueue('outgoing.baileys', 'unoapi.outgoing', 'provider.baileys.*')
+    // Ensure Whatsmeow queues exist too (created but not consumed here)
+    await channel?.assertQueue('outgoing.baileys.dlq', { durable: true })
+    await channel?.assertQueue('outgoing.whatsmeow', { durable: true })
+    await channel?.bindQueue('outgoing.whatsmeow', 'unoapi.outgoing', 'provider.whatsmeow.*')
+    await channel?.assertQueue('outgoing.whatsmeow.dlq', { durable: true })
+    const incomingBaileysWorker = new IncomingBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
+    const providerJob = new IncomingJob(incomingBaileysWorker, outgoing, getConfigVar)
+    channel?.consume('outgoing.baileys', async (payload) => {
+      if (!payload) {
+        return
+      }
+      const phone = extractRoutingKeyFromBindingKey(payload.fields.routingKey)
+      const data = JSON.parse(payload.content.toString())
+      try {
+        await providerJob.consume(phone, data)
+      } catch (error) {
+        logger.error(error, 'Error consuming provider.baileys message')
+      }
+      channel.ack(payload)
+    })
+  })()
 } else {
   logger.info('Starting standard mode')
 }
@@ -211,7 +214,7 @@ const app: App = new App(
   logout,
   middlewareVar,
   injectRouteDummy,
-  contact
+  contact,
 )
 broadcast.setSever(app.socket)
 

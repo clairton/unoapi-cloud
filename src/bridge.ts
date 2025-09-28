@@ -6,13 +6,7 @@ import { BindBridgeJob } from './jobs/bind_bridge'
 import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
-import { 
-  UNOAPI_QUEUE_BIND,
-  UNOAPI_QUEUE_RELOAD,
-  UNOAPI_QUEUE_LOGOUT,
-  UNOAPI_SERVER_NAME,
-  UNOAPI_EXCHANGE_BRIDGE_NAME,
-} from './defaults'
+import { UNOAPI_QUEUE_BIND, UNOAPI_QUEUE_RELOAD, UNOAPI_QUEUE_LOGOUT, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BRIDGE_NAME } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
 import { getConfig } from './services/config'
@@ -54,40 +48,22 @@ const startBrigde = async () => {
   logger.info('Unoapi Cloud version %s starting bridge...', version)
 
   logger.info('Starting bind consumer')
-  await amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME, 
-    `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, 
-    '',
-    bindJob.consume.bind(bindJob),
-    {
-      prefetch: 1,
-      type: 'direct'
-    }
-  )
+  await amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '', bindJob.consume.bind(bindJob), {
+    prefetch: 1,
+    type: 'direct',
+  })
 
   logger.info('Starting reload consumer')
-  await amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME, 
-    `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, 
-    '', 
-    reloadJob.consume.bind(reloadJob),
-    {
-      prefetch: 1,
-      type: 'direct'
-    }
-  )
+  await amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, '', reloadJob.consume.bind(reloadJob), {
+    prefetch: 1,
+    type: 'direct',
+  })
 
   logger.info('Starting logout consumer')
-  await amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`,
-    '', 
-    logoutJob.consume.bind(logoutJob),
-    {
-      prefetch: 1,
-      type: 'direct'
-    }
-  )
+  await amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`, '', logoutJob.consume.bind(logoutJob), {
+    prefetch: 1,
+    type: 'direct',
+  })
 
   const sessionStore: SessionStore = new SessionStoreRedis()
 

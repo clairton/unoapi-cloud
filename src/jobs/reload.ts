@@ -1,4 +1,4 @@
-import logger from '../services/logger';
+import logger from '../services/logger'
 import { Reload } from '../services/reload'
 
 export class ReloadJob {

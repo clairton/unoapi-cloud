@@ -14,4 +14,3 @@ export class Broadcast {
     await this.server.emit('broadcast', { phone, type, content })
   }
 }
-  

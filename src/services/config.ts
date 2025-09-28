@@ -14,7 +14,7 @@ export interface GetMessageMetadata {
 export const getMessageMetadataDefault: GetMessageMetadata = async <T>(data: T) => data
 
 export type Webhook = {
-  id: string,
+  id: string
   url: string
   urlAbsolute: string
   token: string
@@ -73,10 +73,10 @@ export type Config = {
   sendProfilePicture: boolean
   authToken: string | undefined
   authHeader: string | undefined
-  provider: 'baileys' | 'forwarder' | undefined
-  server:  string | undefined
+  provider: 'baileys' | 'whatsmeow' | 'forwarder' | undefined
+  server: string | undefined
   connectionType: connectionType
-  wavoipToken:  string | undefined
+  wavoipToken: string | undefined
   useRedis: boolean
   useS3: boolean
   qrTimeoutMs: number
@@ -143,7 +143,7 @@ export const defaultConfig: Config = {
   proxyUrl: undefined,
   authToken: undefined,
   authHeader: undefined,
-  provider: undefined,
+  provider: 'baileys',
   server: undefined,
   connectionType: 'qrcode',
   wavoipToken: '',

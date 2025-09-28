@@ -46,21 +46,21 @@ export class App {
     this.socket = new Server(this.server, {
       path: '/ws',
       cors: {
-        origin: '*'
-      }
+        origin: '*',
+      },
     })
     this.router(
-      incoming, 
-      outgoing, 
-      baseUrl, 
+      incoming,
+      outgoing,
+      baseUrl,
       getConfig,
       sessionStore,
       this.socket,
       onNewLogin,
-      addToBlacklist, 
-      reload, 
+      addToBlacklist,
+      reload,
       logout,
-      middleware, 
+      middleware,
       injectRoute,
       contact,
     )
@@ -82,17 +82,17 @@ export class App {
     contact: Contact,
   ) {
     const roter = router(
-      incoming, 
-      outgoing, 
-      baseUrl, 
-      getConfig, 
-      sessionStore, 
-      socket, 
-      onNewLogin, 
-      addToBlacklist, 
-      reload, 
-      logout, 
-      middleware, 
+      incoming,
+      outgoing,
+      baseUrl,
+      getConfig,
+      sessionStore,
+      socket,
+      onNewLogin,
+      addToBlacklist,
+      reload,
+      logout,
+      middleware,
       injectRoute,
       contact,
     )

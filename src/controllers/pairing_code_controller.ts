@@ -25,8 +25,8 @@ export class PairingCodeController {
         to: phone,
         type: 'text',
         text: {
-          body: 'Request Pairing code'
-        } 
+          body: 'Request Pairing code',
+        },
       }
       this.service.send(phone, message, {})
       return res.status(200).json({ success: true })

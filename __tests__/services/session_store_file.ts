@@ -38,7 +38,7 @@ describe('service session store file', () => {
         return MAX_CONNECT_RETRY + 1
       }
       return getConnectCount(session)
-    } 
+    }
     expect(await store.verifyStatusStandBy(session)).toBe(true)
   })
   test('return a no standby on count and verify', async () => {
@@ -50,7 +50,7 @@ describe('service session store file', () => {
         return MAX_CONNECT_RETRY - 2
       }
       return getConnectCount(session)
-    } 
-    expect(!!await store.verifyStatusStandBy(session)).toBe(false)
+    }
+    expect(!!(await store.verifyStatusStandBy(session))).toBe(false)
   })
 })

@@ -16,7 +16,7 @@ export const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || LOG_LEVEL
 
 export const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || 'en'
 
-export const VALIDATE_MEDIA_LINK_BEFORE_SEND = 
+export const VALIDATE_MEDIA_LINK_BEFORE_SEND =
   process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == _undefined ? false : process.env.VALIDATE_MEDIA_LINK_BEFORE_SEND == 'true'
 export const SEND_AUDIO_MESSAGE_AS_PTT = 
   process.env.SEND_AUDIO_MESSAGE_AS_PTT == _undefined ? false : process.env.SEND_AUDIO_MESSAGE_AS_PTT == 'true'
@@ -34,6 +34,8 @@ export const WEBHOOK_FORWARD_TIMEOUT_MS = parseInt(process.env.WEBHOOK_TIMEOUT_M
 
 // comunication
 export const UNOAPI_URL = process.env.UNOAPI_URL || 'http://localhost:9876'
+export const WHATSOMEOW_ADAPTER_BASEURL =
+  process.env.WHATSOMEOW_ADAPTER_BASEURL || 'http://provider-whatsmeow:8080'
 export const WEBHOOK_URL_ABSOLUTE = process.env.WEBHOOK_URL_ABSOLUTE || ''
 export const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:9876/webhooks/fake'
 export const WEBHOOK_HEADER = process.env.WEBHOOK_HEADER || 'Authorization'
@@ -44,8 +46,10 @@ export const CONNECTION_TYPE = process.env.CONNECTION_TYPE || 'qrcode'
 
 export const CONSUMER_TIMEOUT_MS = parseInt(process.env.CONSUMER_TIMEOUT_MS || '360000')
 export const WEBHOOK_SEND_NEW_MESSAGES = process.env.WEBHOOK_SEND_NEW_MESSAGES == _undefined ? false : process.env.WEBHOOK_SEND_NEW_MESSAGES == 'true'
-export const WEBHOOK_SEND_INCOMING_MESSAGES = process.env.WEBHOOK_SEND_INCOMING_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_INCOMING_MESSAGES == 'true'
-export const WEBHOOK_SEND_GROUP_MESSAGES = process.env.WEBHOOK_SEND_GROUP_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_GROUP_MESSAGES == 'true'
+export const WEBHOOK_SEND_INCOMING_MESSAGES =
+  process.env.WEBHOOK_SEND_INCOMING_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_INCOMING_MESSAGES == 'true'
+export const WEBHOOK_SEND_GROUP_MESSAGES =
+  process.env.WEBHOOK_SEND_GROUP_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_GROUP_MESSAGES == 'true'
 export const WEBHOOK_SEND_OUTGOING_MESSAGES =
   process.env.WEBHOOK_SEND_OUTGOING_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_OUTGOING_MESSAGES == 'true'
 export const WEBHOOK_SEND_TRANSCRIBE_AUDIO =
@@ -74,7 +78,7 @@ export const SESSION_TTL: number = parseInt(process.env.SESSION_TTL || '-1')
 export const UNOAPI_X_COUNT_RETRIES: string = process.env.UNOAPI_X_COUNT_RETRIES || 'x-unoapi-count-retries'
 export const UNOAPI_X_MAX_RETRIES: string = process.env.UNOAPI_X_MAX_RETRIES || 'x-unoapi-max-retries'
 export const UNOAPI_EXCHANGE_NAME = process.env.UNOAPI_EXCHANGE_NAME || 'unoapi'
-export const UNOAPI_EXCHANGE_BROKER_NAME =`${UNOAPI_EXCHANGE_NAME}.broker`
+export const UNOAPI_EXCHANGE_BROKER_NAME = `${UNOAPI_EXCHANGE_NAME}.broker`
 export const UNOAPI_EXCHANGE_BRIDGE_NAME = `${UNOAPI_EXCHANGE_NAME}.brigde`
 export const UNOAPI_QUEUE_NAME = process.env.UNOAPI_QUEUE_NAME || 'unoapi'
 export const UNOAPI_QUEUE_OUTGOING_PREFETCH = parseInt(process.env.UNOAPI_QUEUE_OUTGOING_PREFETCH || '1')
@@ -158,7 +162,7 @@ export const VALIDATE_ROUTING_KEY = process.env.VALIDATE_ROUTING_KEY === _undefi
 export const CONFIG_SESSION_PHONE_CLIENT = process.env.CONFIG_SESSION_PHONE_CLIENT || 'Unoapi'
 export const CONFIG_SESSION_PHONE_NAME = process.env.CONFIG_SESSION_PHONE_NAME || 'Chrome'
 export const MESSAGE_CHECK_WAAPP = process.env.MESSAGE_CHECK_WAAPP || ''
-export const WHATSAPP_VERSION = process.env.WHATSAPP_VERSION ? JSON.parse(process.env.WHATSAPP_VERSION) as WAVersion : undefined
+export const WHATSAPP_VERSION = process.env.WHATSAPP_VERSION ? (JSON.parse(process.env.WHATSAPP_VERSION) as WAVersion) : undefined
 export const AVAILABLE_LOCALES = JSON.parse(process.env.AVAILABLE_LOCALES || '["en", "pt_BR", "pt"]')
 export const WAVOIP_TOKEN = process.env.WAVOIP_TOKEN || ''
 export const ONLY_HELLO_TEMPLATE: boolean = process.env.ONLY_HELLO_TEMPLATE === _undefined ? false : process.env.ONLY_HELLO_TEMPLATE == 'true'
