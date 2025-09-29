@@ -20,6 +20,7 @@ const MESSAGE_STUB_TYPE_ERRORS = [
   'No matching sessions found for message'.toLowerCase(),
   'No sender key for'.toLowerCase(),
   'Cannot create property'.toLowerCase(),
+  'Bad MAC'.toLowerCase(),
 ]
 
 export class BindTemplateError extends Error {
