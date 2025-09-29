@@ -18,7 +18,8 @@ export class ClientForward implements Client {
   public async send(payload: any, options: any) {
     // message for transcribe texto, cause error on send read event
     // {"messaging_product":"whatsapp","status":"read","message_id":"78f8f8f0-9c98-11f0-aa54-c714bee1dcd0","recipient_id":"....."}
-    if (payload['message_id'] && isUnoId(payload['message_id'])) {
+    if (isUnoId(payload?.message_id)) {
+      logger.debug('Ignore status message %s because is internal unoapi message', payload['message_id'])
       return { ok: { success: true }, error: undefined }
     }
 
@@ -44,7 +45,9 @@ export class ClientForward implements Client {
     }
     logger.debug('Response status: %s', response?.status)
     if (!response?.ok) {
-      return { error: await response.json(), ok: undefined }
+      const content = await response.json()
+      logger.error('Error on send body %s => %s', body, JSON.stringify(content))
+      return { error: content, ok: undefined }
     } else {
       return { ok: await response.json(), error: undefined }
     }

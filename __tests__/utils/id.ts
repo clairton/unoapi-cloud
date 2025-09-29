@@ -10,6 +10,10 @@ describe('utils id', () => {
     expect(isUnoId(generateUnoId())).toBe(true)
   })
 
+  test('isUnoId with generateUnoId with STT', async () => {
+    expect(isUnoId(generateUnoId('STT'))).toBe(true)
+  })
+
   test('isUnoId with uuid', async () => {
     expect(isUnoId(uuid())).toBe(true)
   })

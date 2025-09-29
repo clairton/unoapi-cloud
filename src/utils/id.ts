@@ -11,4 +11,4 @@ export type ID_ADD = 'INC' // incoming messages
                     | 'WARN' // warning message
 
 export const generateUnoId = (add: ID_ADD | '' = '') => `${UNOAPI_BASE_ID}.${add ? `${add}.` : ''}${uuid().replaceAll('-', '').toUpperCase()}`
-export const isUnoId = (id: string) => id && ( id.indexOf('-') >= 0 || id.indexOf(`${UNOAPI_BASE_ID}.`) >= 0)
+export const isUnoId = (id: string) => id && (id.indexOf('-') >= 0 || id.indexOf(`${UNOAPI_BASE_ID}.`) >= 0)
