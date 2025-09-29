@@ -15,6 +15,12 @@ export class ClientForward implements Client {
   }
 
   public async send(payload: any, options: any) {
+    // message for transcribe texto, cause error on send read event
+    // {"messaging_product":"whatsapp","status":"read","message_id":"78f8f8f0-9c98-11f0-aa54-c714bee1dcd0","recipient_id":"....."}
+    if (payload['message_id'] && payload['message_id'].indexOf('-') >= 0) {
+      return { ok: { success: true }, error: undefined }
+    }
+
     const config = await this.getConfig(this.phone)
     const body = JSON.stringify(payload)
     const headers = {
