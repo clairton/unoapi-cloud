@@ -1,7 +1,7 @@
-import { v1 as uuid } from 'uuid'
 import { Listener } from './listener'
 import { OnNewLogin } from './socket'
 import { phoneNumberToJid } from './transformer'
+import { generateUnoId } from '../utils/id'
 
 export const onNewLoginAlert = (listener: Listener): OnNewLogin => {
   return async (phone: string) => {
@@ -9,7 +9,7 @@ export const onNewLoginAlert = (listener: Listener): OnNewLogin => {
     const payload = {
       key: {
         remoteJid: phoneNumberToJid(phone),
-        id: uuid(),
+        id: generateUnoId('NOT'),
       },
       message: {
         conversation: message,

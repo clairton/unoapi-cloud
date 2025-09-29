@@ -5,7 +5,7 @@ import { Outgoing } from '../services/outgoing'
 import { BASE_URL } from '../defaults'
 import mediaToBuffer from '../utils/media_to_buffer'
 import { extractDestinyPhone } from '../services/transformer'
-import { v1 as uuid } from 'uuid'
+import { generateUnoId } from '../utils/id'
 import Audio2TextJS from 'audio2textjs'
 import { writeFileSync, rmSync, existsSync, mkdirSync } from 'fs'
 import { SESSION_DIR } from '../services/session_store_file'
@@ -85,7 +85,7 @@ export class TranscriberJob {
           id: audioMessage.id,
         },
         from: audioMessage.from,
-        id: uuid(),
+        id: generateUnoId('STT'),
         text: { body: transcriptionText },
         type: 'text',
         timestamp: `${parseInt(audioMessage.timestamp) + 1}`,

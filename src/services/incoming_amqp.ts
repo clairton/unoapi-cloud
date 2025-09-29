@@ -1,9 +1,9 @@
 import { Incoming } from './incoming'
 import { amqpPublish } from '../amqp'
 import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_INCOMING } from '../defaults'
-import { v1 as uuid } from 'uuid'
 import { jidToPhoneNumber } from './transformer'
 import { getConfig } from './config'
+import { generateUnoId } from '../utils/id'
 
 export class IncomingAmqp implements Incoming {
   private getConfig: getConfig
@@ -28,7 +28,7 @@ export class IncomingAmqp implements Incoming {
       )
       return { ok: { success: true } }
     } else if (type) {
-      const id = uuid()
+      const id = generateUnoId('INC')
       if (!options['priority']) {
         options['priority'] = 5 // send message without bulk is very important
       }

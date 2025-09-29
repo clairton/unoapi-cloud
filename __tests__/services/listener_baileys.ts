@@ -120,8 +120,8 @@ describe('service listener baileys', () => {
     const payload = JSON.parse(JSON.stringify(textPayload))
     const spy = jest.spyOn(store.dataStore, 'setUnoId')
     await service.process(phone, [payload], 'notify')
-    expect(spy).toHaveBeenCalledWith(id, expect.stringContaining('-'))
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('-'), id)
+    expect(spy).toHaveBeenCalledWith(id, expect.stringContaining('UNO.'))
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('UNO.'), id)
   })
 
   test('call dataStore setKey', async () => {

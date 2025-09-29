@@ -1,6 +1,6 @@
 import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_PARSER, UNOAPI_QUEUE_RELOAD } from '../defaults'
 import { amqpPublish } from '../amqp'
-import { v1 as uuid } from 'uuid'
+import { generateUnoId } from '../utils/id'
 import { Outgoing } from '../services/outgoing'
 import { Template } from '../services/template'
 import { getConfig } from '../services/config'
@@ -37,7 +37,7 @@ export class CommanderJob {
       const currentConfig = await this.getConfig(phone)
       if (payload.type === 'document' && payload?.document?.caption?.toLowerCase() == 'campanha') {
         logger.debug(`Commander processing`)
-        const id = uuid()
+        const id = generateUnoId('CMD')
         await amqpPublish(
           UNOAPI_EXCHANGE_BROKER_NAME, 
           UNOAPI_QUEUE_BULK_PARSER, 

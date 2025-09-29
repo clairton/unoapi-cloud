@@ -7,7 +7,7 @@ import { jidToPhoneNumber, getMimetype, toBuffer, TYPE_MESSAGES_MEDIA } from '..
 import logger from '../services/logger'
 import fetch, { Response } from 'node-fetch'
 import mime from 'mime-types'
-import { v1 as uuid } from 'uuid'
+import { generateUnoId } from '../utils/id'
 
 export class IncomingJob {
   private incoming: Incoming
@@ -34,7 +34,7 @@ export class IncomingJob {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payload: any = a.payload
     const options: object = a.options
-    const idUno: string = a.id || uuid()
+    const idUno: string = a.id || generateUnoId('INC')
     const waId = jidToPhoneNumber(payload.to, '')
     const timestamp = Math.floor(new Date().getTime() / 1000).toString()
     // const retries: number = a.retries ? a.retries + 1 : 1

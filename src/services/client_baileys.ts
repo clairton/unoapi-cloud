@@ -20,7 +20,7 @@ import {
 import { Client, getClient, clients, Contact } from './client'
 import { Config, configs, defaultConfig, getConfig, getMessageMetadataDefault } from './config'
 import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, getMessageType, TYPE_MESSAGES_TO_READ, TYPE_MESSAGES_MEDIA } from './transformer'
-import { v1 as uuid } from 'uuid'
+import { isUnoId, generateUnoId } from '../utils/id'
 import { Response } from './response'
 import QRCode from 'qrcode'
 import { Template } from './template'
@@ -155,7 +155,7 @@ export class ClientBaileys implements Client {
 
   private onNotification: OnNotification = async (text: string, important) => {
     if (this.config.sendConnectionStatus || important) {
-      const id = uuid()
+      const id = generateUnoId('NOT')
       const waMessageKey = {
         fromMe: true,
         remoteJid: phoneNumberToJid(this.phone),
@@ -191,7 +191,7 @@ export class ClientBaileys implements Client {
 
   private onQrCode: OnQrCode = async (qrCode: string, time, limit) => {
     logger.debug('Received qrcode %s %s', this.phone, qrCode)
-    const id = uuid()
+    const id = generateUnoId('QR')
     const qrCodeUrl = await QRCode.toDataURL(qrCode)
     const remoteJid = phoneNumberToJid(this.phone)
     const waMessageKey = {
@@ -374,7 +374,7 @@ export class ClientBaileys implements Client {
           if (messageCallsWebhook) {
             const waMessageKey = {
               fromMe: false,
-              id: uuid(),
+              id: generateUnoId('CALL'),
               remoteJid: from,
             }
             const message = {
@@ -412,7 +412,7 @@ export class ClientBaileys implements Client {
               const key = await this.store?.dataStore?.loadKey(payload?.message_id)
               logger.debug('key %s for %s', JSON.stringify(key), payload?.message_id)
               if (key?.id) {
-                if (key?.id.indexOf('-') > 0) {
+                if (isUnoId(key?.id)) {
                   logger.debug('Ignore read message for %s with key id %s reading message key %s...', this.phone, key?.id)
                 } else {
                   logger.debug('baileys %s reading message key %s...', this.phone, JSON.stringify(key))
@@ -432,7 +432,7 @@ export class ClientBaileys implements Client {
             const key = await this.store?.dataStore?.loadKey(payload?.message_id)
             logger.debug('key %s for %s', JSON.stringify(key), payload?.message_id)
             if (key?.id) {
-              if (key?.id.indexOf('-') > 0) {
+              if (isUnoId(key?.id)) {
                 logger.debug('Ignore delete message for %s with key id %s reading message key %s...', this.phone, key?.id)
               } else {
                 logger.debug('baileys %s deleting message key %s...', this.phone, JSON.stringify(key))
@@ -591,7 +591,7 @@ export class ClientBaileys implements Client {
           await this.close()
           await this.connect(1)
         }
-        const id = uuid()
+        const id = generateUnoId('WARN')
         const ok = {
           messaging_product: 'whatsapp',
           contacts: [

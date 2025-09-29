@@ -7,7 +7,7 @@ import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMed
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
-import { v1 as uuid } from 'uuid'
+import { isUnoId, generateUnoId } from '../utils/id'
 
 const  delays: Map<String, number> = new Map()
 
@@ -98,7 +98,7 @@ export class ListenerBaileys implements Listener {
       await store.dataStore.setMessage(i.key.remoteJid!, i)
       if (!i.key['originalId']) {
         i.key['originalId'] = idBaileys
-        const idUno = uuid()
+        const idUno = generateUnoId()
         await store.dataStore.setUnoId(idUno, idBaileys)
         await store.dataStore.setUnoId(idBaileys, idUno)
         await store.dataStore.setKey(idBaileys, i.key)
@@ -114,8 +114,7 @@ export class ListenerBaileys implements Listener {
     }
     const key = i.key
     // possible update message or delete message
-    // if (key?.id && (key?.fromMe || (!key?.fromMe && ((message as any)?.update?.messageStubType == 1)))) {
-    if (key?.id && [1, '1', 'REVOKE'].includes((message as any)?.update?.messageStubType)) {
+    if (key?.id && !isUnoId(key.id) && (key?.fromMe || (!key?.fromMe && ((message as any)?.update?.messageStubType == 1)))) {
       const idUno = await store.dataStore.loadUnoId(key.id)
       logger.debug('Unoapi id %s to Baileys id %s', idUno, key.id)
       if (idUno) {
