@@ -25,7 +25,7 @@ export class MediaController {
       logger.debug('media index response %s', JSON.stringify(mediaResult))
       return res.status(200).json(mediaResult)
     } else {
-      logger.debug('media index response 404')
+      logger.warn('media index response 404', mediaId)
       return res.sendStatus(404)
     }
   }
