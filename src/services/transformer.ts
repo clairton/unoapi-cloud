@@ -128,6 +128,8 @@ export const getMessageType = (payload: any) => {
     return 'receipt'
   } else if (payload.message) {
     const { message } = payload
+
+
     return TYPE_MESSAGES_TO_READ.find((t) => message[t]) || 
             OTHER_MESSAGES_TO_PROCESS.find((t) => message[t]) || 
             Object.keys(payload.message)[0]
@@ -855,7 +857,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             break
 
           default:
-            if (payload.update && payload.update.messageStubType && payload.update.messageStubType == 1) {
+            if ([1, '1', 'REVOKE'].includes(payload?.update?.messageStubType)) {
               cloudApiStatus = 'deleted'
             } else if (payload?.update?.starred) {
               // starred in unknown, but if is starred the userd read the message
