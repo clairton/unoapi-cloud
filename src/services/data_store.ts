@@ -22,7 +22,7 @@ export type MessageStatus = 'scheduled'
       | 'decrypted'
       | 'decryption_failed'
 
-export type DataStore  = {
+export type DataStore = {
   state: AuthenticationState
   saveCreds: () => Promise<void>
   type: string

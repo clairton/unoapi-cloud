@@ -35,7 +35,7 @@ export class ReloadBaileys extends Reload {
     })
     const store = await config.getStore(phone, config)
     const { sessionStore } = store
-    if (await sessionStore.isStatusOnline(phone) || await sessionStore.isStatusStandBy(phone) || await sessionStore.isStatusConnecting(phone)) {
+    if ((await sessionStore.isStatusOnline(phone)) || (await sessionStore.isStatusStandBy(phone)) || (await sessionStore.isStatusConnecting(phone))) {
       logger.warn('Reload disconnect session %s!', phone)
       await currentClient.disconnect()
     }

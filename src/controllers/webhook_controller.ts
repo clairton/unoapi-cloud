@@ -35,7 +35,7 @@ export class WebhookController {
     const token = req.query['hub.verify_token']
     const challenge = req.query['hub.challenge']
     const config = (await this.getConfig(phone.replace('+', ''))) || { authToken: UNOAPI_AUTH_TOKEN }
-  
+
     if (mode === 'subscribe' && token === config.authToken) {
       res.status(200).send(challenge)
     } else {

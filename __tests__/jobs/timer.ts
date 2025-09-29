@@ -7,7 +7,7 @@ const delLastTimerMock = delLastTimer as jest.MockedFunction<typeof delLastTimer
 
 describe('timer', () => {
   let incoming, job, payload, phone, to, message, time, sendSpy, mockGetLastTimer, incomingPayload
-  
+
   beforeEach(() => {
     incoming = mock<Incoming>()
     mockGetLastTimer = jest.fn()
@@ -17,21 +17,24 @@ describe('timer', () => {
     message = `${new Date().getTime()}s sdfhosfo`
     time = '2011-10-05T14:48:00.000Z'
     payload = {
-      phone, to, message, time
+      phone,
+      to,
+      message,
+      time,
     }
     sendSpy = jest.spyOn(incoming, 'send')
 
-    incomingPayload =[
+    incomingPayload = [
       phone,
       {
         messaging_product: 'whatsapp',
         to,
         type: 'text',
         text: {
-          body: message
-        } 
+          body: message,
+        },
       },
-      {}
+      {},
     ]
     delLastTimerMock.mockResolvedValue(Promise.resolve())
   })

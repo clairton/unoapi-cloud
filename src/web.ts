@@ -8,8 +8,8 @@ import { Outgoing } from './services/outgoing'
 import { OutgoingAmqp } from './services/outgoing_amqp'
 import { SessionStore } from './services/session_store'
 import { SessionStoreRedis } from './services/session_store_redis'
-import { 
-  BASE_URL, 
+import {
+  BASE_URL,
   PORT,
   CONFIG_SESSION_PHONE_CLIENT,
   CONFIG_SESSION_PHONE_NAME,
@@ -62,9 +62,14 @@ app.server.listen(PORT, '0.0.0.0', async () => {
   logger.info('Starting broadcast consumer')
   await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BROADCAST, '*', broadcastJob.consume.bind(broadcastJob), { type: 'topic' })
   await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_RELOAD, '*', reload.run.bind(reloadJob), { type: 'topic' })
-  logger.info('Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)', version, PORT, CONFIG_SESSION_PHONE_CLIENT, CONFIG_SESSION_PHONE_NAME)
+  logger.info(
+    'Unoapi Cloud version: %s, listening on port: %s | Linked Device: %s(%s)',
+    version,
+    PORT,
+    CONFIG_SESSION_PHONE_CLIENT,
+    CONFIG_SESSION_PHONE_NAME,
+  )
 })
-
 
 process.on('uncaughtException', (reason: any) => {
   if (process.env.SENTRY_DSN) {

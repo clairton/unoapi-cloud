@@ -19,7 +19,14 @@ import {
 } from './socket'
 import { Client, getClient, clients, Contact } from './client'
 import { Config, configs, defaultConfig, getConfig, getMessageMetadataDefault } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, getMessageType, TYPE_MESSAGES_TO_READ, TYPE_MESSAGES_MEDIA } from './transformer'
+import {
+  toBaileysMessageContent,
+  phoneNumberToJid,
+  jidToPhoneNumber,
+  getMessageType,
+  TYPE_MESSAGES_TO_READ,
+  TYPE_MESSAGES_MEDIA,
+} from './transformer'
 import { v1 as uuid } from 'uuid'
 import { Response } from './response'
 import QRCode from 'qrcode'
@@ -30,6 +37,127 @@ import { t } from '../i18n'
 import { ClientForward } from './client_forward'
 import { SendError } from './send_error'
 import audioConverter from '../utils/audio_converter'
+
+class PresignedLinkValidator {
+  private static isPresignedLink(url: string): boolean {
+    return url.includes('X-Amz-Algorithm') || url.includes('response-content-disposition') || url.includes('X-Amz-Signature')
+  }
+
+  static async validateLink(url: string): Promise<boolean> {
+    const isPresigned = this.isPresignedLink(url)
+
+    if (!isPresigned) {
+      try {
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(10000),
+          method: 'HEAD',
+        })
+        return response.ok
+      } catch (error) {
+        logger.warn(`Normal link HEAD failed, trying GET: ${error.message}`)
+        try {
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(10000),
+            method: 'GET',
+            headers: {
+              Range: 'bytes=0-0',
+            },
+          })
+          return response.ok
+        } catch (getError) {
+          logger.warn(`Normal link validation failed: ${getError.message}`)
+          return false
+        }
+      }
+    }
+    
+    logger.info(`Detected presigned link, starting validation with GET Range: ${url}`)
+
+    const maxAttempts = 40
+    const baseDelay = 1500
+    const maxDelay = 15000
+    const totalTimeout = 8 * 60 * 1000
+
+    const startTime = Date.now()
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (Date.now() - startTime > totalTimeout) {
+        logger.warn(`Presigned link validation timeout after ${totalTimeout}ms: ${url}`)
+        throw new SendError(11, t('link_validation_timeout', url))
+      }
+
+      try {
+        logger.debug(`Validating presigned link attempt ${attempt}/${maxAttempts}: ${url}`)
+        
+        const response = await fetch(url, {
+          signal: AbortSignal.timeout(8000),
+          method: 'GET',
+          headers: {
+            Range: 'bytes=0-0',
+            'User-Agent': 'UnoAPI/1.0',
+            Accept: '*/*',
+            'Cache-Control': 'no-cache',
+          },
+        })
+        
+        if (response.ok || response.status === 206) {
+          logger.info(`Presigned link validated successfully on attempt ${attempt} (status: ${response.status}): ${url}`)
+          
+          try {
+            await response.text()
+          } catch (e) {
+            // Ignora erro ao consumir body
+          }
+
+          return true
+        }
+
+        // Para links pré-assinados, 403/404/416 podem ser temporários
+        if ([403, 404, 416, 502, 503].includes(response.status)) {
+          logger.debug(`Presigned link not ready (${response.status}), attempt ${attempt}/${maxAttempts}`)
+
+          // Calcula delay inteligente
+          let delay = baseDelay
+          if (attempt <= 15) {
+            delay = baseDelay
+          } else if (attempt <= 25) {
+            delay = baseDelay * 1.5
+          } else {
+            delay = Math.min(baseDelay * 2, maxDelay)
+          }
+
+          if (attempt < maxAttempts) {
+            logger.debug(`Waiting ${delay}ms before next attempt...`)
+            await new Promise((resolve) => setTimeout(resolve, delay))
+          }
+          continue
+        }
+
+        // Outros códigos de erro são definitivos
+        logger.error(`Presigned link validation failed with status ${response.status}: ${url}`)
+        throw new SendError(11, t('invalid_link', response.status, url))
+      } catch (error) {
+        if (error instanceof SendError) {
+          throw error
+        }
+
+        // Erros de rede/timeout podem ser temporários
+        if (error.name === 'AbortError' || error.message.includes('timeout') || error.name === 'FetchError' || error.message.includes('ECONNRESET')) {
+          logger.debug(`Network error on attempt ${attempt}: ${error.message}`)
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, baseDelay))
+            continue
+          }
+        }
+
+        logger.error(`Unexpected error validating presigned link: ${error.message}`)
+        throw new SendError(11, t('link_validation_error', error.message))
+      }
+    }
+
+    throw new SendError(11, t('link_validation_failed_after_retries', maxAttempts, url))
+  }
+}
 
 const attempts = 3
 
@@ -199,7 +327,7 @@ export class ClientBaileys implements Client {
       remoteJid,
       id,
     }
-    const message =  t('qrcode_attemps', time, limit)
+    const message = t('qrcode_attemps', time, limit)
     const waMessage: WAMessage = {
       key: waMessageKey,
       message: {
@@ -279,7 +407,7 @@ export class ClientBaileys implements Client {
       onNewLogin: this.onNewLogin,
       config: this.config,
       onDisconnected: async () => this.disconnect(),
-      onReconnect: this.onReconnect
+      onReconnect: this.onReconnect,
     })
     if (!result) {
       logger.error('Socket connect return empty %s', this.phone)
@@ -335,7 +463,7 @@ export class ClientBaileys implements Client {
             })
             .map(async (message: any) => {
               return this.readMessages([message.key!])
-            })
+            }),
         )
       }
     })
@@ -367,7 +495,18 @@ export class ClientBaileys implements Client {
           this.calls.set(from, true)
           if (this.config.rejectCalls && this.rejectCall) {
             await this.rejectCall(id, from)
-            await this.sendMessage(from, { text: this.config.rejectCalls }, {});
+            const response = await this.sendMessage(from, { text: this.config.rejectCalls }, {})
+            const message = {
+              key: {
+                fromMe: true,
+                remoteJid: from,
+                id: response.key.id,
+              },
+              message: {
+                conversation: this.config.rejectCalls,
+              },
+            }
+            await this.listener.process(this.phone, [message], 'append')
             logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
           }
           const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
@@ -575,7 +714,7 @@ export class ClientBaileys implements Client {
       if (ee.message == 'Media upload failed on all hosts') {
         const link = payload[type] && payload[type].link
         if (link) {
-          const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD'})
+          const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD' })
           if (!response.ok) {
             e = new SendError(11, t('invalid_link', response.status, link))
           }
@@ -733,10 +872,9 @@ export class ClientBaileys implements Client {
       contacts.push({
         wa_id: realJid,
         input: number,
-        status: realJid ? 'valid' : 'invalid'
+        status: realJid ? 'valid' : 'invalid',
       })
     }
     return contacts
   }
 }
-

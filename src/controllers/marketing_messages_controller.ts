@@ -5,7 +5,6 @@ import { Outgoing } from '../services/outgoing'
 import { MessagesController } from './messages_controller'
 
 export class MarketingMessagesController extends MessagesController {
-
   constructor(incoming: Incoming, outgoing: Outgoing) {
     super(incoming, outgoing)
     this.endpoint = 'marketing_messages'

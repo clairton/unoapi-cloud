@@ -24,8 +24,8 @@ describe('blacklist routes', () => {
     const reload = mock<Reload>()
     const logout = mock<Logout>()
     const app: App = new App(incoming, outgoing, '', getConfigTest, sessionStore, onNewLogin, addToBlacklist, reload, logout)
-    const res = await request(app.server).post('/2/blacklist/1').send({ttl: 1, to: '3'})
-    expect(addToBlacklist).toHaveBeenCalledWith('2', '1', '3', 1);
+    const res = await request(app.server).post('/2/blacklist/1').send({ ttl: 1, to: '3' })
+    expect(addToBlacklist).toHaveBeenCalledWith('2', '1', '3', 1)
     expect(res.status).toEqual(200)
   })
 })

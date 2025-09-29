@@ -6,7 +6,6 @@ export type sessionStatus = 'offline' | 'online' | 'disconnected' | 'connecting'
 const statuses: Map<string, string> = new Map<string, string>()
 const retries: Map<string, number> = new Map<string, number>()
 
-
 export abstract class SessionStore {
   abstract getPhones(): Promise<string[]>
   abstract getTokens(phone: string): Promise<string[]>
@@ -17,27 +16,27 @@ export abstract class SessionStore {
 
   async setStatus(phone: string, status: sessionStatus) {
     logger.info(`Session status ${phone} change from ${await this.getStatus(phone)} to ${status}`)
-    statuses.set(phone, status) 
+    statuses.set(phone, status)
   }
 
   async isStatusOnline(phone: string) {
-    return await this.getStatus(phone) == 'online'
+    return (await this.getStatus(phone)) == 'online'
   }
 
   async isStatusConnecting(phone: string) {
-    return await this.getStatus(phone) == 'connecting'
+    return (await this.getStatus(phone)) == 'connecting'
   }
 
   async isStatusOffline(phone: string) {
-    return await this.getStatus(phone) == 'offline'
+    return (await this.getStatus(phone)) == 'offline'
   }
 
   async isStatusDisconnect(phone: string) {
-    return await this.getStatus(phone) == 'disconnected'
+    return (await this.getStatus(phone)) == 'disconnected'
   }
 
   async isStatusRestartRequired(phone: string) {
-    return await this.getStatus(phone) == 'restart_required'
+    return (await this.getStatus(phone)) == 'restart_required'
   }
 
   async getConnectCount(phone: string) {
@@ -49,12 +48,12 @@ export abstract class SessionStore {
   }
 
   async isStatusStandBy(phone: string) {
-    return await this.getStatus(phone) == 'standby'
+    return (await this.getStatus(phone)) == 'standby'
   }
 
   async verifyStatusStandBy(phone: string) {
     const count = await this.getConnectCount(phone)
-    if (await this.getStatus(phone) == 'standby') {
+    if ((await this.getStatus(phone)) == 'standby') {
       if (count < MAX_CONNECT_RETRY) {
         logger.warn('Standby removed %s', phone)
         await this.setStatus(phone, 'offline')
@@ -62,7 +61,7 @@ export abstract class SessionStore {
       }
       logger.warn('Standby %s', phone)
       return true
-    } else if (count > MAX_CONNECT_RETRY && !await this.isStatusRestartRequired(phone)) {
+    } else if (count > MAX_CONNECT_RETRY && !(await this.isStatusRestartRequired(phone))) {
       this.setStatus(phone, 'standby')
       return true
     }

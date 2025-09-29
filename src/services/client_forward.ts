@@ -1,7 +1,7 @@
-import { Client, Contact } from './client';
-import { getConfig } from './config';
-import { Listener } from './listener';
-import logger from './logger';
+import { Client, Contact } from './client'
+import { getConfig } from './config'
+import { Listener } from './listener'
+import logger from './logger'
 
 export class ClientForward implements Client {
   private phone: string
@@ -19,7 +19,7 @@ export class ClientForward implements Client {
     const body = JSON.stringify(payload)
     const headers = {
       'Content-Type': 'application/json; charset=utf-8',
-      'Authorization': `Bearer ${config.webhookForward.token}`
+      Authorization: `Bearer ${config.webhookForward.token}`,
     }
     const endpoint = options.endpoint && payload.type ? options.endpoint : 'messages'
     const url = `${config.webhookForward.url}/${config.webhookForward.version}/${config.webhookForward.phoneNumberId}/${endpoint}`
@@ -46,10 +46,10 @@ export class ClientForward implements Client {
   public async connect(_time: number) {
     const message = {
       message: {
-        conversation: 'Starting unoapi forwarder......'
-      }
+        conversation: 'Starting unoapi forwarder......',
+      },
     }
-    return this.listener.process(this.phone, [message] , 'status')
+    return this.listener.process(this.phone, [message], 'status')
   }
 
   public getMessageMetadata<T>(_message: T): Promise<T> {
@@ -63,7 +63,7 @@ export class ClientForward implements Client {
   public async disconnect() {
     throw 'ClientCloudApi not disconnect'
   }
-  
+
   public async logout() {
     throw 'ClientCloudApi not logout'
   }

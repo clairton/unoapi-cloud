@@ -58,7 +58,6 @@ export class TemplatesController {
         const templates = await store.dataStore.loadTemplates()
         return res.status(200).json({ data: templates })
       }
-
     } catch (e) {
       return res.status(400).json({ status: 'error', message: `${phone} could not create template, error: ${e.message}` })
     }
