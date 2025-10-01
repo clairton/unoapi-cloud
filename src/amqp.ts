@@ -322,6 +322,12 @@ export const amqpConsume = async (
           )
           logger.info('Sent error to whatsapp!')
         }
+        data.traces = data.traces || {}
+        data.traces[countRetries] = {
+          stack: error.stack,
+          message: error.message,
+          datetime: new Date()
+        }
         await amqpPublish(exchange, queue, routingKey, data, { dead: true, type: options.type })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
