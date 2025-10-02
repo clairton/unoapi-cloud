@@ -198,10 +198,11 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
             return phoneOrJid
           }
         } catch (error) {
-          
+          logger.error(error, 'Error on verify whatsapp: %s')
         }
       }
       const result = results && results[0]
+      logger.debug(`${phoneOrJid} onWhatsApp results: ${JSON.stringify(results)}`)
       const test = result && result?.exists && result?.jid
       logger.debug(`${phoneOrJid} found onWhatsApp exists: ${result?.exists} jid: ${result?.jid} test: ${test}`)
       if (test) {
