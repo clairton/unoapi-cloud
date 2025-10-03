@@ -158,6 +158,7 @@ export class ListenerBaileys implements Listener {
       await store.dataStore.setStatus(idBaileys, 'decrypted')
     } catch (error) {
       if (error instanceof DecryptError) {
+        logger.warn('Descrypt error set decryption_failed %s', idBaileys)
         await store.dataStore.setStatus(idBaileys, 'decryption_failed')
       }
       if (error instanceof BindTemplateError) {
