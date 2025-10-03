@@ -118,9 +118,9 @@ export class IncomingJob {
       const webhooks = config.webhooks.filter((w) => w.sendNewMessages)
       logger.debug('%s webhooks with sendNewMessages', webhooks.length)
       await Promise.all(webhooks.map((w) => this.outgoing.sendHttp(phone, w, webhookMessage, {})))
-    } else if (!ok.success) {
+    } else if (!ok?.success) {
       throw `Unknow response ${JSON.stringify(response)}`
-    } else if (ok.success) {
+    } else if (ok?.success) {
       logger.debug('Message id %s update to status %s', payload?.message_id, payload?.status)
       return
     }
