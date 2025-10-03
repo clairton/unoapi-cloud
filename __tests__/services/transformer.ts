@@ -608,6 +608,65 @@ describe('service transformer', () => {
     }
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
+  
+  test('fromBaileysMessageContent with contactsArrayMessage', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '+11115551212'
+    const remoteJid = `${remotePhoneNumber}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Forrest Gump ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      message: {
+        contactsArrayMessage: {
+          displayName: `${pushName} contatos`,
+          contacts: [
+            {
+              displayName: pushName,
+              vcard: `BEGIN:VCARD\nVERSION:4.0\nN:Einstein\nFN:${pushName}\nEND:VCARD`,
+            },
+          ]
+        }
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                contacts: [{ profile: { name: pushName }, wa_id: remotePhoneNumber.replace('+', '') }],
+                messages: [
+                  {
+                    from: remotePhoneNumber.replace('+', ''),
+                    id,
+                    timestamp: messageTimestamp,
+                    contacts: [],
+                    type: 'contacts',
+                  },
+                ],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
+  })
 
   test('fromBaileysMessageContent with contact', async () => {
     const phoneNumer = '5549998093075'

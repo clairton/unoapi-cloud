@@ -688,13 +688,16 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           const vcard = vcards[i]
           if (vcard) {
             const card: vCard = new vCard().parse(vcard.replace(/\r?\n/g, '\r\n'))
+            const formatted_name = card.get('fn')?.valueOf()
+            const vcardPhone = card.get('tel')?.valueOf()
+            if (!vcardPhone) {
+              continue
+            }
             const contact = {
-              name: {
-                formatted_name: card.get('fn').valueOf(),
-              },
+              name: { formatted_name },
               phones: [
                 {
-                  phone: card.get('tel').valueOf(),
+                  phone: vcardPhone,
                 },
               ],
             }
