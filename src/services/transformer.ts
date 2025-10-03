@@ -296,10 +296,11 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
 
     case 'contacts':
       const contact = payload[type][0]
-      const contacName = contact['name']['formatted_name']
+      const contacName = contact?.name?.formatted_name
+      const phones = contact?.phones || []
       const contacts: any[] = []
-      for (let index = 0; index < contact['phones'].length; index++) {
-        const phone = contact['phones'][index]
+      for (let index = 0; index < phones.length; index++) {
+        const phone = phones[index]
         const waid = phone['wa_id']
         const number = phone['phone']
         const vcard = 'BEGIN:VCARD\n'
