@@ -81,7 +81,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   store.setMediaPayload = async (id: string, payload: string) => setMedia(phone, id, payload)
   store.getJid = async (phoneOrJid: string) => {
     const jid = await getJid(phone, phoneOrJid)
-    logger.debug('Found session %s phone %s wa_id %s', phone, phoneOrJid, jid)
+    logger.debug('Found jid on redis session %s phone %s -> %s', phone, phoneOrJid, jid)
     return jid
   }
   store.setJid = async (phoneOrJid: string, jid: string) => {

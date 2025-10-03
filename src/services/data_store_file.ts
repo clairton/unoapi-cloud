@@ -231,7 +231,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
     jids.set(phoneOrJid, jid)
   }
   dataStore.setJidIfNotFound = async (phoneOrJid: string, jid: string) => {
-    if (await dataStore.getJid(jid)) {
+    if (await dataStore.getJid(phoneOrJid)) {
       return
     }
     return dataStore.setJid(phoneOrJid, jid)
