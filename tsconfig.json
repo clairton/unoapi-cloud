@@ -19,9 +19,4 @@
     "isolatedModules": true
   },
   "include": ["src/**/*.ts", "src/**/*.json"],
-  "ts-node": {
-    "compilerOptions": {
-      "esModuleInterop": true
-    }
-  }
 }
