@@ -106,22 +106,3 @@ curl -i -X POST \
   "timeout": 1,
   "message": "Oi, ainda está ai? =)"
 }'
-
-curl -i -X DELETE \
-'http://localhost:9876/timer/554931978550/5549988290955' \
--H 'Content-Type: application/json' \
--H 'Authorization: 1'
-
-curl -i -X POST \
-'https://unoapi.cloud/timer/554936213177/5549988290955' \
--H 'Content-Type: application/json' \
--H 'Authorization: 78wewiuugDIwgfiuggwuigwgYUFFwfiwhfoihwfioho86734GFJgsfgsf' \
--d '{ 
-  "timeout": 20000,
-  "message": "Oi, ainda está ai? =)"
-}'
-
-curl -i -X DELETE \
-'https://unoapi.cloud/timer/554936213177/5549988290955' \
--H 'Content-Type: application/json' \
--H 'Authorization: 78wewiuugDIwgfiuggwuigwgYUFFwfiwhfoihwfioho86734GFJgsfgsf'

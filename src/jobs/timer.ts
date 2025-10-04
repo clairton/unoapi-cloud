@@ -1,6 +1,7 @@
 import { Incoming } from '../services/incoming'
 import logger from '../services/logger'
 import { getLastTimer, delLastTimer } from '../services/redis'
+import { start, stop } from '../services/timer'
 
 export class TimerJob {
   private incoming: Incoming
@@ -14,7 +15,7 @@ export class TimerJob {
   async consume(phone: string, data: object) {
     const a = data as any
     const payload: any = a.payload
-    const { message, to, time } = payload
+    const { message, to, time, nexts } = payload
     const messageDate = Date.parse(time)
     const string = await this.getLastTimerFunction(phone, to)
     const lastTime = string ? Date.parse(string) : undefined
@@ -32,6 +33,10 @@ export class TimerJob {
         } 
       }
       await this.incoming.send(phone, body, {})
+      if (nexts?.length > 0) {
+        const first = nexts.shift()
+        await start(first.phone, first.to, first.timeout, nexts)
+      }
     }
     return delLastTimer(phone, to)
   }
