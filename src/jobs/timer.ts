@@ -36,7 +36,7 @@ export class TimerJob {
       if (nexts?.length > 0) {
         logger.debug('timer consumer found nexts %s to %s', phone, to)
         const first = nexts.shift()
-        await start(first.phone, first.to, first.timeout, nexts)
+        await start(first.phone, first.to, first.timeout, first.message, nexts)
       } else {
         logger.debug('timer consumer not found nexts %s to %s', phone, to)
       }
