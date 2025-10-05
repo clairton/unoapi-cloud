@@ -4,7 +4,8 @@ import { SessionStore } from './session_store'
 import { Listener } from './listener'
 import { OnNewLogin } from './socket'
 import logger from './logger'
-import { UNOAPI_SERVER_NAME } from '../defaults'
+import { UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_QUEUE_BIND, UNOAPI_SERVER_NAME } from '../defaults'
+import { amqpPublish } from '../amqp'
 
 export const autoConnect = async (
   sessionStore: SessionStore,
@@ -20,9 +21,23 @@ export const autoConnect = async (
       const phone = phones[i]
       try {
         const config = await getConfig(phone)
-        if (config.provider && !['forwarder', 'baileys'].includes(config.provider)) {
+        if (config.provider && !['forwarder', 'baileys', 'whatsmeow'].includes(config.provider)) {
           logger.info(`Ignore connecting phone ${phone} provider ${config.provider}...`)
-          continue;
+          continue
+        }
+        // Do not attempt local connection for external providers
+        if (config.provider === 'whatsmeow' || config.provider === 'forwarder') {
+          // For external providers, proactively request BindBridge to attach
+          // per-phone consumers on incoming bridge queues.
+          await amqpPublish(
+            UNOAPI_EXCHANGE_BRIDGE_NAME,
+            `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`,
+            '',
+            { routingKey: phone },
+            { type: 'direct' },
+          )
+          logger.info(`Provider ${config.provider} uses external adapter. Skipping auto connect for ${phone}...`)
+          continue
         }
         if (config.server && config.server !== UNOAPI_SERVER_NAME) {
           logger.info(`Ignore connecting phone ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)

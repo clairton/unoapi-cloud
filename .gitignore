@@ -9,3 +9,4 @@ data/sessions/*
 .env
 .yarn/*
 .yarnrc.yml
+/.idea/

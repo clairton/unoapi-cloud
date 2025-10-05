@@ -116,6 +116,7 @@ export const amqpGetChannel = async () => {
     logger.info('Creating channel...')
     await amqpConnect()
     amqpChannel = await amqpChannelModel?.createChannel()
+    amqpChannel?.setMaxListeners(0)
     logger.info('Created channel!')
   }
   return amqpChannel
@@ -340,6 +341,11 @@ export const amqpConsume = async (
 
   const bindingKey = await bindQueue(channel, exchange, queue, routingKey)
   const bindingKeyDelayed = await bindQueue(channel, exchange, queue, routingKey, true)
+  // For bridge (direct) exchange, also bind a plain routing key without queue prefix
+  // so external adapters can publish using only the phone number as routing key.
+  if (exchange === UNOAPI_EXCHANGE_BRIDGE_NAME && routingKey) {
+    await channel?.bindQueue(queue, exchange, routingKey)
+  }
 
   channel?.on('close', () => {
     channel.unbindQueue(queue, exchange, bindingKey)

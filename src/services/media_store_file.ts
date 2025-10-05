@@ -2,6 +2,7 @@ import { proto, WAMessage, downloadMediaMessage, downloadContentFromMessage, Con
 import { getBinMessage, jidToPhoneNumberIfUser, toBuffer } from './transformer'
 import { writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, rmSync, createReadStream } from 'fs'
+import path from 'path'
 import { MediaStore, getMediaStore, mediaStores } from './media_store'
 import mime from 'mime-types'
 import { Response } from 'express'
@@ -187,13 +188,31 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     const dataStore = await getDataStore(phone, config)
     const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
     if (!mediaPayload) {
-      logger.warn('Media payload nor found %s', mediaId)
-      return;
+      logger.warn('Media payload not found %s', mediaId)
+      return undefined
     }
-    const filePath = mediaStore.getFilePath(phone, mediaId!, mediaPayload?.mime_type!)
+
+    let filePath: string | undefined
+    if (mediaPayload.mime_type) {
+      filePath = mediaStore.getFilePath(phone, mediaId!, mediaPayload.mime_type)
+    } else if (mediaPayload.filename) {
+      logger.debug('Missing mime type for media %s, deriving from filename', mediaId)
+      const ext = path.extname(mediaPayload.filename)
+      if (ext) {
+        filePath = `${phone}/${mediaId}${ext}`
+      }
+    }
+
+    if (!filePath) {
+      logger.warn('Media payload missing mime type and filename %s', mediaId)
+      return undefined
+    }
+
     const url = await mediaStore.getDownloadUrl(baseUrl, filePath)
+    const mimeType = mediaPayload.mime_type || mime.lookup(filePath)
     const payload = {
       ...mediaPayload,
+      ...(mimeType ? { mime_type: mimeType } : {}),
       url,
     }
     return payload

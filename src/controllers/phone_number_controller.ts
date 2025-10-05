@@ -23,6 +23,7 @@ export class PhoneNumberController {
     try {
       const { phone } = req.params
       const config = await this.getConfig(phone)
+      config.provider = config.provider || 'baileys'
       const store = await config.getStore(phone, config)
       logger.debug('Session store retrieved!')
       const { sessionStore } = store
@@ -53,6 +54,7 @@ export class PhoneNumberController {
       for (let i = 0, j = phones.length; i < j; i++) {
         const phone = phones[i]
         const config = await this.getConfig(phone)
+        config.provider = config.provider || 'baileys'
         const store = await config.getStore(phone, config)
         const { sessionStore } = store
         const status = config.provider == 'forwarder' ? 'forwarder' : await sessionStore.getStatus(phone)

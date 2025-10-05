@@ -20,6 +20,7 @@ import { SessionController } from './controllers/session_controller'
 import { BlacklistController } from './controllers/blacklist_controller'
 import { PairingCodeController } from './controllers/pairing_code_controller'
 import { ConnectController } from './controllers/connect_controller'
+import { SessionCommandController } from './controllers/session_command_controller'
 import { Server } from 'socket.io'
 import { OnNewLogin } from './services/socket'
 import { addToBlacklist } from './services/blacklist'
@@ -61,7 +62,7 @@ export const router = (
   const pairingCodeController = new PairingCodeController(getConfig, incoming)
   const connectController = new ConnectController(reload)
   const timerController = new TimerController()
-
+  const sessionCommandController = new SessionCommandController(getConfig, reload, logout)
 
   // Webhook for forward connection
   router.post('/webhooks/whatsapp/:phone', webhookController.whatsapp.bind(webhookController))
@@ -80,6 +81,10 @@ export const router = (
   router.get('/:version/debug_token', indexController.debugToken)
   router.get('/sessions', middleware, phoneNumberController.list.bind(phoneNumberController))
   router.get('/sessions/:phone', sessionController.index.bind(sessionController))
+  router.post('/sessions/:phone/connect', middleware, sessionCommandController.connect.bind(sessionCommandController))
+  router.post('/sessions/:phone/disconnect', middleware, sessionCommandController.disconnect.bind(sessionCommandController))
+  router.post('/sessions/:phone/reload', middleware, sessionCommandController.reload.bind(sessionCommandController))
+  router.get('/sessions/:phone/qr', sessionCommandController.qr.bind(sessionCommandController))
   router.post('/:phone/contacts', middleware, contactsController.post.bind(contactsController))
   router.post('/:version/:phone/register', middleware, registrationController.register.bind(registrationController))
   router.post('/:version/:phone/deregister', middleware, registrationController.deregister.bind(registrationController))
