@@ -9,7 +9,7 @@ export const start = async (phone, to, timeout, message, nexts = []) => {
   const payload = {
     phone, to, message, time: now.toISOString(), nexts
   }
-  logger.debug('timer start phone %s to %s timeout %s', phone, to, timeout)
+  logger.debug('timer start phone %s to %s timeout %s and nexts %s', phone, to, timeout, nexts)
   await setLastTimer(phone, to, now)
   await amqpPublish(
     UNOAPI_EXCHANGE_BROKER_NAME,
