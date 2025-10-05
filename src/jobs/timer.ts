@@ -37,7 +37,7 @@ export class TimerJob {
         logger.debug('timer consumer found nexts %s to %s with %s', phone, to, JSON.stringify(nexts))
         const first = nexts.shift()
         logger.debug('timer consumer %s to %s first %s and nexts %s', phone, to, JSON.stringify(first), JSON.stringify(nexts))
-        await start(phone, to, first.timeout, first.message, nexts)
+        return start(phone, to, first.timeout, first.message, nexts)
       } else {
         logger.debug('timer consumer not found nexts %s to %s', phone, to)
       }
