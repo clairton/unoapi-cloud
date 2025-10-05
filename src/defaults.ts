@@ -34,6 +34,7 @@ export const WEBHOOK_FORWARD_TIMEOUT_MS = parseInt(process.env.WEBHOOK_TIMEOUT_M
 
 // comunication
 export const UNOAPI_URL = process.env.UNOAPI_URL || 'http://localhost:9876'
+export const WHATSMEOW_ADAPTER_BASEURL = process.env.WHATSMEOW_ADAPTER_BASEURL || 'http://provider-whatsmeow:8080'
 export const WEBHOOK_URL_ABSOLUTE = process.env.WEBHOOK_URL_ABSOLUTE || ''
 export const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:9876/webhooks/fake'
 export const WEBHOOK_HEADER = process.env.WEBHOOK_HEADER || 'Authorization'

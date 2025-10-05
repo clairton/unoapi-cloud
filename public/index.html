@@ -246,6 +246,16 @@
                     <form id="editForm">
                         <div class="row edit-form-row">
                           <div class="col-12 col-md-12 col-lg-6">
+                              <label for="provider" class="form-label">Provider</label>
+                              <select id="provider" name="provider" class="form-control">
+                                <option value="baileys">baileys</option>
+                                <option value="whatsmeow">whatsmeow</option>
+                                <option value="forwarder">forwarder</option>
+                              </select>
+                          </div>
+                        </div>
+                        <div class="row edit-form-row">
+                          <div class="col-12 col-md-12 col-lg-6">
                               <label for="label" class="form-label">Identificação</label>
                               <input type="text" class="form-control" id="label" name="lavel" placeholder="Identificação">
                           </div>
@@ -510,6 +520,8 @@
         let currentPhoneNumber = ''
         let currentQrTimeOut = ''
         let lastTimeout = undefined
+        let qrPollIntervalId = undefined
+        let statusPollIntervalId = undefined
         
         const onBroadcast = function(data) {
           if (data.phone == currentPhoneNumber) {
@@ -712,24 +724,35 @@
                 table.clear();
 
                 sessions.forEach(session => {
+                    const statusLower = (session.status || '').toLowerCase()
+                    const disconnectBtn = ['online', 'connecting'].includes(statusLower)
+                      ? `<button class="btn btn-sm btn-secondary disconnect-btn" data-number="${session.display_phone_number}">
+                            <i class="fas fa-unlink"></i> Desconectar
+                         </button>`
+                      : '';
+                    const connectBtn = !['online', 'connecting'].includes(statusLower)
+                      ? `<button class=\"btn btn-sm btn-success connect-btn\" data-bs-toggle=\"modal\" data-bs-target=\"#connectModal\" data-number=\"${session.display_phone_number}\"> 
+                            <i class=\"fas fa-link\"></i> Conectar
+                         </button>`
+                      : '';
+                    const buttons = `
+                        <button class=\"btn btn-sm btn-warning edit-btn\" data-bs-toggle=\"modal\" data-bs-target=\"#editModal\" data-number=\"${session.display_phone_number}\"> 
+                            <i class=\"fas fa-edit\"></i> Editar
+                        </button>
+                        ${connectBtn}
+                        ${disconnectBtn}
+                        <button class=\"btn btn-sm btn-danger delete-btn\" data-number=\"${session.display_phone_number}\"> 
+                            <i class=\"fas fa-trash\"></i> Deletar
+                        </button>
+                        <button class=\"btn btn-sm btn-success message-btn\" data-bs-target=\"#messageModal\" data-number=\"${session.display_phone_number}\"> 
+                            <i class=\"fas fa-message\"></i> Testar
+                        </button>`;
                     table.row.add([
                         session.label,
                         session.display_phone_number,
                         session.status,
                         session.server,
-                        `
-                        <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-number="${session.display_phone_number}">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-sm btn-success connect-btn" data-bs-toggle="modal" data-bs-target="#connectModal" data-number="${session.display_phone_number}">
-                            <i class="fas fa-link"></i> Conectar
-                        </button>
-                        <button class="btn btn-sm btn-danger delete-btn" data-number="${session.display_phone_number}">
-                            <i class="fas fa-trash"></i> Deletar
-                        </button>
-                        <button class="btn btn-sm btn-success message-btn" data-bs-target="#messageModal" data-number="${session.display_phone_number}">
-                            <i class="fas fa-message"></i> Testar
-                        </button>`
+                        buttons
                     ]).draw(false);
                 });
             }
@@ -758,6 +781,27 @@
                     .catch(error => alert(error.message));
                 }
                 
+            });
+
+            //Disconnect button
+            $('#sessionsTable tbody').on('click', '.disconnect-btn', function() {
+                const number = $(this).data('number');
+                const token = localStorage.getItem(tokenKey);
+                if (!token) { alert('Token não encontrado.'); return }
+                fetch(`${apiUrl}/sessions/${number}/disconnect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao desconectar sessão.');
+                    alert('Sessão desconectada.');
+                    // opcional: recarrega dados
+                    fetchSessions(token, false);
+                })
+                .catch(error => alert(error.message));
             });
 
             //Edit button
@@ -793,6 +837,7 @@
 
             //Edit form for session number
             function populateEditForm(session) {
+                $('#provider').val(session.provider || 'baileys');
                 $('#label').val(session.label);
                 $('#authToken').val(session.authToken);
                 $('#wavoipToken').val(session.wavoipToken);
@@ -886,6 +931,7 @@
 
                 if (token && number) {
                     const sessionData = {
+                        provider: $('#provider').val(),
                         label: $('#label').val(),
                         authToken: $('#authToken').val(),
                         wavoipToken: $('#wavoipToken').val(),
@@ -969,15 +1015,20 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.status === 'offline' || data.status === 'disconnected') {
-                            attemptRegister(number, token);
-                        } else if (data.status === 'connecting') {
-                            connectToWebSocket(number, data.qrTimeoutMs);
-                        } else if (data.status === 'online') {
-                            document.getElementById('qrCodeContainer').innerHTML = '';
-                            document.getElementById('qrCodeMessage').textContent = 'Sessão já está Conectada';
+                        const provider = data.provider || 'baileys';
+                        if (provider === 'whatsmeow') {
+                            startWhatsmeowConnectFlow(number, token);
                         } else {
-                            console.log("Status não está offline nem connecting.");
+                            if (data.status === 'offline' || data.status === 'disconnected') {
+                                attemptRegister(number, token);
+                            } else if (data.status === 'connecting') {
+                                connectToWebSocket(number, data.qrTimeoutMs);
+                            } else if (data.status === 'online') {
+                                document.getElementById('qrCodeContainer').innerHTML = '';
+                                document.getElementById('qrCodeMessage').textContent = 'Sessão já está Conectada';
+                            } else {
+                                console.log("Status não está offline nem connecting.");
+                            }
                         }
                     })
                     .catch(error => {
@@ -1062,10 +1113,67 @@
               }
             }
 
+            // Whatsmeow connect flow
+            function startWhatsmeowConnectFlow(number, token) {
+              // clear old timers
+              if (qrPollIntervalId) { clearInterval(qrPollIntervalId); qrPollIntervalId = undefined }
+              if (statusPollIntervalId) { clearInterval(statusPollIntervalId); statusPollIntervalId = undefined }
+
+              currentPhoneNumber = number
+              document.getElementById('qrCodeMessage').textContent = 'Preparando conexão (whatsmeow)...';
+              document.getElementById('qrCodeContainer').innerHTML = '';
+
+              // trigger adapter connect via UNO
+              fetch(`${apiUrl}/sessions/${number}/connect`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+              }).catch(_ => {})
+
+              // poll QR image
+              qrPollIntervalId = setInterval(() => {
+                fetch(`${apiUrl}/sessions/${number}/qr`, { headers: { Authorization: `Bearer ${token}` } })
+                  .then(resp => {
+                    if (resp.ok) {
+                      return resp.text()
+                    }
+                    throw new Error('no qr')
+                  })
+                  .then(base64 => {
+                    const img = `data:image/png;base64,${base64}`
+                    const qrcodeDiv = document.getElementById('qrCodeContainer');
+                    qrcodeDiv.innerHTML = `<img src="${img}" alt="QR Code">`;
+                    document.getElementById('qrCodeMessage').textContent = 'Leia o QR Code Abaixo';
+                  })
+                  .catch(_ => {})
+              }, 1500)
+
+              // poll status
+              statusPollIntervalId = setInterval(() => {
+                fetch(`${apiUrl}/v15.0/${number}`, { headers: { Authorization: `Bearer ${token}` } })
+                  .then(r => r.json())
+                  .then(data => {
+                    const statusDiv = document.getElementById('qrCodeMessage');
+                    if (data.status === 'online') {
+                      statusDiv.textContent = 'Conectado!';
+                      if (qrPollIntervalId) { clearInterval(qrPollIntervalId); qrPollIntervalId = undefined }
+                      if (statusPollIntervalId) { clearInterval(statusPollIntervalId); statusPollIntervalId = undefined }
+                      document.getElementById('qrCodeContainer').innerHTML = '';
+                    } else if (data.status === 'connecting') {
+                      statusDiv.textContent = 'Aguardando leitura do QR Code...';
+                    } else if (data.status === 'disconnected' || data.status === 'offline') {
+                      statusDiv.textContent = `Status: ${data.status}`;
+                    }
+                  })
+                  .catch(_ => {})
+              }, 2000)
+            }
+
             // disconnect websocket on modal close
             $('#connectModal').on('hidden.bs.modal', function () {
               currentPhoneNumber = ''
               currentQrTimeOut = ''
+              if (qrPollIntervalId) { clearInterval(qrPollIntervalId); qrPollIntervalId = undefined }
+              if (statusPollIntervalId) { clearInterval(statusPollIntervalId); statusPollIntervalId = undefined }
               document.getElementById('qrCodeContainer').innerHTML = '';
               document.getElementById('qrCodeMessage').textContent = 'Aguarde o QrCode/PairingCode';
             });            
@@ -1119,5 +1227,5 @@
             }
         }
     </script>
-</body>
-</html>
+ </body>
+ </html>

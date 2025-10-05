@@ -10,6 +10,8 @@ import {
   UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED
 } from '../defaults'
 import { extractDestinyPhone, isAudioMessage, isIncomingMessage, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
+import { downloadContentFromMessage } from 'baileys'
+import mime from 'mime-types'
 import logger from '../services/logger'
 import { getConfig } from '../services/config'
 import { isUpdateMessage, isFailedStatus } from '../services/transformer'
@@ -61,6 +63,19 @@ export class OutgoingJob {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const a = { ...data as any }
     const payload: any = a.payload
+    // Provider adapters (e.g., Whatsmeow) can publish only { payload }
+    // to let UnoAPI fan-out to configured webhooks. In this case,
+    // re-enqueue one message per webhook to reuse the single-webhook path
+    // below (which applies provider-specific transforms when needed).
+    if (!a.webhooks && !a.webhook && payload) {
+      const config = await this.getConfig(phone)
+      await Promise.all(
+        config.webhooks.map(async (webhook) =>
+          amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { payload, webhook }, { type: 'topic' }),
+        ),
+      )
+      return
+    }
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
       if (isFailedStatus(payload) && STATUS_FAILED_WEBHOOK_URL) {
@@ -137,7 +152,87 @@ export class OutgoingJob {
             })
           )
         }
+      } else if (config.provider == 'whatsmeow') {
+        // Handle media using Baileys download/decrypt when payload comes with
+        // directPath/mediaKey (camelCase or snake_case), regardless of direction.
+        const store = await config.getStore(phone, config)
+        const { dataStore, mediaStore } = store
+        if (!isUpdateMessage(payload)) {
+          payload.entry[0].changes[0].value.messages = await Promise.all(
+            payload.entry[0].changes[0].value.messages.map(async message => {
+              if (TYPE_MESSAGES_MEDIA.includes(message.type)) {
+                const media = message[message.type] || {}
+                // Try both camelCase and snake_case keys
+                let mediaKey = media.mediaKey || media.media_key
+                const directPath = media.directPath || media.direct_path
+                const url = media.url || (directPath ? `https://mmg.whatsapp.net${directPath}` : undefined)
+                if (!mediaKey || (!directPath && !url)) {
+                  return message
+                }
+                if (typeof mediaKey === 'string') {
+                  // assume base64
+                  try {
+                    mediaKey = Buffer.from(mediaKey, 'base64')
+                  } catch (_) { /* ignore conversion errors */ }
+                } else if (typeof mediaKey === 'object' && mediaKey !== null) {
+                  try {
+                    mediaKey = Uint8Array.from(Object.values(mediaKey))
+                  } catch (_) { /* ignore conversion errors */ }
+                }
+                const mapMediaType = {
+                  image: 'image',
+                  video: 'video',
+                  document: 'document',
+                  sticker: 'sticker',
+                  audio: 'audio',
+                } as const
+                try {
+                  const stream = await downloadContentFromMessage(
+                    {
+                      mediaKey,
+                      directPath,
+                      url,
+                    } as any,
+                    mapMediaType[message.type],
+                    {},
+                  )
+                  const chunks: Buffer[] = []
+                  for await (const chunk of stream) {
+                    chunks.push(chunk as Buffer)
+                  }
+                  const buffer = Buffer.concat(chunks)
+                  const mimetype: string = media.mime_type || media.mimetype || (media.filename ? (mime.lookup(media.filename) as string) : 'application/octet-stream')
+                  const filePath = mediaStore.getFilePath(phone, message.id, mimetype)
+                  await mediaStore.saveMediaBuffer(filePath, buffer)
+                  const mediaId = `${phone}/${message.id}`
+                  const payloadMedia = {
+                    messaging_product: 'whatsapp',
+                    mime_type: mimetype,
+                    sha256: media.fileSha256 || media.sha256,
+                    file_size: media.fileLength || media.file_size,
+                    id: mediaId,
+                    filename: media.filename || filePath,
+                  }
+                  await dataStore.setMediaPayload(message.id, payloadMedia)
+                  message[message.type].id = mediaId
+                } catch (err) {
+                  // If download/decrypt fails, leave message as-is
+                }
+              }
+              // Preserve digits-only Cloud payloads from adapters (e.g., whatsmeow)
+              // to avoid BR-specific normalization that inserts a '9' and
+              // breaks alignment with contacts[0].wa_id used by Chatwoot.
+              if (!/^\d+$/.test(message.from)) {
+                message.from = jidToPhoneNumber(message.from, '')
+              }
+              return message
+            })
+          )
+        }
       }
+      // If this is a status/receipt payload, optionally delay to ensure
+      // related media messages are delivered first to the webhook consumer.
+      await sleep(1000)
       await this.service.sendHttp(phone, a.webhook, payload, {})
     }
   }

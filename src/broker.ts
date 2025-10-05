@@ -17,7 +17,7 @@ import {
   UNOAPI_QUEUE_TRANSCRIBER,
 } from './defaults'
 
-import { amqpConsume } from './amqp'
+import { amqpConsume, amqpGetChannel, extractRoutingKeyFromBindingKey } from './amqp'
 import { startRedis } from './services/redis'
 import { OutgoingCloudApi } from './services/outgoing_cloud_api'
 import { getConfigRedis } from './services/config_redis'
@@ -37,6 +37,11 @@ import { addToBlacklist } from './jobs/add_to_blacklist'
 import { TimerJob } from './jobs/timer'
 import { TranscriberJob } from './jobs/transcriber'
 import { OutgoingAmqp } from './services/outgoing_amqp'
+import { IncomingBaileys } from './services/incoming_baileys'
+import { getClientBaileys } from './services/client_baileys'
+import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
+import { ListenerAmqp } from './services/listener_amqp'
+import { IncomingJob } from './jobs/incoming'
 
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis, addToBlacklistRedis)
@@ -137,13 +142,35 @@ const startBroker = async () => {
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  await amqpConsume(
-    UNOAPI_EXCHANGE_BROKER_NAME,
-    UNOAPI_QUEUE_BLACKLIST_ADD,
-    '*',
-    addToBlacklist,
-    { notifyFailedMessages, prefetch, type: 'topic' }
-  )
+  await amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', addToBlacklist, { notifyFailedMessages, prefetch, type: 'topic' })
+
+  // Consume provider-specific outgoing messages for Baileys sessions
+  const channel = await amqpGetChannel()
+  await channel?.assertExchange('unoapi.outgoing', 'topic', { durable: true })
+  await channel?.assertQueue('outgoing.baileys', { durable: true })
+  await channel?.bindQueue('outgoing.baileys', 'unoapi.outgoing', 'provider.baileys.*')
+  // Ensure Whatsmeow queues exist too (created but not consumed here)
+  await channel?.assertQueue('outgoing.baileys.dlq', { durable: true })
+  await channel?.assertQueue('outgoing.whatsmeow', { durable: true })
+  await channel?.bindQueue('outgoing.whatsmeow', 'unoapi.outgoing', 'provider.whatsmeow.*')
+  await channel?.assertQueue('outgoing.whatsmeow.dlq', { durable: true })
+  const listenerAmqpWorker = new ListenerAmqp()
+  const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
+  const incomingBaileysWorker = new IncomingBaileys(listenerAmqpWorker, getConfigRedis, getClientBaileys, onNewLogin)
+  const providerJob = new IncomingJob(incomingBaileysWorker, outgoingAmqp, getConfigRedis)
+  channel?.consume('outgoing.baileys', async (payload) => {
+    if (!payload) {
+      return
+    }
+    const phone = extractRoutingKeyFromBindingKey(payload.fields.routingKey)
+    const data = JSON.parse(payload.content.toString())
+    try {
+      await providerJob.consume(phone, data)
+    } catch (error) {
+      logger.error(error, 'Error consuming provider.baileys message')
+    }
+    channel.ack(payload)
+  })
 
   logger.info('Unoapi Cloud version %s started broker!', version)
 }
