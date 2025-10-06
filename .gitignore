@@ -6,6 +6,7 @@ coverage/*
 data/medias/*
 data/stores/*
 data/sessions/*
+data/logs/*
 .env
 .yarn/*
 .yarnrc.yml
