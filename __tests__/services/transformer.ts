@@ -16,6 +16,9 @@ import {
   isGroupMessage,
   isOutgoingMessage,
   getChatAndNumberAndId,
+  isDecryptError,
+  isBindTemplateError,
+  BindTemplateError,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -52,6 +55,22 @@ describe('service transformer', () => {
       ],
     }
     expect(extractDestinyPhone(payload)).toBe('y')
+  })
+
+  test('isDecryptError true', async () => {
+    expect(isDecryptError(new DecryptError({}, 1))).toBe(true)
+  })
+
+  test('isDecryptError false', async () => {
+    expect(isDecryptError(new Error())).toBe(false)
+  })
+
+  test('isBindTemplateError false', async () => {
+    expect(isBindTemplateError(new Error())).toBe(false)
+  })
+
+  test('isBindTemplateError true', async () => {
+    expect(isBindTemplateError(new BindTemplateError())).toBe(true)
   })
 
   test('return x extractDestinyPhone from webhook payload status', async () => {

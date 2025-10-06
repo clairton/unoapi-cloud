@@ -3,7 +3,7 @@ import logger from './logger'
 import { Outgoing } from './outgoing'
 import { Broadcast } from './broadcast'
 import { getConfig } from './config'
-import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia, jidToPhoneNumber, DecryptError } from './transformer'
+import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia, jidToPhoneNumber, DecryptError, isDecryptError, isBindTemplateError } from './transformer'
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
@@ -155,18 +155,20 @@ export class ListenerBaileys implements Listener {
       const senderId = resp[2]
       const { dataStore } = await config.getStore(phone, config)
       await dataStore.setJidIfNotFound(jidToPhoneNumber(senderPhone, ''), senderId)
+      logger.debug('Set message status decrypted %s', idBaileys)
       await store.dataStore.setStatus(idBaileys, 'decrypted')
     } catch (error) {
-      if (error instanceof DecryptError) {
-        logger.warn('DecryptError exception set decryption_failed for message %s', idBaileys)
+      if (isDecryptError(error)) {
+        logger.debug('DecryptError exception set decryption_failed for message %s', idBaileys)
         await store.dataStore.setStatus(idBaileys, 'decryption_failed')
-      }
-      if (error instanceof BindTemplateError) {
+        throw error
+      } else if (isBindTemplateError(error)) {
         const template = new Template(this.getConfig)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const i: any = message
         data = await template.bind(phone, i.template.name, i.template.components)
       } else {
+        logger.debug('Unknown exception for message %s', idBaileys)
         throw error
       }
     } finally {

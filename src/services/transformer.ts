@@ -48,6 +48,14 @@ export class DecryptError extends Error {
   }
 }
 
+export const isDecryptError = (error: Error): error is DecryptError => {
+  return error instanceof DecryptError
+}
+
+export const isBindTemplateError = (error: Error): error is BindTemplateError => {
+  return error instanceof BindTemplateError
+}
+
 export const TYPE_MESSAGES_TO_READ = [
   'viewOnceMessage',
   'editedMessage',

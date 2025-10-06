@@ -18,7 +18,6 @@ import {
   UNOAPI_QUEUE_RELOAD,
 } from './defaults'
 import { getConfigRedis } from './services/config_redis'
-import security from './services/security'
 import { amqpConsume } from './amqp'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -37,7 +36,7 @@ if (process.env.SENTRY_DSN) {
     sendDefaultPii: true,
   })
 }
-
+ 
 const reload = new Reload()
 const incoming: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)

@@ -3,7 +3,7 @@ import { IGNORE_OWN_MESSAGES_DECRYPT_ERROR, UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_
 import { Listener } from '../services/listener'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
-import { DecryptError, isOutgoingMessage } from '../services/transformer'
+import { DecryptError, isDecryptError, isOutgoingMessage } from '../services/transformer'
 import { getConfig } from '../services/config'
 
 export class ListenerJob {
@@ -36,7 +36,7 @@ export class ListenerJob {
       } catch (error) {
         const store = await config.getStore(phone, config)
         const { dataStore } = store
-        if (error instanceof DecryptError) {
+        if (isDecryptError(error)) {
           if ((await dataStore.loadStatus(error.getMessageId())) != 'decryption_failed') {
             logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getMessageId())
             return
