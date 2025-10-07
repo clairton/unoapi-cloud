@@ -38,7 +38,7 @@ export class ListenerJob {
         const { dataStore } = store
         if (isDecryptError(error)) {
           const currentStatus = await dataStore.loadStatus(error.getMessageId())
-          logger.debug('Retrieve message %s status %s', error.getMessageId(), currentStatus)
+          logger.debug('Retrieved message %s status %s', error.getMessageId(), currentStatus)
           if (currentStatus != 'decryption_failed') {
             logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getMessageId())
             return

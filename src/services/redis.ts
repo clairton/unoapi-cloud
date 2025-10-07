@@ -43,7 +43,7 @@ export const redisConnect = async (redisUrl = REDIS_URL) => {
 }
 
 export const redisGet = async (key: string) => {
-  logger.trace(`Getting ${key}`)
+  logger.trace('Getting %s', key)
   try {
     return client.get(key)
   } catch (error) {
@@ -237,6 +237,7 @@ export const getMessageStatus = async (phone: string, id: string) => {
 
 export const setMessageStatus = async (phone: string, id: string, status: string) => {
   const key = messageStatusKey(phone, id)
+  logger.trace('Setting %s => %s', key, status)
   await client.set(key, status, { EX: DATA_TTL })
 }
 

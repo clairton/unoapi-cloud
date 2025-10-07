@@ -109,7 +109,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   }
   store.loadStatus = async (id: string) => {
     const status = await getMessageStatus(phone, id)
-    return status ? undefined : (status as MessageStatus)
+    return status ? (status as MessageStatus) : undefined
   }
   store.setTemplates = async (templates: string) => {
     return setTemplates(phone, templates)
