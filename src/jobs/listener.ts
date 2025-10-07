@@ -48,10 +48,9 @@ export class ListenerJob {
           } else if (options && options?.countRetries >= options?.maxRetries) {
             logger.warn('Decryption error overread max retries message %s', error.getMessageId())
             // send message asking to open whatsapp to see
-            return this.outgoing.send(phone, error.getContent())
+            await this.outgoing.send(phone, error.getContent())
           }
         }
-        logger.warn('Decrypt error message, try again...')
         throw error
       }
     } else {

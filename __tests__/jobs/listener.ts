@@ -88,9 +88,13 @@ describe('listener', () => {
     const content = {}
     const messageId = `${new Date().getTime()}`
     jest.spyOn(dataStoreVar, 'loadStatus').mockReturnValue(Promise.resolve('decryption_failed'))
-    const sendSpy = jest.spyOn(outgoingVar, 'send').mockReturnValue(Promise.resolve())
+    jest.spyOn(outgoingVar, 'send').mockReturnValue(Promise.resolve())
     jest.spyOn(listenerVar, 'process').mockRejectedValue(new DecryptError(content, messageId))
-    await job.consume(phone, data, { countRetries: 2, maxRetries: 2, priority: 0 })
-    expect(sendSpy).toHaveBeenCalledWith(phone, content)
+    try {
+      await job.consume(phone, data, { countRetries: 2, maxRetries: 2, priority: 0 })
+      expect(false).toBe(true)
+    } catch (error) {
+      expect(error instanceof DecryptError).toBe(true)
+    }
   })
 })

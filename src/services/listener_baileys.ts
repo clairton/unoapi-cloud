@@ -99,6 +99,7 @@ export class ListenerBaileys implements Listener {
     const config = await this.getConfig(phone)
     const store = await config.getStore(phone, config)
     const idBaileys = i.key.id!
+    const originalId = i.key['originalId'] || idBaileys
     if (messageType && !['update', 'receipt'].includes(messageType)) {
       i = await config.getMessageMetadata(i)
       await store.dataStore.setMessage(i.key.remoteJid!, i)
@@ -165,8 +166,8 @@ export class ListenerBaileys implements Listener {
       await store.dataStore.setStatus(idBaileys, 'decrypted')
     } catch (error) {
       if (isDecryptError(error)) {
-        logger.debug('DecryptError exception set decryption_failed for message %s', idBaileys)
-        await store.dataStore.setStatus(idBaileys, 'decryption_failed')
+        logger.debug('DecryptError exception set decryption_failed for message %s', originalId)
+        await store.dataStore.setStatus(originalId, 'decryption_failed') 
         throw error
       } else if (isBindTemplateError(error)) {
         const template = new Template(this.getConfig)
@@ -174,7 +175,7 @@ export class ListenerBaileys implements Listener {
         const i: any = message
         data = await template.bind(phone, i.template.name, i.template.components)
       } else {
-        logger.warn('Unknown exception for message %s -> %e', idBaileys, error)
+        logger.warn('Unknown exception for message %s -> %e', originalId, error)
         throw error
       }
     } finally {
