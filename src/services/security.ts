@@ -3,11 +3,10 @@ import { Request, Response, NextFunction } from 'express'
 import logger from './logger'
 import { SessionStore } from './session_store'
 
-
 export default class Security {
   private sessionStore: SessionStore
 
-  constructor(sessionStore: SessionStore){
+  constructor(sessionStore: SessionStore) {
     this.sessionStore = sessionStore
   }
 

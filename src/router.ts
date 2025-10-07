@@ -30,7 +30,6 @@ import { ContactDummy } from './services/contact_dummy'
 import { middlewareNext } from './services/middleware_next'
 import { TimerController } from './controllers/timer_controller'
 
-
 export const router = (
   incoming: Incoming,
   outgoing: Outgoing,
@@ -61,7 +60,6 @@ export const router = (
   const pairingCodeController = new PairingCodeController(getConfig, incoming)
   const connectController = new ConnectController(reload)
   const timerController = new TimerController()
-
 
   // Webhook for forward connection
   router.post('/webhooks/whatsapp/:phone', webhookController.whatsapp.bind(webhookController))

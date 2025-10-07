@@ -19,7 +19,14 @@ import {
 } from './socket'
 import { Client, getClient, clients, Contact } from './client'
 import { Config, configs, defaultConfig, getConfig, getMessageMetadataDefault } from './config'
-import { toBaileysMessageContent, phoneNumberToJid, jidToPhoneNumber, getMessageType, TYPE_MESSAGES_TO_READ, TYPE_MESSAGES_MEDIA } from './transformer'
+import {
+  toBaileysMessageContent,
+  phoneNumberToJid,
+  jidToPhoneNumber,
+  getMessageType,
+  TYPE_MESSAGES_TO_READ,
+  TYPE_MESSAGES_MEDIA,
+} from './transformer'
 import { isUnoId, generateUnoId } from '../utils/id'
 import { Response } from './response'
 import QRCode from 'qrcode'
@@ -108,9 +115,9 @@ const closeDefault = async () => logger.info(`Close connection`)
 export class ClientBaileys implements Client {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   readonly sendMessageDefault: sendMessage = async (_phone: string, _message: AnyMessageContent, _options: unknown) => {
-    const sessionStore = this?.phone && await (await this?.config?.getStore(this.phone, this.config)).sessionStore
+    const sessionStore = this?.phone && (await (await this?.config?.getStore(this.phone, this.config)).sessionStore)
     if (sessionStore) {
-      if (!await sessionStore.isStatusConnecting(this.phone)) {
+      if (!(await sessionStore.isStatusConnecting(this.phone))) {
         clients.delete(this.phone)
       }
       if (await sessionStore.isStatusOnline(this.phone)) {
@@ -142,11 +149,7 @@ export class ClientBaileys implements Client {
   private onWebhookError = async (error: any) => {
     const { sessionStore } = this.store!
     if (!this.config.throwWebhookError && error.name === 'FetchError' && (await sessionStore.isStatusOnline(this.phone))) {
-      return this.sendMessage(
-        phoneNumberToJid(this.phone),
-        { text: `Error on send message to webhook: ${error.message}`},
-        {}
-      )
+      return this.sendMessage(phoneNumberToJid(this.phone), { text: `Error on send message to webhook: ${error.message}` }, {})
     }
     if (this.config.throwWebhookError) {
       throw error
@@ -199,7 +202,7 @@ export class ClientBaileys implements Client {
       remoteJid,
       id,
     }
-    const message =  t('qrcode_attemps', time, limit)
+    const message = t('qrcode_attemps', time, limit)
     const waMessage: WAMessage = {
       key: waMessageKey,
       message: {
@@ -279,7 +282,7 @@ export class ClientBaileys implements Client {
       onNewLogin: this.onNewLogin,
       config: this.config,
       onDisconnected: async () => this.disconnect(),
-      onReconnect: this.onReconnect
+      onReconnect: this.onReconnect,
     })
     if (!result) {
       logger.error('Socket connect return empty %s', this.phone)
@@ -335,7 +338,7 @@ export class ClientBaileys implements Client {
             })
             .map(async (message: any) => {
               return this.readMessages([message.key!])
-            })
+            }),
         )
       }
     })
@@ -367,7 +370,7 @@ export class ClientBaileys implements Client {
           this.calls.set(from, true)
           if (this.config.rejectCalls && this.rejectCall) {
             await this.rejectCall(id, from)
-            await this.sendMessage(from, { text: this.config.rejectCalls }, {});
+            await this.sendMessage(from, { text: this.config.rejectCalls }, {})
             logger.info('Rejecting calls %s %s', this.phone, this.config.rejectCalls)
           }
           const messageCallsWebhook = this.config.rejectCallsWebhook || this.config.messageCallsWebhook
@@ -463,7 +466,7 @@ export class ClientBaileys implements Client {
             if (VALIDATE_MEDIA_LINK_BEFORE_SEND && TYPE_MESSAGES_MEDIA.includes(type)) {
               const link = payload[type] && payload[type].link
               if (link) {
-                const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD'})
+                const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD' })
                 if (!response.ok) {
                   throw new SendError(11, t('invalid_link', response.status, link))
                 }
@@ -575,7 +578,7 @@ export class ClientBaileys implements Client {
       if (ee.message == 'Media upload failed on all hosts') {
         const link = payload[type] && payload[type].link
         if (link) {
-          const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD'})
+          const response: FetchResponse = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'HEAD' })
           if (!response.ok) {
             e = new SendError(11, t('invalid_link', response.status, link))
           }
@@ -733,10 +736,9 @@ export class ClientBaileys implements Client {
       contacts.push({
         wa_id: realJid,
         input: number,
-        status: realJid ? 'valid' : 'invalid'
+        status: realJid ? 'valid' : 'invalid',
       })
     }
     return contacts
   }
 }
-

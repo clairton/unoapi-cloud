@@ -35,7 +35,6 @@ if (process.env.SENTRY_DSN) {
 const getConfigLocal: getConfig = getConfigRedis
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigLocal)
 
-
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigLocal, isInBlacklistInRedis, addToBlacklistRedis)
 const commanderJob = new CommanderJob(outgoingCloudApi, getConfigRedis)
 const bulkParserJob = new BulkParserJob(outgoingCloudApi, getConfigRedis)

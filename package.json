@@ -15,7 +15,7 @@
     "test": "node_modules/jest/bin/jest.js --coverage",
     "build": "./node_modules/typescript/bin/tsc -p .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
-    "dev": "tsx watch src/index.ts --trace-deprecation",
+    "dev": "tsx watch src/index.ts",
     "web-dev": "tsx watch src/web.ts",
     "waker-dev": "tsx watch src/waker.ts",
     "standalone-dev": "tsx watch src/standalone.ts",

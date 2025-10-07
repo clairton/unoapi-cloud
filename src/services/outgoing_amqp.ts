@@ -20,9 +20,10 @@ export class OutgoingAmqp implements Outgoing {
     const config = await this.getConfig(phone)
     await amqpPublish(
       UNOAPI_EXCHANGE_BROKER_NAME,
-      UNOAPI_QUEUE_OUTGOING, phone,
+      UNOAPI_QUEUE_OUTGOING,
+      phone,
       { webhooks: config.webhooks, payload, split: true },
-      { type: 'topic' }
+      { type: 'topic' },
     )
   }
 

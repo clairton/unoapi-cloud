@@ -80,12 +80,12 @@ describe('service transformer', () => {
           changes: [
             {
               value: {
-                statuses: [{ recipient_id: 'x' }]
-              }
-            }
-          ]
-        }
-      ]
+                statuses: [{ recipient_id: 'x' }],
+              },
+            },
+          ],
+        },
+      ],
     }
     expect(extractDestinyPhone(payload)).toBe('x')
   })
@@ -97,12 +97,12 @@ describe('service transformer', () => {
           changes: [
             {
               value: {
-                statuses: [{ recipient_id: 'x' }]
-              }
-            }
-          ]
-        }
-      ]
+                statuses: [{ recipient_id: 'x' }],
+              },
+            },
+          ],
+        },
+      ],
     }
     expect(isGroupMessage(payload)).toBe(false)
   })
@@ -126,7 +126,7 @@ describe('service transformer', () => {
 
   test('getChatAndNumberAndId with jid and :', async () => {
     const remoteJid = '554988290955@s.whatsapp.net'
-    const payload = { key: { remoteJid: '554988290955:25@s.whatsapp.net' }}
+    const payload = { key: { remoteJid: '554988290955:25@s.whatsapp.net' } }
     const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
@@ -136,7 +136,7 @@ describe('service transformer', () => {
   test('getChatAndNumberAndId with lid and without group', async () => {
     const senderPn = '554988290955'
     const remoteJid = '24788516941@lid'
-    const payload = { key: { remoteJid, senderPn }}
+    const payload = { key: { remoteJid, senderPn } }
     const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
@@ -147,7 +147,7 @@ describe('service transformer', () => {
     const participantPn = '554988290955'
     const remoteJid = '24788516941@g.us'
     const participant = '554988290955@s.whatsapp.net'
-    const payload = { key: { remoteJid, participant, participantPn }}
+    const payload = { key: { remoteJid, participant, participantPn } }
     const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
@@ -158,7 +158,7 @@ describe('service transformer', () => {
     const participantPn = '554988290955'
     const remoteJid = '24788516941@g.us'
     const participantLid = '24788516941@lid'
-    const payload = { key: { remoteJid, participantLid, participantPn }}
+    const payload = { key: { remoteJid, participantLid, participantPn } }
     const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
@@ -168,7 +168,7 @@ describe('service transformer', () => {
   test('getChatAndNumberAndId with senderLid and without group', async () => {
     const senderPn = '554988290955'
     const remoteJid = '24788516941@lid'
-    const payload = { key: { remoteJid, senderLid: remoteJid, senderPn }}
+    const payload = { key: { remoteJid, senderLid: remoteJid, senderPn } }
     const a = getChatAndNumberAndId(payload)
     expect(a[0]).toBe(remoteJid)
     expect(a[1]).toBe('5549988290955')
@@ -324,7 +324,6 @@ describe('service transformer', () => {
   test('jidToPhoneNumber without + and put 9˚ digit', async () => {
     expect(jidToPhoneNumber('+554988290955@s.whatsapp.net', '')).toEqual('5549988290955')
   })
-  
 
   test('fromBaileysMessageContent with editedMessage for imageMessage', async () => {
     const phoneNumer = '5549998360838'
@@ -338,24 +337,24 @@ describe('service transformer', () => {
       key: {
         remoteJid,
         fromMe: false,
-        id
+        id,
       },
       message: {
         editedMessage: {
           message: {
             protocolMessage: {
               key: {
-                id: '3AD0FEAAF5915DAEAA07'
+                id: '3AD0FEAAF5915DAEAA07',
               },
               type: 'MESSAGE_EDIT',
               editedMessage: {
                 imageMessage: {
-                  caption: body
-                }
-              }
-            }
-          }
-        }
+                  caption: body,
+                },
+              },
+            },
+          },
+        },
       },
       pushName,
       messageTimestamp,
@@ -627,7 +626,7 @@ describe('service transformer', () => {
     }
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
-  
+
   test('fromBaileysMessageContent with contactsArrayMessage', async () => {
     const phoneNumer = '5549998093075'
     const remotePhoneNumber = '+11115551212'
@@ -649,8 +648,8 @@ describe('service transformer', () => {
               displayName: pushName,
               vcard: `BEGIN:VCARD\nVERSION:4.0\nN:Einstein\nFN:${pushName}\nEND:VCARD`,
             },
-          ]
-        }
+          ],
+        },
       },
       pushName,
       messageTimestamp,
@@ -1170,13 +1169,16 @@ describe('service transformer', () => {
     const id = `wa.${new Date().getTime()}`
     const input = {
       key: {
-        remoteJid, fromMe: true,  id, participant
+        remoteJid,
+        fromMe: true,
+        id,
+        participant,
       },
       status: 2,
       message: {
-        conversation: 'não está funcionando, quer acessar meu computador'
+        conversation: 'não está funcionando, quer acessar meu computador',
       },
-      verifiedBizName: ''
+      verifiedBizName: '',
     }
     const resp = fromBaileysMessageContent('5549988290955', input)
     expect(resp[3]).toBe(remoteJid)
@@ -1200,12 +1202,12 @@ describe('service transformer', () => {
       messageTimestamp,
       pushName,
       message: {
-        editedMessage:{
+        editedMessage: {
           message: {
-            conversation
-          }
-        }
-      }
+            conversation,
+          },
+        },
+      },
     }
     const output = {
       object: 'whatsapp_business_account',
@@ -1248,7 +1250,7 @@ describe('service transformer', () => {
     const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const phoneNumer = '5549998093075'
     const conversation = `blablabla2.${new Date().getTime()}`
-    const input = { 
+    const input = {
       key: {
         remoteJid: remoteJid,
         fromMe: true,
@@ -1256,19 +1258,19 @@ describe('service transformer', () => {
       },
       messageTimestamp,
       pushName,
-      message: { 
-        protocolMessage: { 
-          key: { 
-            remoteJid, 
-            fromMe: true, 
-            id: id2 
-          }, 
-          type: 'MESSAGE_EDIT', 
-          editedMessage: { 
-            conversation,    
-          }, 
-        } 
-      } 
+      message: {
+        protocolMessage: {
+          key: {
+            remoteJid,
+            fromMe: true,
+            id: id2,
+          },
+          type: 'MESSAGE_EDIT',
+          editedMessage: {
+            conversation,
+          },
+        },
+      },
     }
     const output = {
       object: 'whatsapp_business_account',
@@ -1305,12 +1307,12 @@ describe('service transformer', () => {
   test('getMessageType with viewOnceMessage', async () => {
     const input = {
       message: {
-        protocolMessage: {}, 
+        protocolMessage: {},
         type: 'MESSAGE_EDIT',
-        editedMessage: { 
-          conversation: 'blablabla2'
-        }
-      }
+        editedMessage: {
+          conversation: 'blablabla2',
+        },
+      },
     }
     expect(getMessageType(input)).toEqual('editedMessage')
   })
@@ -1347,15 +1349,11 @@ describe('service transformer', () => {
       contacts: [
         {
           name: { formatted_name: displayName },
-          phones: [{ phone, wa_id }]
-        }
-      ]
+          phones: [{ phone, wa_id }],
+        },
+      ],
     }
-    const vcard = 'BEGIN:VCARD\n'
-      + 'VERSION:3.0\n'
-      + `N:${displayName}\n`
-      + `TEL;type=CELL;type=VOICE;waid=${wa_id}:${phone}\n`
-      + 'END:VCARD'
+    const vcard = 'BEGIN:VCARD\n' + 'VERSION:3.0\n' + `N:${displayName}\n` + `TEL;type=CELL;type=VOICE;waid=${wa_id}:${phone}\n` + 'END:VCARD'
     const output = { contacts: { displayName, contacts: [{ vcard }] } }
     expect(toBaileysMessageContent(input)).toEqual(output)
   })
@@ -1569,21 +1567,20 @@ describe('service transformer', () => {
     expect(toBaileysMessageContent(input)).toEqual(output)
   })
 
-
   test('fromBaileysMessageContent participant outside key', async () => {
     const phoneNumer = '5549998093075'
     const remotePhoneNumber = '11115551212'
     const input = {
       key: {
         remoteJid: '554988189915-1593526912@g.us',
-        fromMe: false, 
-        id: '583871ED40A7FBC09B5C3A7C2CC760A0'
+        fromMe: false,
+        id: '583871ED40A7FBC09B5C3A7C2CC760A0',
       },
       message: {
-        conversation: '🤷‍♂️'
+        conversation: '🤷‍♂️',
       },
       participant: `${remotePhoneNumber}@s.whatsapp.net`,
-      isMentionedInStatus :false
+      isMentionedInStatus: false,
     }
     const resp = fromBaileysMessageContent(phoneNumer, input)[0]
     const from = resp.entry[0].changes[0].value.messages[0].from
@@ -1600,10 +1597,10 @@ describe('service transformer', () => {
     const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
     const phoneNumer = '5549998360838'
     const input = {
-      key:{
+      key: {
         remoteJid,
         fromMe: false,
-        id
+        id,
       },
       message: {
         extendedTextMessage: {
@@ -1615,13 +1612,13 @@ describe('service transformer', () => {
               statusMentionMessage: {
                 message: {
                   protocolMessage: {
-                    type: 'STATUS_MENTION_MESSAGE'
-                  }
-                }
-              }
-            }
-          }
-        }
+                    type: 'STATUS_MENTION_MESSAGE',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       pushName,
       messageTimestamp,
@@ -1661,6 +1658,6 @@ describe('service transformer', () => {
     }
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
-// {"key":{"remoteJid":"555533800800@s.whatsapp.net","fromMe":false,"id":"1BE283407E62E5A073"},"messageTimestamp":1753900800,"pushName":"555533800800","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"recipientKeyHash":"BuoOcp2GlUsdsQ==","recipientTimestamp":"1753278139","recipientKeyIndexes":[0,5]},"deviceListMetadataVersion":2},"buttonsMessage":{"contentText":"Para confirmar, estou falando com *IM Agronegócios* e o seu CNPJ é *41.281.5xx/xxxx-xx*?","buttons":[{"buttonId":"1","buttonText":{"displayText":"Sim"},"type":"RESPONSE"},{"buttonId":"2","buttonText":{"displayText":"Não"},"type":"RESPONSE"}],"headerType":"EMPTY"}},"verifiedBizName":"Unifique"}
-// {"key":{"remoteJid":"555533800800@s.whatsapp.net","fromMe":true,"id":"3EB02FCD7C12A71F06DE34"}, "messageTimestamp":1753900805,"pushName":"Im Agronegócios","broadcast":false,"status":2, "message":{"buttonsResponseMessage":{"selectedButtonId":"1","selectedDisplayText":"Sim","contextInfo":{"stanzaId":"1BE283407E62E5A073","participant":"555533800800@s.whatsapp.net","quotedMessage":{"messageContextInfo":{},"buttonsMessage":{"contentText":"Para confirmar, estou falando com *IM Agronegócios* e o seu CNPJ é *41.281.5xx/xxxx-xx*?","buttons":[{"buttonId":"1","buttonText":{"displayText":"Sim"},"type":"RESPONSE"},{"buttonId":"2","buttonText":{"displayText":"Não"},"type":"RESPONSE"}],"headerType":"EMPTY"}}},"type":"DISPLAY_TEXT"}}}
+  // {"key":{"remoteJid":"555533800800@s.whatsapp.net","fromMe":false,"id":"1BE283407E62E5A073"},"messageTimestamp":1753900800,"pushName":"555533800800","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"recipientKeyHash":"BuoOcp2GlUsdsQ==","recipientTimestamp":"1753278139","recipientKeyIndexes":[0,5]},"deviceListMetadataVersion":2},"buttonsMessage":{"contentText":"Para confirmar, estou falando com *IM Agronegócios* e o seu CNPJ é *41.281.5xx/xxxx-xx*?","buttons":[{"buttonId":"1","buttonText":{"displayText":"Sim"},"type":"RESPONSE"},{"buttonId":"2","buttonText":{"displayText":"Não"},"type":"RESPONSE"}],"headerType":"EMPTY"}},"verifiedBizName":"Unifique"}
+  // {"key":{"remoteJid":"555533800800@s.whatsapp.net","fromMe":true,"id":"3EB02FCD7C12A71F06DE34"}, "messageTimestamp":1753900805,"pushName":"Im Agronegócios","broadcast":false,"status":2, "message":{"buttonsResponseMessage":{"selectedButtonId":"1","selectedDisplayText":"Sim","contextInfo":{"stanzaId":"1BE283407E62E5A073","participant":"555533800800@s.whatsapp.net","quotedMessage":{"messageContextInfo":{},"buttonsMessage":{"contentText":"Para confirmar, estou falando com *IM Agronegócios* e o seu CNPJ é *41.281.5xx/xxxx-xx*?","buttons":[{"buttonId":"1","buttonText":{"displayText":"Sim"},"type":"RESPONSE"},{"buttonId":"2","buttonText":{"displayText":"Não"},"type":"RESPONSE"}],"headerType":"EMPTY"}}},"type":"DISPLAY_TEXT"}}}
 })

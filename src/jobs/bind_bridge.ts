@@ -1,13 +1,7 @@
 import { IncomingJob } from './incoming'
 import { ListenerJob } from './listener'
 import { Broadcast } from '../services/broadcast'
-import {
-  UNOAPI_QUEUE_INCOMING,
-  UNOAPI_QUEUE_COMMANDER,
-  UNOAPI_QUEUE_LISTENER,
-  UNOAPI_SERVER_NAME,
-  UNOAPI_EXCHANGE_BRIDGE_NAME,
-} from '../defaults'
+import { UNOAPI_QUEUE_INCOMING, UNOAPI_QUEUE_COMMANDER, UNOAPI_QUEUE_LISTENER, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BRIDGE_NAME } from '../defaults'
 import { amqpConsume } from '../amqp'
 import { getConfig } from '../services/config'
 import { getConfigRedis } from '../services/config_redis'
@@ -61,29 +55,29 @@ export class BindBridgeJob {
     logger.info('Starting listener baileys consumer %s', routingKey)
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
-      `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`, 
+      `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
       routingKey,
       listenerJob.consume.bind(listenerJob),
       {
         notifyFailedMessages,
         priority: 5,
         prefetch: 1,
-        type: 'direct'
-      }
+        type: 'direct',
+      },
     )
 
     logger.info('Starting incoming consumer %s', routingKey)
     await amqpConsume(
       UNOAPI_EXCHANGE_BRIDGE_NAME,
-      `${UNOAPI_QUEUE_INCOMING}.${UNOAPI_SERVER_NAME}`, 
-      routingKey, 
-      incomingJob.consume.bind(incomingJob), 
+      `${UNOAPI_QUEUE_INCOMING}.${UNOAPI_SERVER_NAME}`,
+      routingKey,
+      incomingJob.consume.bind(incomingJob),
       {
         notifyFailedMessages,
         priority: 5,
         prefetch: 1 /* allways 1 */,
-        type: 'direct'
-      }
+        type: 'direct',
+      },
     )
   }
 }

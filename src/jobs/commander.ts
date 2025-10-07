@@ -39,16 +39,18 @@ export class CommanderJob {
         logger.debug(`Commander processing`)
         const id = generateUnoId('CMD')
         await amqpPublish(
-          UNOAPI_EXCHANGE_BROKER_NAME, 
-          UNOAPI_QUEUE_BULK_PARSER, 
-          phone, {
+          UNOAPI_EXCHANGE_BROKER_NAME,
+          UNOAPI_QUEUE_BULK_PARSER,
+          phone,
+          {
             phone,
             payload: {
               id,
               template: 'sisodonto',
               url: payload?.document?.link,
             },
-          }, { type: 'topic' }
+          },
+          { type: 'topic' },
         )
         const message = {
           type: 'text',
@@ -73,7 +75,7 @@ export class CommanderJob {
         const config = { webhooks }
         logger.debug('Template webhooks %s', phone, JSON.stringify(webhooks))
         await setConfig(phone, config)
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, `${UNOAPI_QUEUE_RELOAD}.${currentConfig.server!}`, phone , { phone }, { type: 'topic' })
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, `${UNOAPI_QUEUE_RELOAD}.${currentConfig.server!}`, phone, { phone }, { type: 'topic' })
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-bulk-report') {
         logger.debug('Parsing bulk report template... %s', phone)
         const service = new Template(this.getConfig)
@@ -85,7 +87,13 @@ export class CommanderJob {
           throw new YamlParseError(doc.errors)
         }
         const { bulk } = doc.toJS()
-        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BULK_REPORT, phone, { payload: { phone, id: bulk, unverified: true } }, { type: 'topic' })
+        await amqpPublish(
+          UNOAPI_EXCHANGE_BROKER_NAME,
+          UNOAPI_QUEUE_BULK_REPORT,
+          phone,
+          { payload: { phone, id: bulk, unverified: true } },
+          { type: 'topic' },
+        )
       } else if (payload?.to && phone === payload?.to && payload?.template && payload?.template.name == 'unoapi-config') {
         logger.debug('Parsing config template... %s', phone)
         const service = new Template(this.getConfig)

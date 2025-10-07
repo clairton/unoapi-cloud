@@ -39,14 +39,14 @@ import { OnNewLogin } from './services/socket'
 import { onNewLoginAlert } from './services/on_new_login_alert'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import { Broadcast } from './services/broadcast'
-import { 
+import {
   isInBlacklistInMemory,
   addToBlacklistInMemory,
   addToBlacklist,
   addToBlacklistRedis,
   addToBlacklistJob,
   isInBlacklist,
-  isInBlacklistInRedis
+  isInBlacklistInRedis,
 } from './services/blacklist'
 import { Listener } from './services/listener'
 import { ListenerBaileys } from './services/listener_baileys'
@@ -96,7 +96,7 @@ let logout: Logout = new LogoutBaileys(getClientBaileys, getConfigVar, listener,
 let middlewareVar: middleware = middlewareNext
 if (process.env.REDIS_URL) {
   logger.info('Starting with redis')
-  startRedis().catch( error => {
+  startRedis().catch((error) => {
     console.error(error, 'Erro on start')
     process.exit(1)
   })
@@ -112,7 +112,7 @@ if (process.env.REDIS_URL) {
 
 if (process.env.AMQP_URL) {
   logger.info('Starting with broker')
-  amqpConnect().catch( error => {
+  amqpConnect().catch((error) => {
     console.error(error, 'Erro on start rabbitmq')
     process.exit(1)
   })
@@ -126,29 +126,13 @@ if (process.env.AMQP_URL) {
   const bindBridgeJob = new BindBridgeJob()
   const logoutJob = new LogoutJob(logout)
   logger.info('Starting bind bridge consumer')
-  amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`,
-    '*',
-    bindBridgeJob.consume.bind(bindBridgeJob),
-    { type: 'direct' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '*', bindBridgeJob.consume.bind(bindBridgeJob), {
+    type: 'direct',
+  })
   logger.info('Starting reload consumer')
-  amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`,
-    '',
-    reloadJob.consume.bind(reloadJob),
-    { type: 'direct' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_RELOAD}.${UNOAPI_SERVER_NAME}`, '', reloadJob.consume.bind(reloadJob), { type: 'direct' })
   logger.info('Starting logout consumer')
-  amqpConsume(
-    UNOAPI_EXCHANGE_BRIDGE_NAME,
-    `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`,
-    '',
-    logoutJob.consume.bind(logoutJob),
-    { type: 'direct' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_LOGOUT}.${UNOAPI_SERVER_NAME}`, '', logoutJob.consume.bind(logoutJob), { type: 'direct' })
   logger.info('Starting media consumer')
   const mediaJob = new MediaJob(getConfigVar)
   amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, '*', mediaJob.consume.bind(mediaJob), { type: 'topic' })
@@ -158,32 +142,22 @@ if (process.env.AMQP_URL) {
   logger.info('Starting outgoing consumer %s', UNOAPI_SERVER_NAME)
   const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis, addToBlacklistRedis)
   const outgoinJob = new OutgoingJob(getConfigVar, outgoingCloudApi)
-  amqpConsume(
-    UNOAPI_EXCHANGE_BROKER_NAME,
-    UNOAPI_QUEUE_OUTGOING,
-    '*',
-    outgoinJob.consume.bind(outgoinJob), 
-    { notifyFailedMessages, prefetch, type: 'topic' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, '*', outgoinJob.consume.bind(outgoinJob), {
+    notifyFailedMessages,
+    prefetch,
+    type: 'topic',
+  })
   if (notifyFailedMessages) {
     logger.debug('Starting notification consumer %s', UNOAPI_SERVER_NAME)
     const notificationJob = new NotificationJob(incoming)
-    amqpConsume(
-      UNOAPI_EXCHANGE_BROKER_NAME,
-      UNOAPI_QUEUE_NOTIFICATION,
-      '*',
-      notificationJob.consume.bind(notificationJob),
-      { notifyFailedMessages: false, type: 'topic' })
+    amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_NOTIFICATION, '*', notificationJob.consume.bind(notificationJob), {
+      notifyFailedMessages: false,
+      type: 'topic',
+    })
   }
 
   logger.info('Starting blacklist add consumer %s', UNOAPI_SERVER_NAME)
-  amqpConsume(
-    UNOAPI_EXCHANGE_BROKER_NAME,
-    UNOAPI_QUEUE_BLACKLIST_ADD,
-    '*',
-    atbl,
-    { notifyFailedMessages, prefetch, type: 'topic' }
-  )
+  amqpConsume(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_BLACKLIST_ADD, '*', atbl, { notifyFailedMessages, prefetch, type: 'topic' })
 } else {
   logger.info('Starting standard mode')
 }
@@ -211,7 +185,7 @@ const app: App = new App(
   logout,
   middlewareVar,
   injectRouteDummy,
-  contact
+  contact,
 )
 broadcast.setSever(app.socket)
 

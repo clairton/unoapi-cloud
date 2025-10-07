@@ -3,7 +3,6 @@ import logger from '../services/logger'
 import path from 'path'
 
 class IndexController {
-
   public root(req: Request, res: Response) {
     logger.debug('root method %s', JSON.stringify(req.method))
     logger.debug('root headers %s', JSON.stringify(req.headers))

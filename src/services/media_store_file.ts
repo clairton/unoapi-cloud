@@ -86,13 +86,13 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     if (typeof binMessage?.message?.mediaKey === 'object') {
       binMessage.message.mediaKey = Uint8Array.from(Object.values(binMessage?.message?.mediaKey))
     }
-    
+
     if (url.indexOf('base64') >= 0) {
       const parts = url.split(',')
       const base64 = parts[1]
       buffer = Buffer.from(base64, 'base64')
     } else {
-      const toDownloadMessage = { key: waMessage.key, message: { [binMessage?.messageType!]: binMessage?.message }} as WAMessage
+      const toDownloadMessage = { key: waMessage.key, message: { [binMessage?.messageType!]: binMessage?.message } } as WAMessage
       try {
         buffer = await downloadMediaMessage(toDownloadMessage, 'buffer', {})
       } catch (err) {
@@ -188,7 +188,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
     const mediaPayload = await dataStore.loadMediaPayload(mediaId!)
     if (!mediaPayload) {
       logger.warn('Media payload nor found %s', mediaId)
-      return;
+      return
     }
     const filePath = mediaStore.getFilePath(phone, mediaId!, mediaPayload?.mime_type!)
     const url = await mediaStore.getDownloadUrl(baseUrl, filePath)
@@ -220,7 +220,7 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
       if (!existsSync(base)) {
         mkdirSync(base, { recursive: true })
       }
-      const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
+      const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
       const buffer = toBuffer(await response.arrayBuffer())
       await writeFile(complete, buffer)
       logger.debug('Saved profile picture file %s!!', phoneNumber)

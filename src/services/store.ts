@@ -11,8 +11,8 @@ export interface getStore {
 }
 
 export type Store = {
-  dataStore: DataStore,
-  sessionStore: SessionStore,
+  dataStore: DataStore
+  sessionStore: SessionStore
   state: AuthenticationState
   saveCreds: () => Promise<void>
   mediaStore: MediaStore

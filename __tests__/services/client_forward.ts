@@ -40,7 +40,7 @@ describe('service client forward', () => {
   })
 
   test('not update uno id', async () => {
-    const payload = {status: 'read', message_id: '78f8f8f0-9c98-11f0-aa54-c714bee1dcd0', recipient_id: phone}
+    const payload = { status: 'read', message_id: '78f8f8f0-9c98-11f0-aa54-c714bee1dcd0', recipient_id: phone }
     const resp = await client.send(payload, {})
     expect(resp.ok.success).toBe(true)
   })

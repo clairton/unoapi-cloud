@@ -43,7 +43,17 @@ const sessionStore: SessionStore = new SessionStoreFile()
 const reload = new ReloadBaileys(getClientBaileys, getConfigByEnv, listenerBaileys, onNewLoginn)
 const logout = new LogoutBaileys(getClientBaileys, getConfigByEnv, listenerBaileys, onNewLoginn)
 
-const app: App = new App(incomingBaileys, outgoingCloudApi, BASE_URL, getConfigByEnv, sessionStore, onNewLoginn, addToBlacklistInMemory, reload, logout)
+const app: App = new App(
+  incomingBaileys,
+  outgoingCloudApi,
+  BASE_URL,
+  getConfigByEnv,
+  sessionStore,
+  onNewLoginn,
+  addToBlacklistInMemory,
+  reload,
+  logout,
+)
 broadcast.setSever(app.socket)
 
 app.server.listen(PORT, '0.0.0.0', async () => {

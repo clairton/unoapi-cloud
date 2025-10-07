@@ -20,7 +20,7 @@ export class TimerJob {
     const string = await this.getLastTimerFunction(phone, to)
     const lastTime = string ? Date.parse(string) : undefined
     logger.debug('timer comsumer phone %s to %s time %s last time %s', phone, to, time, lastTime)
-    if (!lastTime || (lastTime > messageDate)) {
+    if (!lastTime || lastTime > messageDate) {
       logger.debug('timer comsumer expired phone %s to %s', phone, to)
     } else {
       logger.debug('timer consumer enqueue phone %s to %s', phone, to)
@@ -29,8 +29,8 @@ export class TimerJob {
         to,
         type: 'text',
         text: {
-          body: message
-        } 
+          body: message,
+        },
       }
       await this.incoming.send(phone, body, {})
       if (nexts?.length > 0) {

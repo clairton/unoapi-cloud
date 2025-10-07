@@ -25,14 +25,9 @@ export class TranscriberJob {
       const { payload, webhooks }: { payload: any; webhooks: Webhook[] } = data as any
       const destinyPhone = extractDestinyPhone(payload)
       const payloadEntry = payload?.entry && payload.entry[0]
-      const payloadValue = payloadEntry &&
-        payload.entry[0].changes &&
-        payload.entry[0].changes[0] &&
-        payload.entry[0].changes[0].value
-      const audioMessage = payloadValue &&
-        payload.entry[0].changes[0].value.messages &&
-        payload.entry[0].changes[0].value.messages[0]
-       
+      const payloadValue = payloadEntry && payload.entry[0].changes && payload.entry[0].changes[0] && payload.entry[0].changes[0].value
+      const audioMessage = payloadValue && payload.entry[0].changes[0].value.messages && payload.entry[0].changes[0].value.messages[0]
+
       const config = await this.getConfig(phone)
       const mediaKey = audioMessage.audio.id
       let token = config.authToken
@@ -41,11 +36,7 @@ export class TranscriberJob {
         mediaUrl = `${config.webhookForward.url}/${config.webhookForward.version}/${mediaKey}`
         token = config.webhookForward.token
       }
-      const { buffer, link, mimeType } = await mediaToBuffer(
-        mediaUrl,
-        token!,
-        webhooks[0].timeoutMs || 0,
-      )
+      const { buffer, link, mimeType } = await mediaToBuffer(mediaUrl, token!, webhooks[0].timeoutMs || 0)
       const extension = config.connectionType == 'forward' ? `.${mime.extension(mimeType)}` : ''
       let transcriptionText = ''
       if (config.openaiApiKey) {
@@ -61,9 +52,9 @@ export class TranscriberJob {
       } else {
         logger.debug('Transcriber audio with Audio2TextJS for session %s to %s', phone, destinyPhone)
         const converter = new Audio2TextJS({
-            threads: 4,
-            processors: 1,
-            outputJson: true,
+          threads: 4,
+          processors: 1,
+          outputJson: true,
         })
         if (!existsSync(SESSION_DIR)) {
           mkdirSync(SESSION_DIR)
@@ -79,17 +70,19 @@ export class TranscriberJob {
       }
       logger.debug('Transcriber audio content for session %s and to %s is %s', phone, destinyPhone, transcriptionText)
       const output = { ...payload }
-      output.entry[0].changes[0].value.messages = [{
-        context: {
-          message_id: audioMessage.id,
-          id: audioMessage.id,
+      output.entry[0].changes[0].value.messages = [
+        {
+          context: {
+            message_id: audioMessage.id,
+            id: audioMessage.id,
+          },
+          from: audioMessage.from,
+          id: generateUnoId('STT'),
+          text: { body: transcriptionText },
+          type: 'text',
+          timestamp: `${parseInt(audioMessage.timestamp) + 1}`,
         },
-        from: audioMessage.from,
-        id: generateUnoId('STT'),
-        text: { body: transcriptionText },
-        type: 'text',
-        timestamp: `${parseInt(audioMessage.timestamp) + 1}`,
-      }]
+      ]
       await Promise.all(
         webhooks.map(async (w) => {
           logger.debug('Transcriber phone %s to %s sending webhook %s', phone, destinyPhone, w.id)

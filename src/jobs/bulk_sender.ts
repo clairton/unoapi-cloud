@@ -1,5 +1,12 @@
 import { amqpPublish } from '../amqp'
-import { UNOAPI_BULK_BATCH, UNOAPI_BULK_DELAY, UNOAPI_QUEUE_BULK_SENDER, UNOAPI_QUEUE_BULK_REPORT, UNOAPI_BULK_MESSAGE_DELAY, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
+import {
+  UNOAPI_BULK_BATCH,
+  UNOAPI_BULK_DELAY,
+  UNOAPI_QUEUE_BULK_SENDER,
+  UNOAPI_QUEUE_BULK_REPORT,
+  UNOAPI_BULK_MESSAGE_DELAY,
+  UNOAPI_EXCHANGE_BROKER_NAME,
+} from '../defaults'
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
 import { setMessageStatus, setbulkMessage } from '../services/redis'
@@ -64,9 +71,10 @@ export class BulkSenderJob {
         statusMessage = `Bulk ${id} phone ${phone} is finished with ${messagesToSend.length} message(s)!`
         await amqpPublish(
           UNOAPI_EXCHANGE_BROKER_NAME,
-          UNOAPI_QUEUE_BULK_REPORT, phone, 
-          { payload: { id, length } }, 
-          { delay: UNOAPI_BULK_DELAY * 1000, type: 'topic' }
+          UNOAPI_QUEUE_BULK_REPORT,
+          phone,
+          { payload: { id, length } },
+          { delay: UNOAPI_BULK_DELAY * 1000, type: 'topic' },
         )
       }
       const messageUpdate = {

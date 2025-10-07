@@ -24,7 +24,7 @@ import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
-import { 
+import {
   DEFAULT_BROWSER,
   LOG_LEVEL,
   CONNECTING_TIMEOUT_MS,
@@ -142,7 +142,7 @@ export const connect = async ({
       logger.info(`First save creds with number is ${phoneCreds} and configured number ${phone}`)
       if (VALIDATE_SESSION_NUMBER && phoneCreds != phone) {
         await logout()
-        const message =  t('session_conflict', phoneCreds, phone)
+        const message = t('session_conflict', phoneCreds, phone)
         logger.error(message)
         await onNotification(message, true)
         currentSaveCreds = async () => logger.error(message)
@@ -164,7 +164,7 @@ export const connect = async ({
     logger.debug('onConnectionUpdate connectionType %s ==> %s %s', config.connectionType, phone, JSON.stringify(event))
     if (event.qr && config.connectionType == 'qrcode') {
       if (status.attempt > attempts) {
-        const message =  t('attempts_exceeded', attempts)
+        const message = t('attempts_exceeded', attempts)
         logger.debug(message)
         await onNotification(message, true)
         status.attempt = 1
@@ -188,13 +188,13 @@ export const connect = async ({
       await sessionStore.setStatus(phone, 'online')
       await onNotification(t('online_session'), true)
     }
-    
+
     switch (event.connection) {
       case 'open':
         await onOpen()
         break
-        
-        case 'close':
+
+      case 'close':
         await onClose(event)
         break
 
@@ -259,7 +259,7 @@ export const connect = async ({
     logger.info(`${phone} disconnected with status: ${statusCode}`)
     if ([DisconnectReason.loggedOut, 403].includes(statusCode)) {
       status.attempt = 1
-      if (!await sessionStore.isStatusConnecting(phone)) {
+      if (!(await sessionStore.isStatusConnecting(phone))) {
         const message = t('removed')
         await onNotification(message, true)
       }
@@ -318,12 +318,12 @@ export const connect = async ({
   const reconnect = async () => {
     logger.info(`${phone} reconnecting`, status.attempt)
     if (status.attempt > attempts) {
-      const message =  t('attempts_exceeded', attempts)
+      const message = t('attempts_exceeded', attempts)
       await onNotification(message, true)
       status.attempt = 1
       return close()
     } else {
-      const message =  t('connecting_attemps', status.attempt, attempts)
+      const message = t('connecting_attemps', status.attempt, attempts)
       await onNotification(message, false)
       await close()
       return onReconnect(status.attempt++)
@@ -344,8 +344,8 @@ export const connect = async ({
     // WebSocket.OPEN (1)
     // WebSocket.CLOSING (2)
     // WebSocket.CLOSED (3)
-    if (`${webSocket['readyState']}` == '1'){
-      if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
+    if (`${webSocket['readyState']}` == '1') {
+      if ((await sessionStore.isStatusConnecting(phone)) || (await sessionStore.isStatusOnline(phone))) {
         try {
           await sock?.end(undefined)
         } catch (e) {
@@ -359,7 +359,7 @@ export const connect = async ({
       }
     }
     sock = undefined
-    if (!await sessionStore.isStatusRestartRequired(phone)) {
+    if (!(await sessionStore.isStatusRestartRequired(phone))) {
       await sessionStore.setStatus(phone, 'offline')
     }
   }
@@ -367,9 +367,9 @@ export const connect = async ({
   const logout = async () => {
     logger.info(`${phone} logout`)
     try {
-      return sock && await sock.logout()
+      return sock && (await sock.logout())
     } catch (error) {
-      logger.error(`Error on remove session ${phone}: ${error.message}`,)  
+      logger.error(`Error on remove session ${phone}: ${error.message}`)
       // ignore de unique error if already diconected session
     } finally {
       logger.info(`${phone} destroyed`)
@@ -397,7 +397,7 @@ export const connect = async ({
     if (await sessionStore.isStatusConnecting(phone)) {
       await verifyConnectingTimeout()
       throw new SendError(5, t('connecting_session'))
-    } else if (await sessionStore.isStatusDisconnect(phone) || !sock) {
+    } else if ((await sessionStore.isStatusDisconnect(phone)) || !sock) {
       throw new SendError(3, t('disconnected_session'))
     } else if (await sessionStore.isStatusOffline(phone)) {
       throw new SendError(12, t('offline_session'))
@@ -416,7 +416,7 @@ export const connect = async ({
     options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
   ) => {
     await validateStatus()
-    const id =  isIndividualJid(to) ? await exists(to) : to
+    const id = isIndividualJid(to) ? await exists(to) : to
     if (id) {
       if (options.composing) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -489,7 +489,7 @@ export const connect = async ({
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
-    loggerBaileys.level = (LOG_LEVEL) as Level
+    loggerBaileys.level = LOG_LEVEL as Level
 
     let agent
     let fetchAgent
@@ -538,7 +538,7 @@ export const connect = async ({
               throw error
             }
           }
-        }
+        },
       }
       sock = new Proxy(proxy, handler)
     } catch (error: any) {
@@ -555,9 +555,9 @@ export const connect = async ({
     if (sock) {
       event('connection.update', onConnectionUpdate)
       event('creds.update', verifyAndSaveCreds)
-      sock.ev.process(async(events) => {
+      sock.ev.process(async (events) => {
         const keys = Object.keys(events)
-        for(const i in keys) {
+        for (const i in keys) {
           const key = keys[i]
           if (eventsMap.has(key)) {
             eventsMap.get(key)(events[key])
@@ -586,7 +586,7 @@ export const connect = async ({
     return false
   }
 
-  if (!await connect()) {
+  if (!(await connect())) {
     await sessionStore.setStatus(phone, 'offline')
     return
   }

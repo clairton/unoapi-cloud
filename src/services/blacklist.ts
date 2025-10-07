@@ -52,9 +52,9 @@ export const isInBlacklistInRedis: isInBlacklist = async (from: string, webhookI
     const pattern = `${blacklist('', '', '').replaceAll('::', '')}*`
     const keys = await redisKeys(pattern)
     logger.info(`Load ${keys.length} items in blacklist`)
-    const promises = keys.map(async key => {
+    const promises = keys.map(async (key) => {
       const ttl = await redisTtl(key)
-      const [ _k, from, webhookId, to ] = key.split(':')
+      const [_k, from, webhookId, to] = key.split(':')
       return addToBlacklistInMemory(from, webhookId, to, ttl)
     })
     await Promise.all(promises)

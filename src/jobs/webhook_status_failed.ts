@@ -1,4 +1,4 @@
-import logger from "../services/logger";
+import logger from '../services/logger'
 
 export class WebhookStatusFailedJob {
   private url: string
@@ -14,10 +14,10 @@ export class WebhookStatusFailedJob {
       await fetch(this.url, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json; charset=utf-8'
+          'Content-Type': 'application/json; charset=utf-8',
         },
         body: JSON.stringify({ text }),
-      });
+      })
     } catch (error) {
       logger.error('Error on webhook status failed')
       logger.error(error)

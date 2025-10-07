@@ -7,46 +7,48 @@ import {
   UNOAPI_EXCHANGE_BROKER_NAME,
   UNOAPI_QUEUE_OUTGOING,
   UNOAPI_QUEUE_TRANSCRIBER,
-  UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED
+  UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
 } from '../defaults'
 import { extractDestinyPhone, isAudioMessage, isIncomingMessage, jidToPhoneNumber, TYPE_MESSAGES_MEDIA } from '../services/transformer'
 import logger from '../services/logger'
 import { getConfig } from '../services/config'
 import { isUpdateMessage, isFailedStatus } from '../services/transformer'
 
-const  dUntil: Map<string, number> = new Map()
-const  dVerified: Map<string, boolean> = new Map()
+const dUntil: Map<string, number> = new Map()
+const dVerified: Map<string, boolean> = new Map()
 
 const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS ? async (phone, payload) => {
-  const to = extractDestinyPhone(payload, false)
- 
-  if (to) {
-    const key = `${phone}:${to}`
-    if (!dVerified.get(key)) {
-      let nextMessageTime = dUntil.get(key)
-      const epochMS: number = Math.floor(Date.now());
-      if (nextMessageTime === undefined) {
-        nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
-        dUntil.set(key, nextMessageTime);
-        logger.debug('Key %s First message', key)
-      } else {
-        const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
-        if (thisMessageDelay > 0) {
-          logger.debug('Key %s Message delayed by %s ms', key, thisMessageDelay)
-          await sleep(thisMessageDelay)
-        } else {
-          logger.debug('Key %s doesn\'t need more delays', key)
-          dVerified.set(key, true);
-          dUntil.delete(key);
+const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
+  ? async (phone, payload) => {
+      const to = extractDestinyPhone(payload, false)
+
+      if (to) {
+        const key = `${phone}:${to}`
+        if (!dVerified.get(key)) {
+          let nextMessageTime = dUntil.get(key)
+          const epochMS: number = Math.floor(Date.now())
+          if (nextMessageTime === undefined) {
+            nextMessageTime = epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_WEBHOOK_MS
+            dUntil.set(key, nextMessageTime)
+            logger.debug('Key %s First message', key)
+          } else {
+            const thisMessageDelay: number = Math.floor(nextMessageTime - epochMS)
+            if (thisMessageDelay > 0) {
+              logger.debug('Key %s Message delayed by %s ms', key, thisMessageDelay)
+              await sleep(thisMessageDelay)
+            } else {
+              logger.debug("Key %s doesn't need more delays", key)
+              dVerified.set(key, true)
+              dUntil.delete(key)
+            }
+          }
         }
-      } 
+      }
     }
-  }
-} :  async (_phone, _payload) => {}
+  : async (_phone, _payload) => {}
 
 export class OutgoingJob {
   private service: Outgoing
@@ -59,33 +61,27 @@ export class OutgoingJob {
 
   async consume(phone: string, data: object) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const a = { ...data as any }
+    const a = { ...(data as any) }
     const payload: any = a.payload
     if (a.webhooks) {
       const webhooks: Webhook[] = a.webhooks
       if (isFailedStatus(payload) && STATUS_FAILED_WEBHOOK_URL) {
-        await amqpPublish(
-          UNOAPI_EXCHANGE_BROKER_NAME,
-          UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
-          phone,
-          { payload }, 
-          { type: 'topic' }
-        )
+        await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED, phone, { payload }, { type: 'topic' })
       }
       await Promise.all(
         webhooks.map(async (webhook) => {
-          return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME,  UNOAPI_QUEUE_OUTGOING, phone, { payload, webhook })
+          return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { payload, webhook })
         }),
       )
       if (isAudioMessage(payload)) {
-        const webhooks = a.webhooks.filter(w => {
+        const webhooks = a.webhooks.filter((w) => {
           if (w.sendTranscribeAudio) {
             logger.debug('Session phone %s webhook %s configured to send transcribe audio message for this webhook', phone, w.id)
             return true
           }
         })
         if (webhooks.length > 0) {
-          await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME,  UNOAPI_QUEUE_TRANSCRIBER, phone, { payload, webhooks }, { type: 'topic' })
+          await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_TRANSCRIBER, phone, { payload, webhooks }, { type: 'topic' })
         }
       }
     } else if (a.webhook) {
@@ -97,25 +93,25 @@ export class OutgoingJob {
         const { dataStore } = store
         if (isUpdateMessage(payload)) {
           payload.entry[0].changes[0].value.statuses = await Promise.all(
-            payload.entry[0].changes[0].value.statuses.map(async status => {
+            payload.entry[0].changes[0].value.statuses.map(async (status) => {
               const currentId = status.id
               const unoId = await dataStore.loadUnoId(currentId)
               if (unoId) {
                 status.id = unoId
               }
               return status
-            })
+            }),
           )
         } else {
           payload.entry[0].changes[0].value.contacts = await Promise.all(
-            payload.entry[0].changes[0].value.contacts.map(async contact => {
+            payload.entry[0].changes[0].value.contacts.map(async (contact) => {
               contact.wa_id = jidToPhoneNumber(contact.wa_id, '')
               return contact
-            })
+            }),
           )
           const isIncoming = isIncomingMessage(payload)
           payload.entry[0].changes[0].value.messages = await Promise.all(
-            payload.entry[0].changes[0].value.messages.map(async message => {
+            payload.entry[0].changes[0].value.messages.map(async (message) => {
               if (TYPE_MESSAGES_MEDIA.includes(message.type) && isIncoming) {
                 const { mediaStore } = store
                 message = await mediaStore.saveMediaForwarder(message)
@@ -134,7 +130,7 @@ export class OutgoingJob {
               }
               message.from = jidToPhoneNumber(message.from, '')
               return message
-            })
+            }),
           )
         }
       }

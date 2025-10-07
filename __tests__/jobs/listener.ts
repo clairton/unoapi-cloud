@@ -20,9 +20,9 @@ describe('listener', () => {
     listenerVar = mock<Listener>()
     dataStoreVar = mock<DataStore>()
     getConfigVar = jest.fn()
-    const getStore = async (_phone: string, _config: Config) => { 
+    const getStore = async (_phone: string, _config: Config) => {
       return {
-        dataStore: dataStoreVar 
+        dataStore: dataStoreVar,
       }
     }
     const currentConfig = { ...config, getStore }
@@ -34,7 +34,7 @@ describe('listener', () => {
   test('consume messages type append not splited and reenqueue', async () => {
     const type = 'append'
     const m = {}
-    const data = { messages: [m], type}
+    const data = { messages: [m], type }
     amqpPublishMock.mockResolvedValueOnce(Promise.resolve())
     await job.consume(phone, data)
     expect(amqpPublishMock).toHaveBeenCalledWith(
@@ -42,14 +42,14 @@ describe('listener', () => {
       `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
       phone,
       { messages: [m], type, splited: true },
-      { type: 'direct' }
+      { type: 'direct' },
     )
   })
 
   test('consume messages type delete not splited and reenqueue', async () => {
     const type = 'delete'
     const m = {}
-    const data = { messages: { keys: [m] }, type}
+    const data = { messages: { keys: [m] }, type }
     amqpPublishMock.mockResolvedValueOnce(Promise.resolve())
     await job.consume(phone, data)
     expect(amqpPublishMock).toHaveBeenCalledWith(
@@ -57,7 +57,7 @@ describe('listener', () => {
       `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
       phone,
       { messages: { keys: [m] }, type, splited: true },
-      { type: 'direct' }
+      { type: 'direct' },
     )
   })
 

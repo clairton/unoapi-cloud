@@ -109,7 +109,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   }
   store.loadStatus = async (id: string) => {
     const status = await getMessageStatus(phone, id)
-    return status ? undefined : status as MessageStatus
+    return status ? undefined : (status as MessageStatus)
   }
   store.setTemplates = async (templates: string) => {
     return setTemplates(phone, templates)
@@ -138,7 +138,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
         ],
       }
 
-      if(!ONLY_HELLO_TEMPLATE) {
+      if (!ONLY_HELLO_TEMPLATE) {
         const bulkReport = {
           id: 2,
           name: 'unoapi-bulk-report',
@@ -215,7 +215,6 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
       } else {
         return [hello]
       }
-      
     }
   }
   return store

@@ -13,7 +13,6 @@ import { Config } from './config'
 import logger from './logger'
 import fetch, { Response as FetchResponse } from 'node-fetch'
 
-
 export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   if (!mediaStores.has(phone)) {
     logger.debug('Creating s3 data store %s', phone)
@@ -45,13 +44,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     const abortSignal = AbortSignal.timeout(s3Config.timeoutMs)
     await s3Client.send(new PutObjectCommand(putParams), { abortSignal })
     logger.debug(`Uploaded file ${fileName} to bucket ${bucket}!`)
-    await amqpPublish(
-      UNOAPI_EXCHANGE_BROKER_NAME,
-      UNOAPI_QUEUE_MEDIA,
-      phone,
-      { fileName: fileName },
-      { delay: DATA_TTL * 1000, type: 'topic' }
-    )
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_MEDIA, phone, { fileName: fileName }, { delay: DATA_TTL * 1000, type: 'topic' })
     return true
   }
 
@@ -65,9 +58,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       const link = await getSignedUrl(s3Client, command, { expiresIn })
       return link
     } catch (error) {
-      logger.error(
-        `Error on generate s3 signed url for bucket: ${bucket} file name: ${fileName} expires in: ${expiresIn} -> ${error.message}`
-      )
+      logger.error(`Error on generate s3 signed url for bucket: ${bucket} file name: ${fileName} expires in: ${expiresIn} -> ${error.message}`)
       throw error
     }
   }
@@ -90,7 +81,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     logger.debug(`Downloaded media ${file}!`)
     return response.Body as Readable
   }
- 
+
   mediaStore.getProfilePictureUrl = async (_baseUrl: string, jid: string) => {
     const phoneNumber = jidToPhoneNumberIfUser(jid)
     const fileName = `${phone}/${PROFILE_PICTURE_FOLDER}/${profilePictureFileName(phoneNumber)}`
@@ -114,7 +105,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       await mediaStore.removeMedia(fileName)
     } else if (contact.imgUrl) {
       logger.debug('Saving profile picture s3 %s...', phoneNumber)
-      const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET'})
+      const response: FetchResponse = await fetch(contact.imgUrl, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
       const buffer = toBuffer(await response.arrayBuffer())
       await mediaStore.saveMediaBuffer(fileName, buffer)
       logger.debug('Saved profile picture s3 %s!', phoneNumber)

@@ -1,4 +1,3 @@
-
 import fetch, { Response, RequestInit } from 'node-fetch'
 import logger from '../services/logger'
 import { toBuffer } from '../services/transformer'
@@ -6,7 +5,7 @@ import { toBuffer } from '../services/transformer'
 export default async function (url: string, token: string, timeoutMs: number) {
   const headers = {
     'Content-Type': 'application/json; charset=utf-8',
-    'Authorization': `Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   }
   const options: RequestInit = { method: 'GET', headers }
   if (timeoutMs > 0) {

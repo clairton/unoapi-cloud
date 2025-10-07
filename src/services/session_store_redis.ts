@@ -1,5 +1,17 @@
 import { SessionStore, sessionStatus } from './session_store'
-import { configKey, authKey, redisKeys, getSessionStatus, setSessionStatus, sessionStatusKey, redisGet, getConnectCount, setConnectCount, delAuth, clearConnectCount } from './redis'
+import {
+  configKey,
+  authKey,
+  redisKeys,
+  getSessionStatus,
+  setSessionStatus,
+  sessionStatusKey,
+  redisGet,
+  getConnectCount,
+  setConnectCount,
+  delAuth,
+  clearConnectCount,
+} from './redis'
 import logger from './logger'
 import { MAX_CONNECT_RETRY, MAX_CONNECT_TIME } from '../defaults'
 
@@ -22,7 +34,7 @@ export class SessionStoreRedis extends SessionStore {
     try {
       const pattern = configKey(phone)
       const keys = await redisKeys(pattern)
-      return Promise.all(keys.map(async (k: string) => JSON.parse(await redisGet(k) || '{}')?.authToken))
+      return Promise.all(keys.map(async (k: string) => JSON.parse((await redisGet(k)) || '{}')?.authToken))
     } catch (error) {
       logger.error(error, 'Erro on get tokens')
       throw error
@@ -30,7 +42,7 @@ export class SessionStoreRedis extends SessionStore {
   }
 
   async getStatus(phone: string) {
-    return await getSessionStatus(phone) || 'disconnected'
+    return (await getSessionStatus(phone)) || 'disconnected'
   }
 
   async setStatus(phone: string, status: sessionStatus) {
@@ -61,7 +73,7 @@ export class SessionStoreRedis extends SessionStore {
       const pattern = sessionStatusKey('*')
       const keys = await redisKeys(pattern)
       for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
+        const key = keys[i]
         const phone = key.replace(toReplaceStatus, '')
         await this.syncConnection(phone)
       }
@@ -74,7 +86,7 @@ export class SessionStoreRedis extends SessionStore {
 
   async syncConnection(phone: string) {
     logger.info(`Syncing ${phone} lost connection`)
-    if(await this.isStatusRestartRequired(phone)) {
+    if (await this.isStatusRestartRequired(phone)) {
       logger.info(`Is not lost connection, is restart required ${phone}`)
       return
     }
@@ -86,7 +98,7 @@ export class SessionStoreRedis extends SessionStore {
       await this.setStatus(phone, 'disconnected')
     }
     const key = sessionStatusKey(phone)
-    if (await redisGet(key) == 'standby' && await this.getConnectCount(phone) < MAX_CONNECT_RETRY) {
+    if ((await redisGet(key)) == 'standby' && (await this.getConnectCount(phone)) < MAX_CONNECT_RETRY) {
       logger.info(`Sync ${phone} standby!`)
       await this.setStatus(phone, 'offline')
     }

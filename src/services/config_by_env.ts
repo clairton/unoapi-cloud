@@ -124,7 +124,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
 
     if (config.customMessageCharacters.length > 0) {
       const getRandomChar = () => {
-        const randomIndex = Math.floor(Math.random() * config.customMessageCharacters.length);
+        const randomIndex = Math.floor(Math.random() * config.customMessageCharacters.length)
         return config.customMessageCharacters[randomIndex]
       }
       config.customMessageCharactersFunction = (message: string) => {

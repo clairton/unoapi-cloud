@@ -49,7 +49,7 @@ describe('service socket', () => {
       onNewLogin,
       attempts: 1,
       time: 1,
-      config: { ...defaultConfig, whatsappVersion }
+      config: { ...defaultConfig, whatsappVersion },
     })
     expect(response && response.status.attempt).toBe(1)
   })
@@ -65,7 +65,7 @@ describe('service socket', () => {
       onNewLogin,
       attempts: 1,
       time: 1,
-      config: { ...defaultConfig, whatsappVersion } 
+      config: { ...defaultConfig, whatsappVersion },
     })
     expect(mockOn).toHaveBeenCalled()
   })

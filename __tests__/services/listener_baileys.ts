@@ -23,26 +23,26 @@ const remoteJid = `${uuid()}@s.whatsapp.net`
 const key = {
   remoteJid,
   fromMe: false,
-  id
+  id,
 }
 const message = {
   conversation: 'skdfkdshf',
 }
 const textPayload = {
   key,
-  message
+  message,
 }
 const documentMessage = {
   url: '',
   mimetype: 'text/csv',
   title: uuid(),
-  caption: 'pode subir essa campanha por favor'
+  caption: 'pode subir essa campanha por favor',
 }
 const mediaPayload = {
   key,
-  message: { 
-    documentMessage
-  }
+  message: {
+    documentMessage,
+  },
 }
 const messageStubTypePayload = {
   key,

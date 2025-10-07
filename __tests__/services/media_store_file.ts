@@ -8,12 +8,12 @@ const phone = `${new Date().getTime()}`
 const messageId = `wa.${new Date().getTime()}`
 const url = `http://somehost`
 const mimetype = 'text/plain'
-const extension = 'txt' 
+const extension = 'txt'
 
 const message = {
   messaging_product: 'whatsapp',
   id: `${phone}/${messageId}`,
-  mime_type: mimetype
+  mime_type: mimetype,
 }
 const dataStore = mock<DataStore>()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,7 +32,7 @@ describe('media routes', () => {
   test('getMedia', async () => {
     const response = {
       url: `${url}/v15.0/download/${phone}/${messageId}.${extension}`,
-      ...message
+      ...message,
     }
     expect(await mediaStore.getMedia(url, messageId)).toStrictEqual(response)
   })

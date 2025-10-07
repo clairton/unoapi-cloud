@@ -22,22 +22,22 @@ export const autoConnect = async (
         const config = await getConfig(phone)
         if (config.provider && !['forwarder', 'baileys'].includes(config.provider)) {
           logger.info(`Ignore connecting phone ${phone} provider ${config.provider}...`)
-          continue;
+          continue
         }
         if (config.server && config.server !== UNOAPI_SERVER_NAME) {
           logger.info(`Ignore connecting phone ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
-          continue;
+          continue
         }
         await sessionStore.syncConnection(phone)
         if (await sessionStore.isStatusStandBy(phone)) {
           logger.info(`Session standby ${phone}...`)
-          continue;
+          continue
         }
         logger.info(`Auto connecting phone ${phone}...`)
         try {
           const store = await config.getStore(phone, config)
           const { sessionStore } = store
-          if (await sessionStore.isStatusConnecting(phone) || await sessionStore.isStatusOnline(phone)) {
+          if ((await sessionStore.isStatusConnecting(phone)) || (await sessionStore.isStatusOnline(phone))) {
             logger.info(`Update session status to auto connect ${phone}...`)
             await sessionStore.setStatus(phone, 'offline')
           }

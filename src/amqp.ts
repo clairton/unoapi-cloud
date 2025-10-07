@@ -14,7 +14,7 @@ import {
   UNOAPI_SERVER_NAME,
   UNOAPI_EXCHANGE_BROKER_NAME,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
-  IGNORED_TO_NUMBERS
+  IGNORED_TO_NUMBERS,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -22,14 +22,8 @@ import { extractDestinyPhone } from './services/transformer'
 
 const withTimeout = (millis, error, promise) => {
   let timeoutPid
-  const timeout = new Promise((_resolve, reject) =>
-    timeoutPid = setTimeout(
-      () => reject(error),
-      millis))
-  return Promise.race([
-    promise,
-    timeout
-  ]).finally(() => {
+  const timeout = new Promise((_resolve, reject) => (timeoutPid = setTimeout(() => reject(error), millis)))
+  return Promise.race([promise, timeout]).finally(() => {
     if (timeoutPid) {
       clearTimeout(timeoutPid)
     }
@@ -126,15 +120,18 @@ export const amqpGetExchange = async (exchange: string, type: ExchangeType, pref
     logger.info('Creating exchange %s...', exchange)
     const channel = await amqpGetChannel()
     await channel?.prefetch(prefetch)
-    await channel?.assertExchange(exchange, type, { durable: true,  arguments: { 'x-max-priority': 5 }})
+    await channel?.assertExchange(exchange, type, { durable: true, arguments: { 'x-max-priority': 5 } })
 
     const exchangeDeadId = queueDeadName(exchange)
     await amqpChannel?.assertExchange(exchangeDeadId, 'topic', { durable: true })
 
     const exchangeDelayedId = queueDelayedName(exchange)
-    await amqpChannel?.assertExchange(exchangeDelayedId, 'topic', { durable: true , arguments: {
-      'x-dead-letter-exchange': exchange
-    }})
+    await amqpChannel?.assertExchange(exchangeDelayedId, 'topic', {
+      durable: true,
+      arguments: {
+        'x-dead-letter-exchange': exchange,
+      },
+    })
     logger.info('Created exchange %s!', exchange)
     exchanges.set(exchange, true)
   }
@@ -161,7 +158,7 @@ export const amqpGetQueue = async (
     priority: 0,
     notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
     type: 'topic',
-    prefetch: 1
+    prefetch: 1,
   },
 ): Promise<QueueObject> => {
   if (!queues.get(queue)) {
@@ -178,15 +175,17 @@ export const amqpGetQueue = async (
 
     const exchangeDelayedId = queueDelayedName(exchange)
     const queueDelayedId = queueDelayedName(queue)
-    const queueDelayed = await amqpChannel?.assertQueue(queueDelayedId, { durable: true, arguments: {
-      'x-dead-letter-exchange': deadLetterExchange
-    }})!
+    const queueDelayed = await amqpChannel?.assertQueue(queueDelayedId, {
+      durable: true,
+      arguments: {
+        'x-dead-letter-exchange': deadLetterExchange,
+      },
+    })!
     await amqpChannel?.bindQueue(queueDelayedId, exchangeDelayedId, `${queueDelayedId}.*`)
 
     queues.set(queue, { queueMain, queueDead, queueDelayed })
     logger.info('Created queue %s!', queue)
   }
-
 
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
@@ -195,7 +194,6 @@ export const amqpGetQueue = async (
   }
   return queues.get(queue)!
 }
-
 
 const getExchangeType = (exchange): ExchangeType => {
   if (UNOAPI_EXCHANGE_BRIDGE_NAME == exchange) {
@@ -212,12 +210,12 @@ export const amqpPublish = async (
   queue: string,
   routingKey: string,
   payload: object,
-  options: Partial<PublishOption> = { 
+  options: Partial<PublishOption> = {
     delay: 0,
     dead: false,
     maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT,
     countRetries: 0,
-    priority: 0
+    priority: 0,
   },
 ) => {
   validateRoutingKey(routingKey)
@@ -256,7 +254,7 @@ export const amqpPublish = async (
     exchangeUsed,
     destiny,
     JSON.stringify(payload),
-    JSON.stringify(properties)
+    JSON.stringify(properties),
   )
 }
 
@@ -266,9 +264,9 @@ export const amqpConsume = async (
   routingKey: string,
   callback: ConsumeCallback,
   options: Partial<CreateOption> = {
-    delay: UNOAPI_MESSAGE_RETRY_DELAY, 
+    delay: UNOAPI_MESSAGE_RETRY_DELAY,
     priority: 0,
-    notifyFailedMessages: NOTIFY_FAILED_MESSAGES
+    notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
   },
 ) => {
   logger.debug('Configurate to consume exchange: %s, queue: %s, routing key: %s and type: %s', exchange, queue, routingKey, options.type)
@@ -287,7 +285,13 @@ export const amqpConsume = async (
     const maxRetries = parseInt(headers[UNOAPI_X_MAX_RETRIES] || UNOAPI_MESSAGE_RETRY_LIMIT)
     const countRetries = parseInt(headers[UNOAPI_X_COUNT_RETRIES] || '0') + 1
     try {
-      logger.debug('Received in queue %s, with routing key: %s, with message: %s with headers: %s', queue, routingKey, content, JSON.stringify(payload.properties.headers))
+      logger.debug(
+        'Received in queue %s, with routing key: %s, with message: %s with headers: %s',
+        queue,
+        routingKey,
+        content,
+        JSON.stringify(payload.properties.headers),
+      )
       if (IGNORED_CONNECTIONS_NUMBERS.includes(routingKey)) {
         logger.info(`Ignore messages from ${routingKey}`)
       } else if (IGNORED_TO_NUMBERS.length > 0 && IGNORED_TO_NUMBERS.includes(extractDestinyPhone(data.payload, false))) {
@@ -313,8 +317,9 @@ export const amqpConsume = async (
                 to: routingKey,
                 type: 'text',
                 text: {
-                  body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${error.message
-                    }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
+                  body: `Unoapi version ${version} message failed in queue ${queue}\n\nstack trace: ${error.stack}\n\n\nerror: ${
+                    error.message
+                  }\n\ndata: ${JSON.stringify(data, undefined, 2)}`,
                 },
               },
             },
@@ -326,7 +331,7 @@ export const amqpConsume = async (
         traces[countRetries] = {
           stack: error.stack,
           message: error.message,
-          datetime: new Date()
+          datetime: new Date(),
         }
         await amqpPublish(exchange, queue, routingKey, { ...data, traces }, { dead: true, type: options.type })
       } else {

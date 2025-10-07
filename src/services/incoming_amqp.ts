@@ -15,17 +15,11 @@ export class IncomingAmqp implements Incoming {
   public async send(phone: string, payload: object, options: object = {}) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { status, type, to } = payload as any
-    const config = await this.getConfig(phone);
+    const config = await this.getConfig(phone)
     if (status) {
       options['type'] = 'direct'
       options['priority'] = 3 // update status is always middle important
-      await amqpPublish(
-        UNOAPI_EXCHANGE_BRIDGE_NAME,
-        `${UNOAPI_QUEUE_INCOMING}.${config.server!}`, 
-        phone,
-        { payload, options },
-        options
-      )
+      await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_INCOMING}.${config.server!}`, phone, { payload, options }, options)
       return { ok: { success: true } }
     } else if (type) {
       const id = generateUnoId('INC')
@@ -33,13 +27,7 @@ export class IncomingAmqp implements Incoming {
         options['priority'] = 5 // send message without bulk is very important
       }
       options['type'] = 'direct'
-      await amqpPublish(
-        UNOAPI_EXCHANGE_BRIDGE_NAME,
-        `${UNOAPI_QUEUE_INCOMING}.${config.server!}`,
-        phone,
-        { payload, id, options }, 
-        options
-      )
+      await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_INCOMING}.${config.server!}`, phone, { payload, id, options }, options)
       const ok = {
         messaging_product: 'whatsapp',
         contacts: [

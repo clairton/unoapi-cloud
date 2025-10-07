@@ -49,7 +49,7 @@ describe('service outgoing whatsapp cloud api', () => {
     service = new OutgoingCloudApi(getConfig, isInBlacklistMock, addToBlacklistMock)
     textPayload = {
       text: {
-        body: 'test'
+        body: 'test',
       },
       type: 'text',
       to: 'abc',
@@ -63,8 +63,8 @@ describe('service outgoing whatsapp cloud api', () => {
               value: {
                 contacts: [{ wa_id }],
                 metadata: { display_phone_number: 'abc' },
-                messages: [ { from: 'abc' }, ]
-              }
+                messages: [{ from: 'abc' }],
+              },
             },
           ],
         },
@@ -77,7 +77,7 @@ describe('service outgoing whatsapp cloud api', () => {
           changes: [
             {
               value: {
-                statuses: [ { status: 'deleted' } ]
+                statuses: [{ status: 'deleted' }],
               },
             },
           ],
@@ -154,7 +154,7 @@ describe('service outgoing whatsapp cloud api', () => {
     const ttl = 1
     const w: Partial<Webhook> = {
       id: `${new Date().getTime() / 5}`,
-      addToBlackListOnOutgoingMessageWithTtl: ttl
+      addToBlackListOnOutgoingMessageWithTtl: ttl,
     }
     mockFetch.mockReset()
     await service.sendHttp(phone!, w as Webhook, outgoingPayload, {})

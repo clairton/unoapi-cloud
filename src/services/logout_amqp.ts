@@ -10,14 +10,8 @@ export class LogoutAmqp implements Logout {
     this.getConfig = getConfig
   }
 
-    public async run(phone: string) {
+  public async run(phone: string) {
     const config = await this.getConfig(phone)
-    await amqpPublish(
-      UNOAPI_EXCHANGE_BRIDGE_NAME,
-      `${UNOAPI_QUEUE_LOGOUT}.${config.server!}`,
-      '',
-      { phone },
-      { type: 'direct' }
-    )
+    await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_LOGOUT}.${config.server!}`, '', { phone }, { type: 'direct' })
   }
 }

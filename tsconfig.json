@@ -18,5 +18,5 @@
     "lib": ["es2020", "esnext.array", "DOM", "ES2021.String"],
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "src/**/*.json"],
+  "include": ["src/**/*.ts", "src/**/*.json"]
 }

@@ -5,7 +5,7 @@ import { Listener } from './listener'
 
 export const clients: Map<string, Client> = new Map()
 
-export type ContactStatus = 'valid' | 'processing' | 'invalid'| 'failed'
+export type ContactStatus = 'valid' | 'processing' | 'invalid' | 'failed'
 
 export interface Contact {
   wa_id: String | undefined
@@ -14,17 +14,7 @@ export interface Contact {
 }
 
 export interface getClient {
-  ({
-    phone,
-    listener,
-    getConfig,
-    onNewLogin,
-  }: {
-    phone: string
-    listener: Listener
-    getConfig: getConfig
-    onNewLogin: OnNewLogin
-  }): Promise<Client>
+  ({ phone, listener, getConfig, onNewLogin }: { phone: string; listener: Listener; getConfig: getConfig; onNewLogin: OnNewLogin }): Promise<Client>
 }
 
 export class ConnectionInProgress extends Error {
@@ -37,7 +27,7 @@ export interface Client {
   connect(time: number): Promise<void>
 
   disconnect(): Promise<void>
-  
+
   logout(): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

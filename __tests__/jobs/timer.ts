@@ -9,8 +9,17 @@ const startMock = start as jest.MockedFunction<typeof start>
 const delLastTimerMock = delLastTimer as jest.MockedFunction<typeof delLastTimer>
 
 describe('timer', () => {
-  let incoming, job: TimerJob, payload: any, phone: string, to: string, message: string, time: string, sendSpy: any, mockGetLastTimer: any, incomingPayload: any
-  
+  let incoming,
+    job: TimerJob,
+    payload: any,
+    phone: string,
+    to: string,
+    message: string,
+    time: string,
+    sendSpy: any,
+    mockGetLastTimer: any,
+    incomingPayload: any
+
   beforeEach(() => {
     incoming = mock<Incoming>()
     mockGetLastTimer = jest.fn()
@@ -20,21 +29,24 @@ describe('timer', () => {
     message = `${new Date().getTime()}s sdfhosfo`
     time = '2011-10-05T14:48:00.000Z'
     payload = {
-      phone, to, message, time
+      phone,
+      to,
+      message,
+      time,
     }
     sendSpy = jest.spyOn(incoming, 'send')
 
-    incomingPayload =[
+    incomingPayload = [
       phone,
       {
         messaging_product: 'whatsapp',
         to,
         type: 'text',
         text: {
-          body: message
-        } 
+          body: message,
+        },
       },
-      {}
+      {},
     ]
     delLastTimerMock.mockResolvedValue(Promise.resolve())
     delLastTimerMock.mockClear()
@@ -78,7 +90,7 @@ describe('timer', () => {
   test('consumer with nexts', async () => {
     mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(time)))
     const first = { ...payload }
-    const nexts = [ first ]
+    const nexts = [first]
     await job.consume(phone, { payload: { ...payload, nexts } })
     expect(startMock).toHaveBeenCalledWith(first.phone, first.to, first.timeout, first.message, [])
     expect(delLastTimerMock).toHaveBeenCalledTimes(0)

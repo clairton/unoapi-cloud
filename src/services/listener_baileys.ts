@@ -3,30 +3,44 @@ import logger from './logger'
 import { Outgoing } from './outgoing'
 import { Broadcast } from './broadcast'
 import { getConfig } from './config'
-import { fromBaileysMessageContent, getMessageType, BindTemplateError, isSaveMedia, jidToPhoneNumber, DecryptError, isDecryptError, isBindTemplateError } from './transformer'
+import {
+  fromBaileysMessageContent,
+  getMessageType,
+  BindTemplateError,
+  isSaveMedia,
+  jidToPhoneNumber,
+  DecryptError,
+  isDecryptError,
+  isBindTemplateError,
+} from './transformer'
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
 import { isUnoId, generateUnoId } from '../utils/id'
 
-const  delays: Map<String, number> = new Map()
+const delays: Map<String, number> = new Map()
 
-const delayFunc = UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_MESSAGES_MS ? async (phone, to) => {
-  if (to) { 
-    const key = `${phone}:${to}`
-    const epochMS: number = Math.floor(Date.now());
-    const lastMessage = (delays.get(key) || 0) as number
-    const timeForNextMessage = lastMessage ? Math.floor(lastMessage + (UNOAPI_DELAY_BETWEEN_MESSAGES_MS)) : Math.floor(epochMS + (UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS)) 
-    const ms = timeForNextMessage - epochMS > 0 ? Math.floor((timeForNextMessage - epochMS)) : 0;
-    logger.debug(`Delay for this message is: %s`, ms)
-    if (ms) {
-      delays.set(key, timeForNextMessage)
-      await delay(ms)
-    } else {
-      delays.set(key, epochMS)
-    }
-  }
-} :  async (_phone, _to) => {}
+const delayFunc =
+  UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_MESSAGES_MS
+    ? async (phone, to) => {
+        if (to) {
+          const key = `${phone}:${to}`
+          const epochMS: number = Math.floor(Date.now())
+          const lastMessage = (delays.get(key) || 0) as number
+          const timeForNextMessage = lastMessage
+            ? Math.floor(lastMessage + UNOAPI_DELAY_BETWEEN_MESSAGES_MS)
+            : Math.floor(epochMS + UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS)
+          const ms = timeForNextMessage - epochMS > 0 ? Math.floor(timeForNextMessage - epochMS) : 0
+          logger.debug(`Delay for this message is: %s`, ms)
+          if (ms) {
+            delays.set(key, timeForNextMessage)
+            await delay(ms)
+          } else {
+            delays.set(key, epochMS)
+          }
+        }
+      }
+    : async (_phone, _to) => {}
 
 export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
@@ -57,22 +71,14 @@ export class ListenerBaileys implements Listener {
         return
       }
     } else if (type == 'qrcode') {
-      await this.broadcast.send(
-        phone,
-        type,
-        messages[0]['message']['imageMessage']['url']
-      )
+      await this.broadcast.send(phone, type, messages[0]['message']['imageMessage']['url'])
       // await this.broadcast.send(
       //   phone,
       //   'status',
       //   messages[0]['message']['imageMessage']['caption']
       // )
-    } else if(type === 'status') {
-      await this.broadcast.send(
-        phone,
-        type,
-        messages[0]['message']['conversation']
-      )
+    } else if (type === 'status') {
+      await this.broadcast.send(phone, type, messages[0]['message']['conversation'])
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {
@@ -114,7 +120,7 @@ export class ListenerBaileys implements Listener {
     }
     const key = i.key
     // possible update message or delete message
-    if (key?.id && !isUnoId(key.id) && (key?.fromMe || (!key?.fromMe && ((message as any)?.update?.messageStubType == 1)))) {
+    if (key?.id && !isUnoId(key.id) && (key?.fromMe || (!key?.fromMe && (message as any)?.update?.messageStubType == 1))) {
       const idUno = await store.dataStore.loadUnoId(key.id)
       logger.debug('Unoapi id %s to Baileys id %s', idUno, key.id)
       if (idUno) {
