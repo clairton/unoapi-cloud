@@ -37,7 +37,9 @@ export class ListenerJob {
         const store = await config.getStore(phone, config)
         const { dataStore } = store
         if (isDecryptError(error)) {
-          if ((await dataStore.loadStatus(error.getMessageId())) != 'decryption_failed') {
+          const currentStatus = await dataStore.loadStatus(error.getMessageId())
+          logger.debug('Retrieve message %s status %s', error.getMessageId(), currentStatus)
+          if (currentStatus != 'decryption_failed') {
             logger.debug('Ignore decrypt error because message status is not decryption_failed %s', error.getMessageId())
             return
           } else if (IGNORE_OWN_MESSAGES_DECRYPT_ERROR && isOutgoingMessage(error.getContent())) {

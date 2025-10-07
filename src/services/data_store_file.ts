@@ -49,7 +49,6 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   const store = await useMultiFileAuthState(SESSION_DIR)
   const dataStore = store as DataStore
   dataStore.type = 'file'
-
   ;((dataStore.loadMessage = async (jid: string, id: string) => messages.get(`${jid}-${id}`)),
     (dataStore.toJSON = () => {
       return {
