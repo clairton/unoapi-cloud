@@ -12,6 +12,7 @@ RUN yarn
 
 ADD ./src ./src
 ADD ./public ./public
+ADD ./data ./data
 ADD ./tsconfig.json ./tsconfig.json
 RUN yarn build
 
