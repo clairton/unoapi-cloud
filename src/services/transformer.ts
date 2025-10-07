@@ -21,6 +21,9 @@ const MESSAGE_STUB_TYPE_ERRORS = [
   'No sender key for'.toLowerCase(),
   'Cannot create property'.toLowerCase(),
   'Bad MAC'.toLowerCase(),
+  'failed to decrypt message'.toLowerCase(),
+  'SessionError'.toLowerCase(),
+  'No session found to decrypt message'.toLowerCase(),
 ]
 
 export class BindTemplateError extends Error {
