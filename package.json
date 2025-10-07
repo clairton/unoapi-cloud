@@ -84,7 +84,7 @@
     "audio-decode": "^2.2.3",
     "audio2textjs": "^1.0.5",
     "awesome-phonenumber": "^6.8.0",
-    "baileys": "npm:whaileys@6.2.6",
+    "baileys": "npm:whaileys@6.2.7",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "i18n": "^0.15.1",
