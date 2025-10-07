@@ -174,7 +174,7 @@ export class ListenerBaileys implements Listener {
         const i: any = message
         data = await template.bind(phone, i.template.name, i.template.components)
       } else {
-        logger.debug('Unknown exception for message %s', idBaileys)
+        logger.warn('Unknown exception for message %s -> %e', idBaileys, error)
         throw error
       }
     } finally {
