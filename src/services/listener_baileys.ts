@@ -162,8 +162,8 @@ export class ListenerBaileys implements Listener {
       const senderId = resp[2]
       const { dataStore } = await config.getStore(phone, config)
       await dataStore.setJidIfNotFound(jidToPhoneNumber(senderPhone, ''), senderId)
-      logger.debug('Set message status decrypted %s', idBaileys)
-      await store.dataStore.setStatus(idBaileys, 'decrypted')
+      logger.debug('Set message status decrypted %s', originalId)
+      await store.dataStore.setStatus(originalId, 'decrypted')
     } catch (error) {
       if (isDecryptError(error)) {
         logger.debug('DecryptError exception set decryption_failed for message %s', originalId)
