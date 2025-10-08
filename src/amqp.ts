@@ -30,12 +30,11 @@ const withTimeout = (millis, error, promise) => {
   })
 }
 
-export const queueDeadName = (queue: string) => `${queue}.dead`
+export const queueDeadName = (queue: string, suffix = 'dead') => `${queue}.${suffix || 'dead'}`
 export const queueDelayedName = (queue: string) => `${queue}.delayed`
 
 let amqpChannelModel: ChannelModel | undefined
 let amqpChannel: Channel | undefined
-let amqpConnection: Connection | undefined
 
 type QueueObject = {
   queueMain: Replies.AssertQueue
@@ -67,6 +66,7 @@ export type CreateOption = {
   notifyFailedMessages: boolean
   prefetch: number
   type: ExchangeType
+  deadSuffix: string
 }
 
 export type PublishOption = CreateOption & {
@@ -83,9 +83,8 @@ export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   if (!amqpChannelModel) {
     logger.info(`Connecting RabbitMQ at ${amqpUrl}...`)
     amqpChannelModel = await connect(amqpUrl)
-    amqpConnection = amqpChannelModel.connection
   } else {
-    logger.info(`Already connected RabbitMQ!`)
+    logger.info('Already connected RabbitMQ!')
   }
 
   amqpChannelModel.on('error', (err) => {
@@ -168,7 +167,7 @@ export const amqpGetQueue = async (
     const queueMain = await channel?.assertQueue(queue, { durable: true })!
     let deadLetterExchange = exchange
 
-    const queueDeadId = queueDeadName(queue)
+    const queueDeadId = queueDeadName(queue, options?.deadSuffix)
     const exchangeDeadId = queueDeadName(exchange)
     const queueDead = await channel?.assertQueue(queueDeadId, { durable: true })!
     await amqpChannel?.bindQueue(queueDeadId, exchangeDeadId, `${queueDeadId}.*`)
@@ -213,6 +212,7 @@ export const amqpPublish = async (
   options: Partial<PublishOption> = {
     delay: 0,
     dead: false,
+    deadSuffix: 'dead',
     maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT,
     countRetries: 0,
     priority: 0,
@@ -333,7 +333,7 @@ export const amqpConsume = async (
           message: error.message,
           datetime: new Date(),
         }
-        await amqpPublish(exchange, queue, routingKey, { ...data, traces }, { dead: true, type: options.type })
+        await amqpPublish(exchange, queue, routingKey, { ...data, traces }, { dead: true, deadSuffix: options.deadSuffix, type: options.type })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
         const delay = (options.delay || UNOAPI_MESSAGE_RETRY_DELAY) * countRetries
