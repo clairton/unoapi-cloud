@@ -66,7 +66,7 @@ export type CreateOption = {
   notifyFailedMessages: boolean
   prefetch: number
   type: ExchangeType
-  withRetry: boolean
+  withoutRetry: boolean
 }
 
 export type PublishOption = CreateOption & {
@@ -158,16 +158,16 @@ export const amqpGetQueue = async (
     notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
     type: 'topic',
     prefetch: 1,
-    withRetry: true,
+    withoutRetry: false,
   },
 ): Promise<QueueObject> => {
   if (!queues.get(queue)) {
     await amqpGetExchange(exchange, options.type!, options.prefetch!)
     const channel = await amqpGetChannel()
-    logger.info('Creating queue %s...', queue)
+    logger.info('Creating queue %s withoutRetry %s...', queue, options?.withoutRetry)
     const queueMain = await channel?.assertQueue(queue, { durable: true })!
     let queueDead, queueDelayed
-    if (options?.withRetry) {
+    if (!options?.withoutRetry) {
       let deadLetterExchange = exchange
 
       const queueDeadId = queueDeadName(queue)
@@ -216,7 +216,7 @@ export const amqpPublish = async (
   options: Partial<PublishOption> = {
     delay: 0,
     dead: false,
-    withRetry: true,
+    withoutRetry: true,
     maxRetries: UNOAPI_MESSAGE_RETRY_LIMIT,
     countRetries: 0,
     priority: 0,
@@ -271,7 +271,7 @@ export const amqpConsume = async (
     delay: UNOAPI_MESSAGE_RETRY_DELAY,
     priority: 0,
     notifyFailedMessages: NOTIFY_FAILED_MESSAGES,
-    withRetry: true,
+    withoutRetry: true,
   },
 ) => {
   logger.debug('Configurate to consume exchange: %s, queue: %s, routing key: %s and type: %s', exchange, queue, routingKey, options.type)
