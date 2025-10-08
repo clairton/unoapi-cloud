@@ -53,7 +53,7 @@ export class ListenerJob {
               `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}.undecryptable`,
               phone,
               { messages, type },
-              { withRetry: false, type: 'direct' },
+              { withoutRetry: true, type: 'direct' },
             )
             return this.outgoing.send(phone, error.getContent())
           }
