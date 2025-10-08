@@ -3,7 +3,7 @@ import { IGNORE_OWN_MESSAGES_DECRYPT_ERROR, UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_
 import { Listener } from '../services/listener'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
-import { DecryptError, isDecryptError, isOutgoingMessage } from '../services/transformer'
+import { isDecryptError, isOutgoingMessage } from '../services/transformer'
 import { getConfig } from '../services/config'
 
 export class ListenerJob {
@@ -17,7 +17,7 @@ export class ListenerJob {
     this.getConfig = getConfig
   }
 
-  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number; priority: 0; deadSuffix: string }) {
+  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number; priority: 0 }) {
     const config = await this.getConfig(phone)
     if (config.server !== UNOAPI_SERVER_NAME) {
       logger.info(`Ignore listener routing key ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
@@ -48,8 +48,14 @@ export class ListenerJob {
           } else if (options && options?.countRetries >= options?.maxRetries) {
             logger.warn('Decryption error overread max retries message %s', error.getMessageId())
             // send message asking to open whatsapp to see
-            await this.outgoing.send(phone, error.getContent())
-            options.deadSuffix = 'undecryptable'
+            await amqpPublish(
+              UNOAPI_EXCHANGE_BRIDGE_NAME,
+              `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}.undecryptable`,
+              phone,
+              { messages, type },
+              { withRetry: false, type: 'direct' },
+            )
+            return this.outgoing.send(phone, error.getContent())
           }
         }
         throw error
