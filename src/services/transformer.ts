@@ -307,7 +307,7 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
         const vcard = 'BEGIN:VCARD\n' + 'VERSION:3.0\n' + `N:${contacName}\n` + `TEL;type=CELL;type=VOICE;waid=${waid}:${number}\n` + 'END:VCARD'
         contacts.push({ vcard })
       }
-      const displayName = contact['phones'].length > 1 ? `${contact['phones'].length} contacts` : contacName
+      const displayName = contacts.length > 1 ? `${contacts.length} contacts` : contacName
       response[type] = { displayName, contacts }
       break
 
