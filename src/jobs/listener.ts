@@ -17,7 +17,7 @@ export class ListenerJob {
     this.getConfig = getConfig
   }
 
-  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number; priority: 0 }) {
+  async consume(phone: string, data: object, options?: { countRetries: number; maxRetries: number; priority: 0; deadSuffix: string }) {
     const config = await this.getConfig(phone)
     if (config.server !== UNOAPI_SERVER_NAME) {
       logger.info(`Ignore listener routing key ${phone} server ${config.server} is not server current server ${UNOAPI_SERVER_NAME}...`)
@@ -49,6 +49,7 @@ export class ListenerJob {
             logger.warn('Decryption error overread max retries message %s', error.getMessageId())
             // send message asking to open whatsapp to see
             await this.outgoing.send(phone, error.getContent())
+            options.deadSuffix = 'undecryptable'
           }
         }
         throw error
