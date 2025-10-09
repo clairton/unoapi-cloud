@@ -154,21 +154,28 @@ export class ListenerBaileys implements Listener {
       }
     }
 
+    const { dataStore } = await config.getStore(phone, config)
     let data
     try {
       const resp = fromBaileysMessageContent(phone, i, config)
       data = resp[0]
       const senderPhone = resp[1]
       const senderId = resp[2]
-      const { dataStore } = await config.getStore(phone, config)
       await dataStore.setJidIfNotFound(jidToPhoneNumber(senderPhone, ''), senderId)
       logger.debug('Set message status decrypted %s', originalId)
       await store.dataStore.setStatus(originalId, 'decrypted')
     } catch (error) {
       if (isDecryptError(error)) {
-        logger.debug('DecryptError exception set decryption_failed for message %s', originalId)
-        await store.dataStore.setStatus(originalId, 'decryption_failed') 
-        throw error
+        const currentStatus = await dataStore.loadStatus(originalId)
+        logger.debug('Retrieved message %s status %s', originalId, currentStatus)
+        if (currentStatus != 'decrypted') {
+          logger.debug('DecryptError exception set decryption_failed for message %s', originalId)
+          await store.dataStore.setStatus(originalId, 'decryption_failed')
+          throw error
+        } else {
+          logger.debug('Ignore decrypt error because message status is decrypted %s', originalId)
+          return
+        }
       } else if (isBindTemplateError(error)) {
         const template = new Template(this.getConfig)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
