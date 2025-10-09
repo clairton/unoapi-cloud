@@ -164,7 +164,7 @@ export const amqpGetQueue = async (
   if (!queues.get(queue)) {
     await amqpGetExchange(exchange, options.type!, options.prefetch!)
     const channel = await amqpGetChannel()
-    logger.info('Creating queue %s withoutRetry %s...', queue, options?.withoutRetry)
+    logger.info('Creating queue %s withoutRetry %s...', queue, !!options?.withoutRetry)
     const queueMain = await channel?.assertQueue(queue, { durable: true })!
     let queueDead, queueDelayed
     if (!options?.withoutRetry) {
@@ -184,12 +184,13 @@ export const amqpGetQueue = async (
         },
       })!
       await amqpChannel?.bindQueue(queueDelayedId, exchangeDelayedId, `${queueDelayedId}.*`)
+    } else {
+      await amqpChannel?.bindQueue(exchange, queue, `${queue}.${routingKey}`)
     }
 
     queues.set(queue, { queueMain, queueDead, queueDelayed })
     logger.info('Created queue %s!', queue)
   }
-
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
     await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '', { routingKey }, { type: 'direct' })
