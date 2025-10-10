@@ -6,7 +6,7 @@ const multiTransport = P.transport({
     {
       level: UNO_LOG_LEVEL,
       target: 'pino/file',
-      options: { destination: './data/logs/unoapi.log' }
+      options: { destination: './data/logs/unoapi.log' },
     },
     {
       level: UNO_LOG_LEVEL,

@@ -105,10 +105,16 @@ export class ListenerBaileys implements Listener {
       await store.dataStore.setMessage(i.key.remoteJid!, i)
       if (!i.key['originalId']) {
         i.key['originalId'] = idBaileys
-        const idUno = generateUnoId()
-        await store.dataStore.setUnoId(idUno, idBaileys)
-        await store.dataStore.setUnoId(idBaileys, idUno)
-        await store.dataStore.setKey(idBaileys, i.key)
+        let idUno = await store.dataStore.loadUnoId(idBaileys)
+        if (!idUno) {
+          idUno = generateUnoId('OUT')
+          logger.debug('Generated new unoapi id %s for %s', idUno, idBaileys)
+          await store.dataStore.setUnoId(idUno, idBaileys)
+          await store.dataStore.setUnoId(idBaileys, idUno)
+          await store.dataStore.setKey(idBaileys, i.key)
+        } else {
+          logger.debug('Retrieved unoapi id %s for %s', idUno, idBaileys)
+        }
         i.key.id = idUno
         await store.dataStore.setMessage(i.key.remoteJid!, i)
       }
