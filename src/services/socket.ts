@@ -14,6 +14,7 @@ import makeWASocket, {
   UserFacingSocketConfig,
   fetchLatestWaWebVersion,
   MessageRetryMap,
+  WAVersion,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
@@ -133,7 +134,18 @@ export const connect = async ({
 }) => {
   let sock: WASocket | undefined = undefined
   const msgRetryCounterMap: MessageRetryMap = {}
-  const whatsappVersion = config.whatsappVersion
+  let whatsappVersion = config.whatsappVersion
+  if (!whatsappVersion) {
+    // Absolute minimal headers required to bypass anti-bot detection
+		const headers = {
+			'sec-fetch-site': 'none',
+			'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+		}
+    const { version, error } = await fetchLatestWaWebVersion({ headers })
+    if (!error) {
+      whatsappVersion = version as WAVersion
+    }
+  }
   const eventsMap = new Map()
   const { dataStore, state, saveCreds, sessionStore } = store
   const firstSaveCreds = async () => {
