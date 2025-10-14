@@ -416,7 +416,7 @@ export class ClientBaileys implements Client {
               logger.debug('key %s for %s', JSON.stringify(key), payload?.message_id)
               if (key?.id) {
                 if (isUnoId(key?.id)) {
-                  logger.debug('Ignore read message for %s with key id %s reading message key %s...', this.phone, key?.id)
+                  logger.debug('Ignore read message for %s with key id %s', this.phone, key?.id)
                 } else {
                   logger.debug('baileys %s reading message key %s...', this.phone, JSON.stringify(key))
                   if (await this.readMessages([key])) {
@@ -436,7 +436,7 @@ export class ClientBaileys implements Client {
             logger.debug('key %s for %s', JSON.stringify(key), payload?.message_id)
             if (key?.id) {
               if (isUnoId(key?.id)) {
-                logger.debug('Ignore delete message for %s with key id %s reading message key %s...', this.phone, key?.id)
+                logger.debug('Ignore delete message for %s with key id %s', this.phone, key?.id)
               } else {
                 logger.debug('baileys %s deleting message key %s...', this.phone, JSON.stringify(key))
                 if (await this.sendMessage(key.remoteJid!, { delete: key }, {})) {
