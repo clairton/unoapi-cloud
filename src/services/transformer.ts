@@ -66,6 +66,7 @@ export const TYPE_MESSAGES_TO_READ = [
   'documentWithCaptionMessage',
   'viewOnceMessageV2',
   'viewOnceMessageV2Extension',
+  'lottieStickerMessage',
   'imageMessage',
   'videoMessage',
   'audioMessage',
@@ -737,6 +738,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       case 'documentWithCaptionMessage':
       // {"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3A3BD07D3529A482876A"},"messageTimestamp":1726448401,"pushName":"Clairton Rodrigo Heinzen","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"FxWbzja6L9qr6A==","senderTimestamp":"1725477022","recipientKeyHash":"HDhq+OTRdd9hhg==","recipientTimestamp":"1725986929"},"deviceListMetadataVersion":2},"viewOnceMessageV2Extension":{"message":{"audioMessage":{"url":"https://mmg.whatsapp.net/v/t62.7117-24/26550443_409309922183140_5545513783776136395_n.enc?ccb=11-4&oh=01_Q5AaIFdNmgUqP86I5VM6WLnt4i1h6wxOoPGY2kvj7wQlhE4c&oe=670EF9DE&_nc_sid=5e03e0&mms3=true","mimetype":"audio/ogg; codecs=opus","fileSha256":"kIFwwAF/PlmPp/Lxy2lVKgt8aq+fzSe+XmRwT5/Cn5A=","fileLength":"11339","seconds":8,"ptt":true,"mediaKey":"MEOnPR/10pkdQhNjjoB1yJXOZ/x9XAJk0m1XI1g7tdM=","fileEncSha256":"ZS1J1Zkjd93jz8TVg9rlNSotMCVbbZyBR/lOIwQhkSI=","directPath":"/v/t62.7117-24/26550443_409309922183140_5545513783776136395_n.enc?ccb=11-4&oh=01_Q5AaIFdNmgUqP86I5VM6WLnt4i1h6wxOoPGY2kvj7wQlhE4c&oe=670EF9DE&_nc_sid=5e03e0","mediaKeyTimestamp":"1726448391","streamingSidecar":"hRM//de8KSrVng==","waveform":"AAYEAgEBAQMGFxscHBQkJBscIyMcHBUPCQQCAQEAAAEPIRwkHhgXGBQJBAIBAAAAAAAAAAAAAAAAAAAAAAAAAA==","viewOnce":true}}}}}
       case 'viewOnceMessageV2Extension':
+      case 'lottieStickerMessage':
         const changedPayload = {
           ...payload,
           message: binMessage.message,
