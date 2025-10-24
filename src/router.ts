@@ -29,6 +29,7 @@ import { Contact } from './services/contact'
 import { ContactDummy } from './services/contact_dummy'
 import { middlewareNext } from './services/middleware_next'
 import { TimerController } from './controllers/timer_controller'
+import { WABA_ID ,BUSINESS_ID } from './defaults'
 
 export const router = (
   incoming: Incoming,
@@ -52,7 +53,7 @@ export const router = (
   const mediaController = new MediaController(baseUrl, getConfig)
   const templatesController = new TemplatesController(getConfig)
   const registrationController = new RegistrationController(getConfig, reload, logout)
-  const phoneNumberController = new PhoneNumberController(getConfig, sessionStore)
+  const phoneNumberController = new PhoneNumberController(getConfig, sessionStore,reload)
   const sessionController = new SessionController(getConfig, onNewLogin, socket)
   const webhookController = new WebhookController(outgoing, getConfig)
   const blacklistController = new BlacklistController(addToBlacklist)
@@ -68,6 +69,20 @@ export const router = (
   // for default webhook
   const webhookFakeController = new WebhookFakeController()
   router.post('/webhooks/fake/:phone', webhookFakeController.fake.bind(webhookFakeController))
+
+  // BUSINESS ID COMPATIBILITY ROUTES
+  // -> owned_whatsapp_business_accounts || accounts
+  router.get(`/:version/${BUSINESS_ID}/owned_whatsapp_business_accounts`, middleware, phoneNumberController.accounts.bind(phoneNumberController))
+  router.get(`/:version/${BUSINESS_ID}/`, middleware, phoneNumberController.accounts.bind(phoneNumberController))
+  
+  // WABA ID COMPATIBILITY ROUTES
+  router.get(`/:version/${WABA_ID}/`, middleware, phoneNumberController.waba.bind(phoneNumberController))
+  router.get(`/:version/${WABA_ID}/phone_numbers`, middleware, phoneNumberController.waba.bind(phoneNumberController))
+  // DEBUG TOKEN ROUTE
+  router.get('/debug_token', middleware, phoneNumberController.debugToken.bind(phoneNumberController))
+  // WABA SUBSCRIPTION ROUTES
+  router.get(`/:phone/subscriptions`, phoneNumberController.getsubs.bind(phoneNumberController))
+  router.post(`/:phone/subscriptions`, phoneNumberController.addsubs.bind(phoneNumberController))
 
   //Routes
   router.get('/', indexController.root)
