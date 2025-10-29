@@ -540,12 +540,14 @@ export const connect = async ({
       const proxy = makeWASocket(socketConfig)
       const handler = {
         apply: (target, _thisArg, argumentsList) => {
+          logger.debug(`proxy handler call: ${target} -> ${argumentsList}`)
           try {
             return target(...argumentsList)
           } catch (error) {
+            logger.error(`proxy handler error: ${error}`)
             if (error && error.isBoom && !error.isServer) {
               onClose({ lastDisconnect: { error } })
-              return
+              return false
             } else {
               throw error
             }
@@ -554,6 +556,7 @@ export const connect = async ({
       }
       sock = new Proxy(proxy, handler)
     } catch (error: any) {
+      logger.error(`makeWASocket error: ${error}`)
       if (error && error.isBoom && !error.isServer) {
         await onClose({ lastDisconnect: { error } })
         return false
