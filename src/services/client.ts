@@ -24,7 +24,7 @@ export class ConnectionInProgress extends Error {
 }
 
 export interface Client {
-  connect(time: number): Promise<void>
+  connect(time: number): Promise<void | boolean>
 
   disconnect(): Promise<void>
 

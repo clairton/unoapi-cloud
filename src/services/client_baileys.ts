@@ -70,12 +70,14 @@ export const getClientBaileys: getClient = async ({
     }
     if (config.autoConnect) {
       logger.info('Connecting client %s', phone)
-      await client.connect(1)
+      if (await client.connect(1)) {
+        clients.set(phone, client)
+      }
       logger.info('Created and connected client %s', phone)
     } else {
       logger.info('Config client to not auto connect %s', phone)
+      clients.set(phone, client)
     }
-    clients.set(phone, client)
   } else {
     logger.debug('Retrieving client baileys %s', phone)
   }
@@ -233,7 +235,9 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onReconnect: OnReconnect = async (time: number) => this.connect(time)
+  private onReconnect: OnReconnect = async (time: number) => { 
+    await this.connect(time)
+  }
 
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
@@ -304,6 +308,7 @@ export class ClientBaileys implements Client {
     }
     await this.subscribe()
     logger.debug('Client Baileys connected for %s', this.phone)
+    return true
   }
 
   async disconnect() {
