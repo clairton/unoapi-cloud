@@ -25,6 +25,9 @@ export class IncomingBaileys implements Incoming {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
+    if (!client) {
+      throw 'Disconnected Client ' + phone
+    }
     logger.debug('Retrieved client for %s', phone)
     return client.send(payload, options)
   }

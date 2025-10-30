@@ -33,7 +33,7 @@ export class LogoutBaileys implements Logout {
         getConfig: this.getConfig,
         onNewLogin: this.onNewLogin,
       })
-      await client.logout()
+      await client?.logout()
     }
     await dataStore.cleanSession(true)
     clients.delete(phone)
