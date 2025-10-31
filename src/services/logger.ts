@@ -27,9 +27,9 @@ if (UNOAPI_LOG_MODES.includes('file')) {
       size: '1m', // Optional: Rotate also at 10MB file size
       mkdir: true, // Create the logs directory if it doesn't exist
       limit: {
-        count: 1000
-      }
-    }
+        count: 1000,
+      },
+    },
   })
 }
 const transport = { targets } as any

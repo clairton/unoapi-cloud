@@ -389,6 +389,13 @@
                                 </label>
                                 <label for="ignoreBroadcastMessages" class="form-label">Ignorar Listas de Transmissão</label>
                             </div>
+                            <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
+                                <label class="switch">
+                                    <input type="checkbox" id="outgoingMessagesCoex" name="outgoingMessagesCoex">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="outgoingMessagesCoex" class="form-label">Envia mensagem de saída no formato coex</label>
+                            </div>
                         </div>
                         <div id="webhooksContainer">
                             <h6>Webhooks</h6>
@@ -814,6 +821,7 @@
                 $('#sendReactionAsReply').prop('checked', session.sendReactionAsReply);
                 $('#autoConnect').prop('checked', session.autoConnect);
                 $('#ignoreBroadcastMessages').prop('checked', session.ignoreBroadcastMessages);
+                $('#outgoingMessagesCoex').prop('checked', session.outgoingMessagesCoex);
                 $('#connectionType').val(session.connectionType);
                 $('#proxyUrl').val(session.proxyUrl);
                 $('#server').val(session.server);
@@ -907,6 +915,7 @@
                         sendReactionAsReply: $('#sendReactionAsReply').is(':checked'),
                         autoConnect: $('#autoConnect').is(':checked'),
                         ignoreBroadcastMessages: $('#ignoreBroadcastMessages').is(':checked'),
+                        outgoingMessagesCoex: $('#outgoingMessagesCoex').is(':checked'),
                         connectionType: $('#connectionType').val(),
                         proxyUrl: $('#proxyUrl').val(),
                         server: $('#server').val(),

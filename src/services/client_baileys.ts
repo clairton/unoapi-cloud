@@ -235,7 +235,7 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onReconnect: OnReconnect = async (time: number) => { 
+  private onReconnect: OnReconnect = async (time: number) => {
     await this.connect(time)
   }
 

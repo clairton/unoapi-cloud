@@ -19,6 +19,8 @@ import {
   isDecryptError,
   isBindTemplateError,
   BindTemplateError,
+  extractFromPhone,
+  extractTypeMessage,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -55,6 +57,91 @@ describe('service transformer', () => {
       ],
     }
     expect(extractDestinyPhone(payload)).toBe('y')
+  })
+
+  test('return y extractDestinyPhone from webhook payload message with message_echoes', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                message_echoes: [{ to: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(extractDestinyPhone(payload)).toBe('y')
+  })
+
+  test('return y extractFromPhone from webhook payload message with message_echoes', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                message_echoes: [{ from: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(extractFromPhone(payload)).toBe('y')
+  })
+
+  test('return y extractFromPhone from webhook payload message with messages', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                messages: [{ from: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(extractFromPhone(payload)).toBe('y')
+  })
+
+  test('return y extractTypeMessage with message_echoes', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                message_echoes: [{ type: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(extractTypeMessage(payload)).toBe('y')
+  })
+
+  test('return y extractTypeMessage with messages', async () => {
+    const payload = {
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                messages: [{ type: 'y' }],
+              },
+            },
+          ],
+        },
+      ],
+    }
+    expect(extractTypeMessage(payload)).toBe('y')
   })
 
   test('isDecryptError true', async () => {
@@ -323,6 +410,58 @@ describe('service transformer', () => {
 
   test('jidToPhoneNumber without + and put 9˚ digit', async () => {
     expect(jidToPhoneNumber('+554988290955@s.whatsapp.net', '')).toEqual('5549988290955')
+  })
+
+  test('fromBaileysMessageContent config outgoingMessagesCoex', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const body = `${new Date().getTime()}`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `Mary ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: true,
+        id,
+      },
+      message: {
+        conversation: body,
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                message_echoes: [
+                  {
+                    to: '5549988290955',
+                    from: phoneNumer,
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body },
+                    type: 'text',
+                  },
+                ],
+                statuses: [],
+                errors: [],
+              },
+              field: 'smb_message_echoes',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input, { outgoingMessagesCoex: true })[0]).toEqual(output)
   })
 
   test('fromBaileysMessageContent with editedMessage for imageMessage', async () => {
