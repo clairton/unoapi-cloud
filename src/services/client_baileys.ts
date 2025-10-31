@@ -143,7 +143,7 @@ export class ClientBaileys implements Client {
   private rejectCall: rejectCall | undefined = rejectCallDefault
   private listener: Listener
   private store: Store | undefined
-  private calls = new Map<string, boolean>()
+  private calls = new Map<string, Map<string, boolean>>()
   private getConfig: getConfig
   private onNewLogin
 
@@ -372,7 +372,10 @@ export class ClientBaileys implements Client {
       for (let i = 0; i < events.length; i++) {
         const { from, id, status } = events[i]
         if (status == 'ringing' && !this.calls.has(from)) {
-          this.calls.set(from, true)
+          if (!this.calls.has(this.phone)) {
+            this.calls.set(this.phone, new Map<string, boolean>())
+          }
+          this.calls.get(this.phone)?.set(from, true)
           if (this.config.rejectCalls && this.rejectCall) {
             await this.rejectCall(id, from)
             await this.sendMessage(from, { text: this.config.rejectCalls }, {})
@@ -394,8 +397,8 @@ export class ClientBaileys implements Client {
             await this.listener.process(this.phone, [message], 'notify')
           }
           setTimeout(() => {
-            logger.debug('Clean call rejecteds %s', from)
-            this.calls.delete(from)
+            logger.debug('Clean call rejecteds %s -> %s', this.phone, from)
+            this.calls.get(this.phone)?.delete(from)
           }, 10_000)
         }
       }
