@@ -3861,10 +3861,10 @@ baileys@^6.7.8:
     protobufjs "^7.2.4"
     ws "^8.13.0"
 
-"baileys@npm:whaileys@6.3.5":
-  version "6.3.5"
-  resolved "https://registry.yarnpkg.com/whaileys/-/whaileys-6.3.5.tgz#246af1664c82bbbf05c32992ea877dc4c1a31aad"
-  integrity sha512-lplpItXlVQzt46b3/0NZo6kWix2ao/XRjmn6bcRA6IUf43LUBYXOFasaD9G/7/piJdKVt6GDyxfMibW3A2FDjA==
+"baileys@npm:whaileys@6.3.8":
+  version "6.3.8"
+  resolved "https://registry.yarnpkg.com/whaileys/-/whaileys-6.3.8.tgz#02829953e3ab1cac492bcef4c99abcaafe7c8e0e"
+  integrity sha512-3pZYp0dP0zp11klZIAX/mpqDGyoFY0o3PPw2fsI+vRhm/DChiioGkYNrCJcmtshDm/Xfl6M/+f5Q0IKVhqfW6g==
   dependencies:
     "@hapi/boom" "^9.1.3"
     axios "^0.24.0"
