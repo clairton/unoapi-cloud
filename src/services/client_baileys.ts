@@ -486,6 +486,7 @@ export class ClientBaileys implements Client {
           let disappearingMessagesInChat: boolean | number = false
           const messageId = payload?.context?.message_id || payload?.context?.id
           if (messageId) {
+            logger.debug('Context message id %s', messageId)
             const key = await this.store?.dataStore?.loadKey(messageId)
             logger.debug('Quoted message key %s!', key?.id)
             if (key?.id) {
@@ -496,6 +497,9 @@ export class ClientBaileys implements Client {
                 if (unoId) {
                   quoted = await this.store?.dataStore.loadMessage(remoteJid, unoId)
                 }
+              }
+              if (quoted && quoted['key'] && quoted['key']['originalId']) {
+                quoted.key.id = quoted['key']['originalId']
               }
               logger.debug('Quoted message %s!', JSON.stringify(quoted))
             }
