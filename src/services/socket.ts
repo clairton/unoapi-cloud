@@ -161,6 +161,7 @@ export const connect = async ({
       } else {
         logger.info(`Correct save creds with number is ${phoneCreds} and configured number ${phone}`)
         currentSaveCreds = saveCreds
+        await saveCreds()
       }
     }
   }
