@@ -59,7 +59,8 @@ export class ClientForward implements Client {
         conversation: 'Starting unoapi forwarder......',
       },
     }
-    return this.listener.process(this.phone, [message], 'status')
+    await this.listener.process(this.phone, [message], 'status')
+    return true
   }
 
   public getMessageMetadata<T>(_message: T): Promise<T> {

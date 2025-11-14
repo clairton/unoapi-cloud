@@ -573,7 +573,6 @@ http://localhost:9876/v17.0/5549988290955/templates \
 
 PS: After update JSON, restart de docker container or service
 
-
 ## Examples
 
 ### [Docker compose with chatwoot](examples/chatwoot/README.md)

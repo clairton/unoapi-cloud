@@ -40,6 +40,7 @@ export type WebhookForward = {
 }
 
 export type Config = {
+  outgoingMessagesCoex: boolean | undefined
   ignoreGroupMessages: boolean
   ignoreNewsletterMessages: boolean
   ignoreBroadcastMessages: boolean
@@ -91,6 +92,7 @@ export type Config = {
 }
 
 export const defaultConfig: Config = {
+  outgoingMessagesCoex: false,
   ignoreGroupMessages: true,
   ignoreNewsletterMessages: true,
   ignoreBroadcastStatuses: true,

@@ -25,6 +25,9 @@ export default class ContactBaileys implements Contact {
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
+    if (!client) {
+      throw 'Disconnected Client ' + phone
+    }
     const contacts = await client.contacts(numbers)
     if (webhook) {
       const body = JSON.stringify({ contacts })

@@ -70,12 +70,14 @@ export const getClientBaileys: getClient = async ({
     }
     if (config.autoConnect) {
       logger.info('Connecting client %s', phone)
-      await client.connect(1)
+      if (await client.connect(1)) {
+        clients.set(phone, client)
+      }
       logger.info('Created and connected client %s', phone)
     } else {
       logger.info('Config client to not auto connect %s', phone)
+      clients.set(phone, client)
     }
-    clients.set(phone, client)
   } else {
     logger.debug('Retrieving client baileys %s', phone)
   }
@@ -141,7 +143,7 @@ export class ClientBaileys implements Client {
   private rejectCall: rejectCall | undefined = rejectCallDefault
   private listener: Listener
   private store: Store | undefined
-  private calls = new Map<string, boolean>()
+  private calls = new Map<string, Map<string, boolean>>()
   private getConfig: getConfig
   private onNewLogin
 
@@ -233,7 +235,9 @@ export class ClientBaileys implements Client {
     }
   }
 
-  private onReconnect: OnReconnect = async (time: number) => this.connect(time)
+  private onReconnect: OnReconnect = async (time: number) => {
+    await this.connect(time)
+  }
 
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
@@ -304,6 +308,7 @@ export class ClientBaileys implements Client {
     }
     await this.subscribe()
     logger.debug('Client Baileys connected for %s', this.phone)
+    return true
   }
 
   async disconnect() {
@@ -367,7 +372,10 @@ export class ClientBaileys implements Client {
       for (let i = 0; i < events.length; i++) {
         const { from, id, status } = events[i]
         if (status == 'ringing' && !this.calls.has(from)) {
-          this.calls.set(from, true)
+          if (!this.calls.has(this.phone)) {
+            this.calls.set(this.phone, new Map<string, boolean>())
+          }
+          this.calls.get(this.phone)?.set(from, true)
           if (this.config.rejectCalls && this.rejectCall) {
             await this.rejectCall(id, from)
             await this.sendMessage(from, { text: this.config.rejectCalls }, {})
@@ -389,8 +397,8 @@ export class ClientBaileys implements Client {
             await this.listener.process(this.phone, [message], 'notify')
           }
           setTimeout(() => {
-            logger.debug('Clean call rejecteds %s', from)
-            this.calls.delete(from)
+            logger.debug('Clean call rejecteds %s -> %s', this.phone, from)
+            this.calls.get(this.phone)?.delete(from)
           }, 10_000)
         }
       }
@@ -478,6 +486,7 @@ export class ClientBaileys implements Client {
           let disappearingMessagesInChat: boolean | number = false
           const messageId = payload?.context?.message_id || payload?.context?.id
           if (messageId) {
+            logger.debug('Context message id %s', messageId)
             const key = await this.store?.dataStore?.loadKey(messageId)
             logger.debug('Quoted message key %s!', key?.id)
             if (key?.id) {
@@ -488,6 +497,9 @@ export class ClientBaileys implements Client {
                 if (unoId) {
                   quoted = await this.store?.dataStore.loadMessage(remoteJid, unoId)
                 }
+              }
+              if (quoted && quoted['key'] && quoted['key']['originalId']) {
+                quoted.key.id = quoted['key']['originalId']
               }
               logger.debug('Quoted message %s!', JSON.stringify(quoted))
             }

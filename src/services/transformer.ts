@@ -407,7 +407,10 @@ export const extractDestinyPhone = (payload: object, throwError = true) => {
         data.entry[0].changes[0].value.contacts[0].wa_id?.replace('+', '')) ||
         (data.entry[0].changes[0].value.statuses &&
           data.entry[0].changes[0].value.statuses[0] &&
-          data.entry[0].changes[0].value.statuses[0].recipient_id?.replace('+', ''))))
+          data.entry[0].changes[0].value.statuses[0].recipient_id?.replace('+', '')) ||
+        (data.entry[0].changes[0].value.message_echoes &&
+          data.entry[0].changes[0].value.message_echoes[0] &&
+          data.entry[0].changes[0].value.message_echoes[0].to.replace('+', ''))))
   if (!number && throwError) {
     throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
   }
@@ -421,9 +424,12 @@ export const extractFromPhone = (payload: object, throwError = true) => {
     data.entry[0].changes &&
     data.entry[0].changes[0] &&
     data.entry[0].changes[0].value &&
-    data.entry[0].changes[0].value.messages &&
-    data.entry[0].changes[0].value.messages[0] &&
-    data.entry[0].changes[0].value.messages[0].from?.replace('+', '')
+    ((data.entry[0].changes[0].value.messages &&
+      data.entry[0].changes[0].value.messages[0] &&
+      data.entry[0].changes[0].value.messages[0].from?.replace('+', '')) ||
+      (data.entry[0].changes[0].value.message_echoes &&
+        data.entry[0].changes[0].value.message_echoes[0] &&
+        data.entry[0].changes[0].value.message_echoes[0].from?.replace('+', '')))
   if (!number && throwError) {
     throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
   }
@@ -489,9 +495,10 @@ export const extractTypeMessage = (payload: object) => {
     data.entry[0].changes &&
     data.entry[0].changes[0] &&
     data.entry[0].changes[0].value &&
-    data.entry[0].changes[0].value.messages &&
-    data.entry[0].changes[0].value.messages[0] &&
-    data.entry[0].changes[0].value.messages[0].type
+    ((data.entry[0].changes[0].value.messages && data.entry[0].changes[0].value.messages[0] && data.entry[0].changes[0].value.messages[0].type) ||
+      (data.entry[0].changes[0].value.message_echoes &&
+        data.entry[0].changes[0].value.message_echoes[0] &&
+        data.entry[0].changes[0].value.message_echoes[0].type))
   )
 }
 
@@ -600,6 +607,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statuses: any[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fieldMessage = config?.outgoingMessagesCoex ? 'message_echoes' : 'messages'
     const messages: any[] = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors: any[] = []
@@ -610,21 +618,23 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           display_phone_number: phone.replace('+', ''),
           phone_number_id: phone.replace('+', ''),
         },
-        messages,
-        contacts: [
-          {
-            profile: {
-              name: profileName,
-              picture: payload.profilePicture,
-            },
-            ...groupMetadata,
-            wa_id: senderPhone.replace('+', '') || senderId,
-          },
-        ],
+        [fieldMessage]: messages,
         statuses,
         errors,
       },
-      field: 'messages',
+      field: config?.outgoingMessagesCoex ? 'smb_message_echoes' : 'messages',
+    }
+    if (!config?.outgoingMessagesCoex) {
+      change.value.contacts = [
+        {
+          profile: {
+            name: profileName,
+            picture: payload.profilePicture,
+          },
+          ...groupMetadata,
+          wa_id: senderPhone.replace('+', '') || senderId,
+        },
+      ]
     }
     const data = {
       object: 'whatsapp_business_account',
@@ -639,6 +649,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     const message: any = {
       from: fromMe ? phone.replace('+', '') : senderPhone.replace('+', '') || senderId,
       id: whatsappMessageId,
+    }
+    if (config?.outgoingMessagesCoex) {
+      message.to = !fromMe ? phone.replace('+', '') : senderPhone.replace('+', '') || senderId
     }
     if (payload.messageTimestamp) {
       message['timestamp'] = payload.messageTimestamp.toString()
@@ -809,7 +822,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             body: MESSAGE_CHECK_WAAPP || t('failed_decrypt'),
           }
           message.type = 'text'
-          change.value.messages.push(message)
+          messages.push(message)
           throw new DecryptError(data, originalId || whatsappMessageId)
         } else {
           return [null, senderPhone, senderId, chatJid]
@@ -968,7 +981,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           `
         }
       }
-      change.value.messages.push(message)
+      messages.push(message)
     }
     logger.debug('fromBaileysMessageContent %s => %s', phone, JSON.stringify(data))
     return [data, senderPhone, senderId, chatJid]
