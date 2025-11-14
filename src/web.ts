@@ -28,6 +28,11 @@ import { BroacastJob } from './jobs/broadcast'
 import { ReloadAmqp } from './services/reload_amqp'
 import { LogoutAmqp } from './services/logout_amqp'
 import { Reload } from './services/reload'
+import { ListenerBaileys } from ‘./services/listener_baileys’
+import ContactBaileys from ‘./services/contact_baileys’
+import { getClientBaileys } from ‘./services/client_baileys’
+import { Contact } from ‘./services/contact’
+import injectRouteDummy from ‘./services/inject_route_dummy’
 
 import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
@@ -43,6 +48,8 @@ const outgoing: Outgoing = new OutgoingAmqp(getConfigRedis)
 const sessionStore: SessionStore = new SessionStoreRedis()
 const onNewLogin = onNewLoginGenerateToken(outgoing)
 const broadcast: Broadcast = new Broadcast()
+const listener = new ListenerBaileys(outgoing, broadcast, getConfigRedis)
+const contact: Contact = new ContactBaileys(listener, getConfigRedis, getClientBaileys, onNewLogin)
 const reloadAmqp = new ReloadAmqp(getConfigRedis)
 const logout = new LogoutAmqp(getConfigRedis)
 import { ReloadJob } from './jobs/reload'
@@ -52,7 +59,7 @@ const reloadJob = new ReloadJob(reloadAmqp)
 const securityVar = new Security(sessionStore)
 const middlewareVar = securityVar.run.bind(securityVar) as middleware
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar)
+const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar, injectRouteDummy, contact)
 broadcast.setSever(app.socket)
 
 const broadcastJob = new BroacastJob(broadcast)
