@@ -28,6 +28,16 @@ import { BroacastJob } from './jobs/broadcast'
 import { ReloadAmqp } from './services/reload_amqp'
 import { LogoutAmqp } from './services/logout_amqp'
 import { Reload } from './services/reload'
+import ContactBaileys from './services/contact_baileys'
+import { Contact } from './services/contact'
+import { ReloadJob } from './jobs/reload'
+import Security from './services/security'
+import middleware from './services/middleware'
+import { getClientBaileys } from './services/client_baileys'
+import { ListenerBaileys } from './services/listener_baileys'
+import { Listener } from './services/listener'
+import { ContactDummy } from './services/contact_dummy'
+import injectRouteDummy from './services/inject_route_dummy'
 
 import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
@@ -45,14 +55,19 @@ const onNewLogin = onNewLoginGenerateToken(outgoing)
 const broadcast: Broadcast = new Broadcast()
 const reloadAmqp = new ReloadAmqp(getConfigRedis)
 const logout = new LogoutAmqp(getConfigRedis)
-import { ReloadJob } from './jobs/reload'
-import Security from './services/security'
-import middleware from './services/middleware'
 const reloadJob = new ReloadJob(reloadAmqp)
 const securityVar = new Security(sessionStore)
 const middlewareVar = securityVar.run.bind(securityVar) as middleware
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar)
+let contactType: Contact
+if (process.env.UNOAPI_MODE == 'cloud') {
+  let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigRedis)
+  contactType = new ContactBaileys(listener, getConfigRedis, getClientBaileys, onNewLogin)
+} else {
+  contactType = new ContactDummy()
+}
+
+const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar, injectRouteDummy, contactType!)
 broadcast.setSever(app.socket)
 
 const broadcastJob = new BroacastJob(broadcast)
