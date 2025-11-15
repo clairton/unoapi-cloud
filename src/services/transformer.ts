@@ -227,51 +227,132 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
       response.text = customMessageCharactersFunction(payload.text.body)
       break
     case 'interactive':
-      let listMessage = {}
-      if (payload.interactive.header) {
-        listMessage = {
-          title: payload.interactive.header.text,
-          description: payload.interactive.body.text,
-          buttonText: payload.interactive.action.button,
-          footerText: payload.interactive.footer.text,
-          sections: payload.interactive.action.sections.map(
-            (section: { title: string; rows: { title: string; rowId: string; description: string }[] }) => {
-              return {
-                title: section.title,
-                rows: section.rows.map((row: { title: string; rowId: string; description: string }) => {
-                  return {
-                    title: row.title,
-                    rowId: row.rowId,
-                    description: row.description,
-                  }
-                }),
-              }
-            },
-          ),
-          listType: 2,
+      // Build payload according to whaileys / baileys interactive format
+      // If there are sections -> build a list message (title, buttonText, sections)
+      // If there are action.buttons -> build a buttons message (text, footer, buttons)
+      const interactive = payload.interactive || {}
+      const action = interactive.action || {}
+      const header = interactive.header || {}
+      const body = interactive.body || {}
+      const footer = interactive.footer || {}
+
+      // Support header multimedia: if header.type is image/video/document/audio
+      if (header.type && header.type !== 'text') {
+        const mediaType = header.type
+        const mediaObj = header[mediaType] || {}
+        const link = mediaObj.link || mediaObj.url
+        if (link) {
+          // attach media to top-level (baileys accepts e.g. { image: { url } })
+          response[mediaType] = { url: link }
+          if (mediaObj.filename) {
+            response.fileName = mediaObj.filename
+          }
+          try {
+            const tmpPayload: any = { type: mediaType }
+            tmpPayload[mediaType] = { link }
+            const mimetype = getMimetype(tmpPayload)
+            if (mimetype) response.mimetype = mimetype
+          } catch (e) {
+            // ignore mimetype detection errors
+          }
         }
+      }
+
+      // If sections are present, produce a list-style payload expected by baileys
+      if (action.sections && Array.isArray(action.sections) && action.sections.length > 0) {
+        response.text = body.text || ''
+        response.footer = footer.text || ''
+        response.title = header.text || ''
+        response.buttonText = action.button || 'Selecione'
+        response.sections = action.sections.map((section: any) => ({
+          title: section.title || '',
+          rows: (section.rows || []).map((row: any) => ({
+            rowId: row.rowId || row.id || '',
+            title: row.title || '',
+            description: row.description || '',
+          })),
+        }))
+      } else if (action.buttons && Array.isArray(action.buttons) && action.buttons.length > 0) {
+        // Build buttons payload
+        response.text = body.text || action.text || ''
+        response.footer = footer.text || ''
+        response.buttons = action.buttons.map((button: any) => {
+          // Handle different button shapes: reply (quick reply), url, call
+          if (button.reply) {
+            const reply = button.reply
+            const id = reply.id || reply.buttonId || ''
+            const title = reply.title || reply.displayText || reply.buttonText || ''
+            return {
+              buttonId: id,
+              buttonText: { displayText: title },
+              type: 1,
+            }
+          }
+
+          if (button.url) {
+            const urlObj = button.url
+            const link = urlObj.link || urlObj.url || urlObj
+            const title = urlObj.title || urlObj.displayText || link || 'Abrir'
+            // Use the link as buttonId so backend can differentiate and handle it
+            return {
+              buttonId: link || '',
+              buttonText: { displayText: title },
+              type: 1,
+            }
+          }
+
+          if (button.call) {
+            const callObj = button.call
+            const phone = callObj.phone_number || callObj.phone || callObj
+            const title = callObj.title || `Ligar ${phone}`
+            return {
+              buttonId: `call:${phone}`,
+              buttonText: { displayText: title },
+              type: 1,
+            }
+          }
+
+          // Fallback: try generic fields
+          const reply = button.reply || button
+          const id = reply.id || reply.buttonId || reply.url?.link || ''
+          const title = reply.title || reply.displayText || reply.buttonText || reply.url?.title || ''
+          return {
+            buttonId: id,
+            buttonText: { displayText: title },
+            type: 1,
+          }
+        })
       } else {
-        listMessage = {
-          title: '',
-          description: payload.interactive.body.text || 'Nenhuma descriçao encontrada',
-          buttonText: 'Selecione',
-          footerText: '',
-          sections: [
-            {
-              title: 'Opcões',
-              rows: payload.interactive.action.buttons.map((button: { reply: { title: string; id: string; description: string } }) => {
-                return {
-                  title: button.reply.title,
-                  rowId: button.reply.id,
-                  description: '',
-                }
-              }),
-            },
-          ],
+        // Fallback: keep previous listMessage behaviour as a compatibility layer
+        const sections = action.sections
+          ? action.sections.map((section: any) => ({
+              title: section.title || '',
+              rows: (section.rows || []).map((row: any) => ({
+                title: row.title || '',
+                rowId: row.rowId || row.id || '',
+                description: row.description || '',
+              })),
+            }))
+          : [
+              {
+                title: 'Opções',
+                rows: (action.buttons || []).map((button: any) => ({
+                  title: button.reply?.title || button.title || '',
+                  rowId: button.reply?.id || button.id || '',
+                  description: button.reply?.description || '',
+                })),
+              },
+            ]
+
+        response.listMessage = {
+          title: header.text || '',
+          description: body.text || 'Nenhuma descriçao encontrada',
+          buttonText: action.button || 'Selecione',
+          footerText: footer.text || '',
+          sections,
           listType: 2,
         }
       }
-      response.listMessage = listMessage
       break
     case 'image':
     case 'audio':
