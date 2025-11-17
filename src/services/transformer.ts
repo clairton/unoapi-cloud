@@ -273,55 +273,94 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
           })),
         }))
       } else if (action.buttons && Array.isArray(action.buttons) && action.buttons.length > 0) {
-        // Build buttons payload
-        response.text = body.text || action.text || ''
-        response.footer = footer.text || ''
-        response.buttons = action.buttons.map((button: any) => {
-          // Handle different button shapes: reply (quick reply), url, call
-          if (button.reply) {
-            const reply = button.reply
+        // Build native flow interactive message (whaileys)
+        const buttons = action.buttons
+          .map((button: any) => {
+            // Quick reply style
+            if (button.reply || button.type === 'reply' || button.type === 'quick_reply') {
+              const reply = button.reply || button
+              const id = reply.id || reply.buttonId || ''
+              const title = reply.title || reply.displayText || reply.buttonText || ''
+              return {
+                name: 'quick_reply',
+                buttonParamsJson: JSON.stringify({
+                  id,
+                  display_text: title,
+                }),
+              }
+            }
+
+            // URL / link button
+            if (button.url || button.type === 'url' || button.type === 'cta_url') {
+              const urlObj = button.url || button
+              const link = urlObj.link || urlObj.url || ''
+              const title = urlObj.title || urlObj.displayText || link || 'Abrir'
+              return {
+                name: 'cta_url',
+                buttonParamsJson: JSON.stringify({
+                  display_text: title,
+                  url: link,
+                }),
+              }
+            }
+
+            // Call button
+            if (button.call || button.type === 'call' || button.type === 'cta_call') {
+              const callObj = button.call || button
+              const phone = callObj.phone_number || callObj.phone || ''
+              const title = callObj.title || `Ligar ${phone}`
+              return {
+                name: 'cta_call',
+                buttonParamsJson: JSON.stringify({
+                  display_text: title,
+                  phone_number: phone,
+                }),
+              }
+            }
+
+            // Copy code button (e.g. PIX)
+            if (button.copy_code || button.type === 'copy_code' || button.type === 'cta_copy') {
+              const copy = button.copy_code || button
+              const code = copy.code || copy.copy_code || ''
+              const title = copy.title || copy.displayText || 'Copiar código'
+              return {
+                name: 'cta_copy',
+                buttonParamsJson: JSON.stringify({
+                  id: copy.id || '',
+                  display_text: title,
+                  copy_code: code,
+                }),
+              }
+            }
+
+            // Fallback: treat as quick reply
+            const reply = button.reply || button
             const id = reply.id || reply.buttonId || ''
             const title = reply.title || reply.displayText || reply.buttonText || ''
             return {
-              buttonId: id,
-              buttonText: { displayText: title },
-              type: 1,
+              name: 'quick_reply',
+              buttonParamsJson: JSON.stringify({
+                id,
+                display_text: title,
+              }),
             }
-          }
+          })
+          .filter(Boolean)
 
-          if (button.url) {
-            const urlObj = button.url
-            const link = urlObj.link || urlObj.url || urlObj
-            const title = urlObj.title || urlObj.displayText || link || 'Abrir'
-            // Use the link as buttonId so backend can differentiate and handle it
-            return {
-              buttonId: link || '',
-              buttonText: { displayText: title },
-              type: 1,
-            }
-          }
-
-          if (button.call) {
-            const callObj = button.call
-            const phone = callObj.phone_number || callObj.phone || callObj
-            const title = callObj.title || `Ligar ${phone}`
-            return {
-              buttonId: `call:${phone}`,
-              buttonText: { displayText: title },
-              type: 1,
-            }
-          }
-
-          // Fallback: try generic fields
-          const reply = button.reply || button
-          const id = reply.id || reply.buttonId || reply.url?.link || ''
-          const title = reply.title || reply.displayText || reply.buttonText || reply.url?.title || ''
-          return {
-            buttonId: id,
-            buttonText: { displayText: title },
-            type: 1,
-          }
-        })
+        response.interactiveMessage = {
+          body: { text: body.text || action.text || '' },
+          footer: footer.text ? { text: footer.text } : undefined,
+          header: {
+            title: header.title || header.text || '',
+            subtitle: header.subtitle || '',
+            hasMediaAttachment: false,
+            // 4 = text header (native flow)
+            type: 4,
+          },
+          nativeFlowMessage: {
+            buttons,
+          },
+        }
       } else {
         // Fallback: keep previous listMessage behaviour as a compatibility layer
         const sections = action.sections
