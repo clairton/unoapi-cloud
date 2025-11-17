@@ -60,6 +60,7 @@ const securityVar = new Security(sessionStore)
 const middlewareVar = securityVar.run.bind(securityVar) as middleware
 
 let contactType: Contact
+console.log('process.env.UNOAPI_MODE', process.env.UNOAPI_MODE)
 if (process.env.UNOAPI_MODE == 'cloud') {
   let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigRedis)
   contactType = new ContactBaileys(listener, getConfigRedis, getClientBaileys, onNewLogin)
