@@ -4,7 +4,7 @@ import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
 import logger from './logger'
 import { Config } from './config'
-import { MESSAGE_CHECK_WAAPP, SEND_AUDIO_MESSAGE_AS_PTT } from '../defaults'
+import { MESSAGE_CHECK_WAAPP, SEND_AUDIO_MESSAGE_AS_PTT, UNOAPI_NATIVE_FLOW_BUTTONS } from '../defaults'
 import { t } from '../i18n'
 
 export const TYPE_MESSAGES_TO_PROCESS_FILE = ['imageMessage', 'videoMessage', 'audioMessage', 'documentMessage', 'stickerMessage', 'ptvMessage']
@@ -273,9 +273,72 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
           })),
         }))
       } else if (action.buttons && Array.isArray(action.buttons) && action.buttons.length > 0) {
-        // Build native flow interactive message (whaileys)
-        const buttons = action.buttons
-          .map((button: any) => {
+        // When native flow buttons are disabled, fall back to classic buttonsMessage
+        if (!UNOAPI_NATIVE_FLOW_BUTTONS) {
+          response.text = body.text || action.text || ''
+          response.footer = footer.text || ''
+          response.buttons = action.buttons.map((button: any) => {
+            // Quick reply style
+            if (button.reply || button.type === 'reply' || button.type === 'quick_reply') {
+              const reply = button.reply || button
+              const id = reply.id || reply.buttonId || ''
+              const title = reply.title || reply.displayText || reply.buttonText || ''
+              return {
+                buttonId: id,
+                buttonText: { displayText: title },
+                type: 1,
+              }
+            }
+
+            // URL / link button
+            if (button.url || button.type === 'url' || button.type === 'cta_url') {
+              const urlObj = button.url || button
+              const link = urlObj.link || urlObj.url || ''
+              const title = urlObj.title || urlObj.displayText || link || 'Abrir'
+              return {
+                buttonId: link || '',
+                buttonText: { displayText: title },
+                type: 1,
+              }
+            }
+
+            // Call button
+            if (button.call || button.type === 'call' || button.type === 'cta_call') {
+              const callObj = button.call || button
+              const phone = callObj.phone_number || callObj.phone || ''
+              const title = callObj.title || `Ligar ${phone}`
+              return {
+                buttonId: `call:${phone}`,
+                buttonText: { displayText: title },
+                type: 1,
+              }
+            }
+
+            // Copy code button (e.g. PIX) - fallback to quick reply behavior
+            if (button.copy_code || button.type === 'copy_code' || button.type === 'cta_copy') {
+              const copy = button.copy_code || button
+              const id = copy.id || ''
+              const title = copy.title || copy.displayText || 'Copiar código'
+              return {
+                buttonId: id,
+                buttonText: { displayText: title },
+                type: 1,
+              }
+            }
+
+            // Fallback: treat as quick reply
+            const reply = button.reply || button
+            const id = reply.id || reply.buttonId || ''
+            const title = reply.title || reply.displayText || reply.buttonText || ''
+            return {
+              buttonId: id,
+              buttonText: { displayText: title },
+              type: 1,
+            }
+          })
+        } else {
+          // Build native flow interactive message (whaileys)
+          const buttons = action.buttons.map((button: any) => {
             // Quick reply style
             if (button.reply || button.type === 'reply' || button.type === 'quick_reply') {
               const reply = button.reply || button
@@ -345,21 +408,20 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
               }),
             }
           })
-          .filter(Boolean)
-
-        response.interactiveMessage = {
-          body: { text: body.text || action.text || '' },
-          footer: footer.text ? { text: footer.text } : undefined,
-          header: {
-            title: header.title || header.text || '',
-            subtitle: header.subtitle || '',
-            hasMediaAttachment: false,
-            // 4 = text header (native flow)
-            type: 4,
-          },
-          nativeFlowMessage: {
-            buttons,
-          },
+          response.interactiveMessage = {
+            body: { text: body.text || action.text || '' },
+            footer: footer.text ? { text: footer.text } : undefined,
+            header: {
+              title: header.title || header.text || '',
+              subtitle: header.subtitle || '',
+              hasMediaAttachment: false,
+              // 4 = text header (native flow)
+              type: 4,
+            },
+            nativeFlowMessage: {
+              buttons,
+            },
+          }
         }
       } else {
         // Fallback: keep previous listMessage behaviour as a compatibility layer
