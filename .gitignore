@@ -10,3 +10,4 @@ data/logs/*
 .env
 .yarn/*
 .yarnrc.yml
+.vscode/
