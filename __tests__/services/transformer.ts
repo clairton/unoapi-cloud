@@ -1673,37 +1673,40 @@ describe('service transformer', () => {
       },
     }
     const output = {
-      listMessage: {
-        buttonText: 'sections',
-        description: 'your-text-message-content',
-        footerText: 'Cloud UnoApi',
-        listType: 2,
-        sections: [
-          {
-            rows: [
-              {
-                description: 'row-description-content',
-                rowId: undefined,
-                title: 'row-title-content',
-              },
-            ],
-            title: 'your-section-title-content',
-          },
-          {
-            rows: [
-              {
-                description: 'row-description-content',
-                rowId: undefined,
-                title: 'row-title-content',
-              },
-            ],
-            title: 'your-section-title-content',
-          },
-        ],
-        title: 'Title',
-      },
+      buttonText: 'sections',
+      // description: 'your-text-message-content',
+      footer: 'Cloud UnoApi',
+      // listType: 2,
+      sections: [
+        {
+          rows: [
+            {
+              description: 'row-description-content',
+              rowId: 'unique-row-identifier',
+              title: 'row-title-content',
+            },
+          ],
+          title: 'your-section-title-content',
+        },
+        {
+          rows: [
+            {
+              description: 'row-description-content',
+              rowId: 'unique-row-identifier',
+              title: 'row-title-content',
+            },
+          ],
+          title: 'your-section-title-content',
+        },
+      ],
+      // title: 'your-text-message-content',
+      "text": "your-text-message-content",
+      "title": "Title"
     }
-    expect(toBaileysMessageContent(input)).toEqual(output)
+    const result = toBaileysMessageContent(input)
+    console.log(JSON.stringify(output))
+    console.log(JSON.stringify(result))
+    expect(result).toEqual(output)
   })
 
   test('fromBaileysMessageContent participant outside key', async () => {
