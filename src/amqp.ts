@@ -15,6 +15,7 @@ import {
   UNOAPI_EXCHANGE_BROKER_NAME,
   UNOAPI_EXCHANGE_BRIDGE_NAME,
   IGNORED_TO_NUMBERS,
+  UNOAPI_QUEUE_LISTENER,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -31,16 +32,17 @@ const withTimeout = (millis, error, promise) => {
 }
 
 export const queueDeadName = (queue: string) => `${queue}.dead`
+export const queueUndecryptableName = (queue: string) => `${queue}.undecryptable`
 export const queueDelayedName = (queue: string) => `${queue}.delayed`
 
 let amqpChannelModel: ChannelModel | undefined
 let amqpChannel: Channel | undefined
-let amqpConnection: Connection | undefined
 
 type QueueObject = {
   queueMain: Replies.AssertQueue
   queueDead: Replies.AssertQueue
   queueDelayed: Replies.AssertQueue
+  queueUndecryptable: Replies.AssertQueue | undefined
 }
 const exchanges = new Map<string, boolean>()
 const queues = new Map<string, QueueObject>()
@@ -71,6 +73,7 @@ export type CreateOption = {
 
 export type PublishOption = CreateOption & {
   dead: boolean
+  undecryptable: boolean
   maxRetries: number
   countRetries: number
 }
@@ -83,9 +86,8 @@ export const amqpConnect = async (amqpUrl = AMQP_URL) => {
   if (!amqpChannelModel) {
     logger.info(`Connecting RabbitMQ at ${amqpUrl}...`)
     amqpChannelModel = await connect(amqpUrl)
-    amqpConnection = amqpChannelModel.connection
   } else {
-    logger.info(`Already connected RabbitMQ!`)
+    logger.info('Already connected RabbitMQ!')
   }
 
   amqpChannelModel.on('error', (err) => {
@@ -124,6 +126,11 @@ export const amqpGetExchange = async (exchange: string, type: ExchangeType, pref
 
     const exchangeDeadId = queueDeadName(exchange)
     await amqpChannel?.assertExchange(exchangeDeadId, 'topic', { durable: true })
+
+    if (exchange.startsWith(UNOAPI_QUEUE_LISTENER)) {
+      const exchangeUndecryptableId = queueUndecryptableName(exchange)
+      await amqpChannel?.assertExchange(exchangeUndecryptableId, 'topic', { durable: true })
+    }
 
     const exchangeDelayedId = queueDelayedName(exchange)
     await amqpChannel?.assertExchange(exchangeDelayedId, 'topic', {
@@ -167,11 +174,18 @@ export const amqpGetQueue = async (
     logger.info('Creating queue %s...', queue)
     const queueMain = await channel?.assertQueue(queue, { durable: true })!
     let deadLetterExchange = exchange
-
     const queueDeadId = queueDeadName(queue)
     const exchangeDeadId = queueDeadName(exchange)
     const queueDead = await channel?.assertQueue(queueDeadId, { durable: true })!
     await amqpChannel?.bindQueue(queueDeadId, exchangeDeadId, `${queueDeadId}.*`)
+    
+    let queueUndecryptable
+    if (queue.startsWith(UNOAPI_QUEUE_LISTENER)) {
+      const queueUndecryptableId = queueUndecryptableName(queue)
+      const exchangeUndecryptableId = queueUndecryptableName(exchange)
+      queueUndecryptable = await channel?.assertQueue(queueUndecryptableId, { durable: true })!
+      await amqpChannel?.bindQueue(queueUndecryptableId, exchangeUndecryptableId, `${queueUndecryptableId}.*`)
+    }
 
     const exchangeDelayedId = queueDelayedName(exchange)
     const queueDelayedId = queueDelayedName(queue)
@@ -183,10 +197,9 @@ export const amqpGetQueue = async (
     })!
     await amqpChannel?.bindQueue(queueDelayedId, exchangeDelayedId, `${queueDelayedId}.*`)
 
-    queues.set(queue, { queueMain, queueDead, queueDelayed })
+    queues.set(queue, { queueMain, queueDead, queueDelayed, queueUndecryptable })
     logger.info('Created queue %s!', queue)
   }
-
   validateRoutingKey(routingKey)
   if (/^\d+$/.test(routingKey) && !routes.get(routingKey)) {
     await amqpPublish(UNOAPI_EXCHANGE_BRIDGE_NAME, `${UNOAPI_QUEUE_BIND}.${UNOAPI_SERVER_NAME}`, '', { routingKey }, { type: 'direct' })
@@ -223,8 +236,8 @@ export const amqpPublish = async (
   options.type = options.type || getExchangeType(exchange)
   logger.debug('Publishing at exchange: %s, with queue: %s, routing key: %s and type: %s', exchange, queue, routingKey, options.type)
   await amqpGetExchange(exchange, options.type!, options.prefetch!)
-  const { queueMain, queueDead, queueDelayed } = await amqpGetQueue(exchange, queue, routingKey, options)
-  const { delay, dead, maxRetries, countRetries } = options
+  const { queueMain, queueDead, queueDelayed, queueUndecryptable } = await amqpGetQueue(exchange, queue, routingKey, options)
+  const { delay, dead, maxRetries, countRetries, undecryptable } = options
   const headers: any = {}
   headers[UNOAPI_X_COUNT_RETRIES] = countRetries
   headers[UNOAPI_X_MAX_RETRIES] = maxRetries
@@ -246,6 +259,9 @@ export const amqpPublish = async (
   } else if (dead) {
     queueUsed = queueDead
     exchangeUsed = queueDeadName(exchange)
+  } else if (undecryptable && queueUndecryptable) {
+    queueUsed = queueUndecryptable
+    exchangeUsed = queueUndecryptableName(exchange)
   }
   const destiny = bindingKey(queueUsed.queue, routingKey)
   await channel?.publish(exchangeUsed, destiny, Buffer.from(JSON.stringify(payload)), properties)
