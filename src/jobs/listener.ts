@@ -49,10 +49,10 @@ export class ListenerJob {
             logger.warn('Decryption error overread max retries message %s', error.getMessageId())
             await amqpPublish(
               UNOAPI_EXCHANGE_BRIDGE_NAME,
-              `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}.undecryptable`,
+              `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}`,
               phone,
               { messages, type },
-              { withoutRetry: true, type: 'direct' },
+              { undecryptable: true, type: 'direct' },
             )
             // send message asking to open whatsapp to see
             return this.outgoing.send(phone, error.getContent())
