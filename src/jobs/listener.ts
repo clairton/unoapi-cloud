@@ -3,7 +3,7 @@ import { IGNORE_OWN_MESSAGES_DECRYPT_ERROR, UNOAPI_EXCHANGE_BRIDGE_NAME, UNOAPI_
 import { Listener } from '../services/listener'
 import logger from '../services/logger'
 import { Outgoing } from '../services/outgoing'
-import { DecryptError, isDecryptError, isOutgoingMessage } from '../services/transformer'
+import { isDecryptError, isOutgoingMessage } from '../services/transformer'
 import { getConfig } from '../services/config'
 
 export class ListenerJob {
@@ -47,8 +47,15 @@ export class ListenerJob {
             return
           } else if (options && options?.countRetries >= options?.maxRetries) {
             logger.warn('Decryption error overread max retries message %s', error.getMessageId())
+            await amqpPublish(
+              UNOAPI_EXCHANGE_BRIDGE_NAME,
+              `${UNOAPI_QUEUE_LISTENER}.${UNOAPI_SERVER_NAME}.undecryptable`,
+              phone,
+              { messages, type },
+              { withoutRetry: true, type: 'direct' },
+            )
             // send message asking to open whatsapp to see
-            await this.outgoing.send(phone, error.getContent())
+            return this.outgoing.send(phone, error.getContent())
           }
         }
         throw error
