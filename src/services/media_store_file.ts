@@ -40,7 +40,9 @@ export const mediaStoreFile = (phone: string, config: Config, getDataStore: getD
 
   mediaStore.saveMediaForwarder = async (message: any) => {
     const filePath = mediaStore.getFilePath(phone, message.id, message[message.type].mime_type)
-    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${message[message.type].id}`
+    const messageSplited = message[message.type].id.split('/')
+    const messageId = messageSplited[messageSplited.length - 1]
+    const url = `${config.webhookForward.url}/${config.webhookForward.version}/${messageId}`
     const { buffer } = await mediaToBuffer(url, config.webhookForward.token!, config.webhookForward?.timeoutMs || 0)
     logger.debug('Saving buffer %s...', filePath)
     await mediaStore.saveMediaBuffer(filePath, buffer)
