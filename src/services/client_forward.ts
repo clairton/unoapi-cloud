@@ -2,7 +2,8 @@ import { Client, Contact } from './client'
 import { getConfig } from './config'
 import { Listener } from './listener'
 import logger from './logger'
-import { isUnoId } from '../utils/id'
+import { generateUnoId, isUnoId } from '../utils/id'
+import { extractDestinyPhone, jidToPhoneNumber } from './transformer'
 
 export class ClientForward implements Client {
   private phone: string
@@ -48,9 +49,49 @@ export class ClientForward implements Client {
     }
     logger.debug('Response status: %s', response?.status)
     if (!response?.ok) {
-      const content = await response.json()
+      const content: any = await response.json()
+      const to = extractDestinyPhone(payload)
       logger.error('Error on send body %s => %s', body, JSON.stringify(content))
-      return { error: content, ok: undefined }
+      let error
+      if (content?.code) {
+        error = {
+          object: 'whatsapp_business_account',
+          entry: [
+            {
+              id: this.phone,
+              changes: [
+                {
+                  value: {
+                    messaging_product: 'whatsapp',
+                    metadata: {
+                      display_phone_number: this.phone.replace('+', ''),
+                      phone_number_id: this.phone.replace('+', ''),
+                    },
+                    statuses: [
+                      {
+                        id: generateUnoId('WARN'),
+                        recipient_id: jidToPhoneNumber(to || this.phone, ''),
+                        status: 'failed',
+                        timestamp: Math.floor(Date.now() / 1000),
+                        errors: [
+                          {
+                            code: content?.code,
+                            title: content?.error_data?.details,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  field: 'messages',
+                },
+              ],
+            },
+          ],
+        }
+      } else {
+        error = content
+      }
+      return { error, ok: undefined }
     } else {
       return { ok: await response.json(), error: undefined }
     }
