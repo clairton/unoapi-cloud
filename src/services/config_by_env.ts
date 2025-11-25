@@ -59,6 +59,7 @@ import {
   OPENAI_API_ASSISTANT_ID,
   WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL,
   OUTGOING_MESSAGES_COEX,
+  GROUP_MESSAGES_CLOUD_FORMAT,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -123,6 +124,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.customMessageCharacters = CUSTOM_MESSAGE_CHARACTERS
     config.whatsappVersion = WHATSAPP_VERSION
     config.outgoingMessagesCoex = OUTGOING_MESSAGES_COEX
+    config.groupMessagesCloudFormat = GROUP_MESSAGES_CLOUD_FORMAT
 
     if (config.customMessageCharacters.length > 0) {
       const getRandomChar = () => {

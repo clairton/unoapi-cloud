@@ -1,4 +1,4 @@
-import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isJidUser, isLidUser, proto, isJidGroup } from 'baileys'
+import { AnyMessageContent, WAMessageContent, WAMessage, isJidNewsletter, isLidUser, proto, isJidGroup } from 'baileys'
 import mime from 'mime-types'
 import { parsePhoneNumber } from 'awesome-phonenumber'
 import vCard from 'vcf'
@@ -626,9 +626,22 @@ export const getGroupId = (payload: object) => {
     data.entry[0].changes &&
     data.entry[0].changes[0] &&
     data.entry[0].changes[0].value &&
-    data.entry[0].changes[0].value.contacts &&
-    data.entry[0].changes[0].value.contacts[0] &&
-    data.entry[0].changes[0].value.contacts[0].group_id
+    (
+      (
+        data.entry[0].changes[0].value.contacts &&
+        data.entry[0].changes[0].value.contacts[0] &&
+        data.entry[0].changes[0].value.contacts[0].group_id
+      ) || (
+        data.entry[0].changes[0].value.messages &&
+        data.entry[0].changes[0].value.messages[0] &&
+        data.entry[0].changes[0].value.messages[0].group_id
+      ) || (
+        data.entry[0].changes[0].value.statuses &&
+        data.entry[0].changes[0].value.statuses[0] &&
+        data.entry[0].changes[0].value.statuses[0].recipient_type == 'group' && 
+        data.entry[0].changes[0].value.statuses[0].group_id
+      )
+    )
   )
 }
 
@@ -773,7 +786,7 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     } else {
       profileName = payload.verifiedBizName || payload.pushName || senderPhone
     }
-    let cloudApiStatus
+    let cloudApiStatus, group_id, recipient_type
     let messageTimestamp = payload.messageTimestamp
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupMetadata: any = {}
@@ -782,9 +795,14 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       groupMetadata.group_id = chatJid
       groupMetadata.group_picture = payload.groupMetadata.profilePicture
     } else if (isJidGroup(chatJid)) {
-      groupMetadata.group_subject = chatJid
-      groupMetadata.group_id = chatJid
-      groupMetadata.group_picture = ''
+      if (config?.groupMessagesCloudFormat) {
+        recipient_type = 'group'
+        group_id = chatJid
+      } else {
+        groupMetadata.group_subject = chatJid
+        groupMetadata.group_id = chatJid
+        groupMetadata.group_picture = ''
+      }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const statuses: any[] = []
@@ -831,6 +849,9 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
     const message: any = {
       from: fromMe ? phone.replace('+', '') : senderPhone.replace('+', '') || senderId,
       id: whatsappMessageId,
+    }
+    if (group_id) {
+      message.group_id = group_id
     }
     if (config?.outgoingMessagesCoex) {
       message.to = !fromMe ? phone.replace('+', '') : senderPhone.replace('+', '') || senderId
@@ -1106,8 +1127,11 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           // expiration_timestamp: new Date().setDate(new Date().getDate() + 30),
         },
         id: messageId,
-        recipient_id: senderPhone.replace('+', '') || senderId,
+        recipient_id: recipient_type == 'group' ? chatJid : senderPhone.replace('+', '') || senderId,
         status: cloudApiStatus,
+      }
+      if (recipient_type) {
+        state.recipient_type = recipient_type
       }
       if (payload.messageTimestamp) {
         state['timestamp'] = payload.messageTimestamp.toString()

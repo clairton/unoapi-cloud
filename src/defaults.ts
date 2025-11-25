@@ -153,6 +153,8 @@ export const SEND_REACTION_AS_REPLY: boolean =
   process.env.SEND_REACTION_AS_REPLY === _undefined ? false : process.env.SEND_REACTION_AS_REPLY == 'true'
 export const OUTGOING_MESSAGES_COEX: boolean =
   process.env.OUTGOING_MESSAGES_COEX === _undefined ? false : process.env.OUTGOING_MESSAGES_COEX == 'true'
+export const GROUP_MESSAGES_CLOUD_FORMAT: boolean =
+  process.env.GROUP_MESSAGES_CLOUD_FORMAT === _undefined ? false : process.env.GROUP_MESSAGES_CLOUD_FORMAT == 'true'
 export const STORAGE_BUCKET_NAME = process.env.STORAGE_BUCKET_NAME || 'unoapi'
 export const STORAGE_ACCESS_KEY_ID = process.env.STORAGE_ACCESS_KEY_ID || 'my-minio'
 export const STORAGE_SECRET_ACCESS_KEY = process.env.STORAGE_SECRET_ACCESS_KEY || '2NVQWHTTT3asdasMgqapGchy6yAMZn'

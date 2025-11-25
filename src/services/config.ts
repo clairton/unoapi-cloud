@@ -41,6 +41,7 @@ export type WebhookForward = {
 
 export type Config = {
   outgoingMessagesCoex: boolean | undefined
+  groupMessagesCloudFormat: boolean | undefined
   ignoreGroupMessages: boolean
   ignoreNewsletterMessages: boolean
   ignoreBroadcastMessages: boolean
@@ -92,6 +93,7 @@ export type Config = {
 }
 
 export const defaultConfig: Config = {
+  groupMessagesCloudFormat: false,
   outgoingMessagesCoex: false,
   ignoreGroupMessages: true,
   ignoreNewsletterMessages: true,

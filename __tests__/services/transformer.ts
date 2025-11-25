@@ -1704,8 +1704,6 @@ describe('service transformer', () => {
       "title": "Title"
     }
     const result = toBaileysMessageContent(input)
-    console.log(JSON.stringify(output))
-    console.log(JSON.stringify(result))
     expect(result).toEqual(output)
   })
 
@@ -1727,6 +1725,32 @@ describe('service transformer', () => {
     const resp = fromBaileysMessageContent(phoneNumer, input)[0]
     const from = resp.entry[0].changes[0].value.messages[0].from
     expect(from).toEqual(remotePhoneNumber)
+  })
+
+  test('fromBaileysMessageContent group with groupMessagesCloudFormat', async () => {
+    const phoneNumer = '5549998093075'
+    const remotePhoneNumber = '11115551212'
+    const remoteJid = '554988189915-1593526912@g.us'
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id: '583871ED40A7FBC09B5C3A7C2CC760A0',
+        participant: `${remotePhoneNumber}@s.whatsapp.net`,
+      },
+      status: 3,
+      message: {
+        conversation: '🤷‍♂️',
+      },
+    }
+    const resp = fromBaileysMessageContent(phoneNumer, input, { groupMessagesCloudFormat: true })[0]
+    console.log(JSON.stringify(resp))
+    // const from = resp.entry[0].changes[0].value.statuses[0].from
+    // const groupId = resp.entry[0].changes[0].value.statuses[0].group_id
+    const recipientType = resp.entry[0].changes[0].value.statuses[0].recipient_type
+    // expect(from).toEqual(remotePhoneNumber)
+    // expect(groupId).toEqual(remoteJid)
+    expect(recipientType).toEqual('group')
   })
 
   test('fromBaileysMessageContent statusMentionMessage', async () => {

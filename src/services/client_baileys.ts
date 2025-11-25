@@ -664,61 +664,69 @@ export class ClientBaileys implements Client {
   }
 
   async getMessageMetadata<T>(message: T) {
-    const isOnline = await this.store?.sessionStore?.isStatusOnline(this.phone)
-    if (!isOnline) {
-      logger.debug('Skip retrieving group metadata store present: %s status: %s', !!this.store, isOnline)
-      if (message['key'] && message['key']['remoteJid'] && isJidGroup(message['key']['remoteJid'])) {
-        const groupMetadata = {
-          // owner_country_code: '55',
-          addressingMode: isLidUser(message['key']['remoteJid']) ? 'lid' : 'pn',
-          id: message['key']['remoteJid'],
-          owner: '',
-          subject: message['key']['remoteJid'],
-          participants: [],
-        }
-        message['groupMetadata'] = groupMetadata!
-      }
-      return message
-    }
-    const key = message && message['key']
     let remoteJid
-    if (key.remoteJid && isJidGroup(key.remoteJid)) {
-      logger.debug('Retrieving group metadata...')
-      remoteJid = key.participant
-      let groupMetadata: GroupMetadata | undefined
-      try {
-        groupMetadata = await this.fetchGroupMetadata(key.remoteJid)
-      } catch (error) {
-        logger.warn(error, 'Ignore error fetch group metadata')
-      }
-      if (groupMetadata) {
-        logger.debug(groupMetadata, 'Retrieved group metadata!')
-      } else {
-        groupMetadata = {
-          // owner_country_code: '55',
-          addressingMode: isLidUser(key.remoteJid) ? 'lid' : 'pn',
-          id: key.remoteJid,
-          owner: '',
-          subject: key.remoteJid,
-          participants: [],
-        }
-      }
-      message['groupMetadata'] = groupMetadata!
-      logger.debug(`Retrieving group profile picture...`)
-      try {
-        const profilePictureGroup = await this.fetchImageUrl(key.remoteJid)
-        if (profilePictureGroup) {
-          logger.debug(`Retrieved group picture! ${profilePictureGroup}`)
-          groupMetadata['profilePicture'] = profilePictureGroup
-        }
-      } catch (error) {
-        logger.warn(error)
-        logger.warn(error, 'Ignore error on retrieve group profile picture')
+    if (this.config.groupMessagesCloudFormat) {
+      logger.debug('Skip message group metada...')
+      const key = message && message['key']
+      if (key.remoteJid && isJidGroup(key.remoteJid)) {
+        remoteJid = key.participant
       }
     } else {
-      remoteJid = key.remoteJid
+      const isOnline = await this.store?.sessionStore?.isStatusOnline(this.phone)
+      if (!isOnline) {
+        logger.debug('Skip retrieving group metadata store present: %s status: %s', !!this.store, isOnline)
+        if (message['key'] && message['key']['remoteJid'] && isJidGroup(message['key']['remoteJid'])) {
+          const groupMetadata = {
+            // owner_country_code: '55',
+            addressingMode: isLidUser(message['key']['remoteJid']) ? 'lid' : 'pn',
+            id: message['key']['remoteJid'],
+            owner: '',
+            subject: message['key']['remoteJid'],
+            participants: [],
+          }
+          message['groupMetadata'] = groupMetadata!
+        }
+        return message
+      }
+      const key = message && message['key']
+      if (key.remoteJid && isJidGroup(key.remoteJid)) {
+        logger.debug('Retrieving group metadata...')
+        remoteJid = key.participant
+        let groupMetadata: GroupMetadata | undefined
+        try {
+          groupMetadata = await this.fetchGroupMetadata(key.remoteJid)
+        } catch (error) {
+          logger.warn(error, 'Ignore error fetch group metadata')
+        }
+        if (groupMetadata) {
+          logger.debug(groupMetadata, 'Retrieved group metadata!')
+        } else {
+          groupMetadata = {
+            // owner_country_code: '55',
+            addressingMode: isLidUser(key.remoteJid) ? 'lid' : 'pn',
+            id: key.remoteJid,
+            owner: '',
+            subject: key.remoteJid,
+            participants: [],
+          }
+        }
+        message['groupMetadata'] = groupMetadata!
+        logger.debug(`Retrieving group profile picture...`)
+        try {
+          const profilePictureGroup = await this.fetchImageUrl(key.remoteJid)
+          if (profilePictureGroup) {
+            logger.debug(`Retrieved group picture! ${profilePictureGroup}`)
+            groupMetadata['profilePicture'] = profilePictureGroup
+          }
+        } catch (error) {
+          logger.warn(error)
+          logger.warn(error, 'Ignore error on retrieve group profile picture')
+        }
+      } else {
+        remoteJid = key.remoteJid
+      }
     }
-    if (remoteJid) {
+    if (remoteJid && await this.store?.sessionStore?.isStatusOnline(this.phone)) {
       const jid = await this.exists(remoteJid)
       if (jid) {
         try {
