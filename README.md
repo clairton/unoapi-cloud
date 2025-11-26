@@ -163,6 +163,26 @@ http://localhost:9876/v15.0/5549988290955/messages \
 }'
 ```
 
+
+## Send a Speech, send text to unoapi and unoapi convert to audio
+
+Needs put configs  OPENAI_API_KEY, OPENAI_API_SPEECH_VOICE and OPENAI_API_SPEECH_MODEL
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/554931978550/messages \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{
+  "messaging_product": "whatsapp",
+  "to": "5549988290955",
+  "type": "speech",
+  "speech": {
+    "body": "hello"
+  } 
+}'
+```
+
 ## Webhook Events
 
 Webhook Events like this

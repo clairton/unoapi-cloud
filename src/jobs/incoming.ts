@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_QUEUE_COMMANDER, UNOAPI_QUEUE_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME } from '../defaults'
+import { UNOAPI_QUEUE_COMMANDER, UNOAPI_QUEUE_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_SPEECH } from '../defaults'
 import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype, toBuffer, TYPE_MESSAGES_MEDIA } from '../services/transformer'
@@ -35,6 +35,9 @@ export class IncomingJob {
     const payload: any = a.payload
     const options: object = a.options
     const idUno: string = a.id || generateUnoId('INC')
+    if (payload.type == 'speech') {
+      return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_SPEECH, phone, { id: idUno, payload }, { type: 'topic' })
+    }
     const waId = jidToPhoneNumber(payload.to, '')
     const timestamp = Math.floor(new Date().getTime() / 1000).toString()
     // const retries: number = a.retries ? a.retries + 1 : 1

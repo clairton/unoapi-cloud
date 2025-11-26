@@ -9,6 +9,8 @@ export const UNOAPI_AUTH_TOKEN = process.env.UNOAPI_AUTH_TOKEN
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 export const OPENAI_API_ASSISTANT_ID = process.env.OPENAI_API_ASSISTANT_ID
 export const OPENAI_API_TRANSCRIBE_MODEL = process.env.OPENAI_API_TRANSCRIBE_MODEL || 'whisper-1'
+export const OPENAI_API_SPEECH_MODEL = process.env.OPENAI_API_SPEECH_MODEL || 'tts-1'
+export const OPENAI_API_SPEECH_VOICE = process.env.OPENAI_API_SPEECH_VOICE || 'alloy'
 export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorization'
 
 export const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
@@ -109,6 +111,7 @@ export const UNOAPI_QUEUE_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
 export const UNOAPI_QUEUE_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
 export const UNOAPI_QUEUE_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
 export const UNOAPI_QUEUE_TRANSCRIBER = `${UNOAPI_QUEUE_NAME}.transcribe`
+export const UNOAPI_QUEUE_SPEECH = `${UNOAPI_QUEUE_NAME}.speech`
 export const UNOAPI_MESSAGE_RETRY_LIMIT = parseInt(process.env.UNOAPI_MESSAGE_RETRY_LIMIT || '5')
 export const UNOAPI_MESSAGE_RETRY_DELAY = parseInt(process.env.UNOAPI_MESSAGE_RETRY_DELAY || '10000')
 export const UNOAPI_DELAY_BETWEEN_MESSAGES_MS = parseInt(process.env.UNOAPI_DELAY_BETWEEN_MESSAGES_MS || '0')

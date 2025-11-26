@@ -262,6 +262,14 @@
                                 <input type="text" class="form-control" id="openaiApiTranscribeModel" name="openaiApiTranscribeModel" placeholder="Openai Transcribe Model">
                             </div>
                             <div class="col-12 col-md-12 col-lg-6">
+                                <label for="openaiApiSpeechModel" class="form-label">Openai Speech Model</label>
+                                <input type="text" class="form-control" id="openaiApiSpeechModel" name="openaiApiSpeechModel" placeholder="Openai Speech Model">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
+                                <label for="openaiApiSpeechVoice" class="form-label">Openai Speech Voice</label>
+                                <input type="text" class="form-control" id="openaiApiSpeechVoice" name="openaiApiSpeechVoice" placeholder="Openai Speech Voice">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
                                 <label for="wavoipToken" class="form-label">Token Wavoip</label>
                                 <input type="text" class="form-control" id="wavoipToken" name="wavoipToken" placeholder="Token WAVOIP...">
                             </div>
@@ -805,6 +813,8 @@
                 $('#wavoipToken').val(session.wavoipToken);
                 $('#openaiApiKey').val(session.openaiApiKey);
                 $('#openaiApiTranscribeModel').val(session.openaiApiTranscribeModel);
+                $('#openaiApiSpeechModel').val(session.openaiApiSpeechModel);
+                $('#openaiApiSpeechVoice').val(session.openaiApiSpeechVoice);
                 $('#rejectCallsWebhook').val(session.rejectCallsWebhook);
                 $('#rejectCalls').val(session.rejectCalls);
                 $('#ignoreGroupMessages').prop('checked', session.ignoreGroupMessages);
@@ -899,6 +909,8 @@
                         wavoipToken: $('#wavoipToken').val(),
                         openaiApiKey: $('#openaiApiKey').val(),
                         openaiApiTranscribeModel: $('#openaiApiTranscribeModel').val(),
+                        openaiApiSpeechModel: $('#openaiApiSpeechModel').val(),
+                        openaiApiSpeechVoice: $('#openaiApiSpeechVoice').val(),
                         rejectCalls: $('#rejectCalls').val(),
                         rejectCallsWebhook: $('#rejectCallsWebhook').val(),
                         ignoreGroupMessages: $('#ignoreGroupMessages').is(':checked'),

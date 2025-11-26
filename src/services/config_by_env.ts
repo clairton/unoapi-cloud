@@ -60,6 +60,8 @@ import {
   WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL,
   OUTGOING_MESSAGES_COEX,
   GROUP_MESSAGES_CLOUD_FORMAT,
+  OPENAI_API_SPEECH_VOICE,
+  OPENAI_API_SPEECH_MODEL,
 } from '../defaults'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
@@ -97,7 +99,9 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.wavoipToken = WAVOIP_TOKEN
     config.openaiApiKey = OPENAI_API_KEY
     config.openaiApiTranscribeModel = OPENAI_API_TRANSCRIBE_MODEL
-    config.openaiAssistantId = OPENAI_API_ASSISTANT_ID
+    config.openaiAssistantId = OPENAI_API_ASSISTANT_ID 
+    config.openaiApiSpeechVoice = OPENAI_API_SPEECH_VOICE
+    config.openaiApiSpeechModel = OPENAI_API_SPEECH_MODEL
     config.useRedis = !!process.env.REDIS_URL
     config.useS3 = !!process.env.STORAGE_ENDPOINT
     config.webhooks[0].url = WEBHOOK_URL

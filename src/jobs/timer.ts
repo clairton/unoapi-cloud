@@ -16,6 +16,7 @@ export class TimerJob {
     const a = data as any
     const payload: any = a.payload
     const { message, to, time, nexts } = payload
+    const type = payload.type || 'text'
     const messageDate = Date.parse(time)
     const string = await this.getLastTimerFunction(phone, to)
     const lastTime = string ? Date.parse(string) : undefined
@@ -27,8 +28,8 @@ export class TimerJob {
       const body = {
         messaging_product: 'whatsapp',
         to,
-        type: 'text',
-        text: {
+        type,
+        [type]: {
           body: message,
         },
       }
