@@ -20,6 +20,7 @@ export class TimerController {
     logger.debug('timer start  body %s', JSON.stringify(req.body))
     const { phone, to } = req.params
     const message = req.body.message || req.query.message
+    const type = req.body.type || req.query.type || 'text'
     if (!message) {
       logger.info('timer start error: message param is required')
       return res.status(400).send(`{"error": "message param is required"}`)
@@ -30,7 +31,7 @@ export class TimerController {
       return res.status(400).send(`{"error": "timeout param is required"}`)
     }
     const nexts = req.body.nexts || req.query.nexts || []
-    await start(phone, to, timeout, message, nexts)
+    await start(phone, to, timeout, message, type, nexts)
     res.status(200).send(`{"success": true}`)
   }
 }

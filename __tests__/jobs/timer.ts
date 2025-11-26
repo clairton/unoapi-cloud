@@ -92,7 +92,7 @@ describe('timer', () => {
     const first = { ...payload }
     const nexts = [first]
     await job.consume(phone, { payload: { ...payload, nexts } })
-    expect(startMock).toHaveBeenCalledWith(first.phone, first.to, first.timeout, first.message, [])
+    expect(startMock).toHaveBeenCalledWith(first.phone, first.to, first.timeout, first.message, 'text', [])
     expect(delLastTimerMock).toHaveBeenCalledTimes(0)
   })
 })

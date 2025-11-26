@@ -3,13 +3,14 @@ import { UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_TIMER } from '../defaults'
 import { setLastTimer } from './redis'
 import logger from './logger'
 
-export const start = async (phone, to, timeout, message, nexts = []) => {
+export const start = async (phone, to, timeout, message, type = 'text', nexts = []) => {
   const now = new Date()
   const payload = {
     phone,
     to,
     message,
     time: now.toISOString(),
+    type,
     nexts,
   }
   logger.debug('timer start phone %s to %s timeout %s and nexts %s', phone, to, timeout, JSON.stringify(nexts))
