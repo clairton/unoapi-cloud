@@ -25,6 +25,9 @@ export class ClientForward implements Client {
     } else if (payload?.status == 'delete') {
       logger.debug('Ignore status message %s delete', payload['message_id'])
       return { ok: { success: true }, error: undefined }
+    } else if (payload?.status && !payload?.message_id) {
+      logger.debug('Ignore status message %s without message_id', payload.status)
+      return { ok: { success: true }, error: undefined }
     }
 
     const config = await this.getConfig(this.phone)
