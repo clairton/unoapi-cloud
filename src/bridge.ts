@@ -1,12 +1,8 @@
-import * as dotenv from 'dotenv'
-dotenv.config()
-
 import logger from './services/logger'
 import { BindBridgeJob } from './jobs/bind_bridge'
 import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
 import { autoConnect } from './services/auto_connect'
-import { UNOAPI_QUEUE_BIND, UNOAPI_QUEUE_RELOAD, UNOAPI_QUEUE_LOGOUT, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BRIDGE_NAME } from './defaults'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
 import { getConfig } from './services/config'
@@ -22,6 +18,13 @@ import { ReloadBaileys } from './services/reload_baileys'
 import { LogoutBaileys } from './services/logout_baileys'
 import { ReloadJob } from './jobs/reload'
 import { LogoutJob } from './jobs/logout'
+import { 
+  UNOAPI_QUEUE_BIND,
+  UNOAPI_QUEUE_RELOAD,
+  UNOAPI_QUEUE_LOGOUT,
+  UNOAPI_SERVER_NAME,
+  UNOAPI_EXCHANGE_BRIDGE_NAME
+} from './defaults'
 
 const getConfigLocal: getConfig = getConfigRedis
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigLocal)

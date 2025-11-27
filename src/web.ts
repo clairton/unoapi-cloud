@@ -1,16 +1,3 @@
-import * as dotenv from 'dotenv'
-dotenv.config()
-
-import {
-  BASE_URL,
-  PORT,
-  CONFIG_SESSION_PHONE_CLIENT,
-  CONFIG_SESSION_PHONE_NAME,
-  UNOAPI_QUEUE_BROADCAST,
-  UNOAPI_EXCHANGE_BROKER_NAME,
-  UNOAPI_QUEUE_RELOAD,
-} from './defaults'
-
 import logger from './services/logger'
 import { App } from './app'
 import { Incoming } from './services/incoming'
@@ -39,8 +26,17 @@ import { ListenerBaileys } from './services/listener_baileys'
 import { Listener } from './services/listener'
 import { ContactDummy } from './services/contact_dummy'
 import injectRouteDummy from './services/inject_route_dummy'
-
 import * as Sentry from '@sentry/node'
+import {
+  BASE_URL,
+  PORT,
+  CONFIG_SESSION_PHONE_CLIENT,
+  CONFIG_SESSION_PHONE_NAME,
+  UNOAPI_QUEUE_BROADCAST,
+  UNOAPI_EXCHANGE_BROKER_NAME,
+  UNOAPI_QUEUE_RELOAD,
+} from './defaults'
+
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,

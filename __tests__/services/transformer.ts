@@ -1744,7 +1744,6 @@ describe('service transformer', () => {
       },
     }
     const resp = fromBaileysMessageContent(phoneNumer, input, { groupMessagesCloudFormat: true })[0]
-    console.log(JSON.stringify(resp))
     // const from = resp.entry[0].changes[0].value.statuses[0].from
     // const groupId = resp.entry[0].changes[0].value.statuses[0].group_id
     const recipientType = resp.entry[0].changes[0].value.statuses[0].recipient_type

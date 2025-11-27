@@ -1,3 +1,4 @@
+import logger from './services/logger'
 import { Outgoing } from './services/outgoing'
 import { CommanderJob } from './jobs/commander'
 import { BulkStatusJob } from './jobs/bulk_status'
@@ -6,6 +7,14 @@ import { BulkParserJob } from './jobs/bulk_parser'
 import { BulkSenderJob } from './jobs/bulk_sender'
 import { BulkReportJob } from './jobs/bulk_report'
 import { OutgoingCloudApi } from './services/outgoing_cloud_api'
+import { amqpConsume } from './amqp'
+import { IncomingAmqp } from './services/incoming_amqp'
+import { getConfig } from './services/config'
+import { getConfigRedis } from './services/config_redis'
+import { Incoming } from './services/incoming'
+import { addToBlacklistRedis, isInBlacklistInRedis } from './services/blacklist'
+import { version } from '../package.json'
+import * as Sentry from '@sentry/node'
 import {
   UNOAPI_QUEUE_BULK_PARSER,
   UNOAPI_QUEUE_BULK_SENDER,
@@ -15,16 +24,7 @@ import {
   UNOAPI_QUEUE_BULK_WEBHOOK,
   UNOAPI_EXCHANGE_BROKER_NAME,
 } from './defaults'
-import { amqpConsume } from './amqp'
-import { IncomingAmqp } from './services/incoming_amqp'
-import { getConfig } from './services/config'
-import { getConfigRedis } from './services/config_redis'
-import { Incoming } from './services/incoming'
-import logger from './services/logger'
-import { addToBlacklistRedis, isInBlacklistInRedis } from './services/blacklist'
-import { version } from '../package.json'
 
-import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,

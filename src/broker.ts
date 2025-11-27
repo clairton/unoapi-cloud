@@ -1,23 +1,3 @@
-import * as dotenv from 'dotenv'
-dotenv.config()
-
-import {
-  UNOAPI_QUEUE_RELOAD,
-  UNOAPI_SERVER_NAME,
-  UNOAPI_QUEUE_MEDIA,
-  UNOAPI_QUEUE_OUTGOING,
-  UNOAPI_QUEUE_NOTIFICATION,
-  UNOAPI_QUEUE_OUTGOING_PREFETCH,
-  UNOAPI_QUEUE_BLACKLIST_ADD,
-  NOTIFY_FAILED_MESSAGES,
-  UNOAPI_EXCHANGE_BROKER_NAME,
-  STATUS_FAILED_WEBHOOK_URL,
-  UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
-  UNOAPI_QUEUE_TIMER,
-  UNOAPI_QUEUE_TRANSCRIBER,
-  UNOAPI_QUEUE_SPEECH,
-} from './defaults'
-
 import logger from './services/logger'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
@@ -39,6 +19,23 @@ import { TimerJob } from './jobs/timer'
 import { TranscriberJob } from './jobs/transcriber'
 import { SpeecherJob } from './jobs/speecher'
 import { OutgoingAmqp } from './services/outgoing_amqp'
+
+import {
+  UNOAPI_QUEUE_RELOAD,
+  UNOAPI_SERVER_NAME,
+  UNOAPI_QUEUE_MEDIA,
+  UNOAPI_QUEUE_OUTGOING,
+  UNOAPI_QUEUE_NOTIFICATION,
+  UNOAPI_QUEUE_OUTGOING_PREFETCH,
+  UNOAPI_QUEUE_BLACKLIST_ADD,
+  NOTIFY_FAILED_MESSAGES,
+  UNOAPI_EXCHANGE_BROKER_NAME,
+  STATUS_FAILED_WEBHOOK_URL,
+  UNOAPI_QUEUE_WEBHOOK_STATUS_FAILED,
+  UNOAPI_QUEUE_TIMER,
+  UNOAPI_QUEUE_TRANSCRIBER,
+  UNOAPI_QUEUE_SPEECH,
+} from './defaults'
 
 const incomingAmqp: Incoming = new IncomingAmqp(getConfigRedis)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigRedis, isInBlacklistInRedis, addToBlacklistRedis)

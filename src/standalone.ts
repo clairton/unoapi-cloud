@@ -1,23 +1,3 @@
-import dotenv from 'dotenv'
-dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
-
-import {
-  BASE_URL,
-  NOTIFY_FAILED_MESSAGES,
-  PORT,
-  UNOAPI_EXCHANGE_BRIDGE_NAME,
-  UNOAPI_EXCHANGE_BROKER_NAME,
-  UNOAPI_QUEUE_BIND,
-  UNOAPI_QUEUE_BLACKLIST_ADD,
-  UNOAPI_QUEUE_LOGOUT,
-  UNOAPI_QUEUE_MEDIA,
-  UNOAPI_QUEUE_NOTIFICATION,
-  UNOAPI_QUEUE_OUTGOING,
-  UNOAPI_QUEUE_OUTGOING_PREFETCH,
-  UNOAPI_QUEUE_RELOAD,
-  UNOAPI_SERVER_NAME,
-} from './defaults'
-
 import logger from './services/logger'
 import { version } from '../package.json'
 import { App } from './app'
@@ -72,8 +52,24 @@ import atbl from './jobs/add_to_blacklist'
 import { MediaJob } from './jobs/media'
 import { OutgoingJob } from './jobs/outgoing'
 import { NotificationJob } from './jobs/notification'
-
 import * as Sentry from '@sentry/node'
+import {
+  BASE_URL,
+  NOTIFY_FAILED_MESSAGES,
+  PORT,
+  UNOAPI_EXCHANGE_BRIDGE_NAME,
+  UNOAPI_EXCHANGE_BROKER_NAME,
+  UNOAPI_QUEUE_BIND,
+  UNOAPI_QUEUE_BLACKLIST_ADD,
+  UNOAPI_QUEUE_LOGOUT,
+  UNOAPI_QUEUE_MEDIA,
+  UNOAPI_QUEUE_NOTIFICATION,
+  UNOAPI_QUEUE_OUTGOING,
+  UNOAPI_QUEUE_OUTGOING_PREFETCH,
+  UNOAPI_QUEUE_RELOAD,
+  UNOAPI_SERVER_NAME,
+} from './defaults'
+
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,

@@ -17,7 +17,6 @@ import {
   WEBHOOK_URL,
   WEBHOOK_URL_ABSOLUTE,
   WEBHOOK_TOKEN,
-  LOG_LEVEL,
   IGNORE_GROUP_MESSAGES,
   IGNORE_OWN_MESSAGES,
   IGNORE_BROADCAST_STATUSES,
@@ -63,11 +62,12 @@ import {
   OPENAI_API_SPEECH_VOICE,
   OPENAI_API_SPEECH_MODEL,
 } from '../defaults'
+import { logLevel } from './logger'
 
 export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> => {
   if (!configs.has(phone)) {
     const config: Config = { ...defaultConfig }
-    config.logLevel = LOG_LEVEL as Level
+    config.logLevel = logLevel as Level
     config.ignoreGroupMessages = IGNORE_GROUP_MESSAGES
     config.ignoreNewsletterMessages = IGNORE_NEWSLETTER_MESSAGES
     config.readOnReceipt = READ_ON_RECEIPT

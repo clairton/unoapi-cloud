@@ -13,10 +13,6 @@ export const OPENAI_API_SPEECH_MODEL = process.env.OPENAI_API_SPEECH_MODEL || 't
 export const OPENAI_API_SPEECH_VOICE = process.env.OPENAI_API_SPEECH_VOICE || 'alloy'
 export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorization'
 
-export const LOG_LEVEL = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
-export const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || LOG_LEVEL
-export const UNOAPI_LOG_MODES = JSON.parse(process.env.UNOAPI_LOG_MODES || '["sysout"]')
-
 export const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || 'en'
 
 export const VALIDATE_MEDIA_LINK_BEFORE_SEND =

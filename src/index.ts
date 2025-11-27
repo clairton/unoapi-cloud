@@ -1,6 +1,5 @@
-import dotenv from 'dotenv'
-dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
 
+import logger from './services/logger'
 import { App } from './app'
 import { IncomingBaileys } from './services/incoming_baileys'
 import { Incoming } from './services/incoming'
@@ -15,16 +14,13 @@ import { onNewLoginAlert } from './services/on_new_login_alert'
 import { Broadcast } from './services/broadcast'
 import { isInBlacklistInMemory, addToBlacklistInMemory, addToBlacklistRedis } from './services/blacklist'
 import { version } from '../package.json'
-
-import logger from './services/logger'
 import { Listener } from './services/listener'
 import { ListenerBaileys } from './services/listener_baileys'
-
-import { BASE_URL, PORT } from './defaults'
 import { ReloadBaileys } from './services/reload_baileys'
 import { LogoutBaileys } from './services/logout_baileys'
-
 import * as Sentry from '@sentry/node'
+import { BASE_URL, PORT } from './defaults'
+
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,

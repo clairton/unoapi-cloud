@@ -1,5 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || '.env' })
+import logger from './services/logger'
+import { Channel, connect, ConsumeMessage } from 'amqplib'
+import { queueDeadName, amqpPublish, extractRoutingKeyFromBindingKey } from './amqp'
+import * as Sentry from '@sentry/node'
 
 import {
   AMQP_URL,
@@ -9,9 +11,7 @@ import {
   UNOAPI_QUEUE_LISTENER,
   UNOAPI_QUEUE_OUTGOING,
 } from './defaults'
-import { Channel, connect, ConsumeMessage } from 'amqplib'
 
-import * as Sentry from '@sentry/node'
 if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
@@ -19,8 +19,6 @@ if (process.env.SENTRY_DSN) {
   })
 }
 
-import logger from './services/logger'
-import { queueDeadName, amqpPublish, extractRoutingKeyFromBindingKey } from './amqp'
 
 logger.info('Starting with waker...')
 

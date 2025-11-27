@@ -18,6 +18,7 @@ import makeWASocket, {
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
+import { logLevel } from './logger'
 import { Store } from './store'
 import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber } from './transformer'
 import logger from './logger'
@@ -27,7 +28,6 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import { useVoiceCallsBaileys } from 'voice-calls-baileys/lib/services/transport.model'
 import {
   DEFAULT_BROWSER,
-  LOG_LEVEL,
   CONNECTING_TIMEOUT_MS,
   MAX_CONNECT_TIME,
   MAX_CONNECT_RETRY,
@@ -486,7 +486,7 @@ export const connect = async ({
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
-    loggerBaileys.level = LOG_LEVEL as Level
+    loggerBaileys.level = logLevel as Level
 
     let agent
     let fetchAgent
