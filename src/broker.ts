@@ -18,11 +18,11 @@ import {
   UNOAPI_QUEUE_SPEECH,
 } from './defaults'
 
+import logger from './services/logger'
 import { amqpConsume } from './amqp'
 import { startRedis } from './services/redis'
 import { OutgoingCloudApi } from './services/outgoing_cloud_api'
 import { getConfigRedis } from './services/config_redis'
-import logger from './services/logger'
 import { version } from '../package.json'
 import { ReloadJob } from './jobs/reload'
 import { MediaJob } from './jobs/media'
