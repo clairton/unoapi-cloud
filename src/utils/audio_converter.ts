@@ -14,6 +14,10 @@ export default async function (url: string): Promise<{ buffer: Buffer; waveform:
     throw `Erro on open ${url}: ${await response?.text()}`
   }
   const inputBuffer = Buffer.from(await response.arrayBuffer())
+  return fromBuffer(inputBuffer)
+}
+
+export async function fromBuffer(inputBuffer: Buffer): Promise<{ buffer: Buffer; waveform: Uint8Array | undefined }> {
   const inputFile = path.join(os.tmpdir(), `${uuid()}`)
   const outputFile = path.join(os.tmpdir(), `${uuid()}`)
   await writeFileSync(inputFile, inputBuffer)
