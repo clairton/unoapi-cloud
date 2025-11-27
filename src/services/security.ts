@@ -35,7 +35,7 @@ export default class Security {
         logger.debug(`Retrieved auth token ${httpAuthToken}`)
         const allTokens = [UNOAPI_AUTH_TOKEN, ...tokens]
         if (!allTokens.includes(httpAuthToken)) {
-          const message = `Invalid token value ${httpAuthToken}`
+          const message = `Invalid token value ${httpAuthToken} for phone ${phone}`
           logger.debug('method %s', req.method)
           logger.debug('headers %s', JSON.stringify(req.headers))
           logger.debug('params %s', JSON.stringify(req.params))
