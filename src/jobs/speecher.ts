@@ -24,10 +24,9 @@ export class SpeecherJob {
       voice: config.openaiApiSpeechVoice!,
       input: payload.speech.body,
     })
-    const openaiBuffer = Buffer.from(await audio.arrayBuffer())
-    const { buffer } = await fromBuffer(openaiBuffer)
+    const buffer = Buffer.from(await audio.arrayBuffer())
     const { mediaStore } = await config.getStore(phone, config)
-    const fileName = `${phone}/${id}.ogg`
+    const fileName = `${phone}/${id}.mp3`
     await mediaStore.saveMediaBuffer(fileName, buffer)
     const link = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
     payload.type = 'audio'

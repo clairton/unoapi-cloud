@@ -12,6 +12,7 @@ import { mediaStoreFile } from './media_store_file'
 import { Config } from './config'
 import logger from './logger'
 import fetch, { Response as FetchResponse } from 'node-fetch'
+import mime from 'mime'
 
 export const getMediaStoreS3: getMediaStore = (phone: string, config: Config, getDataStore: getDataStore): MediaStore => {
   if (!mediaStores.has(phone)) {
@@ -52,6 +53,14 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
     const getParams = {
       Bucket: bucket,
       Key: fileName,
+    }
+    try {
+      // const fileNameSplit = fileName.split('/')
+      // const name = fileNameSplit[fileNameSplit.length - 1]
+      // getParams['ResponseContentDisposition'] = `inline; filename="${name}"`
+      getParams['ResponseContentType'] = mime.lookup(fileName)
+    } catch (e) {
+      logger.error(e, 'error on set params ResponseContentDisposition and ResponseContentType')
     }
     const command = new GetObjectCommand(getParams)
     try {
