@@ -3,6 +3,7 @@ import { getConfig } from '../services/config'
 import logger from '../services/logger'
 import { DATA_URL_TTL } from '../defaults'
 import { Incoming } from '../services/incoming'
+import { fromBuffer } from '../utils/audio_converter'
 
 export class SpeecherJob {
   private service: Incoming
@@ -23,9 +24,10 @@ export class SpeecherJob {
       voice: config.openaiApiSpeechVoice!,
       input: payload.speech.body,
     })
-    const buffer = Buffer.from(await audio.arrayBuffer())
+    const openaiBuffer = Buffer.from(await audio.arrayBuffer())
+    const { buffer } = await fromBuffer(openaiBuffer)
     const { mediaStore } = await config.getStore(phone, config)
-    const fileName = `${phone}/${id}.mp3`
+    const fileName = `${phone}/${id}.ogg`
     await mediaStore.saveMediaBuffer(fileName, buffer)
     const link = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
     payload.type = 'audio'
