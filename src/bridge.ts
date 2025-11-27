@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
-import process from 'node:process'
 
+import logger from './services/logger'
 import { BindBridgeJob } from './jobs/bind_bridge'
 import { SessionStoreRedis } from './services/session_store_redis'
 import { SessionStore } from './services/session_store'
@@ -13,7 +13,6 @@ import { getConfig } from './services/config'
 import { getConfigRedis } from './services/config_redis'
 import { getClientBaileys } from './services/client_baileys'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
-import logger from './services/logger'
 import { Listener } from './services/listener'
 import { ListenerAmqp } from './services/listener_amqp'
 import { OutgoingAmqp } from './services/outgoing_amqp'

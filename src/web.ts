@@ -1,13 +1,6 @@
 import * as dotenv from 'dotenv'
 dotenv.config()
 
-import { App } from './app'
-import { Incoming } from './services/incoming'
-import { IncomingAmqp } from './services/incoming_amqp'
-import { Outgoing } from './services/outgoing'
-import { OutgoingAmqp } from './services/outgoing_amqp'
-import { SessionStore } from './services/session_store'
-import { SessionStoreRedis } from './services/session_store_redis'
 import {
   BASE_URL,
   PORT,
@@ -17,9 +10,17 @@ import {
   UNOAPI_EXCHANGE_BROKER_NAME,
   UNOAPI_QUEUE_RELOAD,
 } from './defaults'
+
+import logger from './services/logger'
+import { App } from './app'
+import { Incoming } from './services/incoming'
+import { IncomingAmqp } from './services/incoming_amqp'
+import { Outgoing } from './services/outgoing'
+import { OutgoingAmqp } from './services/outgoing_amqp'
+import { SessionStore } from './services/session_store'
+import { SessionStoreRedis } from './services/session_store_redis'
 import { getConfigRedis } from './services/config_redis'
 import { amqpConsume } from './amqp'
-import logger from './services/logger'
 import { version } from '../package.json'
 import { onNewLoginGenerateToken } from './services/on_new_login_generate_token'
 import { addToBlacklistJob } from './services/blacklist'
