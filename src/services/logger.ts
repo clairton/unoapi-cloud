@@ -19,8 +19,6 @@ class AppLogger {
       AppLogger.logLevel = process.env.LOG_LEVEL || (process.env.NODE_ENV == 'development' ? 'debug' : 'error')
       const UNO_LOG_LEVEL = process.env.UNO_LOG_LEVEL || AppLogger.logLevel
       const UNOAPI_LOG_MODES = JSON.parse(process.env.UNOAPI_LOG_MODES || '["sysout"]')
-      console.log('process.env.UNO_LOG_LEVEL', process.env.UNO_LOG_LEVEL)
-      console.log('UNO_LOG_LEVEL', UNO_LOG_LEVEL)
       const targets: Record<string, any>[] = []
       if (UNOAPI_LOG_MODES.includes('sysout')) {
         targets.push({

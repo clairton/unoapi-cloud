@@ -3,7 +3,6 @@ import { getConfig } from '../services/config'
 import logger from '../services/logger'
 import { DATA_URL_TTL } from '../defaults'
 import { Incoming } from '../services/incoming'
-import { fromBuffer } from '../utils/audio_converter'
 
 export class SpeecherJob {
   private service: Incoming
