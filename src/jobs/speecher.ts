@@ -18,18 +18,19 @@ export class SpeecherJob {
     logger.debug('speecher session %s to %s text s%', phone, payload.to, payload.speech.body)
     const config = await this.getConfig(phone)
     const openai = new OpenAI({ apiKey: config.openaiApiKey })
-    const mp3 = await openai.audio.speech.create({
+    const audio = await openai.audio.speech.create({
       model: config.openaiApiSpeechModel!,
       voice: config.openaiApiSpeechVoice!,
       input: payload.speech.body,
+      response_format: 'opus'
     })
-    const buffer = Buffer.from(await mp3.arrayBuffer())
+    const buffer = Buffer.from(await audio.arrayBuffer())
     const { mediaStore } = await config.getStore(phone, config)
-    const fileName = `${phone}/${id}.mp3`
+    const fileName = `${phone}/${id}.ogg`
     await mediaStore.saveMediaBuffer(fileName, buffer)
     const link = await mediaStore.getFileUrl(fileName, DATA_URL_TTL)
     payload.type = 'audio'
-    payload.audio = { link }
+    payload.audio = { link, voice: true,  mime_type: 'audio/ogg; codecs=opus' }
     delete payload.speech
     return this.service.send(phone, payload, {})
   }
