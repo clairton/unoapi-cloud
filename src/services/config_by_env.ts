@@ -61,6 +61,7 @@ import {
   GROUP_MESSAGES_CLOUD_FORMAT,
   OPENAI_API_SPEECH_VOICE,
   OPENAI_API_SPEECH_MODEL,
+  OPENAI_API_BASE_URL,
 } from '../defaults'
 import { logLevel } from './logger'
 
@@ -102,6 +103,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.openaiAssistantId = OPENAI_API_ASSISTANT_ID 
     config.openaiApiSpeechVoice = OPENAI_API_SPEECH_VOICE
     config.openaiApiSpeechModel = OPENAI_API_SPEECH_MODEL
+    config.openaiBaseUrl = OPENAI_API_BASE_URL
     config.useRedis = !!process.env.REDIS_URL
     config.useS3 = !!process.env.STORAGE_ENDPOINT
     config.webhooks[0].url = WEBHOOK_URL

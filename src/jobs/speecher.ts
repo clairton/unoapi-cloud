@@ -17,7 +17,7 @@ export class SpeecherJob {
     const { payload, id }: { payload: any; id: string } = { ...data } as any
     logger.debug('speecher session %s to %s text s%', phone, payload.to, payload.speech.body)
     const config = await this.getConfig(phone)
-    const openai = new OpenAI({ apiKey: config.openaiApiKey })
+    const openai = new OpenAI({ apiKey: config.openaiApiKey, baseURL:  config.openaiBaseUrl })
     const audio = await openai.audio.speech.create({
       model: config.openaiApiSpeechModel!,
       voice: config.openaiApiSpeechVoice!,

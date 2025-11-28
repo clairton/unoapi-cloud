@@ -11,6 +11,7 @@ export const OPENAI_API_ASSISTANT_ID = process.env.OPENAI_API_ASSISTANT_ID
 export const OPENAI_API_TRANSCRIBE_MODEL = process.env.OPENAI_API_TRANSCRIBE_MODEL || 'whisper-1'
 export const OPENAI_API_SPEECH_MODEL = process.env.OPENAI_API_SPEECH_MODEL || 'tts-1'
 export const OPENAI_API_SPEECH_VOICE = process.env.OPENAI_API_SPEECH_VOICE || 'alloy'
+export const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com/v1'
 export const UNOAPI_HEADER_NAME = process.env.UNOAPI_HEADER_NAME || 'Authorization'
 
 export const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || 'en'

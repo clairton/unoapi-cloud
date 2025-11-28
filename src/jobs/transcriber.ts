@@ -41,7 +41,7 @@ export class TranscriberJob {
       let transcriptionText = ''
       if (config.openaiApiKey) {
         logger.debug('Transcriber audio with OpenAI for session %s to %s', phone, destinyPhone)
-        const openai = new OpenAI({ apiKey: config.openaiApiKey })
+        const openai = new OpenAI({ apiKey: config.openaiApiKey, baseURL: config.openaiBaseUrl })
         const splitedLink = link.split('/')
         const fileName = `${splitedLink[splitedLink.length - 1]}${extension}`
         const transcription = await openai.audio.transcriptions.create({

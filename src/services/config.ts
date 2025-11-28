@@ -92,6 +92,7 @@ export type Config = {
   openaiAssistantId: string | undefined
   openaiApiSpeechVoice: string | undefined
   openaiApiSpeechModel: string | undefined
+  openaiBaseUrl: string | undefined
 }
 
 export const defaultConfig: Config = {
@@ -165,7 +166,8 @@ export const defaultConfig: Config = {
   openaiApiTranscribeModel: undefined,
   openaiAssistantId: undefined,
   openaiApiSpeechVoice: undefined,
-  openaiApiSpeechModel: undefined
+  openaiApiSpeechModel: undefined,
+  openaiBaseUrl: undefined
 }
 
 export interface getConfig {

@@ -258,6 +258,10 @@
                                 <input type="text" class="form-control" id="openaiApiKey" name="openaiApiKey" placeholder="Openai Api Key">
                             </div>
                             <div class="col-12 col-md-12 col-lg-6">
+                                <label for="openaiBaseUrl" class="form-label">Openai Api URL</label>
+                                <input type="text" class="form-control" id="openaiBaseUrl" name="openaiBaseUrl" placeholder="Openai Api URL">
+                            </div>
+                            <div class="col-12 col-md-12 col-lg-6">
                                 <label for="openaiApiTranscribeModel" class="form-label">Openai Transcribe Model</label>
                                 <input type="text" class="form-control" id="openaiApiTranscribeModel" name="openaiApiTranscribeModel" placeholder="Openai Transcribe Model">
                             </div>
@@ -812,6 +816,7 @@
                 $('#authToken').val(session.authToken);
                 $('#wavoipToken').val(session.wavoipToken);
                 $('#openaiApiKey').val(session.openaiApiKey);
+                $('#openaiBaseUrl').val(session.openaiBaseUrl);
                 $('#openaiApiTranscribeModel').val(session.openaiApiTranscribeModel);
                 $('#openaiApiSpeechModel').val(session.openaiApiSpeechModel);
                 $('#openaiApiSpeechVoice').val(session.openaiApiSpeechVoice);
@@ -908,6 +913,7 @@
                         authToken: $('#authToken').val(),
                         wavoipToken: $('#wavoipToken').val(),
                         openaiApiKey: $('#openaiApiKey').val(),
+                        openaiBaseUrl: $('#openaiBaseUrl').val(),
                         openaiApiTranscribeModel: $('#openaiApiTranscribeModel').val(),
                         openaiApiSpeechModel: $('#openaiApiSpeechModel').val(),
                         openaiApiSpeechVoice: $('#openaiApiSpeechVoice').val(),
