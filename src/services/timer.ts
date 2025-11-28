@@ -19,5 +19,6 @@ export const start = async (phone, to, timeout, message, type = 'text', nexts = 
 }
 
 export const stop = async (from, to) => {
+  logger.debug('timer stop from %s to %s', from, to)
   return setLastTimer(from, to, new Date())
 }
