@@ -14,7 +14,6 @@ export const start = async (phone, to, timeout, message, type = 'text', nexts = 
     nexts,
   }
   logger.debug('timer phone %s to %s start timeout %s and nexts %s', phone, to, timeout, JSON.stringify(nexts))
-  await setLastTimer(phone, to, now)
   await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_TIMER, phone, { payload }, { type: 'topic', delay: timeout })
 }
 
