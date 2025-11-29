@@ -65,7 +65,20 @@ if (process.env.UNOAPI_MODE == 'cloud') {
   contactType = new ContactDummy()
 }
 
-const app: App = new App(incoming, outgoing, BASE_URL, getConfigRedis, sessionStore, onNewLogin, addToBlacklistJob, reloadAmqp, logout, middlewareVar, injectRouteDummy, contactType!)
+const app: App = new App(
+  incoming,
+  outgoing,
+  BASE_URL,
+  getConfigRedis,
+  sessionStore,
+  onNewLogin,
+  addToBlacklistJob,
+  reloadAmqp,
+  logout,
+  middlewareVar,
+  injectRouteDummy,
+  contactType!,
+)
 broadcast.setSever(app.socket)
 
 const broadcastJob = new BroacastJob(broadcast)

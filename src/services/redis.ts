@@ -459,7 +459,7 @@ export const getLastTimer = async (phone: string, to: string) => {
   const key = lastTimerKey(phone, to)
   logger.debug('getLastTimer with key %s', key)
   const string = await redisGet(key)
-  return string ? parseInt(string) : undefined 
+  return string ? parseInt(string) : undefined
 }
 
 export const delLastTimer = async (phone: string, to: string) => {

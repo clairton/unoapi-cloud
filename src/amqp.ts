@@ -178,7 +178,7 @@ export const amqpGetQueue = async (
     const exchangeDeadId = queueDeadName(exchange)
     const queueDead = await channel?.assertQueue(queueDeadId, { durable: true })!
     await amqpChannel?.bindQueue(queueDeadId, exchangeDeadId, `${queueDeadId}.*`)
-    
+
     let queueUndecryptable
     if (queue.startsWith(UNOAPI_QUEUE_LISTENER)) {
       const queueUndecryptableId = queueUndecryptableName(queue)

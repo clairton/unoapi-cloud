@@ -1700,8 +1700,8 @@ describe('service transformer', () => {
         },
       ],
       // title: 'your-text-message-content',
-      "text": "your-text-message-content",
-      "title": "Title"
+      text: 'your-text-message-content',
+      title: 'Title',
     }
     const result = toBaileysMessageContent(input)
     expect(result).toEqual(output)

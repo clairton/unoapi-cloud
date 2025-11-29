@@ -1,6 +1,13 @@
 import { Incoming } from '../services/incoming'
 import { Outgoing } from '../services/outgoing'
-import { UNOAPI_QUEUE_COMMANDER, UNOAPI_QUEUE_BULK_STATUS, FETCH_TIMEOUT_MS, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_SPEECH } from '../defaults'
+import {
+  UNOAPI_QUEUE_COMMANDER,
+  UNOAPI_QUEUE_BULK_STATUS,
+  FETCH_TIMEOUT_MS,
+  UNOAPI_SERVER_NAME,
+  UNOAPI_EXCHANGE_BROKER_NAME,
+  UNOAPI_QUEUE_SPEECH,
+} from '../defaults'
 import { PublishOption, amqpPublish } from '../amqp'
 import { getConfig } from '../services/config'
 import { jidToPhoneNumber, getMimetype, toBuffer, TYPE_MESSAGES_MEDIA } from '../services/transformer'

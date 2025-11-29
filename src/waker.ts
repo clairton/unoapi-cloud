@@ -19,7 +19,6 @@ if (process.env.SENTRY_DSN) {
   })
 }
 
-
 logger.info('Starting with waker...')
 
 const brokerQueues = [UNOAPI_QUEUE_OUTGOING]

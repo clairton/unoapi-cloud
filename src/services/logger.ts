@@ -24,7 +24,7 @@ class AppLogger {
         targets.push({
           level: UNO_LOG_LEVEL,
           target: 'pino-pretty',
-           minimumLevel: UNO_LOG_LEVEL,
+          minimumLevel: UNO_LOG_LEVEL,
           options: {
             colorize: true,
             ignore: 'pid,hostname',

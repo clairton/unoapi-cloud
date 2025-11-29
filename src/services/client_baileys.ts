@@ -726,7 +726,7 @@ export class ClientBaileys implements Client {
         remoteJid = key.remoteJid
       }
     }
-    if (remoteJid && await this.store?.sessionStore?.isStatusOnline(this.phone)) {
+    if (remoteJid && (await this.store?.sessionStore?.isStatusOnline(this.phone))) {
       const jid = await this.exists(remoteJid)
       if (jid) {
         try {

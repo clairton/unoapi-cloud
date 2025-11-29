@@ -5,4 +5,3 @@ logger.info('Starting...')
 import './web'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import './worker'
-

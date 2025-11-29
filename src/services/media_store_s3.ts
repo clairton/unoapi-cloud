@@ -61,7 +61,7 @@ export const mediaStoreS3 = (phone: string, config: Config, getDataStore: getDat
       let mimetype = mime.lookup(fileName)
       if (mimetype == 'audio/ogg') {
         mimetype = 'audio/ogg; codecs=opus'
-      } 
+      }
       getParams['ResponseContentType'] = mimetype
     } catch (e) {
       logger.error(e, 'error on set params ResponseContentDisposition and ResponseContentType')

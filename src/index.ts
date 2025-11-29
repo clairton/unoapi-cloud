@@ -1,4 +1,3 @@
-
 import logger from './services/logger'
 import { App } from './app'
 import { IncomingBaileys } from './services/incoming_baileys'

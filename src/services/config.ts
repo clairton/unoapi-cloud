@@ -167,7 +167,7 @@ export const defaultConfig: Config = {
   openaiAssistantId: undefined,
   openaiApiSpeechVoice: undefined,
   openaiApiSpeechModel: undefined,
-  openaiBaseUrl: undefined
+  openaiBaseUrl: undefined,
 }
 
 export interface getConfig {

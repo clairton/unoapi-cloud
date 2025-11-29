@@ -18,13 +18,7 @@ import { ReloadBaileys } from './services/reload_baileys'
 import { LogoutBaileys } from './services/logout_baileys'
 import { ReloadJob } from './jobs/reload'
 import { LogoutJob } from './jobs/logout'
-import { 
-  UNOAPI_QUEUE_BIND,
-  UNOAPI_QUEUE_RELOAD,
-  UNOAPI_QUEUE_LOGOUT,
-  UNOAPI_SERVER_NAME,
-  UNOAPI_EXCHANGE_BRIDGE_NAME
-} from './defaults'
+import { UNOAPI_QUEUE_BIND, UNOAPI_QUEUE_RELOAD, UNOAPI_QUEUE_LOGOUT, UNOAPI_SERVER_NAME, UNOAPI_EXCHANGE_BRIDGE_NAME } from './defaults'
 
 const getConfigLocal: getConfig = getConfigRedis
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigLocal)
