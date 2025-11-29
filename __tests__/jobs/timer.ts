@@ -65,7 +65,6 @@ describe('timer', () => {
     mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(Date.parse('2011-10-05T14:48:01.000Z'))))
     await job.consume(phone, { payload })
     expect(sendSpy).not.toHaveBeenCalled()
-    expect(delLastTimerMock).toHaveBeenCalled()
   })
 
   test('consumer with less last time date', async () => {
@@ -78,7 +77,7 @@ describe('timer', () => {
   test('consumer with equals last time date', async () => {
     mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(time)))
     await job.consume(phone, { payload })
-    expect(sendSpy).not.toHaveBeenCalled()
+    expect(sendSpy).toHaveBeenCalled()
     expect(delLastTimerMock).toHaveBeenCalled()
   })
 

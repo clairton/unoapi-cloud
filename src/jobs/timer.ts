@@ -19,7 +19,7 @@ export class TimerJob {
     const type = payload.type || 'text'
     const lastTime = await this.getLastTimerFunction(phone, to)
     logger.debug('timer phone %s to %s consumer message time %s last time %s', phone, to, messageTime, lastTime)
-    if (!lastTime || messageTime > lastTime) {
+    if (!lastTime || messageTime >= lastTime) {
       logger.debug('timer phone %s to %s consumer enqueue', phone, to)
       const body = {
         messaging_product: 'whatsapp',
@@ -39,9 +39,9 @@ export class TimerJob {
       } else {
         logger.debug('timer phone %s to %s consumer not found nexts', phone, to)
       }
+      await delLastTimer(phone, to)
     } else {
       logger.debug('timer phone %s to %s consumer expired', phone, to)
     }
-    return delLastTimer(phone, to)
   }
 }
