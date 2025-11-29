@@ -449,16 +449,17 @@ export const setGroup = async (phone: string, jid: string, data: GroupMetadata) 
   return redisSetAndExpire(key, JSON.stringify(data), DATA_TTL)
 }
 
-export const setLastTimer = async (phone: string, to: string, current: Date) => {
+export const setLastTimer = async (phone: string, to: string, current: number) => {
   const key = lastTimerKey(phone, to)
   logger.debug('setLastTimer with key %s', key)
-  return redisSet(key, current.toISOString())
+  return redisSet(key, current)
 }
 
 export const getLastTimer = async (phone: string, to: string) => {
   const key = lastTimerKey(phone, to)
   logger.debug('getLastTimer with key %s', key)
-  return redisGet(key)
+  const string = await redisGet(key)
+  return string ? parseInt(string) : undefined 
 }
 
 export const delLastTimer = async (phone: string, to: string) => {
