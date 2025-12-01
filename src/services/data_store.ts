@@ -23,6 +23,8 @@ export type MessageStatus =
   | 'decrypted'
   | 'decryption_failed'
 
+export type MessageDirection = 'incoming' | 'outgoing'
+
 export type DataStore = {
   state: AuthenticationState
   saveCreds: () => Promise<void>
@@ -46,6 +48,8 @@ export type DataStore = {
   loadUnoId: (id: string) => Promise<string | undefined>
   setStatus: (id: string, status: MessageStatus) => Promise<void>
   loadStatus: (id: string) => Promise<MessageStatus | undefined>
+  setLastMessageDirection: (phone: string, status: MessageDirection) => Promise<void>
+  loadLastMessageDirection: (phone: string) => Promise<MessageDirection | undefined>
   getJid: (phone: string) => Promise<string | undefined>
   loadJid: (phone: string, sock: WASocket) => Promise<string | undefined>
   setJid: (phone: string, jid: string) => Promise<void>

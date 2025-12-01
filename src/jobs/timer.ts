@@ -1,3 +1,4 @@
+import { getConfig } from '../services/config'
 import { Incoming } from '../services/incoming'
 import logger from '../services/logger'
 import { getLastTimer } from '../services/redis'
@@ -5,11 +6,13 @@ import { start } from '../services/timer'
 
 export class TimerJob {
   private incoming: Incoming
+  private getConfig: getConfig
   private getLastTimerFunction: typeof getLastTimer
 
-  constructor(incoming: Incoming, getLastTimerFunction: typeof getLastTimer = getLastTimer) {
+  constructor(incoming: Incoming, getConfig: getConfig, getLastTimerFunction: typeof getLastTimer = getLastTimer) {
     this.incoming = incoming
     this.getLastTimerFunction = getLastTimerFunction
+    this.getConfig = getConfig
   }
 
   async consume(phone: string, data: object) {
@@ -21,8 +24,16 @@ export class TimerJob {
     logger.debug('timer phone %s to %s comsumer time %s last time %s', phone, to, messageDate, lastTime)
     if (!lastTime || lastTime > messageDate) {
       logger.debug('timer phone %s to %s comsumer expired ', phone, to)
+      return
     } else {
-      logger.debug('timer phone %s to %s consumer enqueue', phone, to)
+      const config = await this.getConfig(phone)
+      const { dataStore } = await config.getStore(phone, config)
+      const lastMessageDirection = await dataStore.loadLastMessageDirection(phone)
+      logger.debug('timer phone %s to %s comsumer last message direction %s', phone, to, lastMessageDirection)
+      if (lastMessageDirection != 'incoming') {
+        return
+      }
+      logger.debug('timer phone %s to %s consumer enqueue message: %s', phone, to, message)
       const body = {
         messaging_product: 'whatsapp',
         to,

@@ -45,7 +45,7 @@ const reloadJob = new ReloadJob(reload)
 const mediaJob = new MediaJob(getConfigRedis)
 const notificationJob = new NotificationJob(incomingAmqp)
 const outgingJob = new OutgoingJob(getConfigRedis, outgoingCloudApi)
-const timerJob = new TimerJob(incomingAmqp)
+const timerJob = new TimerJob(incomingAmqp, getConfigRedis)
 const transcriberJob = new TranscriberJob(outgoingAmqp, getConfigRedis)
 const speecherJob = new SpeecherJob(incomingAmqp, getConfigRedis)
 

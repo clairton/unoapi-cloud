@@ -35,7 +35,7 @@ export class IncomingJob {
     const payload: any = a.payload
     const options: object = a.options
     const idUno: string = a.id || generateUnoId('INC')
-    if (payload.type == 'speech') {
+    if (payload?.type == 'speech') {
       return amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_SPEECH, phone, { id: idUno, payload }, { type: 'topic' })
     }
     const waId = jidToPhoneNumber(payload.to, '')

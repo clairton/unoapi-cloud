@@ -29,6 +29,13 @@ export class IncomingBaileys implements Incoming {
       throw 'Disconnected Client ' + phone
     }
     logger.debug('Retrieved client for %s', phone)
-    return client.send(payload, options)
+    const resp = await client.send(payload, options)
+    const to = payload['to']
+    if (to) {
+      const config = await this.getConfig(phone)
+      const { dataStore } = await config.getStore(phone, config)
+      await dataStore.setLastMessageDirection(to, 'incoming')
+    }
+    return resp
   }
 }

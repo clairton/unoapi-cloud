@@ -4,6 +4,8 @@ jest.mock('../../src/services/timer')
 import { TimerJob } from '../../src/jobs/timer'
 import { Incoming } from '../../src/services/incoming'
 import { start } from '../../src/services/timer'
+import { getConfig } from '../../src/services/redis'
+import { dataStores } from '../../src/services/data_store'
 const startMock = start as jest.MockedFunction<typeof start>
 
 describe('timer', () => {
@@ -16,12 +18,26 @@ describe('timer', () => {
     time: string,
     sendSpy: any,
     mockGetLastTimer: any,
-    incomingPayload: any
+    incomingPayload: any,
+    messageDirection: string | undefined,
+    getConfigVar: typeof getConfig
 
   beforeEach(() => {
     incoming = mock<Incoming>()
     mockGetLastTimer = jest.fn()
-    job = new TimerJob(incoming, mockGetLastTimer)
+    messageDirection = 'incoming'
+    getConfigVar = async () => {
+      return {
+          getStore: async () => {
+            return {
+              dataStore: {
+                loadLastMessageDirection: async () => messageDirection
+              }
+            }
+          }
+      }
+    }
+    job = new TimerJob(incoming, getConfigVar, mockGetLastTimer)
     phone = `${new Date().getTime()}`
     to = `${new Date().getTime()}`
     message = `${new Date().getTime()}s sdfhosfo`
@@ -50,6 +66,18 @@ describe('timer', () => {
 
   test('consumer without expired date', async () => {
     mockGetLastTimer.mockReturnValueOnce(new Promise((resolve) => resolve(undefined)))
+    await job.consume(phone, { payload })
+    expect(sendSpy).not.toHaveBeenCalled()
+  })
+
+  test('consumer with last message direction undefined', async () => {
+    messageDirection = undefined
+    await job.consume(phone, { payload })
+    expect(sendSpy).not.toHaveBeenCalled()
+  })
+
+  test('consumer with last message direction outgoing', async () => {
+    messageDirection = 'outgoing'
     await job.consume(phone, { payload })
     expect(sendSpy).not.toHaveBeenCalled()
   })

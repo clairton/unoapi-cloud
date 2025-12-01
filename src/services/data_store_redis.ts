@@ -1,5 +1,5 @@
 import { proto, WAMessage, WAMessageKey, GroupMetadata } from 'baileys'
-import { DataStore, MessageStatus } from './data_store'
+import { DataStore, MessageDirection, MessageStatus } from './data_store'
 import { jidToPhoneNumber, phoneNumberToJid, isIndividualJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
 import { ONLY_HELLO_TEMPLATE } from '../defaults'
@@ -24,6 +24,8 @@ import {
   setTemplates,
   setMedia,
   getMedia,
+  getMessageDirection,
+  setMessageDirection
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -110,6 +112,13 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
   store.loadStatus = async (id: string) => {
     const status = await getMessageStatus(phone, id)
     return status ? (status as MessageStatus) : undefined
+  }
+  store.setLastMessageDirection = async (clientPhone: string, direction: MessageDirection) => {
+    return setMessageDirection(phone, clientPhone, direction)
+  }
+  store.loadLastMessageDirection = async (clientPhone: string) => {
+    const direction = await getMessageDirection(phone, clientPhone)
+    return direction ? (direction as MessageDirection) : undefined
   }
   store.setTemplates = async (templates: string) => {
     return setTemplates(phone, templates)
