@@ -15,8 +15,7 @@ describe('timer', () => {
     phone: string,
     to: string,
     message: string,
-    time: number,
-    lastTime: number,
+    time: string,
     sendSpy: any,
     mockGetLastTimer: any,
     incomingPayload: any
@@ -28,8 +27,7 @@ describe('timer', () => {
     phone = `${new Date().getTime()}`
     to = `${new Date().getTime()}`
     message = `${new Date().getTime()}s sdfhosfo`
-    time = Date.parse('2011-10-05T14:48:00.000Z')
-    lastTime = Date.parse('2011-10-05T14:47:00.000Z')
+    time = '2011-10-05T14:48:00.000Z'
     payload = {
       phone,
       to,
@@ -54,36 +52,43 @@ describe('timer', () => {
     delLastTimerMock.mockClear()
   })
 
-  test('consumer without last time date', async () => {
+  test('consumer without expired date', async () => {
     mockGetLastTimer.mockReturnValueOnce(new Promise((resolve) => resolve(undefined)))
     await job.consume(phone, { payload })
-    expect(sendSpy).toHaveBeenCalledWith(...incomingPayload)
+    expect(sendSpy).not.toHaveBeenCalled()
     expect(delLastTimerMock).toHaveBeenCalled()
   })
 
-  test('consumer with greather last time date', async () => {
-    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(Date.parse('2011-10-05T14:48:01.000Z'))))
+  test('consumer with greather expired date', async () => {
+    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve('2011-10-05T14:48:01.000Z')))
     await job.consume(phone, { payload })
     expect(sendSpy).not.toHaveBeenCalled()
     expect(delLastTimerMock).toHaveBeenCalled()
   })
 
-  test('consumer with less last time date', async () => {
-    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(Date.parse('2011-10-05T14:47:59.000Z'))))
+  test('consumer with less expired date', async () => {
+    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve('2011-10-05T14:47:59.000Z')))
     await job.consume(phone, { payload })
     expect(sendSpy).toHaveBeenCalledWith(...incomingPayload)
     expect(delLastTimerMock).toHaveBeenCalled()
   })
 
-  test('consumer with equals last time date', async () => {
+  test('consumer with equals expired date', async () => {
     mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(time)))
     await job.consume(phone, { payload })
-    expect(sendSpy).not.toHaveBeenCalled()
+    expect(sendSpy).toHaveBeenCalledWith(...incomingPayload)
+    expect(delLastTimerMock).toHaveBeenCalled()
+  })
+
+  test('consumer with equals expired date', async () => {
+    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(time)))
+    await job.consume(phone, { payload })
+    expect(sendSpy).toHaveBeenCalledWith(...incomingPayload)
     expect(delLastTimerMock).toHaveBeenCalled()
   })
 
   test('consumer with nexts', async () => {
-    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(Date.parse('2011-10-05T14:47:00.000Z'))))
+    mockGetLastTimer.mockReturnValue(new Promise((resolve) => resolve(time)))
     const first = { ...payload }
     const nexts = [first]
     await job.consume(phone, { payload: { ...payload, nexts } })

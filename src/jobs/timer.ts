@@ -15,11 +15,15 @@ export class TimerJob {
   async consume(phone: string, data: object) {
     const a = data as any
     const payload: any = a.payload
-    const { message, to, time: messageTime, nexts } = payload
+    const { message, to, time, nexts } = payload
     const type = payload.type || 'text'
-    const lastTime = await this.getLastTimerFunction(phone, to)
-    logger.debug('timer comsumer phone %s to %s message time %s last time %s', phone, to, messageTime, lastTime)
-    if (!lastTime || messageTime > lastTime) {
+    const messageDate = Date.parse(time)
+    const string = await this.getLastTimerFunction(phone, to)
+    const lastTime = string ? Date.parse(string) : undefined
+    logger.debug('timer comsumer phone %s to %s time %s last time %s', phone, to, time, lastTime)
+    if (!lastTime || lastTime > messageDate) {
+      logger.debug('timer comsumer expired phone %s to %s', phone, to)
+    } else {
       logger.debug('timer consumer enqueue phone %s to %s', phone, to)
       const body = {
         messaging_product: 'whatsapp',
@@ -39,8 +43,6 @@ export class TimerJob {
       } else {
         logger.debug('timer consumer not found nexts %s to %s', phone, to)
       }
-    } else {
-      logger.debug('timer comsumer expired phone %s to %s', phone, to)
     }
     return delLastTimer(phone, to)
   }

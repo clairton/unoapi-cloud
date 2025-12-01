@@ -168,18 +168,9 @@ http://localhost:9876/v15.0/5549988290955/messages \
 
 Needs put configs  OPENAI_API_KEY, OPENAI_API_SPEECH_VOICE and OPENAI_API_SPEECH_MODEL
 
-
 ```sh
 curl -i -X POST \
-https://graph.facebook.com/v23.0/197323900140596/messages \
--H 'Content-Type: application/json' \
--H 'Bearer EAALVnfB76LABOxpKfZCo3C7JEYoGRdubxCSpCAHyWDmxwXswZBCn3eqnVHrAG3Oyv0Ba9Dfwc3Ml6o8laaOZBlTQEOmwd4613196EqLkOJTsZBA66KApWDeHkCmqTPGvAPcOJBLRyDoVqjbZADvVEINqqXU64QZATMxYWzcun6jXZCjSZCRWVM4j8BXtyiZAzBF2HKCVhfQ9jx3mnaqZBF' \
--d '{"messaging_product":"whatsapp","to":"5549988290955","type":"audio","audio":{"link":"https://nyc3.digitaloceanspaces.com/chatwoot-web/u0h3s2uagcygq2mv01rlhecjud4r?response-content-disposition=attachment%3B%20filename%3D%2291a227b049c8.mp3%22%3B%20filename%2A%3DUTF-8%27%2791a227b049c8.mp3&response-content-type=audio%2Fmpeg&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=DO00M8ECDMVNRGWVEUFJ%2F20251127%2Fnyc3%2Fs3%2Faws4_request&X-Amz-Date=20251127T174119Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=f1fe5af084723f8cf5bffbf4713375ac180aa5d99471676d6dda00d4cde30ba2"}}'
-```
-
-```sh
-curl -i -X POST \
-https://unoapi.cloud/v15.0/554936341300/messages \
+http://localhost:9876/v15.0/554931978550/messages \
 -H 'Content-Type: application/json' \
 -H 'Authorization: 1' \
 -d '{
@@ -189,30 +180,6 @@ https://unoapi.cloud/v15.0/554936341300/messages \
   "speech": {
     "body": "hello"
   } 
-}'
-``````sh
-curl -i -X POST \
-https://unoapi.cloud/v15.0/554940002610/messages \
--H 'Content-Type: application/json' \
--H 'Authorization: EAALVnfB76LABOxpKfZCo3C7JEYoGRdubxCSpCAHyWDmxwXswZBCn3eqnVHrAG3Oyv0Ba9Dfwc3Ml6o8laaOZBlTQEOmwd4613196EqLkOJTsZBA66KApWDeHkCmqTPGvAPcOJBLRyDoVqjbZADvVEINqqXU64QZATMxYWzcun6jXZCjSZCRWVM4j8BXtyiZAzBF2HKCVhfQ9jx3mnaqZBF' \
--d '{
-  "messaging_product": "whatsapp",
-  "to": "5549988290955",
-  "type": "speech",
-  "speech": {
-    "body": "hello"
-  } 
-}'
-```
-```sh
-curl -i -X POST \
-https://unoapi.cloud/timer/554936341300/5549988290955 \
--H 'Content-Type: application/json' \
--H 'Authorization: wrioHGE9whrihiehfkhf9weht893thTTR6etrhwirhwrow98uwerhfe' \
--d '{ 
-  "timeout": 10,
-  "type": "speech",
-  "message": "Oi, ainda está ai? =)"
 }'
 ```
 

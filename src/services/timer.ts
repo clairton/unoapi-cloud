@@ -4,12 +4,12 @@ import { setLastTimer } from './redis'
 import logger from './logger'
 
 export const start = async (phone, to, timeout, message, type = 'text', nexts = []) => {
-  const now = new Date().getTime()
+  const now = new Date()
   const payload = {
     phone,
     to,
     message,
-    time: now,
+    time: now.toISOString(),
     type,
     nexts,
   }
@@ -20,5 +20,5 @@ export const start = async (phone, to, timeout, message, type = 'text', nexts = 
 
 export const stop = async (from, to) => {
   logger.debug('timer stop from %s to %s', from, to)
-  return setLastTimer(from, to, new Date().getTime())
+  return setLastTimer(from, to, new Date())
 }
