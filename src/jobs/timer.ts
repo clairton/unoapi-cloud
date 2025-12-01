@@ -20,11 +20,11 @@ export class TimerJob {
     const messageDate = Date.parse(time)
     const string = await this.getLastTimerFunction(phone, to)
     const lastTime = string ? Date.parse(string) : undefined
-    logger.debug('timer comsumer phone %s to %s time %s last time %s', phone, to, time, lastTime)
+    logger.debug('timer phone %s to %s comsumer time %s last time %s', phone, to, time, lastTime)
     if (!lastTime || lastTime > messageDate) {
-      logger.debug('timer comsumer expired phone %s to %s', phone, to)
+      logger.debug('timer phone %s to %s comsumer expired ', phone, to)
     } else {
-      logger.debug('timer consumer enqueue phone %s to %s', phone, to)
+      logger.debug('timer phone %s to %s consumer enqueue', phone, to)
       const body = {
         messaging_product: 'whatsapp',
         to,
@@ -35,13 +35,13 @@ export class TimerJob {
       }
       await this.incoming.send(phone, body, {})
       if (nexts?.length > 0) {
-        logger.debug('timer consumer found nexts %s to %s with %s', phone, to, JSON.stringify(nexts))
+        logger.debug('timer phone %s to %s consumer found nexts with %s', phone, to, JSON.stringify(nexts))
         const first = nexts.shift()
         first.type = first.type || 'text'
-        logger.debug('timer consumer %s to %s first %s and nexts %s', phone, to, JSON.stringify(first), JSON.stringify(nexts))
+        logger.debug('timer phone %s to %s consumer first %s and nexts %s', phone, to, JSON.stringify(first), JSON.stringify(nexts))
         return start(phone, to, first.timeout, first.message, first.type, nexts)
       } else {
-        logger.debug('timer consumer not found nexts %s to %s', phone, to)
+        logger.debug('timer phone %s to %s consumer not found nexts', phone, to)
       }
     }
     return delLastTimer(phone, to)
