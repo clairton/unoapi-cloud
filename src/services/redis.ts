@@ -462,12 +462,6 @@ export const getLastTimer = async (phone: string, to: string) => {
   return string ? parseInt(string) : undefined
 }
 
-export const delLastTimer = async (phone: string, to: string) => {
-  const key = lastTimerKey(phone, to)
-  logger.debug('delLastTimer with key %s', key)
-  return redisDel(key)
-}
-
 export const setMedia = async (phone: string, id: string, payload: any) => {
   const key = mediaKey(phone, id)
   logger.debug('setMedia with key %s', key)

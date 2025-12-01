@@ -1,6 +1,6 @@
 import { Incoming } from '../services/incoming'
 import logger from '../services/logger'
-import { getLastTimer, delLastTimer } from '../services/redis'
+import { getLastTimer } from '../services/redis'
 import { start } from '../services/timer'
 
 export class TimerJob {
@@ -42,6 +42,5 @@ export class TimerJob {
         logger.debug('timer phone %s to %s consumer not found nexts', phone, to)
       }
     }
-    return delLastTimer(phone, to)
   }
 }
