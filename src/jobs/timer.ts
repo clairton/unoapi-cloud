@@ -15,12 +15,10 @@ export class TimerJob {
   async consume(phone: string, data: object) {
     const a = data as any
     const payload: any = a.payload
-    const { message, to, time, nexts } = payload
+    const { message, to, time: messageDate, nexts } = payload
     const type = payload.type || 'text'
-    const messageDate = Date.parse(time)
-    const string = await this.getLastTimerFunction(phone, to)
-    const lastTime = string ? Date.parse(string) : undefined
-    logger.debug('timer phone %s to %s comsumer time %s last time %s', phone, to, time, lastTime)
+    const lastTime = await this.getLastTimerFunction(phone, to)
+    logger.debug('timer phone %s to %s comsumer time %s last time %s', phone, to, messageDate, lastTime)
     if (!lastTime || lastTime > messageDate) {
       logger.debug('timer phone %s to %s comsumer expired ', phone, to)
     } else {
