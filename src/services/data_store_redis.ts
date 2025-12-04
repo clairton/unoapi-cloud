@@ -90,15 +90,22 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     await setJid(phone, phoneOrJid, jid)
   }
   store.loadMessage = async (remoteJid: string, id: string) => {
-    const newJid = isIndividualJid(remoteJid) ? phoneNumberToJid(jidToPhoneNumber(remoteJid)) : remoteJid
-    const m = await getMessage(phone, newJid, id)
-    const wm = m as proto.IWebMessageInfo
-    return wm
+    const clientPhone = jidToPhoneNumber(remoteJid)
+    let m
+    m = await getMessage(phone, clientPhone, id)
+    if (!m) {
+      const newJid = isIndividualJid(remoteJid) ? phoneNumberToJid(jidToPhoneNumber(remoteJid)) : remoteJid
+      m = await getMessage(phone, newJid, id)
+    }
+    if (!m) {
+      return
+    }
+    return m as proto.IWebMessageInfo
   }
   store.setMessage = async (remoteJid: string, message: WAMessage) => {
-    const newJid = isIndividualJid(remoteJid) ? phoneNumberToJid(jidToPhoneNumber(remoteJid)) : remoteJid
+    const clientPhone = jidToPhoneNumber(remoteJid);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return setMessage(phone, newJid, message.key.id!, message)
+    return setMessage(phone, clientPhone, message.key.id!, message)
   }
   store.cleanSession = async (removeConfig = CLEAN_CONFIG_ON_DISCONNECT) => {
     if (removeConfig) {
