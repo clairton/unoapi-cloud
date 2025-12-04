@@ -4,21 +4,21 @@ import { start, stop } from '../services/timer'
 
 export class TimerController {
   async stop(req: Request, res: Response) {
-    logger.debug('timer stop method %s', req.method)
-    logger.debug('timer stop  headers %s', JSON.stringify(req.headers))
-    logger.debug('timer stop  params %s', JSON.stringify(req.params))
-    logger.debug('timer stop  body %s', JSON.stringify(req.body))
     const { phone, to } = req.params
+    logger.debug('timer phone %s stop method %s', phone, req.method)
+    logger.debug('timer phone %s stop headers %s', phone, JSON.stringify(req.headers))
+    logger.debug('timer phone %s stop params %s', phone, JSON.stringify(req.params))
+    logger.debug('timer phone %s stop body %s', phone, JSON.stringify(req.body))
     await stop(phone, to)
     res.status(200).send(`{"success": true}`)
   }
 
   async start(req: Request, res: Response) {
-    logger.debug('timer start method %s', req.method)
-    logger.debug('timer start  headers %s', JSON.stringify(req.headers))
-    logger.debug('timer start  params %s', JSON.stringify(req.params))
-    logger.debug('timer start  body %s', JSON.stringify(req.body))
     const { phone, to } = req.params
+    logger.debug('timer phone %s start method %s', phone, req.method)
+    logger.debug('timer phone %s headers %s', phone, JSON.stringify(req.headers))
+    logger.debug('timer phone %s params %s', phone, JSON.stringify(req.params))
+    logger.debug('timer phone %s body %s', phone, JSON.stringify(req.body))
     const message = req.body.message || req.query.message
     const type = req.body.type || req.query.type || 'text'
     if (!message) {

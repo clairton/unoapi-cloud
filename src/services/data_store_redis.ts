@@ -114,10 +114,12 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     return status ? (status as MessageStatus) : undefined
   }
   store.setLastMessageDirection = async (clientPhone: string, direction: MessageDirection) => {
+    logger.debug('Last message direction phone %s to %s set %s', phone, clientPhone, direction)
     return setMessageDirection(phone, clientPhone, direction)
   }
   store.loadLastMessageDirection = async (clientPhone: string) => {
     const direction = await getMessageDirection(phone, clientPhone)
+    logger.debug('Last message direction phone %s to %s get %s', phone, clientPhone, direction)
     return direction ? (direction as MessageDirection) : undefined
   }
   store.setTemplates = async (templates: string) => {

@@ -21,15 +21,15 @@ export class TimerJob {
     const { message, to, time: messageDate, nexts } = payload
     const type = payload.type || 'text'
     const lastTime = await this.getLastTimerFunction(phone, to)
-    logger.debug('timer phone %s to %s comsumer time %s last time %s', phone, to, messageDate, lastTime)
+    logger.debug('timer phone %s to %s consumer time %s last time %s', phone, to, messageDate, lastTime)
     if (!lastTime || lastTime > messageDate) {
-      logger.debug('timer phone %s to %s comsumer expired ', phone, to)
+      logger.debug('timer phone %s to %s consumer expired ', phone, to)
       return
     } else {
       const config = await this.getConfig(phone)
       const { dataStore } = await config.getStore(phone, config)
       const lastMessageDirection = await dataStore.loadLastMessageDirection(phone)
-      logger.debug('timer phone %s to %s comsumer last message direction %s', phone, to, lastMessageDirection)
+      logger.debug('timer phone %s to %s consumer last message direction %s', phone, to, lastMessageDirection)
       if (lastMessageDirection != 'incoming') {
         return
       }
