@@ -255,7 +255,7 @@ export const getMessageDirection = async (phone: string, phoneClient: string) =>
 
 export const setMessageDirection = async (phone: string, phoneClient: string, direction: string) => {
   const key = messageDirectionKey(phone, phoneClient)
-  await client.set(key, direction, { EX: DATA_TTL })
+  return client.set(key, direction, { EX: DATA_TTL })
 }
 
 export const getTemplates = async (phone: string) => {

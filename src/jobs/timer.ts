@@ -28,7 +28,7 @@ export class TimerJob {
     } else {
       const config = await this.getConfig(phone)
       const { dataStore } = await config.getStore(phone, config)
-      const lastMessageDirection = await dataStore.loadLastMessageDirection(phone)
+      const lastMessageDirection = await dataStore.loadLastMessageDirection(to)
       logger.debug('timer phone %s to %s consumer last message direction %s', phone, to, lastMessageDirection)
       if (lastMessageDirection != 'incoming') {
         return
