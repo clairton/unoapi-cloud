@@ -27,7 +27,7 @@ export const CONVERT_AUDIO_FFMPEG_PARAMS = JSON.parse(
 )
 export const SEND_AUDIO_WAVEFORM = process.env.SEND_AUDIO_WAVEFORM == _undefined ? false : process.env.SEND_AUDIO_WAVEFORM == 'true'
 export const UNOAPI_NATIVE_FLOW_BUTTONS: boolean =
-  process.env.UNOAPI_NATIVE_FLOW_BUTTONS === _undefined ? false : process.env.UNOAPI_NATIVE_FLOW_BUTTONS == 'false'
+  process.env.UNOAPI_NATIVE_FLOW_BUTTONS === 'false'
 
 export const WEBHOOK_FORWARD_PHONE_NUMBER_ID = process.env.WEBHOOK_FORWARD_PHONE_NUMBER_ID || ''
 export const WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID = process.env.WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID || ''
