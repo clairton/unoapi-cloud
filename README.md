@@ -374,6 +374,7 @@ CONFIG_SESSION_PHONE_NAME=Chrome Browser Name = Chrome | Firefox | Edge | Opera 
 WHATSAPP_VERSION=Version of whatsapp, default to local Baileys version. Format is `[2, 3000, 1019810866]`
 VALIDATE_SESSION_NUMBER=validate the number in session and config is equals, default true
 OPENAI_API_KEY=openai api key to transcribe audio
+UNOAPI_NATIVE_FLOW_BUTTONS= Enable or disable nativeFlowButtons support. Allows cta_(url|call|code) buttons or just reply buttons (for greater compatibility). Default is false for compatibility.
 ```
 
 Bucket env to config assets media compatible with S3, this config can't save in redis:
