@@ -82,7 +82,7 @@ export const TYPE_MESSAGES_TO_READ = [
   'conversation',
   'ptvMessage',
   'templateButtonReplyMessage',
-  // 'listMessage',
+  'listMessage',
   // 'templateMessage'
 ]
 
@@ -1134,6 +1134,36 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           message_id: listReplyMessageId,
           id: listReplyMessageId,
         }
+        break
+
+      case 'listMessage':
+        message.interactive = {
+          type: 'list',
+          header: {
+            text: binMessage?.headerText
+          },
+          body: {
+            text: binMessage?.description
+          },
+          footer: {
+            text: binMessage?.footerText
+          },
+          action: {
+            button: binMessage?.buttonText,
+
+            
+
+            sections: (binMessage?.sections || []).map((section: any) => ({
+              title: section.title || '',
+              rows: (section.rows || []).map((row: any) => ({
+                title: row.title || '',
+                id: row.rowId || row.id || '',
+                description: row.description || '',
+              })),
+            }))
+          }
+        }
+        message.type = 'interactive'
         break
 
       case 'statusMentionMessage':
