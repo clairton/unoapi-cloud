@@ -81,6 +81,8 @@ export const TYPE_MESSAGES_TO_READ = [
   'listResponseMessage',
   'conversation',
   'ptvMessage',
+  'templateButtonReplyMessage',
+  // 'templateMessage'
 ]
 
 const OTHER_MESSAGES_TO_PROCESS = ['protocolMessage', 'senderKeyDistributionMessage', 'messageContextInfo', 'messageStubType']
@@ -545,12 +547,12 @@ export const getChatAndNumberAndId = (payload: any): [string, string, string] =>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getNumberAndId = (payload: any): [string, string] => {
   const {
-    key: { remoteJid, senderPn, participantPn, participant, senderLid, participantLid },
+    key: { remoteJid, senderPn, participantPn, participant, senderLid, participantLid, recipientLid },
     participant: participant2,
     participantPn: participantPn2,
   } = payload
 
-  const lid = senderLid || participantLid || participant || participant2 || remoteJid
+  const lid = senderLid || participantLid || recipientLid || participant || participant2 || remoteJid
   const split = lid.split('@')
   const id = `${split[0].split(':')[0]}@${split[1]}`
   const pn = participantPn || senderPn || participantPn2 || participant || participant2
@@ -988,6 +990,19 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
             emoji: binMessage.text,
           }
           message.type = 'reaction'
+        }
+        break
+
+      case 'templateButtonReplyMessage':
+        const replyMessageId = binMessage?.contextInfo?.stanzaId
+        message.button = {
+          payload: binMessage?.selectedId,
+          text: binMessage?.selectedDisplayText
+        }
+        message.type = 'button'
+        message.context = {
+          message_id: replyMessageId,
+          id: replyMessageId,
         }
         break
 

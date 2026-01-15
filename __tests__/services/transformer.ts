@@ -1825,4 +1825,195 @@ describe('service transformer', () => {
   })
   // {"key":{"remoteJid":"555533800800@s.whatsapp.net","fromMe":false,"id":"1BE283407E62E5A073"},"messageTimestamp":1753900800,"pushName":"555533800800","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"recipientKeyHash":"BuoOcp2GlUsdsQ==","recipientTimestamp":"1753278139","recipientKeyIndexes":[0,5]},"deviceListMetadataVersion":2},"buttonsMessage":{"contentText":"Para confirmar, estou falando com *IM Agronegócios* e o seu CNPJ é *41.281.5xx/xxxx-xx*?","buttons":[{"buttonId":"1","buttonText":{"displayText":"Sim"},"type":"RESPONSE"},{"buttonId":"2","buttonText":{"displayText":"Não"},"type":"RESPONSE"}],"headerType":"EMPTY"}},"verifiedBizName":"Unifique"}
   // {"key":{"remoteJid":"555533800800@s.whatsapp.net","fromMe":true,"id":"3EB02FCD7C12A71F06DE34"}, "messageTimestamp":1753900805,"pushName":"Im Agronegócios","broadcast":false,"status":2, "message":{"buttonsResponseMessage":{"selectedButtonId":"1","selectedDisplayText":"Sim","contextInfo":{"stanzaId":"1BE283407E62E5A073","participant":"555533800800@s.whatsapp.net","quotedMessage":{"messageContextInfo":{},"buttonsMessage":{"contentText":"Para confirmar, estou falando com *IM Agronegócios* e o seu CNPJ é *41.281.5xx/xxxx-xx*?","buttons":[{"buttonId":"1","buttonText":{"displayText":"Sim"},"type":"RESPONSE"},{"buttonId":"2","buttonText":{"displayText":"Não"},"type":"RESPONSE"}],"headerType":"EMPTY"}}},"type":"DISPLAY_TEXT"}}}
+
+  test('fromBaileysMessageContent with templateButtonReplyMessage', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const body = `${new Date().getTime()}`
+    const id = `wa.${new Date().getTime()}`
+    const stanzaId = `wa.${new Date().getTime()}`
+    const pushName = `Mary ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      message: {
+        templateButtonReplyMessage: {
+          selectedId: body,
+          selectedDisplayText: body,
+          contextInfo: {
+            stanzaId
+          }
+        }
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    context: {
+                      id: stanzaId,
+                      message_id: stanzaId
+                    },
+                    from: '5549988290955',
+                    id,
+                    timestamp: messageTimestamp,
+                    button: { 
+                      payload: body,
+                      text: body,
+                    },
+                    type: 'button',
+                  },
+                ],
+                contacts: [{ profile: { name: pushName }, wa_id: '5549988290955' }],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
+  })
 })
+
+
+// {
+//    "payload":{
+//       "object":"whatsapp_business_account",
+//       "entry":[
+//          {
+//             "id":"252538077941948",
+//             "changes":[
+//                {
+//                   "value":{
+//                      "messaging_product":"whatsapp",
+//                      "metadata":{
+//                         "display_phone_number":"554940002610",
+//                         "phone_number_id":"197323900140596"
+//                      },
+//                      "contacts":[
+//                         {
+//                            "profile":{
+//                               "name":"Clairton"
+//                            },
+//                            "wa_id":"554988290955"
+//                         }
+//                      ],
+//                      "messages":[
+//                         {
+//                            "context":{
+//                               "from":"554940002610",
+//                               "id":"wamid.HBgMNTU0OTg4MjkwOTU1FQIAERgSNjA1MUM5QjcxNkE2RjI5OTlBAA=="
+//                            },
+//                            "from":"554988290955",
+//                            "id":"wamid.HBgMNTU0OTg4MjkwOTU1FQIAEhgUM0ExMTQwRTkxRUVENUJERTlGN0EA",
+//                            "timestamp":"1768486070",
+//                            "type":"button",
+//                            "button":{
+//                               "payload":"Verificar Disponibilidade",
+//                               "text":"Verificar Disponibilidade"
+//                            }
+//                         }
+//                      ]
+//                   },
+//                   "field":"messages"
+//                }
+//             ]
+//          }
+//       ]
+//    }
+
+
+// {
+//   key: {
+//       "remoteJid": "554940002610@s.whatsapp.net",
+//       "fromMe": true,
+//       "id": "3AD63E6C8A79A252B0DC",
+//       "recipientLid": "202082908909711@lid"
+//     }
+//     messageTimestamp: 1768486521
+//     pushName: "Clairton"
+//     status: 2
+//     message: {
+//       "templateButtonReplyMessage": {
+//         "selectedId": "Saber mais",
+//         "selectedDisplayText": "Saber mais",
+//         "contextInfo": {
+//           "stanzaId": "6051C9B716A6F2999A",
+//           "participant": "554940002610@s.whatsapp.net",
+//           "quotedMessage": {
+//             "templateMessage": {
+//               "hydratedFourRowTemplate": {
+//                 "imageMessage": {
+//                   "url": "https://mmg.whatsapp.net/v/t62.7118-24/34665115_1539906810534119_110090755217396454_n.enc?ccb=11-4&oh=01_Q5Aa3AFYOzYwMHTI_qhxW3CUk_pQYa2EBvrc7Ii5ycD282xFkQ&oe=6943E740&_nc_sid=5e03e0&mms3=true",
+//                   "mimetype": "image/jpeg",
+//                   "fileSha256": "pAIYm4Y/02c7VsoK90P4BmAzkZDG4knLRyN9DKXdLes=",
+//                   "fileLength": "179432",
+//                   "height": 832,
+//                   "width": 1600,
+//                   "mediaKey": "4QLMqnAzPDa8E8aJzH8pM+2EFKqRhbykZ/m9rpNFZiM=",
+//                   "fileEncSha256": "7D9vtQQVrdB+Qo/oiD2OWFV08NWJRjx055pbBwS6L5w=",
+//                   "directPath": "/v/t62.7118-24/34665115_1539906810534119_110090755217396454_n.enc?ccb=11-4&oh=01_Q5Aa3AFYOzYwMHTI_qhxW3CUk_pQYa2EBvrc7Ii5ycD282xFkQ&oe=6943E740&_nc_sid=5e03e0",
+//                   "mediaKeyTimestamp": "1763471010",
+//                   "jpegThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAAlAEgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwC0SACTTfMUetAbNG4YB9aAFLgHBoDgkAUA5JGOlJvG78cZoAVyQjEdQKrqvylt7bqsMygfMQKgVhhiDxQNE4OQKWmo6uMgijf8vA5JwBQIcaKYZPmA684J96KAGqoZQT9akpqcKAaeKBsbt5PPBqOQrEpPc9BUxGKpHMzFicAdKBojLFiSTzQCQpXseamaOMMpYlR/Ok3kPwy+XQVciBxyOKtW7bgST8wqNY4mbhuPSk2tAQ2QRQD1LQjXk88/pRTkIYA9jRQZje1KDRRQAE0wKB0AoooAgu/4ar4oooNI7EttxL+FWiit94ZoooJluPXjgdKKKKCT/9k=",
+//                   "thumbnailDirectPath": "/v/t62.35850-24/12093040_1353499959905316_6421062811199989067_n.enc?ccb=11-4&oh=01_Q5Aa3AHm7I55_RwOa2p-iCqibXZeNDV86ueFwsLwD1C8zTQprg&oe=6943E3BA&_nc_sid=5e03e0",
+//                   "thumbnailSha256": "P5ZmDTKY+6CbRltai4gxbWwraiAde5RbwkFx67AQY4s=",
+//                   "thumbnailEncSha256": "LLdyjhlncDVWnh9Lzz90MCibL7TPf3P95v4SBOS00Eg="
+//                 },
+//                 "hydratedContentText": "📢 Olá! Aqui é o *Celso Portiolli*, embaixador da Odonto Excellence! 😁✨\n\n😃*Joao D.*, que está na sua rede de contatos e faz tratamento conosco, ficou tão satisfeito(a) que indicou você para uma consulta de avaliação odontológica completa!\n\n💳 Na *Odonto Excellence* oferecemos um parcelamento com crediário próprio e *aprovação* na hora, você *escolhe* a data de vencimento e o valor da sua parcela.\n\n💰 Além disso, temos várias formas para você conseguir *descontos* e pagar menos pelo seu tratamento!\n\n💙 É *maravilhoso* ter pessoas ao nosso redor que se importam com a nossa saúde e bem-estar!\n\n📅 Que tal verificar a disponibilidade e a até mesmo agendar sua visita para *hoje*? \n\n🦷 Aqui você decide e já pode iniciar seu tratamento na *hora*! 🚀",
+//                 "hydratedButtons": [
+//                   {
+//                     "quickReplyButton": {
+//                       "displayText": "Verificar Disponibilidade",
+//                       "id": "Verificar Disponibilidade"
+//                     },
+//                     "index": 0
+//                   },
+//                   {
+//                     "quickReplyButton": {
+//                       "displayText": "Saber mais",
+//                       "id": "Saber mais"
+//                     },
+//                     "index": 1
+//                   },
+//                   {
+//                     "quickReplyButton": {
+//                       "displayText": "Somente mês que vem",
+//                       "id": "Somente mês que vem"
+//                     },
+//                     "index": 2
+//                   },
+//                   {
+//                     "quickReplyButton": {
+//                       "displayText": "No momento não",
+//                       "id": "No momento não"
+//                     },
+//                     "index": 3
+//                   }
+//                 ],
+//                 "templateId": "1033393388290309"
+//               }
+//             }
+//           }
+//         },
+//         "selectedIndex": 1
+//       }
+//     }
+// }

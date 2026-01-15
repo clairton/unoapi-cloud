@@ -50,7 +50,7 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (isOutgoingMessage(message)) {
       const config = await this.getConfig(phone)
-      const { dataStore } = await config.getStore(phone, config)  
+      const { dataStore } = await config.getStore(phone, config)
       await dataStore.setLastMessageDirection(destinyPhone, 'outgoing')
       if (webhook.addToBlackListOnOutgoingMessageWithTtl) {
         logger.info(`Session phone %s webhook %s configured to add to blacklist when outgoing message for this webhook`, phone, webhook.id)
