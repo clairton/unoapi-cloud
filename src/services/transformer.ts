@@ -84,6 +84,7 @@ export const TYPE_MESSAGES_TO_READ = [
   'templateButtonReplyMessage',
   'listMessage',
   'buttonsMessage',
+  'buttonsResponseMessage'
   // 'templateMessage'
 ]
 
@@ -1121,7 +1122,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         const row = (section?.rows || []).find(r => { 
           return r?.rowId == rowId
         })
-        console.log(row)
         message.interactive = { 
           type: 'list_reply',
           list_reply: { 
@@ -1134,6 +1134,22 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
         message.context = {
           message_id: listReplyMessageId,
           id: listReplyMessageId,
+        }
+        break
+
+      case 'buttonsResponseMessage':
+        const buttonReplyMessageId = binMessage?.contextInfo?.stanzaId
+        message.interactive = { 
+          type: 'button_reply',
+          button_reply: { 
+            id: binMessage?.selectedButtonId,
+            title: binMessage?.selectedDisplayText
+          }
+        }
+        message.type = 'interactive'
+        message.context = {
+          message_id: buttonReplyMessageId,
+          id: buttonReplyMessageId,
         }
         break
 

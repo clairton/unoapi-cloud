@@ -165,10 +165,9 @@ http://localhost:9876/v15.0/5549988290955/messages \
 
 ## Interactive
 
-To send interactive
+To send interactive with list
 
 ```sh
-
 curl -i -X POST \
 http://localhost:9876/v15.0/5549988290955/messages \
 -H 'Content-Type: application/json' \
@@ -204,6 +203,45 @@ http://localhost:9876/v15.0/5549988290955/messages \
               "description":"continuar usando o whatsapp no smarphone e sincronizar as mensagem de todos os dispositvos"
             }
           ]
+        }
+      ]
+    }
+  }
+}'
+```
+
+To send interactive with buttons
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+-H 'Content-Type: application/json' \
+-d '{
+  "to": "554931978550",
+  "type":"interactive",
+  "interactive":{
+    "type": "button",
+    "body": {
+      "text": "Hi Pablo! Your gardening workshop is scheduled for 9am tomorrow. Use the buttons if you need to reschedule. Thank you!"
+    },
+    "footer": {
+      "text": "Lucky Shrub: Your gateway to succulents!™"
+    },
+    "action": {
+      "buttons": [
+        {
+          "type": "reply",
+          "reply": {
+            "id": "change-button",
+            "title": "Change"
+          }
+        },
+        {
+          "type": "reply",
+          "reply": {
+            "id": "cancel-button",
+            "title": "Cancel"
+          }
         }
       ]
     }
