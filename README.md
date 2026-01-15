@@ -163,6 +163,53 @@ http://localhost:9876/v15.0/5549988290955/messages \
 }'
 ```
 
+## Interactive
+
+To send interactive
+
+```sh
+
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+-H 'Content-Type: application/json' \
+-d '{
+  "to": "554931978550",
+  "type":"interactive",
+  "interactive":{
+    "type":"list",
+    "header":{
+      "type":"text",
+      "text":"Escolha umas das opções abaixo:"
+    },
+    "body":{
+      "text":"Qual a api melhor custo beneficio?"
+    },
+    "action":{
+      "button":"Clique para ver as opções",
+      "sections":[
+        {
+          "title":"Oficial",
+          "rows":[
+            {
+              "id":"oficial",
+              "description":"varias limitações, como iniciar conversas pagando pela janela de 24, se o cliente responder"
+            }
+          ]
+        },
+        {
+          "title":"Unoapi",
+          "rows":[
+            {
+              "id":"uno",
+              "description":"continuar usando o whatsapp no smarphone e sincronizar as mensagem de todos os dispositvos"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}'
+```
 
 ## Send a Speech, send text to unoapi and unoapi convert to audio
 
