@@ -530,61 +530,6 @@ describe('service transformer', () => {
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
-  test('fromBaileysMessageContent with messageContextInfo', async () => {
-    const phoneNumer = '5549998360838'
-    const remotePhoneNumer = '554988290955'
-    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
-    const body = `${new Date().getTime()}`
-    const id = `wa.${new Date().getTime()}`
-    const pushName = `Mary ${new Date().getTime()}`
-    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
-    const input = {
-      key: {
-        remoteJid,
-        fromMe: false,
-        id,
-      },
-      message: {
-        messageContextInfo: body,
-        listResponseMessage: {
-          title: body,
-        },
-      },
-      pushName,
-      messageTimestamp,
-    }
-    const output = {
-      object: 'whatsapp_business_account',
-      entry: [
-        {
-          id: remoteJid,
-          changes: [
-            {
-              value: {
-                messaging_product: 'whatsapp',
-                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
-                messages: [
-                  {
-                    from: '5549988290955',
-                    id,
-                    timestamp: messageTimestamp,
-                    text: { body },
-                    type: 'text',
-                  },
-                ],
-                contacts: [{ profile: { name: pushName }, wa_id: '5549988290955' }],
-                statuses: [],
-                errors: [],
-              },
-              field: 'messages',
-            },
-          ],
-        },
-      ],
-    }
-    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
-  })
-
   test('fromBaileysMessageContent with text', async () => {
     const phoneNumer = '5549998360838'
     const remotePhoneNumer = '554988290955'
@@ -1891,6 +1836,91 @@ describe('service transformer', () => {
     }
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
+
+  test('fromBaileysMessageContent with listResponseMessage', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const stanzaId = `wa.${new Date().getTime()}`
+    const title = `title ${new Date().getTime()}`
+    const description = `description ${new Date().getTime()}`
+    const id = `wa.${new Date().getTime()}`
+    const rowId = `rowId.${new Date().getTime()}`
+    const pushName = `Mary ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      message: {
+        listResponseMessage: {
+          title, listType: 'SINGLE_SELECT', description,
+          singleSelectReply: {
+            selectedRowId: rowId
+          },
+          contextInfo: {
+            stanzaId,
+            quotedMessage: {
+              listMessage: {
+                title, description, listType: 'SINGLE_SELECT',
+                sections: [
+                  {
+                    title,
+                    rows: [
+                      {
+                        title, description, rowId
+                      }
+                    ]
+                  }
+                ],
+              }
+            }
+          },
+        }
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    context: {
+                      id: stanzaId,
+                      message_id: stanzaId
+                    },
+                    from: '5549988290955',
+                    id,
+                    timestamp: messageTimestamp,
+                    interactive: { 
+                      type: 'list_reply',
+                      list_reply: { id: rowId, title, description }
+                    },
+                    type: 'interactive'
+                  },
+                ],
+                contacts: [{ profile: { name: pushName, picture: undefined }, wa_id: '5549988290955' }],
+                statuses: [],
+                errors: []
+              },
+              field: 'messages'
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
+  })
 })
 
 
@@ -2016,4 +2046,198 @@ describe('service transformer', () => {
 //         "selectedIndex": 1
 //       }
 //     }
+// }
+
+// {
+//   key: {
+//     "remoteJid": "554931978550@s.whatsapp.net",
+//     "fromMe": false,
+//     "id": "2A3FE4E4A9DE7EE726E0",
+//     "senderLid": "122763419345068@lid",
+//     "senderPn": "554931978550@s.whatsapp.net"
+//   }
+//   messageTimestamp: 1768493098
+//   pushName: "Odonto Excellence Financeiro"
+//   message: {
+//     "messageContextInfo": {
+//       "deviceListMetadata": {
+//         "senderKeyHash": "F60qNks9STXvaw==",
+//         "senderTimestamp": "1768407677",
+//         "recipientKeyHash": "hDjPmlXrZHIciQ==",
+//         "recipientTimestamp": "1767300812"
+//       },
+//       "deviceListMetadataVersion": 2,
+//       "messageSecret": "+GW8niGoIYnKlJ2NeHJnqyXJufbl78omvPx1XFzNkjg="
+//     },
+//     "listResponseMessage": {
+//       "title": "row-title-content",
+//       "listType": "SINGLE_SELECT",
+//       "singleSelectReply": {
+//         "selectedRowId": "unique-row-identifier"
+//       },
+//       "contextInfo": {
+//         "stanzaId": "3EB0C05C5D76F83EAA4095",
+//         "participant": "554988290955@s.whatsapp.net",
+//         "quotedMessage": {
+//           "listMessage": {
+//             "title": "Title",
+//             "description": "your-text-message-content",
+//             "buttonText": "sections",
+//             "listType": "SINGLE_SELECT",
+//             "sections": [
+//               {
+//                 "title": "your-section-title-content",
+//                 "rows": [
+//                   {
+//                     "title": "row-title-content",
+//                     "description": "row-description-content",
+//                     "rowId": "unique-row-identifier"
+//                   }
+//                 ]
+//               },
+//               {
+//                 "title": "your-section-title-content",
+//                 "rows": [
+//                   {
+//                     "title": "row-title-content",
+//                     "description": "row-description-content",
+//                     "rowId": "unique-row-identifier"
+//                   }
+//                 ]
+//               }
+//             ],
+//             "footerText": "Cloud UnoApi"
+//           }
+//         }
+//       },
+//       "description": "row-description-content"
+//     }
+//   }
+//   verifiedBizName: "Odonto Excellence Financeiro"
+// }
+
+
+
+// {
+//   "object":"whatsapp_business_account",
+//   "entry":[
+//     {
+//       "id":"5549988290955",
+//       "changes":[
+//         {
+//           "value":{
+//             "messaging_product":"whatsapp",
+//             "metadata":{
+//               "display_phone_number":"5549988290955",
+//               "phone_number_id":"5549988290955"
+//             },
+//             "contacts":[
+//               {
+//                 "wa_id":"554931978550",
+//                 "profile":{
+//                   "name":"",
+//                   "picture":""
+//                 }
+//               }
+//             ],
+//             "messages":[
+//               {
+//                 "from":"5549988290955",
+//                 "id":"UNO.INC.099B7B00F22D11F08BF3FFD8522FCB29",
+//                 "timestamp":"1768493569",
+//                 "interactive":{
+//                   "type":"list",
+//                   "header":{
+//                     "type":"text",
+//                     "text":"Title"
+//                   },
+//                   "body":{
+//                     "text":"Qual a api melhor custo beneficio?"
+//                   },
+//                   "footer":{
+//                     "text":"Cloud UnoApi"
+//                   },
+//                   "action":{
+//                     "button":"sections",
+//                     "sections":[
+//                       {
+//                         "title":"Cloud Oficial",
+//                         "rows":[
+//                           {
+//                             "id":"oficial",
+//                             "title":"Cloud Oficial",
+//                             "description":"varias limitações, como iniciar conversas pagando pela janela de 24, se o cliente responder"
+//                           }
+//                         ]
+//                       },
+//                       {
+//                         "title":"Unoapi",
+//                         "rows":[
+//                           {
+//                             "id":"uno",
+//                             "title":"UnoApi",
+//                             "description":"continuar usando o whatsapp no smarphone e sincronizar as mensagem de todos os dispositvos"
+//                           }
+//                         ]
+//                       }
+//                     ]
+//                   }
+//                 },
+//                 "type":"interactive"
+//               }
+//             ]
+//           },
+//           "field":"messages"
+//         }
+//       ]
+//     }
+//   ]
+// }
+
+
+
+// {
+//   "key":{
+//     "remoteJid":"554931978550@s.whatsapp.net",
+//     "fromMe":true,
+//     "id":"3EB05F6945EFC0B83785D9"
+//   },
+//   "message":{
+//     "documentWithCaptionMessage":{
+//       "message":{
+//         "messageContextInfo":{
+//           "messageSecret":"wtUqMQf6kALjNlD+W/ozz4WpUMuabmtSAa+8KLN7Tu0="
+//         },
+//         "listMessage":{
+//           "title":"Title",
+//           "description":"Qual a api melhor custo beneficio?",
+//           "buttonText":"sections",
+//           "listType":"SINGLE_SELECT",
+//           "sections":[
+//             {
+//               "title":"Cloud Oficial",
+//               "rows":[
+//                 {
+//                   "title":"Cloud Oficial",
+//                   "description":"varias limitações, como iniciar conversas pagando pela janela de 24, se o cliente responder",
+//                   "rowId":"oficial"
+//                 }
+//               ]
+//             },
+//             {
+//               "title":"Unoapi",
+//               "rows":[
+//                 {
+//                   "title":"UnoApi",
+//                   "description":"continuar usando o whatsapp no smarphone e sincronizar as mensagem de todos os dispositvos",
+//                   "rowId":"uno"
+//                 }
+//               ]
+//             }
+//           ],
+//           "footerText":"Cloud UnoApi"
+//         }
+//       }
+//     }
+//   }
 // }
