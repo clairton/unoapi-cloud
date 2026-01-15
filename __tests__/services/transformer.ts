@@ -1926,7 +1926,6 @@ describe('service transformer', () => {
     const phoneNumer = '5549998360838'
     const remotePhoneNumer = '554988290955'
     const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
-    const stanzaId = `wa.${new Date().getTime()}`
     const title = `title ${new Date().getTime()}`
     const description = `description ${new Date().getTime()}`
     const buttonText = `buttonText ${new Date().getTime()}`
@@ -1989,6 +1988,83 @@ describe('service transformer', () => {
                         sections: [
                           {title, rows: [ { id: rowId, title, description }]}
                         ]
+                      }
+                    },
+                    type: 'interactive'
+                  },
+                ],
+                contacts: [{ profile: { name: pushName, picture: undefined }, wa_id: '5549988290955' }],
+                statuses: [],
+                errors: []
+              },
+              field: 'messages'
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
+  })
+
+  test('fromBaileysMessageContent with documentWithCaptionMessage and buttonsMessage', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const contentText = `contentText ${new Date().getTime()}`
+    const buttonText = `buttonText ${new Date().getTime()}`
+    const buttonId = `buttonId ${new Date().getTime()}`
+    const footerText = `footerText ${new Date().getTime()}`
+    const headerText = `headerText ${new Date().getTime()}`
+    const id = `wa.${new Date().getTime()}`
+    const pushName = `pushName ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const input = {
+      key: {
+        remoteJid,
+        fromMe: false,
+        id,
+      },
+      message: {
+        documentWithCaptionMessage:{
+          message:{
+            buttonsMessage:{
+              contentText, footerText, headerText,
+              buttons:[{ buttonId, buttonText: { displayText: buttonText }, type: 'RESPONSE'}]
+            }
+          }
+        }
+      },
+      pushName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    from: '5549988290955',
+                    id,
+                    timestamp: messageTimestamp,
+                    interactive: {
+                      type: 'button',
+                      body: {
+                        text: contentText
+                      },
+                      footer: {
+                        text: footerText
+                      },
+                      header: {
+                        text: headerText
+                      },
+                      action: {
+                        buttons: [ { type: 'reply', reply: { id: buttonId, title: buttonText } }]
                       }
                     },
                     type: 'interactive'

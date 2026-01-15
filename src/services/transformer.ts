@@ -83,6 +83,7 @@ export const TYPE_MESSAGES_TO_READ = [
   'ptvMessage',
   'templateButtonReplyMessage',
   'listMessage',
+  'buttonsMessage',
   // 'templateMessage'
 ]
 
@@ -1150,9 +1151,6 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           },
           action: {
             button: binMessage?.buttonText,
-
-            
-
             sections: (binMessage?.sections || []).map((section: any) => ({
               title: section.title || '',
               rows: (section.rows || []).map((row: any) => ({
@@ -1160,6 +1158,31 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
                 id: row.rowId || row.id || '',
                 description: row.description || '',
               })),
+            }))
+          }
+        }
+        message.type = 'interactive'
+        break
+
+      case 'buttonsMessage':
+        message.interactive = {
+          type: 'button',
+          header: {
+            text: binMessage?.headerText
+          },
+          body: {
+            text: binMessage?.contentText
+          },
+          footer: {
+            text: binMessage?.footerText
+          },
+          action: {
+            buttons: (binMessage?.buttons || []).map((button: any) => ({
+              type: 'reply',
+              reply: {
+                title: button?.buttonText?.displayText,
+                id: button.buttonId,
+              }
             }))
           }
         }
