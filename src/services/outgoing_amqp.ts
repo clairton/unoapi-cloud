@@ -29,6 +29,6 @@ export class OutgoingAmqp implements Outgoing {
 
   public async sendHttp(phone: string, webhook: Webhook, payload: object, options: Partial<PublishOption> = {}) {
     options.type = 'topic'
-    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { webhook, payload, split: false }, options)
+    await amqpPublish(UNOAPI_EXCHANGE_BROKER_NAME, UNOAPI_QUEUE_OUTGOING, phone, { webhooks: [webhook], payload, split: false }, options)
   }
 }

@@ -2083,7 +2083,6 @@ describe('service transformer', () => {
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
-
   test('fromBaileysMessageContent with buttonsResponseMessage', async () => {
     const phoneNumer = '5549998360838'
     const remotePhoneNumer = '554988290955'
