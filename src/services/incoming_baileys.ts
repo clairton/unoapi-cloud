@@ -29,7 +29,7 @@ export class IncomingBaileys implements Incoming {
       throw 'Disconnected Client ' + phone
     }
     logger.debug('Retrieved client for %s', phone)
-    const to = payload['to']
+    const to = payload['to'] || ''
     if (to.endsWith('@broadcast')) {
       options['broadcast'] = true
       const config = await this.getConfig(phone)
