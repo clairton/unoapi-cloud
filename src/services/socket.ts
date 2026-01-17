@@ -506,6 +506,7 @@ export const connect = async ({
       agent,
       fetchAgent,
       qrTimeout: config.qrTimeoutMs,
+      shouldResendMessageOn475AckError: true
     }
     if (whatsappVersion) {
       socketConfig.version = whatsappVersion
