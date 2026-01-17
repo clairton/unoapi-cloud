@@ -283,5 +283,8 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
 
     return [template]
   }
+
+  dataStore.getAllJid = async () => [...jids.values()]
+
   return dataStore
 }

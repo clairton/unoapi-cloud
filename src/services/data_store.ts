@@ -52,6 +52,7 @@ export type DataStore = {
   loadLastMessageDirection: (phone: string) => Promise<MessageDirection | undefined>
   getJid: (phone: string) => Promise<string | undefined>
   loadJid: (phone: string, sock: WASocket) => Promise<string | undefined>
+  getAllJid: () => Promise<string[]>
   setJid: (phone: string, jid: string) => Promise<void>
   setJidIfNotFound: (phone: string, jid: string) => Promise<void>
   setMessage: (jid: string, message: WAMessage) => Promise<void>

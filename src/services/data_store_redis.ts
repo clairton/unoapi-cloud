@@ -25,7 +25,10 @@ import {
   setMedia,
   getMedia,
   getMessageDirection,
-  setMessageDirection
+  setMessageDirection,
+  jidKey,
+  redisKeys,
+  redisGet
 } from './redis'
 import { Config } from './config'
 import logger from './logger'
@@ -235,5 +238,18 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
       }
     }
   }
+
+  store.getAllJid = async () => {
+    try {
+      const pattern = jidKey(phone, '*')
+      const keys = await redisKeys(pattern)
+      const jids = await Promise.all(keys.map(async key => redisGet(key)))
+      return [...new Set(jids.filter(j => j.endsWith('s.whatsapp.net')))]
+    } catch (error) {
+      logger.error(error, 'Erro on get all jids')
+      throw error
+    }
+  }
+
   return store
 }
