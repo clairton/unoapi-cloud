@@ -34,7 +34,9 @@ export class IncomingBaileys implements Incoming {
       options['broadcast'] = true
       const config = await this.getConfig(phone)
       const { dataStore } = await config.getStore(phone, config)
-      options['statusJidList'] = dataStore.getAllJid()
+      const jids = await dataStore.getAllJid()
+      logger.debug('Publish storie for %s contacts', jids.length)
+      options['statusJidList'] = jids
     }
     const resp = await client.send(payload, options)
     if (to) {

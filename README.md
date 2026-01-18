@@ -161,6 +161,20 @@ http://localhost:9876/v15.0/5549988290955/messages \
     "link" : "https://github.githubassets.com/favicons/favicon-dark.png"
   }
 }'
+
+
+curl -i -X POST \
+https://unoapi.cloud/v15.0/554931978550/messages \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 78wewiuugDIwgfiuggwuigwgYUFFwfiwhfoihwfioho86734GFJgsfgsf' \
+-d '{
+  "messaging_product": "whatsapp",
+  "to": "status@broadcast",
+  "type": "image",
+  "image": {
+    "link" : "https://github.githubassets.com/favicons/favicon-dark.png"
+  }
+}'
 ```
 
 ## Interactive
