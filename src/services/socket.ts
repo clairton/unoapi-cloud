@@ -410,7 +410,13 @@ export const connect = async ({
   const send: sendMessage = async (
     to: string,
     message: AnyMessageContent,
-    options: { composing: boolean; quoted: boolean | undefined } = { composing: false, quoted: undefined },
+    options: { 
+      composing: boolean; 
+      quoted: boolean | undefined; 
+      broadcast: boolean | undefined; 
+      statusJidList: string[] | undefined } = { 
+        composing: false, quoted: undefined, broadcast: undefined, statusJidList: undefined
+      },
   ) => {
     await validateStatus()
     const id = isIndividualJid(to) ? await exists(to) : to
@@ -430,7 +436,13 @@ export const connect = async ({
       if (options.quoted) {
         opts['quoted'] = options.quoted
       }
-      logger.debug('Send baileys from %s to %s -> %s', phone, id, JSON.stringify(message))
+      if (options.broadcast) {
+        opts['broadcast'] = options.broadcast
+      }
+      if (options.statusJidList) {
+        opts['statusJidList'] = options.statusJidList
+      }
+      logger.debug('Send baileys from %s to %s -> %s with options %s', phone, id, JSON.stringify(message), JSON.stringify(opts))
       return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {

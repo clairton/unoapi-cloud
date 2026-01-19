@@ -243,8 +243,10 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
     try {
       const pattern = jidKey(phone, '*')
       const keys = await redisKeys(pattern)
+      logger.debug('Get all jid return keys: %s', JSON.stringify(keys))
       const jids = await Promise.all(keys.map(async key => redisGet(key)))
-      return [...new Set(jids.filter(j => j.endsWith('s.whatsapp.net')))]
+      logger.debug('Get all jid return jids: %s', JSON.stringify(jids))
+      return jids //[...new Set(jids.filter(j => j.endsWith('s.whatsapp.net')))]
     } catch (error) {
       logger.error(error, 'Erro on get all jids')
       throw error

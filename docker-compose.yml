@@ -21,9 +21,6 @@ x-minio: &minio
   image: quay.io/minio/minio:latest
   command: server --console-address ":9001" --address ":9000" /data
   env_file: .env
-  expose:
-    - 9000:9000
-    - 9001:9001
   healthcheck:
     test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
     interval: 30s
@@ -70,8 +67,8 @@ services:
     <<: *minio
     restart: on-failure
     ports:
-      - 9000:9000
       - 9001:9001
+      - 9000:9000
     volumes:
       - minio:/data
     entrypoint: |

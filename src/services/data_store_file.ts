@@ -1,7 +1,7 @@
 import { proto, WAMessage, WAMessageKey, WASocket, useMultiFileAuthState, GroupMetadata, isLidUser } from 'baileys'
 import { isIndividualJid, jidToPhoneNumber, phoneNumberToJid } from './transformer'
 import { existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'fs'
-import { DataStore, MessageStatus } from './data_store'
+import { DataStore, MessageDirection, MessageStatus } from './data_store'
 import { SESSION_DIR } from './session_store_file'
 import { getDataStore, dataStores } from './data_store'
 import { Config } from './config'
@@ -285,6 +285,8 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
   }
 
   dataStore.getAllJid = async () => [...jids.values()]
+
+  dataStore.setLastMessageDirection = async (_clientPhone: string, _direction: MessageDirection) => {}
 
   return dataStore
 }

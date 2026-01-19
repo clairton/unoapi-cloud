@@ -370,6 +370,7 @@ export class ClientBaileys implements Client {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.event('call', async (events: any[]) => {
       for (let i = 0; i < events.length; i++) {
+        logger.debug('call event %s => %s', this.phone, JSON.stringify(events[i]))
         const { from, id, status } = events[i]
         if (status == 'ringing' && !this.calls.has(from)) {
           if (!this.calls.has(this.phone)) {
