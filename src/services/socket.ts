@@ -16,6 +16,7 @@ import makeWASocket, {
   MessageRetryMap,
   WAVersion,
   MiscMessageGenerationOptions,
+  WAMessage,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
@@ -112,7 +113,7 @@ export type Status = {
 
 export type SendMessageOptions = { 
   composing: boolean; 
-  quoted: boolean | undefined; 
+  quoted: WAMessage | undefined; 
   broadcast: boolean | undefined; 
   statusJidList: string[] | undefined 
 }
@@ -441,18 +442,18 @@ export const connect = async ({
         await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
-      const opts: SendMessageOptions = SendMessageOptionsDefault
+      const opts: MiscMessageGenerationOptions = {}
       if (options.quoted) {
         opts.quoted = options.quoted
-      }
-      if (options.broadcast) {
-        opts.broadcast = options.broadcast
       }
       if (options.statusJidList) {
         opts.statusJidList = options.statusJidList
       }
+      if (options.broadcast) {
+        opts['broadcast'] = options.broadcast
+      }
       logger.debug('Send baileys from %s to %s -> %s with options %s', phone, id, JSON.stringify(message), JSON.stringify(opts))
-      return sock?.sendMessage(id, message, opts as MiscMessageGenerationOptions)
+      return sock?.sendMessage(id, message, opts)
     }
     if (!isValidPhoneNumber(to)) {
       throw new SendError(7, t('invalid_phone_number', to))
