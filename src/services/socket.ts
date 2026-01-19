@@ -15,6 +15,7 @@ import makeWASocket, {
   fetchLatestWaWebVersion,
   MessageRetryMap,
   WAVersion,
+  MiscMessageGenerationOptions,
 } from 'baileys'
 import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
@@ -107,6 +108,20 @@ export interface logout {
 
 export type Status = {
   attempt: number
+}
+
+export type SendMessageOptions = { 
+  composing: boolean; 
+  quoted: boolean | undefined; 
+  broadcast: boolean | undefined; 
+  statusJidList: string[] | undefined 
+}
+
+export const SendMessageOptionsDefault: SendMessageOptions = { 
+  composing: false,
+  quoted: undefined,
+  broadcast: undefined,
+  statusJidList: undefined,
 }
 
 export const connect = async ({
@@ -410,13 +425,7 @@ export const connect = async ({
   const send: sendMessage = async (
     to: string,
     message: AnyMessageContent,
-    options: { 
-      composing: boolean; 
-      quoted: boolean | undefined; 
-      broadcast: boolean | undefined; 
-      statusJidList: string[] | undefined } = { 
-        composing: false, quoted: undefined, broadcast: undefined, statusJidList: undefined
-      },
+    options: SendMessageOptions = SendMessageOptionsDefault
   ) => {
     await validateStatus()
     const id = isIndividualJid(to) ? await exists(to) : to
@@ -432,18 +441,18 @@ export const connect = async ({
         await sock?.sendPresenceUpdate('paused', id)
       }
       logger.debug(`${phone} is sending message ==> ${id} ${JSON.stringify(message)}`)
-      const opts = {}
+      const opts: SendMessageOptions = SendMessageOptionsDefault
       if (options.quoted) {
-        opts['quoted'] = options.quoted
+        opts.quoted = options.quoted
       }
       if (options.broadcast) {
-        opts['broadcast'] = options.broadcast
+        opts.broadcast = options.broadcast
       }
       if (options.statusJidList) {
-        opts['statusJidList'] = options.statusJidList
+        opts.statusJidList = options.statusJidList
       }
       logger.debug('Send baileys from %s to %s -> %s with options %s', phone, id, JSON.stringify(message), JSON.stringify(opts))
-      return sock?.sendMessage(id, message, opts)
+      return sock?.sendMessage(id, message, opts as MiscMessageGenerationOptions)
     }
     if (!isValidPhoneNumber(to)) {
       throw new SendError(7, t('invalid_phone_number', to))
