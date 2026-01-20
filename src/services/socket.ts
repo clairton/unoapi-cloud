@@ -448,9 +448,14 @@ export const connect = async ({
       }
       if (options.statusJidList) {
         opts.statusJidList = options.statusJidList
+        if (sock?.user?.id) {
+          options.statusJidList.push(sock?.user?.id)
+        }
       }
       if (options.broadcast) {
         opts['broadcast'] = options.broadcast
+        opts['backgroundColor'] = '#FF0000'
+        opts['font'] = 2
       }
       logger.debug('Send baileys from %s to %s -> %s with options %s', phone, id, JSON.stringify(message), JSON.stringify(opts))
       return sock?.sendMessage(id, message, opts)

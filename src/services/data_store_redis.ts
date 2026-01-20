@@ -1,6 +1,6 @@
 import { proto, WAMessage, WAMessageKey, GroupMetadata } from 'baileys'
 import { DataStore, MessageDirection, MessageStatus } from './data_store'
-import { jidToPhoneNumber, phoneNumberToJid, isIndividualJid } from './transformer'
+import { jidToPhoneNumber, phoneNumberToJid, isIndividualJid, formatJid } from './transformer'
 import { getDataStore, dataStores } from './data_store'
 import { ONLY_HELLO_TEMPLATE } from '../defaults'
 import {
@@ -245,8 +245,11 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
       const keys = await redisKeys(pattern)
       logger.debug('Get all jid return keys: %s', JSON.stringify(keys))
       const jids = await Promise.all(keys.map(async key => redisGet(key)))
-      logger.debug('Get all jid return jids: %s', JSON.stringify(jids))
-      return jids //[...new Set(jids.filter(j => j.endsWith('s.whatsapp.net')))]
+      const set = [...new Set(jids.map(formatJid))].filter(v => {
+        return v && v.endsWith('@s.whatsapp.net') && v.split('@')[0].length > 1
+      })
+      logger.debug('Get all jid return jids: %s', JSON.stringify(set))
+      return set
     } catch (error) {
       logger.error(error, 'Erro on get all jids')
       throw error
