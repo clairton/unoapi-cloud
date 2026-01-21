@@ -11,7 +11,7 @@
   "online_session": "Sessão estabelecida",
   "connection_timed_out": "A sessão %s excedeu o tempo de %s ms, sessão alterada para estado Offline",
   "connecting": "A estabelecer...",
-  "connected": "Sessão do número %s estabelecida, versão do WhatsApp v%s, a última versão do WhatsApp v%s, às %s",
+  "connected": "Sessão do número %s estabelecida conta %s, versão do WhatsApp v%s, a última versão do WhatsApp v%s, às %s",
   "removed": "A sessão foi removida via aplicação WhatsApp, envie uma nova mensagem para gerar novo QR Code e voltar a estabelecer a ligação!",
   "unique": "A sessão só pode ser estabelecida uma vez, a atual sessão está a ser desligada, envie uma mensagem para voltar a estabelecer a ligação!",
   "closed": "A sessão foi encerrada com o estado: %s, detalhe: %s!",

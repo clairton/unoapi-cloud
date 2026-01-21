@@ -246,7 +246,7 @@ const dataStoreRedis = async (phone: string, config: Config): Promise<DataStore>
       logger.debug('Get all jid return keys: %s', JSON.stringify(keys))
       const jids = await Promise.all(keys.map(async key => redisGet(key)))
       const set = [...new Set(jids.map(formatJid))].filter(v => {
-        return v && v.endsWith('@s.whatsapp.net') && v.split('@')[0].length > 1
+        return v && v.split('@')[0].length > 1
       })
       logger.debug('Get all jid return jids: %s', JSON.stringify(set))
       return set

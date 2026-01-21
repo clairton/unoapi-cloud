@@ -22,7 +22,7 @@ import MAIN_LOGGER from 'baileys/lib/Utils/logger'
 import { Config, defaultConfig } from './config'
 import { logLevel } from './logger'
 import { Store } from './store'
-import { isIndividualJid, isValidPhoneNumber, jidToPhoneNumber } from './transformer'
+import { formatJid, isIndividualJid, isValidPhoneNumber, jidToPhoneNumber } from './transformer'
 import logger from './logger'
 import { Level } from 'pino'
 import { SocksProxyAgent } from 'socks-proxy-agent'
@@ -267,7 +267,8 @@ export const connect = async ({
     await sessionStore.setStatus(phone, 'online')
     logger.info(`${phone} connected`)
     const { version } = await fetchLatestBaileysVersion()
-    const message = t('connected', phone, whatsappVersion ? whatsappVersion.join('.') : 'auto', version.join('.'), new Date().toUTCString())
+
+    const message = t('connected', phone, sock?.user?.id!, whatsappVersion ? whatsappVersion.join('.') : 'auto', version.join('.'), new Date().toUTCString())
     await onNotification(message, false)
   }
 
@@ -449,7 +450,7 @@ export const connect = async ({
       if (options.statusJidList) {
         opts.statusJidList = options.statusJidList
         if (sock?.user?.id) {
-          options.statusJidList.push(sock?.user?.id)
+          options.statusJidList.push(formatJid(sock?.user?.id))
         }
       }
       if (options.broadcast) {
