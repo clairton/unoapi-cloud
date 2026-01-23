@@ -129,13 +129,14 @@ export class OutgoingCloudApi implements Outgoing {
     logger.debug('Response: %s', response?.status)
     if (!response?.ok) {
       const errText = await response?.text()
+      const err = new Error(`Webhook response ${response?.status} ${response?.statusText}: ${errText}`)
       if (cbEnabled) {
-        const opened = await this.handleCircuitFailure(phone, cbId, cbKey, errText)
+        const opened = await this.handleCircuitFailure(phone, cbId, cbKey, err)
         if (opened) {
           throw new WebhookCircuitOpenError(`WEBHOOK_CB opened for ${cbId}`, this.cbRequeueDelayMs())
         }
       }
-      throw errText
+      throw err
     }
     if (cbEnabled) {
       try {
@@ -164,6 +165,7 @@ export class OutgoingCloudApi implements Outgoing {
         return true
       } else {
         logger.warn('WEBHOOK_CB failure (phone=%s webhook=%s count=%s/%s)', phone, cbId, finalCount, threshold)
+        try { logger.warn(error as any, 'WEBHOOK_CB send failed (phone=%s webhook=%s)', phone, cbId) } catch {}
         return false
       }
     } catch (e) {
@@ -172,8 +174,6 @@ export class OutgoingCloudApi implements Outgoing {
       // If the CB handler fails, fall back to the original error path (no circuit open)
       return false
     }
-    try { logger.warn(error as any, 'WEBHOOK_CB send failed (phone=%s webhook=%s)', phone, cbId) } catch {}
-    return false
   }
 }
 
