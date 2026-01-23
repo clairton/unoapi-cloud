@@ -487,7 +487,7 @@ WEBHOOK_URL_ABSOLUTE=the webhook absolute url, not use this if already use WEBHO
 WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, no use if use WEBHOOK_URL_ABSOLUTE
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
-WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
+WEBHOOK_TIMEOUT_MS=webhook request timeout, default 60000 ms
 WEBHOOK_CB_ENABLED=true enable webhook circuit breaker to avoid backlog when endpoint is offline, default true
 WEBHOOK_CB_FAILURE_THRESHOLD=number of failures within window to open circuit, default 1
 WEBHOOK_CB_OPEN_MS=how long to keep the circuit open (skip sends), default 120000
@@ -527,12 +527,22 @@ WEBHOOK_FORWARD_VERSION=the version of whatsapp cloud api, default is v17.0
 WEBHOOK_FORWARD_URL=the url of whatsapp cloud api, default is https://graph.facebook.com
 WEBHOOK_FORWARD_TIMEOUT_MS=the timeout for request to whatsapp cloud api, default is 360000
 ```
+Circuit breaker behavior:
+- Counts consecutive webhook failures within `WEBHOOK_CB_FAILURE_TTL_MS`.
+- When the count reaches `WEBHOOK_CB_FAILURE_THRESHOLD`, the circuit opens for `WEBHOOK_CB_OPEN_MS` and sends are skipped.
+- After the open window, delivery is attempted again automatically.
+
+Why keep `WEBHOOK_TIMEOUT_MS` low:
+- A high timeout blocks the consumer for too long when the endpoint is offline.
+- With lower timeout, failures are detected faster and the circuit opens sooner, reducing backlog.
+
 Example (circuit breaker):
 ```env
 WEBHOOK_CB_ENABLED=true
 WEBHOOK_CB_FAILURE_THRESHOLD=1
 WEBHOOK_CB_FAILURE_TTL_MS=300000
 WEBHOOK_CB_OPEN_MS=120000
+WEBHOOK_TIMEOUT_MS=60000
 ```
 
 ### Config session with redis
