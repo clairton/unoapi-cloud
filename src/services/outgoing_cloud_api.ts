@@ -5,6 +5,17 @@ import logger from './logger'
 import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, extractDestinyPhone, extractFromPhone } from './transformer'
 import { addToBlacklist, isInBlacklist } from './blacklist'
 import { PublishOption } from '../amqp'
+import { WEBHOOK_CB_ENABLED, WEBHOOK_CB_FAILURE_THRESHOLD, WEBHOOK_CB_OPEN_MS, WEBHOOK_CB_FAILURE_TTL_MS, WEBHOOK_CB_REQUEUE_DELAY_MS, WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS } from '../defaults'
+import { isWebhookCircuitOpen, openWebhookCircuit, closeWebhookCircuit, bumpWebhookCircuitFailure } from './redis'
+
+class WebhookCircuitOpenError extends Error {
+  public code = 'WEBHOOK_CB_OPEN'
+  public delayMs: number
+  constructor(message: string, delayMs: number) {
+    super(message)
+    this.delayMs = delayMs
+  }
+}
 
 export class OutgoingCloudApi implements Outgoing {
   private getConfig: getConfig
@@ -29,6 +40,24 @@ export class OutgoingCloudApi implements Outgoing {
   }
 
   public async sendHttp(phone: string, webhook: Webhook, message: object, _options: Partial<PublishOption> = {}) {
+    const cbEnabled = !!WEBHOOK_CB_ENABLED && WEBHOOK_CB_FAILURE_THRESHOLD > 0 && WEBHOOK_CB_OPEN_MS > 0
+    const cbId = (webhook && (webhook.id || webhook.url || webhook.urlAbsolute)) ? `${webhook.id || webhook.url || webhook.urlAbsolute}` : 'default'
+    const cbKey = `${phone}:${cbId}`
+    const now = Date.now()
+    if (cbEnabled) {
+      let open = false
+      try {
+        open = await isWebhookCircuitOpen(phone, cbId)
+      } catch {}
+      if (open) {
+        logger.warn('WEBHOOK_CB open: skipping send (phone=%s webhook=%s)', phone, cbId)
+        throw new WebhookCircuitOpenError(`WEBHOOK_CB open for ${cbId}`, this.cbRequeueDelayMs())
+      }
+      if (isCircuitOpenLocal(cbKey, now)) {
+        logger.warn('WEBHOOK_CB open (local): skipping send (phone=%s webhook=%s)', phone, cbId)
+        throw new WebhookCircuitOpenError(`WEBHOOK_CB open (local) for ${cbId}`, this.cbRequeueDelayMs())
+      }
+    }
     const destinyPhone = await this.isInBlacklist(phone, webhook.id, message)
     if (destinyPhone) {
       logger.info(`Session phone %s webhook %s and destiny phone %s are in blacklist`, phone, webhook.id, destinyPhone)
@@ -89,11 +118,113 @@ export class OutgoingCloudApi implements Outgoing {
     } catch (error) {
       logger.error('Error on send to url %s with headers %s and body %s', url, JSON.stringify(headers), body)
       logger.error(error)
+      if (cbEnabled) {
+        const opened = await this.handleCircuitFailure(phone, cbId, cbKey, error as any)
+        if (opened) {
+          throw new WebhookCircuitOpenError(`WEBHOOK_CB opened for ${cbId}`, this.cbRequeueDelayMs())
+        }
+      }
       throw error
     }
     logger.debug('Response: %s', response?.status)
     if (!response?.ok) {
-      throw await response?.text()
+      const errText = await response?.text()
+      const err = new Error(`Webhook response ${response?.status} ${response?.statusText}: ${errText}`)
+      if (cbEnabled) {
+        const opened = await this.handleCircuitFailure(phone, cbId, cbKey, err)
+        if (opened) {
+          throw new WebhookCircuitOpenError(`WEBHOOK_CB opened for ${cbId}`, this.cbRequeueDelayMs())
+        }
+      }
+      throw err
+    }
+    if (cbEnabled) {
+      try {
+        await closeWebhookCircuit(phone, cbId)
+      } catch {}
+      resetCircuitLocal(cbKey)
+    }
+  }
+
+  private cbRequeueDelayMs() {
+    return WEBHOOK_CB_REQUEUE_DELAY_MS || WEBHOOK_CB_OPEN_MS || 120000
+  }
+
+  private async handleCircuitFailure(phone: string, cbId: string, cbKey: string, error: any): Promise<boolean> {
+    try {
+      const threshold = WEBHOOK_CB_FAILURE_THRESHOLD || 1
+      const openMs = WEBHOOK_CB_OPEN_MS || 120000
+      const ttlMs = WEBHOOK_CB_FAILURE_TTL_MS || openMs
+      const count = await bumpWebhookCircuitFailure(phone, cbId, ttlMs)
+      const localCount = bumpCircuitFailureLocal(cbKey, ttlMs)
+      const finalCount = Math.max(count || 0, localCount || 0)
+      if (finalCount >= threshold) {
+        await openWebhookCircuit(phone, cbId, openMs)
+        openCircuitLocal(cbKey, openMs)
+        logger.warn('WEBHOOK_CB opened (phone=%s webhook=%s count=%s openMs=%s)', phone, cbId, finalCount, openMs)
+        return true
+      } else {
+        logger.warn('WEBHOOK_CB failure (phone=%s webhook=%s count=%s/%s)', phone, cbId, finalCount, threshold)
+        try { logger.warn(error as any, 'WEBHOOK_CB send failed (phone=%s webhook=%s)', phone, cbId) } catch {}
+        return false
+      }
+    } catch (e) {
+      logger.warn(e as any, 'WEBHOOK_CB failure handler error (phone=%s webhook=%s)', phone, cbId)
+      try { logger.warn(error as any, 'WEBHOOK_CB original error (phone=%s webhook=%s)', phone, cbId) } catch {}
+      // If the CB handler fails, fall back to the original error path (no circuit open)
+      return false
     }
   }
 }
+
+const cbOpenUntil: Map<string, number> = new Map()
+const cbFailState: Map<string, { count: number; exp: number }> = new Map()
+let cbLastCleanup = 0
+const CB_CLEANUP_INTERVAL_MS = WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS || 60 * 60 * 1000
+
+const isCircuitOpenLocal = (key: string, now: number) => {
+  maybeCleanupLocalCircuit(now)
+  const until = cbOpenUntil.get(key)
+  if (!until) return false
+  if (now >= until) {
+    cbOpenUntil.delete(key)
+    return false
+  }
+  return true
+}
+
+const openCircuitLocal = (key: string, openMs: number) => {
+  maybeCleanupLocalCircuit(Date.now())
+  cbOpenUntil.set(key, Date.now() + Math.max(1, openMs || 0))
+}
+
+const resetCircuitLocal = (key: string) => {
+  maybeCleanupLocalCircuit(Date.now())
+  cbOpenUntil.delete(key)
+  cbFailState.delete(key)
+}
+
+const bumpCircuitFailureLocal = (key: string, ttlMs: number): number => {
+  const now = Date.now()
+  maybeCleanupLocalCircuit(now)
+  const ttl = Math.max(1, ttlMs || 0)
+  const current = cbFailState.get(key)
+  if (!current || now >= current.exp) {
+    cbFailState.set(key, { count: 1, exp: now + ttl })
+    return 1
+  }
+  current.count += 1
+  return current.count
+}
+
+const maybeCleanupLocalCircuit = (now: number) => {
+  if (now - cbLastCleanup < CB_CLEANUP_INTERVAL_MS) return
+  cbLastCleanup = now
+  for (const [key, until] of cbOpenUntil) {
+    if (now >= until) cbOpenUntil.delete(key)
+  }
+  for (const [key, st] of cbFailState) {
+    if (now >= st.exp) cbFailState.delete(key)
+  }
+}
+

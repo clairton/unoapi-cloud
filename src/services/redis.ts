@@ -131,6 +131,67 @@ const redisSetAndExpire = async function (key: string, value: any, ttl: number) 
   }
 }
 
+export const redisDelKey = async (key: string) => redisDel(key)
+
+// Atomic increment with TTL (seconds). Sets TTL on first increment.
+export const redisIncrWithTtl = async (key: string, ttlSec: number): Promise<number> => {
+  logger.trace(`INCR ${key} with ttl ${ttlSec}s`)
+  try {
+    const v = await client.incr(key)
+    if (v === 1 && ttlSec > 0) {
+      try { await client.expire(key, ttlSec) } catch {}
+    }
+    return v
+  } catch (error) {
+    if (!client) {
+      await getRedis()
+      const v = await client.incr(key)
+      if (v === 1 && ttlSec > 0) {
+        try { await client.expire(key, ttlSec) } catch {}
+      }
+      return v
+    }
+    throw error
+  }
+}
+
+// Webhook circuit breaker keys
+export const webhookCircuitOpenKey = (session: string, webhookId: string) =>
+  `${BASE_KEY}webhook-cb:${session}:${webhookId}:open`
+export const webhookCircuitFailKey = (session: string, webhookId: string) =>
+  `${BASE_KEY}webhook-cb:${session}:${webhookId}:fail`
+
+export const isWebhookCircuitOpen = async (session: string, webhookId: string): Promise<boolean> => {
+  const key = webhookCircuitOpenKey(session, webhookId)
+  try {
+    const v = await redisGet(key)
+    return !!v
+  } catch {
+    return false
+  }
+}
+
+export const openWebhookCircuit = async (session: string, webhookId: string, openMs: number): Promise<void> => {
+  const ttlSec = Math.max(1, Math.ceil((openMs || 0) / 1000))
+  try {
+    await redisSetAndExpire(webhookCircuitOpenKey(session, webhookId), '1', ttlSec)
+  } catch {}
+}
+
+export const closeWebhookCircuit = async (session: string, webhookId: string): Promise<void> => {
+  try { await redisDel(webhookCircuitOpenKey(session, webhookId)) } catch {}
+  try { await redisDel(webhookCircuitFailKey(session, webhookId)) } catch {}
+}
+
+export const bumpWebhookCircuitFailure = async (session: string, webhookId: string, ttlMs: number): Promise<number> => {
+  const ttlSec = Math.max(1, Math.ceil((ttlMs || 0) / 1000))
+  try {
+    return await redisIncrWithTtl(webhookCircuitFailKey(session, webhookId), ttlSec)
+  } catch {
+    return 0
+  }
+}
+
 export const authKey = (phone: string) => {
   return `${BASE_KEY}auth:${phone}`
 }
