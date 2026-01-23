@@ -492,6 +492,7 @@ WEBHOOK_CB_ENABLED=true enable webhook circuit breaker to avoid backlog when end
 WEBHOOK_CB_FAILURE_THRESHOLD=number of failures within window to open circuit, default 1
 WEBHOOK_CB_OPEN_MS=how long to keep the circuit open (skip sends), default 120000
 WEBHOOK_CB_FAILURE_TTL_MS=failure counter window in ms, default 300000
+WEBHOOK_CB_REQUEUE_DELAY_MS=delay (ms) used to requeue when circuit is open, default 300000
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
@@ -531,6 +532,7 @@ Circuit breaker behavior:
 - Counts consecutive webhook failures within `WEBHOOK_CB_FAILURE_TTL_MS`.
 - When the count reaches `WEBHOOK_CB_FAILURE_THRESHOLD`, the circuit opens for `WEBHOOK_CB_OPEN_MS` and sends are skipped.
 - After the open window, delivery is attempted again automatically.
+- When the circuit is open, the message is requeued with a longer delay (`WEBHOOK_CB_REQUEUE_DELAY_MS`) to avoid retry storms.
 
 Why keep `WEBHOOK_TIMEOUT_MS` low:
 - A high timeout blocks the consumer for too long when the endpoint is offline.
@@ -542,6 +544,7 @@ WEBHOOK_CB_ENABLED=true
 WEBHOOK_CB_FAILURE_THRESHOLD=1
 WEBHOOK_CB_FAILURE_TTL_MS=300000
 WEBHOOK_CB_OPEN_MS=120000
+WEBHOOK_CB_REQUEUE_DELAY_MS=300000
 WEBHOOK_TIMEOUT_MS=60000
 ```
 

@@ -16,6 +16,7 @@ import {
   UNOAPI_EXCHANGE_BRIDGE_NAME,
   IGNORED_TO_NUMBERS,
   UNOAPI_QUEUE_LISTENER,
+  WEBHOOK_CB_REQUEUE_DELAY_MS,
 } from './defaults'
 import logger from './services/logger'
 import { version } from '../package.json'
@@ -352,7 +353,14 @@ export const amqpConsume = async (
         await amqpPublish(exchange, queue, routingKey, { ...data, traces }, { dead: true, type: options.type })
       } else {
         logger.info('Publish retry %s of %s', countRetries, maxRetries)
-        const delay = (options.delay || UNOAPI_MESSAGE_RETRY_DELAY) * countRetries
+        let delay = (options.delay || UNOAPI_MESSAGE_RETRY_DELAY) * countRetries
+        try {
+          const err: any = error as any
+          if (err && (err.code === 'WEBHOOK_CB_OPEN' || err.name === 'WebhookCircuitOpenError')) {
+            delay = err.delayMs || WEBHOOK_CB_REQUEUE_DELAY_MS || delay
+            logger.info('WEBHOOK_CB requeue delay %s ms (queue=%s)', delay, queue)
+          }
+        } catch {}
         await amqpPublish(exchange, queue, routingKey, data, { delay, maxRetries, countRetries, type: options.type })
       }
       await channel?.ack(payload)
