@@ -167,7 +167,10 @@ export class OutgoingCloudApi implements Outgoing {
         return false
       }
     } catch (e) {
-      logger.warn(e as any, 'WEBHOOK_CB failure handler error')
+      logger.warn(e as any, 'WEBHOOK_CB failure handler error (phone=%s webhook=%s)', phone, cbId)
+      try { logger.warn(error as any, 'WEBHOOK_CB original error (phone=%s webhook=%s)', phone, cbId) } catch {}
+      // If the CB handler fails, fall back to the original error path (no circuit open)
+      return false
     }
     try { logger.warn(error as any, 'WEBHOOK_CB send failed (phone=%s webhook=%s)', phone, cbId) } catch {}
     return false
@@ -224,3 +227,4 @@ const maybeCleanupLocalCircuit = (now: number) => {
     if (now >= st.exp) cbFailState.delete(key)
   }
 }
+
