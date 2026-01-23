@@ -578,7 +578,6 @@ The `.env` can be save one config, but on redis use different webhook by session
       "token": "kslflkhlkwq",
       "header": "api_access_token",
       "sendGroupMessages": false,
-      "sendGroupMessages": false,
       "sendNewMessages": false,
     }
   ],
