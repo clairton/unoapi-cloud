@@ -175,8 +175,11 @@ export class OutgoingCloudApi implements Outgoing {
 
 const cbOpenUntil: Map<string, number> = new Map()
 const cbFailState: Map<string, { count: number; exp: number }> = new Map()
+let cbLastCleanup = 0
+const CB_CLEANUP_INTERVAL_MS = 60 * 60 * 1000
 
 const isCircuitOpenLocal = (key: string, now: number) => {
+  maybeCleanupLocalCircuit(now)
   const until = cbOpenUntil.get(key)
   if (!until) return false
   if (now >= until) {
@@ -187,16 +190,19 @@ const isCircuitOpenLocal = (key: string, now: number) => {
 }
 
 const openCircuitLocal = (key: string, openMs: number) => {
+  maybeCleanupLocalCircuit(Date.now())
   cbOpenUntil.set(key, Date.now() + Math.max(1, openMs || 0))
 }
 
 const resetCircuitLocal = (key: string) => {
+  maybeCleanupLocalCircuit(Date.now())
   cbOpenUntil.delete(key)
   cbFailState.delete(key)
 }
 
 const bumpCircuitFailureLocal = (key: string, ttlMs: number): number => {
   const now = Date.now()
+  maybeCleanupLocalCircuit(now)
   const ttl = Math.max(1, ttlMs || 0)
   const current = cbFailState.get(key)
   if (!current || now >= current.exp) {
@@ -205,4 +211,15 @@ const bumpCircuitFailureLocal = (key: string, ttlMs: number): number => {
   }
   current.count += 1
   return current.count
+}
+
+const maybeCleanupLocalCircuit = (now: number) => {
+  if (now - cbLastCleanup < CB_CLEANUP_INTERVAL_MS) return
+  cbLastCleanup = now
+  for (const [key, until] of cbOpenUntil) {
+    if (now >= until) cbOpenUntil.delete(key)
+  }
+  for (const [key, st] of cbFailState) {
+    if (now >= st.exp) cbFailState.delete(key)
+  }
 }
