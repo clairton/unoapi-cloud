@@ -435,7 +435,7 @@ Create a `.env`file and put configuration if you need change default value:
 This a general env:
 
 ```env
-CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
+CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 15000
 AVAILABLE_LOCALES=default is `["en", "pt_BR", "pt"]`
 DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en, to add new, use docker volume for exempla `/app/dist/src/locales/custom.json` and add `custom` in `AVAILABLE_LOCALES`
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
@@ -526,7 +526,7 @@ WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID=the business account id of whatsapp cloud ap
 WEBHOOK_FORWARD_TOKEN=the token of whatsapp cloud api, default is empty
 WEBHOOK_FORWARD_VERSION=the version of whatsapp cloud api, default is v17.0
 WEBHOOK_FORWARD_URL=the url of whatsapp cloud api, default is https://graph.facebook.com
-WEBHOOK_FORWARD_TIMEOUT_MS=the timeout for request to whatsapp cloud api, default is 360000
+WEBHOOK_FORWARD_TIMEOUT_MS=the timeout for request to whatsapp cloud api, default is 60000
 ```
 Circuit breaker behavior:
 - Counts consecutive webhook failures within `WEBHOOK_CB_FAILURE_TTL_MS`.
