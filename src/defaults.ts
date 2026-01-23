@@ -65,6 +65,12 @@ export const WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL =
     ? undefined
     : parseInt(process.env.WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL!)
 export const WEBHOOK_SESSION = process.env.WEBHOOK_SESSION || ''
+// Webhook circuit breaker (fail fast when endpoints are offline)
+export const WEBHOOK_CB_ENABLED =
+  process.env.WEBHOOK_CB_ENABLED == _undefined ? true : process.env.WEBHOOK_CB_ENABLED == 'true'
+export const WEBHOOK_CB_FAILURE_THRESHOLD = parseInt(process.env.WEBHOOK_CB_FAILURE_THRESHOLD || '1')
+export const WEBHOOK_CB_OPEN_MS = parseInt(process.env.WEBHOOK_CB_OPEN_MS || '120000')
+export const WEBHOOK_CB_FAILURE_TTL_MS = parseInt(process.env.WEBHOOK_CB_FAILURE_TTL_MS || '300000')
 export const AMQP_URL = process.env.AMQP_URL || 'amqp://guest:guest@localhost:5672'
 export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 export const PROXY_URL = process.env.PROXY_URL

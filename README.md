@@ -488,6 +488,10 @@ WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, 
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
 WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
+WEBHOOK_CB_ENABLED=true enable webhook circuit breaker to avoid backlog when endpoint is offline, default true
+WEBHOOK_CB_FAILURE_THRESHOLD=number of failures within window to open circuit, default 1
+WEBHOOK_CB_OPEN_MS=how long to keep the circuit open (skip sends), default 120000
+WEBHOOK_CB_FAILURE_TTL_MS=failure counter window in ms, default 300000
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
@@ -522,6 +526,13 @@ WEBHOOK_FORWARD_TOKEN=the token of whatsapp cloud api, default is empty
 WEBHOOK_FORWARD_VERSION=the version of whatsapp cloud api, default is v17.0
 WEBHOOK_FORWARD_URL=the url of whatsapp cloud api, default is https://graph.facebook.com
 WEBHOOK_FORWARD_TIMEOUT_MS=the timeout for request to whatsapp cloud api, default is 360000
+```
+Example (circuit breaker):
+```env
+WEBHOOK_CB_ENABLED=true
+WEBHOOK_CB_FAILURE_THRESHOLD=1
+WEBHOOK_CB_FAILURE_TTL_MS=300000
+WEBHOOK_CB_OPEN_MS=120000
 ```
 
 ### Config session with redis
@@ -809,3 +820,4 @@ Mail to sales@unoapi.cloud
 - Counting connection retry attempts even when restarting to prevent looping messages
 - Message delete endpoint
 - Send reply message with please to send again, when any error and message enqueue in .dead
+
