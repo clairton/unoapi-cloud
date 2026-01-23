@@ -5,7 +5,7 @@ import logger from './logger'
 import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, extractDestinyPhone, extractFromPhone } from './transformer'
 import { addToBlacklist, isInBlacklist } from './blacklist'
 import { PublishOption } from '../amqp'
-import { WEBHOOK_CB_ENABLED, WEBHOOK_CB_FAILURE_THRESHOLD, WEBHOOK_CB_OPEN_MS, WEBHOOK_CB_FAILURE_TTL_MS, WEBHOOK_CB_REQUEUE_DELAY_MS } from '../defaults'
+import { WEBHOOK_CB_ENABLED, WEBHOOK_CB_FAILURE_THRESHOLD, WEBHOOK_CB_OPEN_MS, WEBHOOK_CB_FAILURE_TTL_MS, WEBHOOK_CB_REQUEUE_DELAY_MS, WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS } from '../defaults'
 import { isWebhookCircuitOpen, openWebhookCircuit, closeWebhookCircuit, bumpWebhookCircuitFailure } from './redis'
 
 class WebhookCircuitOpenError extends Error {
@@ -176,7 +176,7 @@ export class OutgoingCloudApi implements Outgoing {
 const cbOpenUntil: Map<string, number> = new Map()
 const cbFailState: Map<string, { count: number; exp: number }> = new Map()
 let cbLastCleanup = 0
-const CB_CLEANUP_INTERVAL_MS = 60 * 60 * 1000
+const CB_CLEANUP_INTERVAL_MS = WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS || 60 * 60 * 1000
 
 const isCircuitOpenLocal = (key: string, now: number) => {
   maybeCleanupLocalCircuit(now)

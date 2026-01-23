@@ -493,6 +493,7 @@ WEBHOOK_CB_FAILURE_THRESHOLD=number of failures within window to open circuit, d
 WEBHOOK_CB_OPEN_MS=how long to keep the circuit open (skip sends), default 120000
 WEBHOOK_CB_FAILURE_TTL_MS=failure counter window in ms, default 300000
 WEBHOOK_CB_REQUEUE_DELAY_MS=delay (ms) used to requeue when circuit is open, default 300000
+WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS=local CB map cleanup interval (ms), default 3600000
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
@@ -545,6 +546,7 @@ WEBHOOK_CB_FAILURE_THRESHOLD=1
 WEBHOOK_CB_FAILURE_TTL_MS=300000
 WEBHOOK_CB_OPEN_MS=120000
 WEBHOOK_CB_REQUEUE_DELAY_MS=300000
+WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS=3600000
 WEBHOOK_TIMEOUT_MS=60000
 ```
 
