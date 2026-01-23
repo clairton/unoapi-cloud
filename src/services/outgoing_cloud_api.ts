@@ -45,13 +45,14 @@ export class OutgoingCloudApi implements Outgoing {
     const cbKey = `${phone}:${cbId}`
     const now = Date.now()
     if (cbEnabled) {
+      let open = false
       try {
-        const open = await isWebhookCircuitOpen(phone, cbId)
-        if (open) {
-          logger.warn('WEBHOOK_CB open: skipping send (phone=%s webhook=%s)', phone, cbId)
-          throw new WebhookCircuitOpenError(`WEBHOOK_CB open for ${cbId}`, this.cbRequeueDelayMs())
-        }
+        open = await isWebhookCircuitOpen(phone, cbId)
       } catch {}
+      if (open) {
+        logger.warn('WEBHOOK_CB open: skipping send (phone=%s webhook=%s)', phone, cbId)
+        throw new WebhookCircuitOpenError(`WEBHOOK_CB open for ${cbId}`, this.cbRequeueDelayMs())
+      }
       if (isCircuitOpenLocal(cbKey, now)) {
         logger.warn('WEBHOOK_CB open (local): skipping send (phone=%s webhook=%s)', phone, cbId)
         throw new WebhookCircuitOpenError(`WEBHOOK_CB open (local) for ${cbId}`, this.cbRequeueDelayMs())
