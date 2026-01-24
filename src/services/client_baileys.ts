@@ -414,7 +414,8 @@ export class ClientBaileys implements Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async send(payload: any, options: any = {}) {
-    const { status, type, to } = payload
+    const { status, type } = payload
+    let { to } = payload
     try {
       if (status) {
         if (['sent', 'delivered', 'failed', 'progress', 'read', 'deleted'].includes(status)) {
@@ -517,6 +518,7 @@ export class ClientBaileys implements Client {
             } catch {}
             content = { react: { text: emoji, key: reactionKey } }
             targetTo = reactionKey.remoteJid
+            to = targetTo
             extraSendOptions.forceRemoteJid = reactionKey.remoteJid
             extraSendOptions.skipBrSendOrder = true
           } else if ('template' === type) {
