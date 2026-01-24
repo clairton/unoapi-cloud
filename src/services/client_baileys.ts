@@ -545,7 +545,7 @@ export class ClientBaileys implements Client {
                   if (!resp?.ok) {
                     throw new Error(`sticker_download_failed: ${resp?.status || 0}`)
                   }
-                  const MAX_STICKER_BYTES = 2 * 1024 * 1024
+                  const MAX_STICKER_BYTES = 8 * 1024 * 1024
                   const contentLength = Number(resp.headers.get('content-length') || 0)
                   if (contentLength && contentLength > MAX_STICKER_BYTES) {
                     throw new Error(`sticker_too_large: ${contentLength}`)
