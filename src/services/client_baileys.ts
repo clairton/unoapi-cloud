@@ -37,6 +37,7 @@ import { t } from '../i18n'
 import { ClientForward } from './client_forward'
 import { SendError } from './send_error'
 import audioConverter from '../utils/audio_converter'
+import { convertToWebpSticker } from '../utils/sticker_convert'
 
 const attempts = 3
 
@@ -465,9 +466,60 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message status ${status}`)
         }
       } else if (type) {
-        if (['text', 'image', 'audio', 'sticker', 'document', 'video', 'template', 'interactive', 'contacts'].includes(type)) {
+        if (['text', 'image', 'audio', 'sticker', 'document', 'video', 'template', 'interactive', 'contacts', 'reaction'].includes(type)) {
           let content
-          if ('template' === type) {
+          let targetTo = to
+          const extraSendOptions: any = {}
+          if ('reaction' === type) {
+            const reaction = payload?.reaction || {}
+            const messageId =
+              reaction?.message_id ||
+              reaction?.messageId ||
+              payload?.message_id ||
+              payload?.context?.message_id ||
+              payload?.context?.id
+            if (!messageId) {
+              throw new SendError(400, 'invalid_reaction_payload: missing message_id')
+            }
+            const dataStore = this.store?.dataStore
+            let key = await dataStore?.loadKey(messageId)
+            if (!key) {
+              const unoId = await dataStore?.loadUnoId(messageId)
+              if (unoId) {
+                key = await dataStore?.loadKey(unoId)
+              }
+            }
+            if (!key || !key.id || !key.remoteJid) {
+              throw new SendError(404, `reaction_message_not_found: ${messageId}`)
+            }
+            const emojiRaw = typeof reaction?.emoji !== 'undefined'
+              ? reaction.emoji
+              : (typeof reaction?.text !== 'undefined' ? reaction.text : reaction?.value)
+            const emoji = `${emojiRaw ?? ''}`
+            let reactionKey = key
+            try {
+              const original = await dataStore?.loadMessage?.(reactionKey.remoteJid, reactionKey.id)
+              if (original?.key) {
+                reactionKey = { ...original.key, id: reactionKey.id }
+                if (typeof reactionKey.participant === 'string' && reactionKey.participant.trim() === '') {
+                  delete (reactionKey as any).participant
+                }
+              }
+            } catch {}
+            try {
+              logger.info(
+                'REACTION send: msgId=%s key.id=%s key.remoteJid=%s key.participant=%s',
+                messageId,
+                reactionKey?.id || '<none>',
+                reactionKey?.remoteJid || '<none>',
+                (reactionKey as any)?.participant || '<none>',
+              )
+            } catch {}
+            content = { react: { text: emoji, key: reactionKey } }
+            targetTo = reactionKey.remoteJid
+            extraSendOptions.forceRemoteJid = reactionKey.remoteJid
+            extraSendOptions.skipBrSendOrder = true
+          } else if ('template' === type) {
             const template = new Template(this.getConfig)
             content = await template.bind(this.phone, payload.template.name, payload.template.components)
           } else {
@@ -481,6 +533,30 @@ export class ClientBaileys implements Client {
               }
             }
             content = toBaileysMessageContent(payload, this.config.customMessageCharactersFunction)
+            if (type === 'sticker') {
+              try {
+                const stickerPayload: any = payload?.sticker || {}
+                const stickerLink = stickerPayload?.link || (content as any)?.sticker?.url
+                const cleanLink = `${stickerLink || ''}`.split('?')[0].split('#')[0]
+                const stickerMimeRaw = `${stickerPayload?.mime_type || stickerPayload?.mimetype || (content as any)?.mimetype || ''}`.toLowerCase()
+                const isWebp = stickerMimeRaw.includes('webp') || cleanLink.toLowerCase().endsWith('.webp')
+                if (stickerLink && !isWebp && typeof (content as any)?.sticker === 'object' && (content as any)?.sticker?.url) {
+                  const resp = await fetch(stickerLink, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
+                  if (!resp?.ok) {
+                    throw new Error(`sticker_download_failed: ${resp?.status || 0}`)
+                  }
+                  const contentType = `${resp.headers.get('content-type') || ''}`.toLowerCase()
+                  const isAnimated = contentType.includes('gif') || cleanLink.toLowerCase().endsWith('.gif')
+                  const buf = Buffer.from(await resp.arrayBuffer())
+                  const webp = await convertToWebpSticker(buf, { animated: isAnimated })
+                  ;(content as any).sticker = webp
+                  ;(content as any).mimetype = 'image/webp'
+                  logger.debug('Sticker converted to webp for %s', stickerLink)
+                }
+              } catch (err) {
+                logger.warn(err, 'Ignore error converting sticker to webp sending original')
+              }
+            }
           }
           let quoted: WAMessage | undefined = undefined
           let disappearingMessagesInChat: boolean | number = false
@@ -490,7 +566,7 @@ export class ClientBaileys implements Client {
             const key = await this.store?.dataStore?.loadKey(messageId)
             logger.debug('Quoted message key %s!', key?.id)
             if (key?.id) {
-              const remoteJid = phoneNumberToJid(to)
+              const remoteJid = phoneNumberToJid(targetTo)
               quoted = await this.store?.dataStore.loadMessage(remoteJid, key?.id)
               if (!quoted) {
                 const unoId = await this.store?.dataStore?.loadUnoId(key?.id)
@@ -527,12 +603,12 @@ export class ClientBaileys implements Client {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
-          await toDelay(this.phone, to)
+          const toDelay = sockDelays.get(targetTo) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
+          await toDelay(this.phone, targetTo)
           let response
           if (content?.listMessage) {
             response = await this.sendMessage(
-              to,
+              targetTo,
               {
                 forward: {
                   key: {
@@ -548,14 +624,16 @@ export class ClientBaileys implements Client {
                 composing: this.config.composingMessage,
                 quoted,
                 disappearingMessagesInChat,
+                ...extraSendOptions,
                 ...options,
               },
             )
           } else {
-            response = await this.sendMessage(to, content, {
+            response = await this.sendMessage(targetTo, content, {
               composing: this.config.composingMessage,
               quoted,
               disappearingMessagesInChat,
+              ...extraSendOptions,
               ...options,
             })
           }

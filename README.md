@@ -127,6 +127,41 @@ http://localhost:9876/v15.0/5549988290955/messages \
 }'
 ```
 
+To react to a message
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{
+  "messaging_product": "whatsapp",
+  "to": "5549988290955",
+  "type": "reaction",
+  "reaction": {
+    "message_id": "MESSAGE_ID",
+    "emoji": "👍"
+  }
+}'
+```
+
+To send a sticker (PNG/JPG/GIF are auto-converted to WEBP)
+
+```sh
+curl -i -X POST \
+http://localhost:9876/v15.0/5549988290955/messages \
+-H 'Content-Type: application/json' \
+-H 'Authorization: 1' \
+-d '{
+  "messaging_product": "whatsapp",
+  "to": "5549988290955",
+  "type": "sticker",
+  "sticker": {
+    "link": "https://example.com/sticker.png"
+  }
+}'
+```
+
 ## Media
 
 To test media
