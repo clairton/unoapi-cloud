@@ -545,9 +545,18 @@ export class ClientBaileys implements Client {
                   if (!resp?.ok) {
                     throw new Error(`sticker_download_failed: ${resp?.status || 0}`)
                   }
+                  const MAX_STICKER_BYTES = 2 * 1024 * 1024
+                  const contentLength = Number(resp.headers.get('content-length') || 0)
+                  if (contentLength && contentLength > MAX_STICKER_BYTES) {
+                    throw new Error(`sticker_too_large: ${contentLength}`)
+                  }
                   const contentType = `${resp.headers.get('content-type') || ''}`.toLowerCase()
                   const isAnimated = contentType.includes('gif') || cleanLink.toLowerCase().endsWith('.gif')
-                  const buf = Buffer.from(await resp.arrayBuffer())
+                  const arrayBuffer = await resp.arrayBuffer()
+                  if (arrayBuffer.byteLength > MAX_STICKER_BYTES) {
+                    throw new Error(`sticker_too_large: ${arrayBuffer.byteLength}`)
+                  }
+                  const buf = Buffer.from(arrayBuffer)
                   const webp = await convertToWebpSticker(buf, { animated: isAnimated })
                   ;(content as any).sticker = webp
                   ;(content as any).mimetype = 'image/webp'
