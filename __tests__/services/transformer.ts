@@ -22,6 +22,7 @@ import {
   extractFromPhone,
   extractTypeMessage,
 } from '../../src/services/transformer'
+import { resolveReactionPayload } from '../../src/services/reaction_helper'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
 const documentMessage: proto.Message.IDocumentMessage = {
@@ -1652,20 +1653,42 @@ describe('service transformer', () => {
     expect(result).toEqual(output)
   })
 
-  // Reaction here expects a pre-resolved payload (reaction.key already set by helper)
-  test('toBaileysMessageContent reaction', async () => {
-    const input = {
-      type: 'reaction',
-      reaction: {
-        emoji: 'ok',
-        key: {
+  const buildReactionDataStore = () => ({
+    loadKey: jest.fn(async (id: string) => {
+      if (id === 'REACTION_MESSAGE_ID') {
+        return {
+          id: 'REACTION_KEY_ID',
           remoteJid: '554988189915@s.whatsapp.net',
           fromMe: true,
-          id: 'REACTION_KEY_ID',
-        },
+        }
+      }
+      return undefined
+    }),
+    loadUnoId: jest.fn(async () => undefined),
+    loadMessage: jest.fn(async () => ({ key: { id: 'REACTION_KEY_ID', remoteJid: '554988189915@s.whatsapp.net', fromMe: true } })),
+  })
+
+  test('toBaileysMessageContent reaction (cloud input)', async () => {
+    const cloudInput = {
+      messaging_product: 'whatsapp',
+      to: '554988189915',
+      type: 'reaction',
+      reaction: {
+        message_id: 'REACTION_MESSAGE_ID',
+        emoji: 'ok',
       },
     }
-    const output = {
+    const resolved = await resolveReactionPayload(cloudInput, buildReactionDataStore())
+    const resolvedPayload = {
+      ...cloudInput,
+      reaction: {
+        ...(cloudInput as any).reaction,
+        emoji: resolved.emoji,
+        key: resolved.reactionKey,
+      },
+    }
+    const result = toBaileysMessageContent(resolvedPayload)
+    expect(result).toEqual({
       react: {
         text: 'ok',
         key: {
@@ -1674,23 +1697,29 @@ describe('service transformer', () => {
           id: 'REACTION_KEY_ID',
         },
       },
-    }
-    const result = toBaileysMessageContent(input)
-    expect(result).toEqual(output)
+    })
   })
 
-  test('toBaileysMessageContent reaction without emoji', async () => {
-    const input = {
+  test('toBaileysMessageContent reaction without emoji (cloud input)', async () => {
+    const cloudInput = {
+      messaging_product: 'whatsapp',
+      to: '554988189915',
       type: 'reaction',
       reaction: {
-        key: {
-          remoteJid: '554988189915@s.whatsapp.net',
-          fromMe: true,
-          id: 'REACTION_KEY_ID',
-        },
+        message_id: 'REACTION_MESSAGE_ID',
       },
     }
-    const output = {
+    const resolved = await resolveReactionPayload(cloudInput, buildReactionDataStore())
+    const resolvedPayload = {
+      ...cloudInput,
+      reaction: {
+        ...(cloudInput as any).reaction,
+        emoji: resolved.emoji,
+        key: resolved.reactionKey,
+      },
+    }
+    const result = toBaileysMessageContent(resolvedPayload)
+    expect(result).toEqual({
       react: {
         text: '',
         key: {
@@ -1699,24 +1728,30 @@ describe('service transformer', () => {
           id: 'REACTION_KEY_ID',
         },
       },
-    }
-    const result = toBaileysMessageContent(input)
-    expect(result).toEqual(output)
+    })
   })
 
-  test('toBaileysMessageContent reaction with empty emoji', async () => {
-    const input = {
+  test('toBaileysMessageContent reaction with empty emoji (cloud input)', async () => {
+    const cloudInput = {
+      messaging_product: 'whatsapp',
+      to: '554988189915',
       type: 'reaction',
       reaction: {
+        message_id: 'REACTION_MESSAGE_ID',
         emoji: '',
-        key: {
-          remoteJid: '554988189915@s.whatsapp.net',
-          fromMe: true,
-          id: 'REACTION_KEY_ID',
-        },
       },
     }
-    const output = {
+    const resolved = await resolveReactionPayload(cloudInput, buildReactionDataStore())
+    const resolvedPayload = {
+      ...cloudInput,
+      reaction: {
+        ...(cloudInput as any).reaction,
+        emoji: resolved.emoji,
+        key: resolved.reactionKey,
+      },
+    }
+    const result = toBaileysMessageContent(resolvedPayload)
+    expect(result).toEqual({
       react: {
         text: '',
         key: {
@@ -1725,9 +1760,7 @@ describe('service transformer', () => {
           id: 'REACTION_KEY_ID',
         },
       },
-    }
-    const result = toBaileysMessageContent(input)
-    expect(result).toEqual(output)
+    })
   })
 
   test('toBaileysMessageContent reaction without key', async () => {
