@@ -464,6 +464,7 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
     case 'audio':
     case 'document':
     case 'video':
+    case 'sticker':
       const link = payload[type].link
       if (link) {
         let mimetype: string = getMimetype(payload)
@@ -482,6 +483,7 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
         response[type] = { url: link }
         break
       }
+      throw new Error(`invalid_media_payload: missing link for ${type}`)
 
     case 'contacts':
       const contact = payload[type][0]
@@ -501,6 +503,20 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
 
     case 'template':
       throw new BindTemplateError()
+
+    case 'reaction': {
+      const reaction = payload?.reaction || {}
+      const key = reaction?.key
+      if (!key) {
+        throw new Error('invalid_reaction_payload: missing key')
+      }
+      const emojiRaw = typeof reaction?.emoji !== 'undefined'
+        ? reaction.emoji
+        : (typeof reaction?.text !== 'undefined' ? reaction.text : reaction?.value)
+      const emoji = `${emojiRaw ?? ''}`
+      response.react = { text: emoji, key }
+      break
+    }
 
     default:
       throw new Error(`Unknow message type ${type}`)

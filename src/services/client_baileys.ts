@@ -37,6 +37,8 @@ import { t } from '../i18n'
 import { ClientForward } from './client_forward'
 import { SendError } from './send_error'
 import audioConverter from '../utils/audio_converter'
+import { convertToWebpSticker } from '../utils/sticker_convert'
+import { resolveReactionPayload } from './reaction_helper'
 
 const attempts = 3
 
@@ -239,6 +241,40 @@ export class ClientBaileys implements Client {
     await this.connect(time)
   }
 
+  private async maybeConvertStickerToWebp(content: any, payload: any) {
+    try {
+      const stickerPayload: any = payload?.sticker || {}
+      const stickerLink = stickerPayload?.link || (content as any)?.sticker?.url
+      const cleanLink = `${stickerLink || ''}`.split('?')[0].split('#')[0]
+      const stickerMimeRaw = `${stickerPayload?.mime_type || stickerPayload?.mimetype || (content as any)?.mimetype || ''}`.toLowerCase()
+      const isWebp = stickerMimeRaw.includes('webp') || cleanLink.toLowerCase().endsWith('.webp')
+      if (stickerLink && !isWebp && typeof (content as any)?.sticker === 'object' && (content as any)?.sticker?.url) {
+        const resp = await fetch(stickerLink, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
+        if (!resp?.ok) {
+          throw new Error(`sticker_download_failed: ${resp?.status || 0}`)
+        }
+        const MAX_STICKER_BYTES = 8 * 1024 * 1024
+        const contentLength = Number(resp.headers.get('content-length') || 0)
+        if (contentLength && contentLength > MAX_STICKER_BYTES) {
+          throw new Error(`sticker_too_large: ${contentLength}`)
+        }
+        const contentType = `${resp.headers.get('content-type') || ''}`.toLowerCase()
+        const isAnimated = contentType.includes('gif') || cleanLink.toLowerCase().endsWith('.gif')
+        const arrayBuffer = await resp.arrayBuffer()
+        if (arrayBuffer.byteLength > MAX_STICKER_BYTES) {
+          throw new Error(`sticker_too_large: ${arrayBuffer.byteLength}`)
+        }
+        const buf = Buffer.from(arrayBuffer)
+        const webp = await convertToWebpSticker(buf, { animated: isAnimated })
+        ;(content as any).sticker = webp
+        ;(content as any).mimetype = 'image/webp'
+        logger.debug('Sticker converted to webp for %s', stickerLink)
+      }
+    } catch (err) {
+      logger.warn(err, 'Ignore error converting sticker to webp sending original')
+    }
+  }
+
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
     logger.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
@@ -413,7 +449,9 @@ export class ClientBaileys implements Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async send(payload: any, options: any = {}) {
-    const { status, type, to } = payload
+    const { status, type } = payload
+    let { to } = payload
+    let safeTo = to || this.phone
     try {
       if (status) {
         if (['sent', 'delivered', 'failed', 'progress', 'read', 'deleted'].includes(status)) {
@@ -465,9 +503,27 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message status ${status}`)
         }
       } else if (type) {
-        if (['text', 'image', 'audio', 'sticker', 'document', 'video', 'template', 'interactive', 'contacts'].includes(type)) {
+        if (['text', 'image', 'audio', 'sticker', 'document', 'video', 'template', 'interactive', 'contacts', 'reaction'].includes(type)) {
           let content
-          if ('template' === type) {
+          let targetTo = to
+          const extraSendOptions: any = {}
+          if ('reaction' === type) {
+            const resolved = await resolveReactionPayload(payload, this.store?.dataStore)
+            const resolvedPayload = {
+              ...payload,
+              reaction: {
+                ...(payload?.reaction || {}),
+                emoji: resolved.emoji,
+                key: resolved.reactionKey,
+              },
+            }
+            content = toBaileysMessageContent(resolvedPayload, this.config.customMessageCharactersFunction)
+            targetTo = resolved.targetTo
+            to = targetTo
+            safeTo = targetTo
+            extraSendOptions.forceRemoteJid = resolved.targetTo
+            extraSendOptions.skipBrSendOrder = true
+          } else if ('template' === type) {
             const template = new Template(this.getConfig)
             content = await template.bind(this.phone, payload.template.name, payload.template.components)
           } else {
@@ -481,6 +537,9 @@ export class ClientBaileys implements Client {
               }
             }
             content = toBaileysMessageContent(payload, this.config.customMessageCharactersFunction)
+            if (type === 'sticker') {
+              await this.maybeConvertStickerToWebp(content, payload)
+            }
           }
           let quoted: WAMessage | undefined = undefined
           let disappearingMessagesInChat: boolean | number = false
@@ -490,7 +549,7 @@ export class ClientBaileys implements Client {
             const key = await this.store?.dataStore?.loadKey(messageId)
             logger.debug('Quoted message key %s!', key?.id)
             if (key?.id) {
-              const remoteJid = phoneNumberToJid(to)
+              const remoteJid = phoneNumberToJid(targetTo)
               quoted = await this.store?.dataStore.loadMessage(remoteJid, key?.id)
               if (!quoted) {
                 const unoId = await this.store?.dataStore?.loadUnoId(key?.id)
@@ -527,12 +586,12 @@ export class ClientBaileys implements Client {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           const sockDelays = delays.get(this.phone) || (delays.set(this.phone, new Map<string, Delay>()) && delays.get(this.phone)!)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const toDelay = sockDelays.get(to) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
-          await toDelay(this.phone, to)
+          const toDelay = sockDelays.get(targetTo) || (async (_phone: string, to) => sockDelays.set(to, this.delayBeforeSecondMessage))
+          await toDelay(this.phone, targetTo)
           let response
           if (content?.listMessage) {
             response = await this.sendMessage(
-              to,
+              targetTo,
               {
                 forward: {
                   key: {
@@ -548,14 +607,16 @@ export class ClientBaileys implements Client {
                 composing: this.config.composingMessage,
                 quoted,
                 disappearingMessagesInChat,
+                ...extraSendOptions,
                 ...options,
               },
             )
           } else {
-            response = await this.sendMessage(to, content, {
+            response = await this.sendMessage(targetTo, content, {
               composing: this.config.composingMessage,
               quoted,
               disappearingMessagesInChat,
+              ...extraSendOptions,
               ...options,
             })
           }
@@ -611,7 +672,7 @@ export class ClientBaileys implements Client {
           messaging_product: 'whatsapp',
           contacts: [
             {
-              wa_id: jidToPhoneNumber(to, ''),
+              wa_id: jidToPhoneNumber(safeTo, ''),
             },
           ],
           messages: [
@@ -636,7 +697,7 @@ export class ClientBaileys implements Client {
                     statuses: [
                       {
                         id,
-                        recipient_id: jidToPhoneNumber(to || this.phone, ''),
+                        recipient_id: jidToPhoneNumber(safeTo, ''),
                         status: 'failed',
                         timestamp: Math.floor(Date.now() / 1000),
                         errors: [

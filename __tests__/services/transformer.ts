@@ -22,6 +22,7 @@ import {
   extractFromPhone,
   extractTypeMessage,
 } from '../../src/services/transformer'
+import { resolveReactionPayload } from '../../src/services/reaction_helper'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
 const documentMessage: proto.Message.IDocumentMessage = {
@@ -1647,6 +1648,143 @@ describe('service transformer', () => {
       // title: 'your-text-message-content',
       "text": "your-text-message-content",
       "title": "Title"
+    }
+    const result = toBaileysMessageContent(input)
+    expect(result).toEqual(output)
+  })
+
+  const buildReactionDataStore = () => ({
+    loadKey: jest.fn(async (id: string) => {
+      if (id === 'REACTION_MESSAGE_ID') {
+        return {
+          id: 'REACTION_KEY_ID',
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+        }
+      }
+      return undefined
+    }),
+    loadUnoId: jest.fn(async () => undefined),
+    loadMessage: jest.fn(async () => ({ key: { id: 'REACTION_KEY_ID', remoteJid: '554988189915@s.whatsapp.net', fromMe: true } })),
+  })
+
+  test('toBaileysMessageContent reaction (cloud input)', async () => {
+    const cloudInput = {
+      messaging_product: 'whatsapp',
+      to: '554988189915',
+      type: 'reaction',
+      reaction: {
+        message_id: 'REACTION_MESSAGE_ID',
+        emoji: 'ok',
+      },
+    }
+    const resolved = await resolveReactionPayload(cloudInput, buildReactionDataStore())
+    const resolvedPayload = {
+      ...cloudInput,
+      reaction: {
+        ...(cloudInput as any).reaction,
+        emoji: resolved.emoji,
+        key: resolved.reactionKey,
+      },
+    }
+    const result = toBaileysMessageContent(resolvedPayload)
+    expect(result).toEqual({
+      react: {
+        text: 'ok',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    })
+  })
+
+  test('toBaileysMessageContent reaction without emoji (cloud input)', async () => {
+    const cloudInput = {
+      messaging_product: 'whatsapp',
+      to: '554988189915',
+      type: 'reaction',
+      reaction: {
+        message_id: 'REACTION_MESSAGE_ID',
+      },
+    }
+    const resolved = await resolveReactionPayload(cloudInput, buildReactionDataStore())
+    const resolvedPayload = {
+      ...cloudInput,
+      reaction: {
+        ...(cloudInput as any).reaction,
+        emoji: resolved.emoji,
+        key: resolved.reactionKey,
+      },
+    }
+    const result = toBaileysMessageContent(resolvedPayload)
+    expect(result).toEqual({
+      react: {
+        text: '',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    })
+  })
+
+  test('toBaileysMessageContent reaction with empty emoji (cloud input)', async () => {
+    const cloudInput = {
+      messaging_product: 'whatsapp',
+      to: '554988189915',
+      type: 'reaction',
+      reaction: {
+        message_id: 'REACTION_MESSAGE_ID',
+        emoji: '',
+      },
+    }
+    const resolved = await resolveReactionPayload(cloudInput, buildReactionDataStore())
+    const resolvedPayload = {
+      ...cloudInput,
+      reaction: {
+        ...(cloudInput as any).reaction,
+        emoji: resolved.emoji,
+        key: resolved.reactionKey,
+      },
+    }
+    const result = toBaileysMessageContent(resolvedPayload)
+    expect(result).toEqual({
+      react: {
+        text: '',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    })
+  })
+
+  test('toBaileysMessageContent reaction without key', async () => {
+    const input = {
+      type: 'reaction',
+      reaction: {
+        emoji: 'ok',
+      },
+    }
+    expect(() => toBaileysMessageContent(input)).toThrow('invalid_reaction_payload: missing key')
+  })
+
+  test('toBaileysMessageContent sticker', async () => {
+    const input = {
+      type: 'sticker',
+      sticker: {
+        link: 'https://example.com/sticker.png',
+      },
+    }
+    const output = {
+      mimetype: 'image/png',
+      sticker: {
+        url: 'https://example.com/sticker.png',
+      },
     }
     const result = toBaileysMessageContent(input)
     expect(result).toEqual(output)
