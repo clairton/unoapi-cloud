@@ -451,6 +451,7 @@ export class ClientBaileys implements Client {
   async send(payload: any, options: any = {}) {
     const { status, type } = payload
     let { to } = payload
+    let safeTo = to || this.phone
     try {
       if (status) {
         if (['sent', 'delivered', 'failed', 'progress', 'read', 'deleted'].includes(status)) {
@@ -519,6 +520,7 @@ export class ClientBaileys implements Client {
             content = toBaileysMessageContent(resolvedPayload, this.config.customMessageCharactersFunction)
             targetTo = resolved.targetTo
             to = targetTo
+            safeTo = targetTo
             extraSendOptions.forceRemoteJid = resolved.targetTo
             extraSendOptions.skipBrSendOrder = true
           } else if ('template' === type) {
@@ -670,7 +672,7 @@ export class ClientBaileys implements Client {
           messaging_product: 'whatsapp',
           contacts: [
             {
-              wa_id: jidToPhoneNumber(to, ''),
+              wa_id: jidToPhoneNumber(safeTo, ''),
             },
           ],
           messages: [
@@ -695,7 +697,7 @@ export class ClientBaileys implements Client {
                     statuses: [
                       {
                         id,
-                        recipient_id: jidToPhoneNumber(to || this.phone, ''),
+                        recipient_id: jidToPhoneNumber(safeTo, ''),
                         status: 'failed',
                         timestamp: Math.floor(Date.now() / 1000),
                         errors: [
