@@ -483,6 +483,7 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
         response[type] = { url: link }
         break
       }
+      throw new Error(`invalid_media_payload: missing link for ${type}`)
 
     case 'contacts':
       const contact = payload[type][0]
