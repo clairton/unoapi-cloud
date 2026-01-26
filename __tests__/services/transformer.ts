@@ -1678,6 +1678,57 @@ describe('service transformer', () => {
     expect(result).toEqual(output)
   })
 
+  test('toBaileysMessageContent reaction without emoji', async () => {
+    const input = {
+      type: 'reaction',
+      reaction: {
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    }
+    const output = {
+      react: {
+        text: '',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    }
+    const result = toBaileysMessageContent(input)
+    expect(result).toEqual(output)
+  })
+
+  test('toBaileysMessageContent reaction with empty emoji', async () => {
+    const input = {
+      type: 'reaction',
+      reaction: {
+        emoji: '',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    }
+    const output = {
+      react: {
+        text: '',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    }
+    const result = toBaileysMessageContent(input)
+    expect(result).toEqual(output)
+  })
+
   test('toBaileysMessageContent reaction without key', async () => {
     const input = {
       type: 'reaction',
