@@ -240,6 +240,89 @@ export class ClientBaileys implements Client {
     await this.connect(time)
   }
 
+  // Resolve reaction target and key before building Baileys payload
+  private async resolveReactionPayload(payload: any) {
+    const reaction = payload?.reaction || {}
+    const messageId =
+      reaction?.message_id ||
+      reaction?.messageId ||
+      payload?.message_id ||
+      payload?.context?.message_id ||
+      payload?.context?.id
+    if (!messageId) {
+      throw new SendError(400, 'invalid_reaction_payload: missing message_id')
+    }
+    const dataStore = this.store?.dataStore
+    let key = await dataStore?.loadKey(messageId)
+    if (!key) {
+      const unoId = await dataStore?.loadUnoId(messageId)
+      if (unoId) {
+        key = await dataStore?.loadKey(unoId)
+      }
+    }
+    if (!key || !key.id || !key.remoteJid) {
+      throw new SendError(404, `reaction_message_not_found: ${messageId}`)
+    }
+    const emojiRaw = typeof reaction?.emoji !== 'undefined'
+      ? reaction.emoji
+      : (typeof reaction?.text !== 'undefined' ? reaction.text : reaction?.value)
+    const emoji = `${emojiRaw ?? ''}`
+    let reactionKey = key
+    try {
+      const original = await dataStore?.loadMessage?.(reactionKey.remoteJid, reactionKey.id)
+      if (original?.key) {
+        reactionKey = { ...original.key, id: reactionKey.id }
+        if (typeof reactionKey.participant === 'string' && reactionKey.participant.trim() === '') {
+          delete (reactionKey as any).participant
+        }
+      }
+    } catch {}
+    try {
+      logger.info(
+        'REACTION send: msgId=%s key.id=%s key.remoteJid=%s key.participant=%s',
+        messageId,
+        reactionKey?.id || '<none>',
+        reactionKey?.remoteJid || '<none>',
+        (reactionKey as any)?.participant || '<none>',
+      )
+    } catch {}
+    return { reactionKey, emoji, targetTo: reactionKey.remoteJid }
+  }
+
+  private async maybeConvertStickerToWebp(content: any, payload: any) {
+    try {
+      const stickerPayload: any = payload?.sticker || {}
+      const stickerLink = stickerPayload?.link || (content as any)?.sticker?.url
+      const cleanLink = `${stickerLink || ''}`.split('?')[0].split('#')[0]
+      const stickerMimeRaw = `${stickerPayload?.mime_type || stickerPayload?.mimetype || (content as any)?.mimetype || ''}`.toLowerCase()
+      const isWebp = stickerMimeRaw.includes('webp') || cleanLink.toLowerCase().endsWith('.webp')
+      if (stickerLink && !isWebp && typeof (content as any)?.sticker === 'object' && (content as any)?.sticker?.url) {
+        const resp = await fetch(stickerLink, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
+        if (!resp?.ok) {
+          throw new Error(`sticker_download_failed: ${resp?.status || 0}`)
+        }
+        const MAX_STICKER_BYTES = 8 * 1024 * 1024
+        const contentLength = Number(resp.headers.get('content-length') || 0)
+        if (contentLength && contentLength > MAX_STICKER_BYTES) {
+          throw new Error(`sticker_too_large: ${contentLength}`)
+        }
+        const contentType = `${resp.headers.get('content-type') || ''}`.toLowerCase()
+        const isAnimated = contentType.includes('gif') || cleanLink.toLowerCase().endsWith('.gif')
+        const arrayBuffer = await resp.arrayBuffer()
+        if (arrayBuffer.byteLength > MAX_STICKER_BYTES) {
+          throw new Error(`sticker_too_large: ${arrayBuffer.byteLength}`)
+        }
+        const buf = Buffer.from(arrayBuffer)
+        const webp = await convertToWebpSticker(buf, { animated: isAnimated })
+        ;(content as any).sticker = webp
+        ;(content as any).mimetype = 'image/webp'
+        logger.debug('Sticker converted to webp for %s', stickerLink)
+      }
+    } catch (err) {
+      logger.warn(err, 'Ignore error converting sticker to webp sending original')
+    }
+  }
+
   private delayBeforeSecondMessage: Delay = async (phone, to) => {
     const time = 2000
     logger.debug(`Sleep for ${time} before second message ${phone} => ${to}`)
@@ -472,54 +555,19 @@ export class ClientBaileys implements Client {
           let targetTo = to
           const extraSendOptions: any = {}
           if ('reaction' === type) {
-            const reaction = payload?.reaction || {}
-            const messageId =
-              reaction?.message_id ||
-              reaction?.messageId ||
-              payload?.message_id ||
-              payload?.context?.message_id ||
-              payload?.context?.id
-            if (!messageId) {
-              throw new SendError(400, 'invalid_reaction_payload: missing message_id')
+            const resolved = await this.resolveReactionPayload(payload)
+            const resolvedPayload = {
+              ...payload,
+              reaction: {
+                ...(payload?.reaction || {}),
+                emoji: resolved.emoji,
+                key: resolved.reactionKey,
+              },
             }
-            const dataStore = this.store?.dataStore
-            let key = await dataStore?.loadKey(messageId)
-            if (!key) {
-              const unoId = await dataStore?.loadUnoId(messageId)
-              if (unoId) {
-                key = await dataStore?.loadKey(unoId)
-              }
-            }
-            if (!key || !key.id || !key.remoteJid) {
-              throw new SendError(404, `reaction_message_not_found: ${messageId}`)
-            }
-            const emojiRaw = typeof reaction?.emoji !== 'undefined'
-              ? reaction.emoji
-              : (typeof reaction?.text !== 'undefined' ? reaction.text : reaction?.value)
-            const emoji = `${emojiRaw ?? ''}`
-            let reactionKey = key
-            try {
-              const original = await dataStore?.loadMessage?.(reactionKey.remoteJid, reactionKey.id)
-              if (original?.key) {
-                reactionKey = { ...original.key, id: reactionKey.id }
-                if (typeof reactionKey.participant === 'string' && reactionKey.participant.trim() === '') {
-                  delete (reactionKey as any).participant
-                }
-              }
-            } catch {}
-            try {
-              logger.info(
-                'REACTION send: msgId=%s key.id=%s key.remoteJid=%s key.participant=%s',
-                messageId,
-                reactionKey?.id || '<none>',
-                reactionKey?.remoteJid || '<none>',
-                (reactionKey as any)?.participant || '<none>',
-              )
-            } catch {}
-            content = { react: { text: emoji, key: reactionKey } }
-            targetTo = reactionKey.remoteJid
+            content = toBaileysMessageContent(resolvedPayload, this.config.customMessageCharactersFunction)
+            targetTo = resolved.targetTo
             to = targetTo
-            extraSendOptions.forceRemoteJid = reactionKey.remoteJid
+            extraSendOptions.forceRemoteJid = resolved.targetTo
             extraSendOptions.skipBrSendOrder = true
           } else if ('template' === type) {
             const template = new Template(this.getConfig)
@@ -536,37 +584,7 @@ export class ClientBaileys implements Client {
             }
             content = toBaileysMessageContent(payload, this.config.customMessageCharactersFunction)
             if (type === 'sticker') {
-              try {
-                const stickerPayload: any = payload?.sticker || {}
-                const stickerLink = stickerPayload?.link || (content as any)?.sticker?.url
-                const cleanLink = `${stickerLink || ''}`.split('?')[0].split('#')[0]
-                const stickerMimeRaw = `${stickerPayload?.mime_type || stickerPayload?.mimetype || (content as any)?.mimetype || ''}`.toLowerCase()
-                const isWebp = stickerMimeRaw.includes('webp') || cleanLink.toLowerCase().endsWith('.webp')
-                if (stickerLink && !isWebp && typeof (content as any)?.sticker === 'object' && (content as any)?.sticker?.url) {
-                  const resp = await fetch(stickerLink, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
-                  if (!resp?.ok) {
-                    throw new Error(`sticker_download_failed: ${resp?.status || 0}`)
-                  }
-                  const MAX_STICKER_BYTES = 8 * 1024 * 1024
-                  const contentLength = Number(resp.headers.get('content-length') || 0)
-                  if (contentLength && contentLength > MAX_STICKER_BYTES) {
-                    throw new Error(`sticker_too_large: ${contentLength}`)
-                  }
-                  const contentType = `${resp.headers.get('content-type') || ''}`.toLowerCase()
-                  const isAnimated = contentType.includes('gif') || cleanLink.toLowerCase().endsWith('.gif')
-                  const arrayBuffer = await resp.arrayBuffer()
-                  if (arrayBuffer.byteLength > MAX_STICKER_BYTES) {
-                    throw new Error(`sticker_too_large: ${arrayBuffer.byteLength}`)
-                  }
-                  const buf = Buffer.from(arrayBuffer)
-                  const webp = await convertToWebpSticker(buf, { animated: isAnimated })
-                  ;(content as any).sticker = webp
-                  ;(content as any).mimetype = 'image/webp'
-                  logger.debug('Sticker converted to webp for %s', stickerLink)
-                }
-              } catch (err) {
-                logger.warn(err, 'Ignore error converting sticker to webp sending original')
-              }
+              await this.maybeConvertStickerToWebp(content, payload)
             }
           }
           let quoted: WAMessage | undefined = undefined

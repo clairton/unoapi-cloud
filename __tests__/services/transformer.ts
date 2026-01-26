@@ -1652,6 +1652,49 @@ describe('service transformer', () => {
     expect(result).toEqual(output)
   })
 
+  test('toBaileysMessageContent reaction', async () => {
+    const input = {
+      type: 'reaction',
+      reaction: {
+        emoji: 'ok',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    }
+    const output = {
+      react: {
+        text: 'ok',
+        key: {
+          remoteJid: '554988189915@s.whatsapp.net',
+          fromMe: true,
+          id: 'REACTION_KEY_ID',
+        },
+      },
+    }
+    const result = toBaileysMessageContent(input)
+    expect(result).toEqual(output)
+  })
+
+  test('toBaileysMessageContent sticker', async () => {
+    const input = {
+      type: 'sticker',
+      sticker: {
+        link: 'https://example.com/sticker.png',
+      },
+    }
+    const output = {
+      mimetype: 'image/png',
+      sticker: {
+        url: 'https://example.com/sticker.png',
+      },
+    }
+    const result = toBaileysMessageContent(input)
+    expect(result).toEqual(output)
+  })
+
   test('fromBaileysMessageContent participant outside key', async () => {
     const phoneNumer = '5549998093075'
     const remotePhoneNumber = '11115551212'
