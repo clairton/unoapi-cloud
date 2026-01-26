@@ -1678,6 +1678,16 @@ describe('service transformer', () => {
     expect(result).toEqual(output)
   })
 
+  test('toBaileysMessageContent reaction without key', async () => {
+    const input = {
+      type: 'reaction',
+      reaction: {
+        emoji: 'ok',
+      },
+    }
+    expect(() => toBaileysMessageContent(input)).toThrow('invalid_reaction_payload: missing key')
+  })
+
   test('toBaileysMessageContent sticker', async () => {
     const input = {
       type: 'sticker',
