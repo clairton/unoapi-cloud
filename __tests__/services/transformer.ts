@@ -1652,6 +1652,7 @@ describe('service transformer', () => {
     expect(result).toEqual(output)
   })
 
+  // Reaction here expects a pre-resolved payload (reaction.key already set by helper)
   test('toBaileysMessageContent reaction', async () => {
     const input = {
       type: 'reaction',
