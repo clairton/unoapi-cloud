@@ -52,7 +52,10 @@ export class ClientForward implements Client {
     }
     logger.debug('Response status: %s', response?.status)
     if (!response?.ok) {
-      const content: any = await response.json()
+      let content: any = await response.json()
+      if (!content?.code && content?.error?.code) {
+        content = content?.error
+      }
       const to = extractDestinyPhone(payload)
       logger.error('Error on send body %s => %s', body, JSON.stringify(content))
       let error

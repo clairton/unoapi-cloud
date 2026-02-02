@@ -131,7 +131,9 @@ export class IncomingJob {
     let outgingPayload
     if (error) {
       if (idUno) {
-        error.entry[0].changes[0].value.statuses[0].id = idUno
+        if (error?.entry[0]?.changes[0]?.value?.statuses[0]?.id) {
+          error.entry[0].changes[0].value.statuses[0].id = idUno
+        }
       }
       outgingPayload = error
       optionsOutgoing.priority = 1
