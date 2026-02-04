@@ -466,7 +466,7 @@ export class ClientBaileys implements Client {
           throw new Error(`Unknow message status ${status}`)
         }
       } else if (type) {
-        if (['text', 'image', 'audio', 'sticker', 'document', 'video', 'template', 'interactive', 'contacts'].includes(type)) {
+        if (['text', 'image', 'audio', 'sticker', 'document', 'video', 'template', 'interactive', 'contacts', 'reaction'].includes(type)) {
           let content
           if ('template' === type) {
             const template = new Template(this.getConfig)
@@ -666,9 +666,12 @@ export class ClientBaileys implements Client {
 
   async getMessageMetadata<T>(message: T) {
     let remoteJid
+    const key = message && message['key']
+    if (key?.fromMe && jidToPhoneNumber(key?.remoteJid, '') == this.phone) {
+      return message
+    }
     if (this.config.groupMessagesCloudFormat) {
       logger.debug('Skip message group metada...')
-      const key = message && message['key']
       if (key.remoteJid && isJidGroup(key.remoteJid)) {
         remoteJid = key.participant
       }
