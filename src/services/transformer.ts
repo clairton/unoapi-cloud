@@ -231,6 +231,12 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
     case 'text':
       response.text = customMessageCharactersFunction(payload.text.body)
       break
+    case 'reaction':
+      response.react = {
+        text: payload.reaction.emoji,
+        key: payload.reaction.key
+      }
+      break
     case 'interactive':
       // Build payload according to whaileys / baileys interactive format
       // If there are sections -> build a list message (title, buttonText, sections)

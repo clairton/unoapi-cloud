@@ -505,6 +505,15 @@ export class ClientBaileys implements Client {
               logger.debug('Quoted message %s!', JSON.stringify(quoted))
             }
           }
+
+          if (payload?.reaction?.message_id) {
+            logger.debug('Reacted message id %s', payload?.reaction?.message_id)
+            const key = await this.store?.dataStore?.loadKey(payload?.reaction?.message_id)
+            if (key) {
+              logger.debug('Reacted message baileys id %s!', key?.id)
+              payload.reaction.key = key
+            }
+          }
           if (payload?.ttl) {
             disappearingMessagesInChat = payload.ttl
           }
