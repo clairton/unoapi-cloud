@@ -6,10 +6,8 @@ import { getConfig } from './config'
 import {
   fromBaileysMessageContent,
   getMessageType,
-  BindTemplateError,
   isSaveMedia,
   jidToPhoneNumber,
-  DecryptError,
   isDecryptError,
   isBindTemplateError,
 } from './transformer'
