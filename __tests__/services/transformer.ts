@@ -530,6 +530,77 @@ describe('service transformer', () => {
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
   })
 
+  test('fromBaileysMessageContent with pix key', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const key = `${new Date().getTime()}`
+    const keyType = `key.${new Date().getTime()}`
+    const id = `wa.${new Date().getTime()}`
+    const merchantName = `Mary ${new Date().getTime()}`
+    const messageTimestamp = Math.floor(new Date().getTime() / 1000).toString()
+    const body = `*${merchantName}*\nChave PIX tipo *${keyType}*: ${key}`
+    const input = {
+      key: {
+        remoteJid, fromMe: false, id
+      },
+      message: {
+        interactiveMessage: {
+          nativeFlowMessage: {
+            buttons: [
+              {
+                buttonParamsJson: JSON.stringify({
+                  payment_settings: [
+                    {
+                      type:'pix_static_code',
+                      pix_static_code: {
+                        merchant_name: merchantName,
+                        key,
+                        key_type: keyType
+                      }
+                    }
+                  ]
+                })
+              }
+            ]
+          }
+        }
+      },
+      pushName: merchantName,
+      messageTimestamp,
+    }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                messages: [
+                  {
+                    from: '5549988290955',
+                    id,
+                    timestamp: messageTimestamp,
+                    text: { body },
+                    type: 'text',
+                  },
+                ],
+                contacts: [{ profile: { name: merchantName, picture: undefined }, wa_id: '5549988290955' }],
+                statuses: [],
+                errors: [],
+              },
+              field: 'messages',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
+  })
+
   test('fromBaileysMessageContent with text', async () => {
     const phoneNumer = '5549998360838'
     const remotePhoneNumer = '554988290955'

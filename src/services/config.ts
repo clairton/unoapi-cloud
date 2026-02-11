@@ -3,6 +3,17 @@ import { getStoreFile } from './store_file'
 import { WAMessageKey, WAVersion } from 'baileys'
 import { Level } from 'pino'
 
+// customUploadHosts: [
+//   { hostname: 'media.fcgh28-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'media.fgru11-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'media.fsdu2-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'media.frao1-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'media.fcgh20-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'media.fpoa33-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'media.fbel2-1.fna.whatsapp.net', maxContentLengthBytes: NaN },
+//   { hostname: 'mmg.whatsapp.net', maxContentLengthBytes: NaN } 
+// ]
+
 export const configs: Map<string, Config> = new Map()
 
 export type connectionType = 'qrcode' | 'pairing_code' | 'forward'

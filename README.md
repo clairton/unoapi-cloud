@@ -817,6 +817,7 @@ Mail to sales@unoapi.cloud
 - Add /health endpoint with test connection with redis, s3 and rabbitmq
 - https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/reference/smb_message_echoes?locale=pt_BR format message sending by app\
 - https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/reference/history?locale=pt_BR format for sync history 
+- https://developers.facebook.com/documentation/business-messaging/whatsapp/payments/payments-br/offsite-pix?locale=pt_BR
 
 ## Ready
 - Connect with pairing code: https://github.com/WhiskeySockets/Baileys#starting-socket-with-pairing-code

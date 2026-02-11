@@ -84,7 +84,9 @@ export const TYPE_MESSAGES_TO_READ = [
   'templateButtonReplyMessage',
   'listMessage',
   'buttonsMessage',
-  'buttonsResponseMessage'
+  'buttonsResponseMessage',
+  'interactiveMessage',
+  'nativeFlowMessage',
   // 'templateMessage'
 ]
 
@@ -961,9 +963,10 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
       // {"key":{"remoteJid":"554988290955@s.whatsapp.net","fromMe":false,"id":"3A3BD07D3529A482876A"},"messageTimestamp":1726448401,"pushName":"Clairton Rodrigo Heinzen","broadcast":false,"message":{"messageContextInfo":{"deviceListMetadata":{"senderKeyHash":"FxWbzja6L9qr6A==","senderTimestamp":"1725477022","recipientKeyHash":"HDhq+OTRdd9hhg==","recipientTimestamp":"1725986929"},"deviceListMetadataVersion":2},"viewOnceMessageV2Extension":{"message":{"audioMessage":{"url":"https://mmg.whatsapp.net/v/t62.7117-24/26550443_409309922183140_5545513783776136395_n.enc?ccb=11-4&oh=01_Q5AaIFdNmgUqP86I5VM6WLnt4i1h6wxOoPGY2kvj7wQlhE4c&oe=670EF9DE&_nc_sid=5e03e0&mms3=true","mimetype":"audio/ogg; codecs=opus","fileSha256":"kIFwwAF/PlmPp/Lxy2lVKgt8aq+fzSe+XmRwT5/Cn5A=","fileLength":"11339","seconds":8,"ptt":true,"mediaKey":"MEOnPR/10pkdQhNjjoB1yJXOZ/x9XAJk0m1XI1g7tdM=","fileEncSha256":"ZS1J1Zkjd93jz8TVg9rlNSotMCVbbZyBR/lOIwQhkSI=","directPath":"/v/t62.7117-24/26550443_409309922183140_5545513783776136395_n.enc?ccb=11-4&oh=01_Q5AaIFdNmgUqP86I5VM6WLnt4i1h6wxOoPGY2kvj7wQlhE4c&oe=670EF9DE&_nc_sid=5e03e0","mediaKeyTimestamp":"1726448391","streamingSidecar":"hRM//de8KSrVng==","waveform":"AAYEAgEBAQMGFxscHBQkJBscIyMcHBUPCQQCAQEAAAEPIRwkHhgXGBQJBAIBAAAAAAAAAAAAAAAAAAAAAAAAAA==","viewOnce":true}}}}}
       case 'viewOnceMessageV2Extension':
       case 'lottieStickerMessage':
+      case 'interactiveMessage':
         const changedPayload = {
           ...payload,
-          message: binMessage.message,
+          message: binMessage.message || binMessage,
         }
         return fromBaileysMessageContent(phone, changedPayload, config)
 
@@ -973,6 +976,20 @@ export const fromBaileysMessageContent = (phone: string, payload: any, config?: 
           body: binMessage?.text || binMessage,
         }
         message.type = 'text'
+        break
+
+      case 'nativeFlowMessage':
+        // {"key":{"remoteJid":"x@s.whatsapp.net","fromMe":false,"id":"wjdgujkk","senderLid":"X@lid","senderPn":"X@s.whatsapp.net"},"messageTimestamp":1770817659,"pushName":"Refrigeração S","message":{"interactiveMessage":{"nativeFlowMessage":{"buttons":[{"name":"payment_info","buttonParamsJson":"{\"currency\":\"BRL\",\"total_amount\":{\"value\":0,\"offset\":100},\"reference_id\":\"XYZ\",\"type\":\"physical-goods\",\"order\":{\"status\":\"pending\",\"subtotal\":{\"value\":0,\"offset\":100},\"order_type\":\"ORDER\",\"items\":[{\"name\":\"\",\"amount\":{\"value\":0,\"offset\":100},\"quantity\":0,\"sale_amount\":{\"value\":0,\"offset\":100}}]},\"payment_settings\":[{\"type\":\"pix_static_code\",\"pix_static_code\":{\"merchant_name\":\"Refrigeração S LTDA\",\"key\":\"XXXX\",\"key_type\":\"CNPJ\"}}],\"share_payment_status\":false,\"referral\":\"chat_attachment\"}"}]}}},"verifiedBizName":"Refrigeração S"}
+        const button = (binMessage?.buttons || [])[0] || {}
+        const jsonParams: any = JSON.parse(button.buttonParamsJson || '{}')
+        const settings = (jsonParams?.payment_settings || [])[0] || {}
+        if (['pix_dynamic_code', 'pix_static_code'].includes(settings.type)) {
+          const { merchant_name, key_type, key } = settings[settings.type] || {}
+          message.text = {
+            body: `*${merchant_name}*\nChave PIX tipo *${key_type}*: ${key}`
+          }
+          message.type = 'text'
+        }
         break
 
       case 'reactionMessage':
