@@ -449,7 +449,7 @@ Create a `.env`file and put configuration if you need change default value:
 This a general env:
 
 ```env
-CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 30000
+CONSUMER_TIMEOUT_MS=miliseconds in timeout for consume job, default is 15000
 AVAILABLE_LOCALES=default is `["en", "pt_BR", "pt"]`
 DEFAULT_LOCALE=locale for notifications status, now possibile is en, pt_BR and pt, default is en, to add new, use docker volume for exempla `/app/dist/src/locales/custom.json` and add `custom` in `AVAILABLE_LOCALES`
 ONLY_HELLO_TEMPLATE=true sets hello template as the only default template, default false.
@@ -501,7 +501,13 @@ WEBHOOK_URL_ABSOLUTE=the webhook absolute url, not use this if already use WEBHO
 WEBHOOK_URL=the webhook url, this config attribute put phone number on the end, no use if use WEBHOOK_URL_ABSOLUTE
 WEBHOOK_TOKEN=the webhook header token
 WEBHOOK_HEADER=the webhook header name
-WEBHOOK_TIMEOUT_MS=webhook request timeout, default 5000 ms
+WEBHOOK_TIMEOUT_MS=webhook request timeout, default 60000 ms
+WEBHOOK_CB_ENABLED=true enable webhook circuit breaker to avoid backlog when endpoint is offline, default true
+WEBHOOK_CB_FAILURE_THRESHOLD=number of failures within window to open circuit, default 1
+WEBHOOK_CB_OPEN_MS=how long to keep the circuit open (skip sends), default 120000
+WEBHOOK_CB_FAILURE_TTL_MS=failure counter window in ms, default 300000
+WEBHOOK_CB_REQUEUE_DELAY_MS=delay (ms) used to requeue when circuit is open, default 300000
+WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS=local CB map cleanup interval (ms), default 3600000
 WEBHOOK_SEND_NEW_MESSAGES=true, send new messages to webhook, caution with this, messages will be duplicated, default is false
 WEBHOOK_SEND_GROUP_MESSAGES=true, send group messages to webhook, default is true
 WEBHOOK_SEND_OUTGOING_MESSAGES=true, send outgoing messages to webhook, default is true
@@ -535,7 +541,27 @@ WEBHOOK_FORWARD_BUSINESS_ACCOUNT_ID=the business account id of whatsapp cloud ap
 WEBHOOK_FORWARD_TOKEN=the token of whatsapp cloud api, default is empty
 WEBHOOK_FORWARD_VERSION=the version of whatsapp cloud api, default is v17.0
 WEBHOOK_FORWARD_URL=the url of whatsapp cloud api, default is https://graph.facebook.com
-WEBHOOK_FORWARD_TIMEOUT_MS=the timeout for request to whatsapp cloud api, default is 360000
+WEBHOOK_FORWARD_TIMEOUT_MS=the timeout for request to whatsapp cloud api, default is 60000
+```
+Circuit breaker behavior:
+- Counts consecutive webhook failures within `WEBHOOK_CB_FAILURE_TTL_MS`.
+- When the count reaches `WEBHOOK_CB_FAILURE_THRESHOLD`, the circuit opens for `WEBHOOK_CB_OPEN_MS` and sends are skipped.
+- After the open window, delivery is attempted again automatically.
+- When the circuit is open, the message is requeued with a longer delay (`WEBHOOK_CB_REQUEUE_DELAY_MS`) to avoid retry storms.
+
+Why keep `WEBHOOK_TIMEOUT_MS` low:
+- A high timeout blocks the consumer for too long when the endpoint is offline.
+- With lower timeout, failures are detected faster and the circuit opens sooner, reducing backlog.
+
+Example (circuit breaker):
+```env
+WEBHOOK_CB_ENABLED=true
+WEBHOOK_CB_FAILURE_THRESHOLD=1
+WEBHOOK_CB_FAILURE_TTL_MS=300000
+WEBHOOK_CB_OPEN_MS=120000
+WEBHOOK_CB_REQUEUE_DELAY_MS=300000
+WEBHOOK_CB_LOCAL_CLEANUP_INTERVAL_MS=3600000
+WEBHOOK_TIMEOUT_MS=60000
 ```
 
 ### Config session with redis
@@ -565,7 +591,6 @@ The `.env` can be save one config, but on redis use different webhook by session
       "url": "http://localhost:3000/whatsapp/webhook",
       "token": "kslflkhlkwq",
       "header": "api_access_token",
-      "sendGroupMessages": false,
       "sendGroupMessages": false,
       "sendNewMessages": false,
     }
@@ -824,3 +849,4 @@ Mail to sales@unoapi.cloud
 - Counting connection retry attempts even when restarting to prevent looping messages
 - Message delete endpoint
 - Send reply message with please to send again, when any error and message enqueue in .dead
+
