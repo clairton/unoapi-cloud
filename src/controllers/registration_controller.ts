@@ -40,7 +40,11 @@ export class RegistrationController {
     logger.debug('deregister body %s', JSON.stringify(req.body))
     logger.debug('deregister query %s', JSON.stringify(req.query))
     const { phone } = req.params
-    await this.logout.run(phone, { force: true })
-    return res.status(204).send()
+    try {
+      await this.logout.run(phone, { force: true })
+      return res.status(204).send()
+    } catch (e) {
+      return res.status(400).json({ status: 'error', message: `${phone} could not deregister, error: ${e.message}` })
+    }
   }
 }
