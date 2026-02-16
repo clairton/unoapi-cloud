@@ -108,6 +108,8 @@ export const UNOAPI_QUEUE_BULK_WEBHOOK = `${UNOAPI_QUEUE_NAME}.bulk.webhook`
 export const UNOAPI_QUEUE_COMMANDER = `${UNOAPI_QUEUE_NAME}.commander`
 export const UNOAPI_QUEUE_INCOMING = `${UNOAPI_QUEUE_NAME}.incoming`
 export const UNOAPI_QUEUE_TRANSCRIBER = `${UNOAPI_QUEUE_NAME}.transcribe`
+export const RELOAD_PUBLISH_BROKER = process.env.RELOAD_PUBLISH_BROKER === _undefined ? false : process.env.RELOAD_PUBLISH_BROKER == 'true'
+export const RELOAD_BAILEYS_DEBOUNCE_MS = parseInt(process.env.RELOAD_BAILEYS_DEBOUNCE_MS || '15000')
 export const UNOAPI_QUEUE_SPEECH = `${UNOAPI_QUEUE_NAME}.speech`
 export const UNOAPI_MESSAGE_RETRY_LIMIT = parseInt(process.env.UNOAPI_MESSAGE_RETRY_LIMIT || '5')
 export const UNOAPI_MESSAGE_RETRY_DELAY = parseInt(process.env.UNOAPI_MESSAGE_RETRY_DELAY || '10000')
