@@ -40,7 +40,7 @@ export class RegistrationController {
     logger.debug('deregister body %s', JSON.stringify(req.body))
     logger.debug('deregister query %s', JSON.stringify(req.query))
     const { phone } = req.params
-    await this.logout.run(phone)
+    await this.logout.run(phone, { force: true })
     return res.status(204).send()
   }
 }
