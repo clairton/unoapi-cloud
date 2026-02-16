@@ -47,7 +47,7 @@ export class SessionStoreRedis extends SessionStore {
 
   async setStatus(phone: string, status: sessionStatus) {
     logger.info(`Session status ${phone} change from ${await this.getStatus(phone)} to ${status}`)
-    if (['online', 'restart_required'].includes(status)) {
+    if (['online', 'restart_required', 'reloading'].includes(status)) {
       await this.clearConnectCount(phone)
     }
     return setSessionStatus(phone, status)

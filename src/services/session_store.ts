@@ -1,7 +1,7 @@
 import { MAX_CONNECT_RETRY } from '../defaults'
 import logger from './logger'
 
-export type sessionStatus = 'offline' | 'online' | 'disconnected' | 'connecting' | 'standby' | 'restart_required'
+export type sessionStatus = 'offline' | 'online' | 'disconnected' | 'connecting' | 'standby' | 'restart_required' | 'reloading'
 
 const statuses: Map<string, string> = new Map<string, string>()
 const retries: Map<string, number> = new Map<string, number>()
@@ -21,6 +21,10 @@ export abstract class SessionStore {
 
   async isStatusOnline(phone: string) {
     return (await this.getStatus(phone)) == 'online'
+  }
+
+  async isStatusReloading(phone: string) {
+    return (await this.getStatus(phone)) == 'reloading'
   }
 
   async isStatusConnecting(phone: string) {

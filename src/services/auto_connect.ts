@@ -37,8 +37,9 @@ export const autoConnect = async (
         try {
           const store = await config.getStore(phone, config)
           const { sessionStore } = store
-          if ((await sessionStore.isStatusConnecting(phone)) || (await sessionStore.isStatusOnline(phone))) {
-            logger.info(`Update session status to auto connect ${phone}...`)
+          const currentStatus = await sessionStore.getStatus(phone)
+          if (['connecting', 'online', 'reloading'].includes(currentStatus)) {
+            logger.info(`Update session current status ${currentStatus} to offline in session ${phone}...`)
             await sessionStore.setStatus(phone, 'offline')
           }
           getClient({ phone, listener, getConfig, onNewLogin })

@@ -27,15 +27,21 @@ export class ReloadBaileys extends Reload {
       logger.debug('Reload broker for phone %s', phone)
       return super.run(phone)
     }
+    const store = await config.getStore(phone, config)
+    const { sessionStore } = store
+    const currentStatus = await sessionStore.getStatus(phone)
+    if (currentStatus == 'reloading') {
+      logger.info('Already reloading session %s!', phone)
+      return
+    }
+    await sessionStore.setStatus(phone, 'reloading')
     const currentClient = await this.getClient({
       phone,
       listener: this.listener,
       getConfig: this.getConfig,
       onNewLogin: this.onNewLogin,
     })
-    const store = await config.getStore(phone, config)
-    const { sessionStore } = store
-    if ((await sessionStore.isStatusOnline(phone)) || (await sessionStore.isStatusStandBy(phone)) || (await sessionStore.isStatusConnecting(phone))) {
+    if (['online', 'standby', 'connecting'].includes(currentStatus)) {
       logger.warn('Reload disconnect session %s!', phone)
       await currentClient?.disconnect()
     }
