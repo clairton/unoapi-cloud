@@ -15,8 +15,10 @@ import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
 import { UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS, UNOAPI_DELAY_BETWEEN_MESSAGES_MS } from '../defaults'
 import { isUnoId, generateUnoId } from '../utils/id'
+import { Sync } from './sync'
 
 const delays: Map<String, number> = new Map()
+const syncs: Map<String, boolean> = new Map()
 
 const delayFunc =
   UNOAPI_DELAY_AFTER_FIRST_MESSAGE_MS && UNOAPI_DELAY_BETWEEN_MESSAGES_MS
@@ -44,11 +46,13 @@ export class ListenerBaileys implements Listener {
   private outgoing: Outgoing
   private getConfig: getConfig
   private broadcast: Broadcast
+  private sync: Sync
 
-  constructor(outgoing: Outgoing, broadcast: Broadcast, getConfig: getConfig) {
+  constructor(outgoing: Outgoing, broadcast: Broadcast, getConfig: getConfig, sync: Sync) {
     this.outgoing = outgoing
     this.getConfig = getConfig
     this.broadcast = broadcast
+    this.sync = sync
   }
 
   async process(phone: string, messages: object[], type: eventType) {
@@ -170,6 +174,13 @@ export class ListenerBaileys implements Listener {
       await store.dataStore.setStatus(originalId, 'decrypted')
     } catch (error) {
       if (isDecryptError(error)) {
+        const jid = i?.key?.remoteJid!
+        if (syncs.has(`${phone}:${jid}`)) {
+          logger.debug('Ignore sync because already run for %s and %s', phone, jid)
+        } else {
+          await this.sync.process(phone, [jid])
+          syncs.set(`${phone}:${jid}`, true)
+        }
         const currentStatus = await dataStore.loadStatus(originalId)
         logger.debug('Retrieved message %s status %s', originalId, currentStatus)
         if (currentStatus != 'decrypted') {

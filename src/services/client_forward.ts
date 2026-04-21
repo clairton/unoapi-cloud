@@ -114,18 +114,18 @@ export class ClientForward implements Client {
   }
 
   public getMessageMetadata<T>(_message: T): Promise<T> {
-    throw new Error('ClientCloudApi not getMessageMetadata')
+    throw new Error('ClientForward not getMessageMetadata')
   }
 
   public contacts(_numbers: string[]): Promise<Contact[]> {
-    throw new Error('ClientCloudApi not contacts')
+    throw new Error('ClientForward not contacts')
   }
 
   public async disconnect() {
-    throw 'ClientCloudApi not disconnect'
+    throw 'ClientForward not disconnect'
   }
 
   public async logout() {
-    throw 'ClientCloudApi not logout'
+    throw 'ClientForward not logout'
   }
 }

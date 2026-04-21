@@ -1,4 +1,4 @@
-import { Contact, proto, WAMessage } from 'baileys'
+import { Contact, WAMessage } from 'baileys'
 import { Response } from 'express'
 import { getDataStore } from './data_store'
 import { Config } from './config'

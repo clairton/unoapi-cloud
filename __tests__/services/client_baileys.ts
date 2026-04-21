@@ -18,7 +18,6 @@ import {
   logout,
 } from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
-import { proto } from 'baileys'
 import { DataStore } from '../../src/services/data_store'
 import { Incoming } from '../../src/services/incoming'
 import { dataStores } from '../../src/services/data_store'
@@ -29,7 +28,7 @@ import { SendError } from '../../src/services/send_error'
 const mockConnect = connect as jest.MockedFunction<typeof connect>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const event = (event, _callback) => {
+const event = (event: any, _callback: any) => {
   logger.info('subscribe event: %s', event)
 }
 
@@ -45,13 +44,13 @@ describe('service client baileys', () => {
   let store: Store
   let dataStore: DataStore
   let sessionStore: SessionStore
-  let send
-  let read
-  let logout
-  let exists
-  let rejectCall
-  let fetchImageUrl
-  let fetchGroupMetadata
+  let send: any
+  let read: readMessages
+  let logout: logout
+  let exists: exists
+  let rejectCall: rejectCall
+  let fetchImageUrl: fetchImageUrl
+  let fetchGroupMetadata: fetchGroupMetadata
   let getConfig: getConfig
   let config: Config
   let close: close
@@ -111,8 +110,8 @@ describe('service client baileys', () => {
   })
 
   test('call send with message text success', async () => {
-    const anyMessage: Promise<proto.WebMessageInfo> = mock<Promise<proto.WebMessageInfo>>()
-    send.mockReturnValue(anyMessage)
+    // const anyMessage: Promise<proto.WebMessageInfo> = mock<Promise<proto.WebMessageInfo>>()
+    // send.mockReturnValue(anyMessage)
     const to = `${new Date().getMilliseconds()}`
     const id = `${new Date().getMilliseconds()}`
     send.mockResolvedValue({ key: { id } })

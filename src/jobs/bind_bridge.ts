@@ -9,6 +9,8 @@ import { getClientBaileys } from '../services/client_baileys'
 import { onNewLoginGenerateToken } from '../services/on_new_login_generate_token'
 import { Outgoing } from '../services/outgoing'
 import logger from '../services/logger'
+import { Sync } from '../services/sync'
+import { SyncBaileys } from '../services/sync_baileys'
 import { Listener } from '../services/listener'
 import { ListenerBaileys } from '../services/listener_baileys'
 import { OutgoingAmqp } from '../services/outgoing_amqp'
@@ -22,11 +24,12 @@ const getConfigLocal: getConfig = getConfigRedis
 const outgoingAmqp: Outgoing = new OutgoingAmqp(getConfigLocal)
 const listenerAmqp: Listener = new ListenerAmqp()
 const broadcastAmqp: Broadcast = new BroadcastAmqp()
-const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigLocal)
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigLocal, isInBlacklistInRedis, addToBlacklistRedis)
 const onNewLogin = onNewLoginGenerateToken(outgoingCloudApi)
 const incomingBaileys = new IncomingBaileys(listenerAmqp, getConfigLocal, getClientBaileys, onNewLogin)
+const syncBaileys: Sync = new SyncBaileys(listenerAmqp, getConfigLocal, getClientBaileys, onNewLogin)
 const incomingJob = new IncomingJob(incomingBaileys, outgoingAmqp, getConfigLocal, UNOAPI_QUEUE_COMMANDER)
+const listenerBaileys: Listener = new ListenerBaileys(outgoingAmqp, broadcastAmqp, getConfigLocal, syncBaileys)
 const listenerJob = new ListenerJob(listenerBaileys, outgoingCloudApi, getConfigLocal)
 
 const processeds = new Map<string, boolean>()

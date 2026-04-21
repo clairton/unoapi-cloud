@@ -26,6 +26,6 @@
   "standby": "Standby session, waiting for time configured to try connect again, %s error in %s seconds",
   "proxy_error": "Error on connect to proxy: %s",
   "session_conflict": "The session number is %s but the configured number %s",
-  "waiting_information": "Waiting for qrcode/pairing code",
+  "retry_decrypt": "I can't read a message, I'll try again...",
   "reload": "Reload"
 }

@@ -482,7 +482,7 @@ export const connect = async ({
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
     await validateStatus()
-
+    
     return sock?.rejectCall(callId, callFrom)
   }
 

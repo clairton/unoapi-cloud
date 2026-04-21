@@ -36,6 +36,9 @@ import {
   UNOAPI_EXCHANGE_BROKER_NAME,
   UNOAPI_QUEUE_RELOAD,
 } from './defaults'
+import { SyncBaileys } from './services/sync_baileys'
+import { Sync } from './services/sync'
+import { ListenerAmqp } from './services/listener_amqp'
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -59,7 +62,9 @@ const middlewareVar = securityVar.run.bind(securityVar) as middleware
 let contactType: Contact
 console.log('process.env.UNOAPI_MODE', process.env.UNOAPI_MODE)
 if (process.env.UNOAPI_MODE == 'cloud') {
-  let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigRedis)
+  const listenerAmqp: Listener = new ListenerAmqp()
+  const syncBaileys: Sync = new SyncBaileys(listenerAmqp, getConfigRedis, getClientBaileys, onNewLogin)
+  const listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigRedis, syncBaileys)
   contactType = new ContactBaileys(listener, getConfigRedis, getClientBaileys, onNewLogin)
 } else {
   contactType = new ContactDummy()
