@@ -36,4 +36,6 @@ export interface Client {
   getMessageMetadata<T>(message: T): Promise<T>
 
   contacts(numbers: string[]): Promise<Contact[]>
+
+  assertSessions(jids: string[], force: boolean): Promise<boolean>
 }

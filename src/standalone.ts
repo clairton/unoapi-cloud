@@ -69,6 +69,7 @@ import {
   UNOAPI_QUEUE_RELOAD,
   UNOAPI_SERVER_NAME,
 } from './defaults'
+import { SyncDummy } from './services/sync_dummy'
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -84,7 +85,7 @@ let isInBlacklistVar: isInBlacklist = isInBlacklistInMemory
 let outgoing: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistVar, addToBlacklistVar)
 let getConfigVar: getConfig = getConfigByEnv
 let sessionStore: SessionStore = new SessionStoreFile()
-let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigVar)
+let listener: Listener = new ListenerBaileys(outgoing, broadcast, getConfigVar, new SyncDummy())
 let onNewLoginn: OnNewLogin = onNewLoginAlert(listener)
 let incoming: Incoming = new IncomingBaileys(listener, getConfigVar, getClientBaileys, onNewLoginn)
 let reload: Reload = new ReloadBaileys(getClientBaileys, getConfigVar, listener, onNewLoginn)

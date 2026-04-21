@@ -20,6 +20,7 @@ import { ReloadBaileys } from './services/reload_baileys'
 import { LogoutBaileys } from './services/logout_baileys'
 import * as Sentry from '@sentry/node'
 import { BASE_URL, PORT } from './defaults'
+import { SyncDummy } from './services/sync_dummy'
 
 if (process.env.SENTRY_DSN) {
   Sentry.init({
@@ -29,9 +30,8 @@ if (process.env.SENTRY_DSN) {
 }
 
 const outgoingCloudApi: Outgoing = new OutgoingCloudApi(getConfigByEnv, isInBlacklistInMemory, addToBlacklistRedis)
-
 const broadcast: Broadcast = new Broadcast()
-const listenerBaileys: Listener = new ListenerBaileys(outgoingCloudApi, broadcast, getConfigByEnv)
+const listenerBaileys: Listener = new ListenerBaileys(outgoingCloudApi, broadcast, getConfigByEnv, new SyncDummy())
 const onNewLoginn = onNewLoginAlert(listenerBaileys)
 const incomingBaileys: Incoming = new IncomingBaileys(listenerBaileys, getConfigByEnv, getClientBaileys, onNewLoginn)
 const sessionStore: SessionStore = new SessionStoreFile()

@@ -8,6 +8,7 @@ import { Outgoing } from '../../src/services/outgoing'
 import { Broadcast } from '../../src/services/broadcast'
 import { v1 as uuid } from 'uuid'
 import { DecryptError } from '../../src/services/transformer'
+import { Sync } from '../../src/services/sync'
 
 let store: Store
 let getConfig: getConfig
@@ -17,6 +18,7 @@ let phone: string
 let outgoing: Outgoing
 let service: ListenerBaileys
 let broadcast: Broadcast
+let sync: Sync
 
 const id = uuid().replaceAll('-', '')
 const remoteJid = `${uuid()}@s.whatsapp.net`
@@ -63,12 +65,13 @@ describe('service listener baileys', () => {
       return config
     }
     store = mock<Store>()
+    sync = mock<Sync>()
     broadcast = mock<Broadcast>()
     outgoing = mock<Outgoing>()
     store.dataStore = mock<DataStore>()
     store.mediaStore = mock<MediaStore>()
     phone = `${new Date().getMilliseconds()}`
-    service = new ListenerBaileys(outgoing, broadcast, getConfig)
+    service = new ListenerBaileys(outgoing, broadcast, getConfig, sync)
   })
 
   test('send call sendOne when text', async () => {

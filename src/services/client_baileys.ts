@@ -147,7 +147,7 @@ export class ClientBaileys implements Client {
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
-  private assertSessions: assertSessions = assertSessionsDefault
+  private assertSessionsFn: assertSessions = assertSessionsDefault
   private listener: Listener
   private store: Store | undefined
   private calls = new Map<string, Map<string, boolean>>()
@@ -304,7 +304,7 @@ export class ClientBaileys implements Client {
     this.sendMessage = send
     this.readMessages = read
     this.rejectCall = rejectCall
-    this.assertSessions = assertSessions
+    this.assertSessionsFn = assertSessions
     this.fetchImageUrl = this.config.sendProfilePicture ? fetchImageUrl : fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadata
     this.close = close
@@ -329,7 +329,7 @@ export class ClientBaileys implements Client {
     this.sendMessage = this.sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
-    this.assertSessions = assertSessionsDefault
+    this.assertSessionsFn = assertSessionsDefault
     this.fetchImageUrl = fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadataDefault
     this.exists = existsDefault
@@ -774,5 +774,9 @@ export class ClientBaileys implements Client {
       })
     }
     return contacts
+  }
+
+  public async assertSessions(jids: string[], force: boolean) {
+    return !!this.assertSessionsFn(jids, force)
   }
 }
