@@ -16,6 +16,7 @@ import {
   exists,
   close,
   logout,
+  assertSessions,
 } from '../../src/services/socket'
 import { mock, mockFn } from 'jest-mock-extended'
 import { proto } from 'baileys'
@@ -29,7 +30,7 @@ import { SendError } from '../../src/services/send_error'
 const mockConnect = connect as jest.MockedFunction<typeof connect>
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const event = (event, _callback) => {
+const event = (event: any, _callback: any) => {
   logger.info('subscribe event: %s', event)
 }
 
@@ -45,13 +46,14 @@ describe('service client baileys', () => {
   let store: Store
   let dataStore: DataStore
   let sessionStore: SessionStore
-  let send
-  let read
-  let logout
-  let exists
-  let rejectCall
-  let fetchImageUrl
-  let fetchGroupMetadata
+  let send: any
+  let read: readMessages
+  let logout: logout
+  let exists: exists
+  let rejectCall: rejectCall
+  let fetchImageUrl: fetchImageUrl
+  let fetchGroupMetadata: fetchGroupMetadata
+  let assertSessions: assertSessions
   let getConfig: getConfig
   let config: Config
   let close: close
@@ -86,7 +88,8 @@ describe('service client baileys', () => {
     logout = mockFn<logout>()
     fetchImageUrl = mockFn<fetchImageUrl>()
     fetchGroupMetadata = mockFn<fetchGroupMetadata>()
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout })
+    assertSessions = mockFn<assertSessions>()
+    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, assertSessions, fetchImageUrl, fetchGroupMetadata, exists, close, logout })
   })
 
   test('call send with unknown status', async () => {
@@ -111,8 +114,8 @@ describe('service client baileys', () => {
   })
 
   test('call send with message text success', async () => {
-    const anyMessage: Promise<proto.WebMessageInfo> = mock<Promise<proto.WebMessageInfo>>()
-    send.mockReturnValue(anyMessage)
+    // const anyMessage: Promise<proto.WebMessageInfo> = mock<Promise<proto.WebMessageInfo>>()
+    // send.mockReturnValue(anyMessage)
     const to = `${new Date().getMilliseconds()}`
     const id = `${new Date().getMilliseconds()}`
     send.mockResolvedValue({ key: { id } })
@@ -140,7 +143,7 @@ describe('service client baileys', () => {
     send = async () => {
       throw new SendError(1, '')
     }
-    mockConnect.mockResolvedValue({ event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout })
+    mockConnect.mockResolvedValue({ event, status, send, read, assertSessions, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout })
     await client.connect(0)
     const response = await client.send(payload, {})
     expect(response.error.entry.length).toBe(1)

@@ -87,6 +87,10 @@ export interface rejectCall {
   (_callId: string, _callFrom: string): Promise<void>
 }
 
+export interface assertSessions {
+  (_jids: string[], _force: boolean): Promise<boolean>
+}
+
 export interface fetchImageUrl {
   (_jid: string): Promise<string | undefined>
 }
@@ -481,9 +485,14 @@ export const connect = async ({
   }
 
   const rejectCall: rejectCall = async (callId: string, callFrom: string) => {
+    
+    return sock?.rejectCall(callId, callFrom)
+  }
+  
+  const assertSessions: assertSessions = async (jids: string[], force: boolean) => {
     await validateStatus()
 
-    return sock?.rejectCall(callId, callFrom)
+    return !!(await sock?.assertSessions(jids, force))
   }
 
   const fetchImageUrl: fetchImageUrl = async (jid: string) => {
@@ -620,5 +629,5 @@ export const connect = async ({
     return
   }
 
-  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout }
+  return { event, status, send, read, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout, assertSessions }
 }

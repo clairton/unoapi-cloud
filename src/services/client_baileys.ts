@@ -16,6 +16,7 @@ import {
   logout,
   close,
   OnReconnect,
+  assertSessions,
 } from './socket'
 import { Client, getClient, clients, Contact } from './client'
 import { Config, configs, defaultConfig, getConfig, getMessageMetadataDefault } from './config'
@@ -97,6 +98,11 @@ const rejectCallDefault: rejectCall = async (_keys) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const assertSessionsDefault: assertSessions = async (_jids: string[], _force: boolean) => {
+  throw sendError
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const fetchImageUrlDefault: fetchImageUrl = async (_jid: string) => ''
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -141,6 +147,7 @@ export class ClientBaileys implements Client {
   private fetchGroupMetadata = fetchGroupMetadataDefault
   private readMessages = readMessagesDefault
   private rejectCall: rejectCall | undefined = rejectCallDefault
+  private assertSessions: assertSessions = assertSessionsDefault
   private listener: Listener
   private store: Store | undefined
   private calls = new Map<string, Map<string, boolean>>()
@@ -292,11 +299,12 @@ export class ClientBaileys implements Client {
       logger.error('Socket connect return empty %s', this.phone)
       return
     }
-    const { send, read, event, rejectCall, fetchImageUrl, fetchGroupMetadata, exists, close, logout } = result
+    const { send, read, event, rejectCall, assertSessions, fetchImageUrl, fetchGroupMetadata, exists, close, logout } = result
     this.event = event
     this.sendMessage = send
     this.readMessages = read
     this.rejectCall = rejectCall
+    this.assertSessions = assertSessions
     this.fetchImageUrl = this.config.sendProfilePicture ? fetchImageUrl : fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadata
     this.close = close
@@ -321,6 +329,7 @@ export class ClientBaileys implements Client {
     this.sendMessage = this.sendMessageDefault
     this.readMessages = readMessagesDefault
     this.rejectCall = rejectCallDefault
+    this.assertSessions = assertSessionsDefault
     this.fetchImageUrl = fetchImageUrlDefault
     this.fetchGroupMetadata = fetchGroupMetadataDefault
     this.exists = existsDefault
