@@ -373,7 +373,7 @@ export class ClientBaileys implements Client {
         logger.debug('call event %s => %s', this.phone, JSON.stringify(events[i]))
         const { from, callerPn, id, status } = events[i]
         const fromPhone = callerPn || from
-        if (status == 'ringing' && !this.calls.has(fromPhone)) {
+        if (status == 'ringing' && !this.calls.get(this.phone)?.get(fromPhone)) {
           if (!this.calls.has(this.phone)) {
             this.calls.set(this.phone, new Map<string, boolean>())
           }
