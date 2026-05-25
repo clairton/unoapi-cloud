@@ -8,8 +8,8 @@ export class LogoutJob {
     this.logout = logout
   }
 
-  async consume(_: string, { phone }: { phone: string }) {
+  async consume(_: string, { phone, force }: { phone: string; force?: boolean }) {
     logger.debug('Logout service for phone %s', phone)
-    this.logout.run(phone)
+    await this.logout.run(phone, { force })
   }
 }
