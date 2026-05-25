@@ -600,7 +600,10 @@ export const extractDestinyPhone = (payload: object, throwError = true) => {
           data.entry[0].changes[0].value.statuses[0].recipient_id?.replace('+', '')) ||
         (data.entry[0].changes[0].value.message_echoes &&
           data.entry[0].changes[0].value.message_echoes[0] &&
-          data.entry[0].changes[0].value.message_echoes[0].to.replace('+', ''))))
+          data.entry[0].changes[0].value.message_echoes[0].to.replace('+', ''))||
+        (data.entry[0].changes[0].value.calls &&
+          data.entry[0].changes[0].value.calls[0] &&
+          data.entry[0].changes[0].value.calls[0].to.replace('+', ''))))
   if (!number && throwError) {
     throw Error(`error on get phone number from ${JSON.stringify(payload)}`)
   }
@@ -660,6 +663,17 @@ export const isGroupMessage = (payload: object) => {
 export const isNewsletterMessage = (payload: object) => {
   const groupId = getGroupId(payload)
   return groupId && isJidNewsletter(groupId)
+}
+
+export const isCall = (payload: object) => {
+  const data = payload as any
+  return data.entry &&
+    data.entry[0] &&
+    data.entry[0].changes &&
+    data.entry[0].changes[0].value &&
+    data.entry[0].changes[0].value.calls &&
+    data.entry[0].changes[0].value.calls[0] &&
+    data.entry[0].changes[0].value.calls[0].id
 }
 
 export const extractSessionPhone = (payload: object) => {
@@ -739,6 +753,44 @@ export const jidToPhoneNumber = (value: any, plus = '+', retry = true): string =
 
 export const jidToPhoneNumberIfUser = (value: any): string => {
   return isIndividualJid(value) ? jidToPhoneNumber(value, '') : value
+}
+
+export const fromBaileysCallContent = (phone: string, payload: any) => {
+  const from = jidToPhoneNumber(payload.callerPn || payload.from, '')
+  const to = phone
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: payload.chatId,
+        changes: [
+          {
+            value: {
+              messaging_product: 'whatsapp',
+              metadata: {
+                phone_number_id: phone,
+                display_phone_number: phone,
+              },
+              calls: [
+                {
+                  id: payload.id,
+                  to,
+                  from,
+                  event: payload.status,
+                  timestamp: Date.parse(payload.date), 
+                  // "session": {
+                  //   "sdp_type": "offer",
+                  //   "sdp": "<<RFC 8866 SDP>>"
+                  // }
+                }
+              ]
+            },
+            field: 'calls'
+          }
+        ]
+      }
+    ]
+  }
 }
 
 /*

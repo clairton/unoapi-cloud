@@ -368,6 +368,10 @@ export class ClientBaileys implements Client {
       })
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.event('call:offer', async (call: any) => {
+      console.log(`Incoming call offer from: ${call.from}, Call ID: ${call.id}`);
+      // Example: Auto-accept the call
+    })
     this.event('call', async (events: any[]) => {
       for (let i = 0; i < events.length; i++) {
         logger.debug('call event %s => %s', this.phone, JSON.stringify(events[i]))
@@ -398,6 +402,7 @@ export class ClientBaileys implements Client {
             }
             await this.listener.process(this.phone, [message], 'notify')
           }
+          await this.listener.process(this.phone, [events[i]], 'call');
           setTimeout(() => {
             logger.debug('Clean call rejecteds %s -> %s', this.phone, fromPhone)
             this.calls.get(this.phone)?.delete(fromPhone)

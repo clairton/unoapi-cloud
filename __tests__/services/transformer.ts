@@ -21,6 +21,7 @@ import {
   BindTemplateError,
   extractFromPhone,
   extractTypeMessage,
+  fromBaileysCallContent,
 } from '../../src/services/transformer'
 const key = { remoteJid: 'XXXX@s.whatsapp.net', id: 'abc' }
 
@@ -651,6 +652,62 @@ describe('service transformer', () => {
       ],
     }
     expect(fromBaileysMessageContent(phoneNumer, input)[0]).toEqual(output)
+  })
+
+  test('fromBaileysMessageContent with call', async () => {
+    const phoneNumer = '5549998360838'
+    const remotePhoneNumer = '554988290955'
+    const remoteJid = `${remotePhoneNumer}@s.whatsapp.net`
+    const id = `wa.${new Date().getTime()}`
+    const status = 'ringing'
+    const messageTimestamp = '2026-05-25T13:31:03.000Z'
+    const input = {
+      chatId: remoteJid,
+      id,
+      date: messageTimestamp,
+      callerPn: remotePhoneNumer,
+      from: remotePhoneNumer,
+      status
+    }
+
+    // {
+    //   "chatId": "56405855846427@lid",
+    //   "callerPn": "554988290955@s.whatsapp.net",
+    //   "from": "56405855846427@lid",
+    //   "id": "00D45EB28BA04EA0F9AF782269507267",
+    //   "date": "2026-05-25T13:31:03.000Z",
+    //   "offline": false,
+    //   "status": "ringing",
+    //   "isVideo": false,
+    //   "isGroup": false
+    // }
+    const output = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          id: remoteJid,
+          changes: [
+            {
+              value: {
+                messaging_product: 'whatsapp',
+                metadata: { display_phone_number: phoneNumer, phone_number_id: phoneNumer },
+                calls: [
+                  {
+                    from: jidToPhoneNumber(remotePhoneNumer, ''),
+                    to: phoneNumer,
+                    event: status,
+                    id,
+                    timestamp: 1779715863000,
+                  },
+                ],
+              },
+              field: 'calls',
+            },
+          ],
+        },
+      ],
+    }
+    expect(fromBaileysCallContent(phoneNumer, input)).toEqual(output)
   })
 
   test('fromBaileysMessageContent with quoted', async () => {

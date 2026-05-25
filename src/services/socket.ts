@@ -514,7 +514,7 @@ export const connect = async ({
 
     const loggerBaileys = MAIN_LOGGER.child({})
     logger.level = config.logLevel as Level
-    loggerBaileys.level = logLevel as Level
+    loggerBaileys.level = 'trace' as Level
 
     let agent
     let fetchAgent

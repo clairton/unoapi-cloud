@@ -56,6 +56,8 @@ export const WEBHOOK_SEND_OUTGOING_MESSAGES =
   process.env.WEBHOOK_SEND_OUTGOING_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_OUTGOING_MESSAGES == 'true'
 export const WEBHOOK_SEND_TRANSCRIBE_AUDIO =
   process.env.WEBHOOK_SEND_TRANSCRIBE_AUDIO == _undefined ? false : process.env.WEBHOOK_SEND_TRANSCRIBE_AUDIO == 'true'
+export const WEBHOOK_SEND_CALL =
+  process.env.WEBHOOK_SEND_CALL == _undefined ? false : process.env.WEBHOOK_SEND_CALL == 'true'
 export const WEBHOOK_SEND_UPDATE_MESSAGES =
   process.env.WEBHOOK_SEND_UPDATE_MESSAGES == _undefined ? true : process.env.WEBHOOK_SEND_UPDATE_MESSAGES == 'true'
 export const WEBHOOK_SEND_NEWSLETTER_MESSAGES =

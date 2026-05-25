@@ -247,7 +247,7 @@
                         <div class="row edit-form-row">
                           <div class="col-12 col-md-12 col-lg-6">
                               <label for="label" class="form-label">Identificação</label>
-                              <input type="text" class="form-control" id="label" name="lavel" placeholder="Identificação">
+                              <input type="text" class="form-control" id="label" name="label" placeholder="Identificação">
                           </div>
                             <div class="col-12 col-md-12 col-lg-6">
                                 <label for="authToken" class="form-label">Auth Token</label>
@@ -301,6 +301,32 @@
                                 <label for="server" class="form-label">Server</label>
                                 <input type="text" class="form-control" id="server" name="server" placeholder="Ex: default is server_1">
                             </div>
+                        </div>
+                        <div class="row edit-form-row">
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardUrl" class="form-label">Encaminhamento URL</label>
+                              <input type="text" class="form-control" id="webhookForwardUrl" name="webhookForwardUrl" placeholder="Encaminhamento URL">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardPhoneNumberId" class="form-label">Encaminhamento Phone Number Id</label>
+                              <input type="text" class="form-control" id="webhookForwardPhoneNumberId" name="webhookForwardPhoneNumberId" placeholder="Encaminhamento Phone Number Id">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardBusinessAccountId" class="form-label">Encaminhamento Business Account Id</label>
+                              <input type="text" class="form-control" id="webhookForwardBusinessAccountId" name="webhookForwardBusinessAccountId" placeholder="Encaminhamento Business Account Id">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardToken" class="form-label">Encaminhamento Token</label>
+                              <input type="text" class="form-control" id="webhookForwardToken" name="webhookForwardToken" placeholder="Encaminhamento Token">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardVersion" class="form-label">Encaminhamento Version</label>
+                              <input type="text" class="form-control" id="webhookForwardVersion" name="webhookForwardVersion" placeholder="Encaminhamento Version">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardTimeoutMs" class="form-label">Encaminhamento Timeout em Milisegundos</label>
+                              <input type="text" class="form-control" id="webhookForwardTimeoutMs" name="webhookForwardTimeoutMs" placeholder="Encaminhamento Timeout em Milisegundos">
+                          </div>
                         </div>
                         <div class="row edit-form-row">
                             <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
@@ -409,6 +435,32 @@
                                 <label for="outgoingMessagesCoex" class="form-label">Envia mensagem de saída no formato coex</label>
                             </div>
                         </div>
+                        <div class="row edit-form-row">
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardUrl" class="form-label">Encaminhamento URL</label>
+                              <input type="text" class="form-control" id="webhookForwardUrl" name="webhookForwardUrl" placeholder="Encaminhamento URL">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardPhoneNumberId" class="form-label">Encaminhamento Phone Number Id</label>
+                              <input type="text" class="form-control" id="webhookForwardPhoneNumberId" name="webhookForwardPhoneNumberId" placeholder="Encaminhamento Phone Number Id">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardBusinessAccountId" class="form-label">Encaminhamento Business Account Id</label>
+                              <input type="text" class="form-control" id="webhookForwardBusinessAccountId" name="webhookForwardBusinessAccountId" placeholder="Encaminhamento Business Account Id">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardToken" class="form-label">Encaminhamento Token</label>
+                              <input type="text" class="form-control" id="webhookForwardToken" name="webhookForwardToken" placeholder="Encaminhamento Token">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardVersion" class="form-label">Encaminhamento Version</label>
+                              <input type="text" class="form-control" id="webhookForwardVersion" name="webhookForwardVersion" placeholder="Encaminhamento Version">
+                          </div>
+                          <div class="col-12 col-md-12 col-lg-6">
+                              <label for="webhookForwardTimeoutMs" class="form-label">Encaminhamento Timeout em Milisegundos</label>
+                              <input type="text" class="form-control" id="webhookForwardTimeoutMs" name="webhookForwardTimeoutMs" placeholder="Encaminhamento Timeout em Milisegundos">
+                          </div>
+                        </div>
                         <div id="webhooksContainer">
                             <h6>Webhooks</h6>
                             <div class="webhook mb-3">
@@ -453,6 +505,11 @@
                                 <label for="sendTranscribeAudio" class="form-label">Enviar Transcrição de Áudio</label>
                                 <label class="switch">
                                     <input type="checkbox" class="webhook-sendTranscribeAudio">
+                                    <span class="slider round"></span>
+                                </label>
+                                <label for="sendCall" class="form-label">Enviar Aviso de Ligação</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendCall">
                                     <span class="slider round"></span>
                                 </label>
                                 <label for="addToBlackListOnOutgoingMessageWithTtl" class="form-label">Adicionar ao blacklits quando ouver uma mensagem de saida por X segundos</label>
@@ -651,6 +708,11 @@
                         <label for="sendTranscribeAudio" class="form-label">Enviar Transcrição de Áudio</label>
                         <label class="switch">
                             <input type="checkbox" class="webhook-sendTranscribeAudio">
+                            <span class="slider round"></span>
+                        </label>
+                        <label for="sendCall" class="form-label">Enviar Aviso de Ligação</label>
+                        <label class="switch">
+                            <input type="checkbox" class="webhook-sendCall">
                             <span class="slider round"></span>
                         </label>
                         <label for="addToBlackListOnOutgoingMessageWithTtl" class="form-label">Adicionar ao blacklits quando ouver uma mensagem de saida por X segundos</label>
@@ -891,6 +953,11 @@
                                     <input type="checkbox" class="webhook-sendTranscribeAudio" ${webhook.sendTranscribeAudio ? 'checked' : ''}>
                                     <span class="slider round"></span>
                                 </label>
+                                <label for="sendCall" class="form-label">Enviar Aviso de Ligação</label>
+                                <label class="switch">
+                                    <input type="checkbox" class="webhook-sendCall" ${webhook.sendCall ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
                                 <label for="addToBlackListOnOutgoingMessageWithTtl" class="form-label">Adicionar ao blacklits quando ouver uma mensagem de saida por X segundos</label>
                                 <label>
                                     <input type="text" class="webhook-addToBlackListOnOutgoingMessageWithTtl" value="${webhook.addToBlackListOnOutgoingMessageWithTtl || ''}" class="form-control">
@@ -953,6 +1020,7 @@
                             sendIncomingMessages: $(this).find('.webhook-sendIncomingMessages').is(':checked'),
                             sendUpdateMessages: $(this).find('.webhook-sendUpdateMessages').is(':checked'),
                             sendTranscribeAudio: $(this).find('.webhook-sendTranscribeAudio').is(':checked'),
+                            sendCall: $(this).find('.webhook-sendCall').is(':checked'),
                             addToBlackListOnOutgoingMessageWithTtl: $(this).find('.webhook-addToBlackListOnOutgoingMessageWithTtl').val(),
                         };
                         sessionData.webhooks.push(webhook);

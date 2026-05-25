@@ -10,6 +10,7 @@ import {
   jidToPhoneNumber,
   isDecryptError,
   isBindTemplateError,
+  fromBaileysCallContent,
 } from './transformer'
 import { WAMessage, delay } from 'baileys'
 import { Template } from './template'
@@ -81,12 +82,17 @@ export class ListenerBaileys implements Listener {
       // )
     } else if (type === 'status') {
       await this.broadcast.send(phone, type, messages[0]['message']['conversation'])
+    } else if (type == 'call') {
+      await Promise.all(messages.map(async (m: any) => {
+        const d = fromBaileysCallContent(phone, m)
+        return this.outgoing.send(phone, d)
+      }))
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filteredMessages = messages.filter((m: any) => {
       return (
         m?.key?.remoteJid &&
-        (['qrcode', 'status'].includes(type) || (!config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))))
+        (['qrcode', 'status', 'call'].includes(type) || (!config.shouldIgnoreJid(m.key.remoteJid) && !config.shouldIgnoreKey(m.key, getMessageType(m))))
       )
     })
     logger.debug('%s filtereds messages/updates of %s', messages.length - filteredMessages.length, messages.length)

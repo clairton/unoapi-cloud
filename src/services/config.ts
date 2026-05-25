@@ -38,6 +38,7 @@ export type Webhook = {
   sendNewsletterMessages: boolean
   sendIncomingMessages: boolean
   sendTranscribeAudio: boolean
+  sendCall: boolean
   addToBlackListOnOutgoingMessageWithTtl: number | undefined
 }
 
@@ -150,6 +151,7 @@ export const defaultConfig: Config = {
       sendUpdateMessages: true,
       sendIncomingMessages: true,
       sendTranscribeAudio: false,
+      sendCall: false,
       addToBlackListOnOutgoingMessageWithTtl: undefined,
     },
   ],

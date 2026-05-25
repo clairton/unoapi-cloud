@@ -62,6 +62,7 @@ import {
   OPENAI_API_SPEECH_VOICE,
   OPENAI_API_SPEECH_MODEL,
   OPENAI_API_BASE_URL,
+  WEBHOOK_SEND_CALL,
 } from '../defaults'
 import { logLevel } from './logger'
 
@@ -118,6 +119,7 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.webhooks[0].sendUpdateMessages = WEBHOOK_SEND_UPDATE_MESSAGES
     config.webhooks[0].sendIncomingMessages = WEBHOOK_SEND_INCOMING_MESSAGES
     config.webhooks[0].sendTranscribeAudio = WEBHOOK_SEND_TRANSCRIBE_AUDIO
+    config.webhooks[0].sendCall = WEBHOOK_SEND_CALL
     config.webhooks[0].addToBlackListOnOutgoingMessageWithTtl = WEBHOOK_ADD_TO_BLACKLIST_ON_OUTGOING_MESSAGE_WITH_TTL
 
     config.webhookForward.url = WEBHOOK_FORWARD_URL

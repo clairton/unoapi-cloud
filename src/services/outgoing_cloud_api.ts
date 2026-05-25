@@ -2,7 +2,7 @@ import { Outgoing } from './outgoing'
 import fetch, { Response, RequestInit } from 'node-fetch'
 import { Webhook, getConfig } from './config'
 import logger from './logger'
-import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, extractDestinyPhone, extractFromPhone } from './transformer'
+import { completeCloudApiWebHook, isGroupMessage, isOutgoingMessage, isNewsletterMessage, isUpdateMessage, extractDestinyPhone, extractFromPhone, isCall } from './transformer'
 import { addToBlacklist, isInBlacklist } from './blacklist'
 import { PublishOption } from '../amqp'
 
@@ -40,6 +40,10 @@ export class OutgoingCloudApi implements Outgoing {
     }
     if (!webhook.sendNewsletterMessages && isNewsletterMessage(message)) {
       logger.info(`Session phone %s webhook %s configured to not send newsletter message for this webhook`, phone, webhook.id)
+      return
+    }
+    if (!webhook.sendCall && isCall(message)) {
+      logger.info(`Session phone %s webhook %s configured to not send call for this webhook`, phone, webhook.id)
       return
     }
     const fromPhone = extractFromPhone(message, false)

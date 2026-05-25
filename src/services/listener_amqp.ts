@@ -33,6 +33,7 @@ const delays = {
   message: (_) => 0,
   update: (_) => 0,
   delete: (_) => 0,
+  call: (_) => 0,
 }
 
 export class ListenerAmqp implements Listener {
