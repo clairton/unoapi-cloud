@@ -466,6 +466,7 @@ export const toBaileysMessageContent = (payload: any, customMessageCharactersFun
     case 'audio':
     case 'document':
     case 'video':
+    case 'sticker':
       const link = payload[type].link
       if (link) {
         let mimetype: string = getMimetype(payload)
