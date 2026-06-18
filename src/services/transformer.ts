@@ -552,7 +552,7 @@ export const getChatAndNumberAndId = (payload: any): [string, string, string] =>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getNumberAndId = (payload: any): [string, string] => {
   const {
-    key: { remoteJid, senderPn, participantPn, participant, senderLid, participantLid, recipientLid },
+    key: { remoteJid, senderPn, recipientPn, participantPn, participant, senderLid, participantLid, recipientLid },
     participant: participant2,
     participantPn: participantPn2,
   } = payload
@@ -560,7 +560,7 @@ export const getNumberAndId = (payload: any): [string, string] => {
   const lid = senderLid || participantLid || recipientLid || participant || participant2 || remoteJid
   const split = lid.split('@')
   const id = `${split[0].split(':')[0]}@${split[1]}`
-  const pn = participantPn || senderPn || participantPn2 || participant || participant2
+  const pn = participantPn || senderPn || participantPn2 || participant || participant2 || recipientPn
   const phone = pn ? jidToPhoneNumber(pn, '') : id
   return [phone, id]
 }
