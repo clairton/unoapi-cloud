@@ -534,7 +534,6 @@ export const connect = async ({
       agent,
       fetchAgent,
       qrTimeout: config.qrTimeoutMs,
-      shouldResendMessageOn475AckError: true
     }
     if (whatsappVersion) {
       socketConfig.version = whatsappVersion
@@ -583,6 +582,23 @@ export const connect = async ({
     }
     if (sock) {
       event('connection.update', onConnectionUpdate)
+      event('ack.error', async ({ attrs }) => {
+        if (attrs.error == '465' || attrs.error == '463') {
+          const accountReachOutTimeLock = await sock?.fetchAccountReachOutTimeLock()
+          const message = t('blocked')
+          await onNotification(`${message}: ${JSON.stringify(accountReachOutTimeLock)}`, true)
+          await sessionStore.setStatus(phone, 'standby')
+          await close()
+        } else if (attrs.error == '475') {
+          const newChatMessageCap = await sock?.fetchNewChatMessageCap();
+          const message = t('restart')
+          await onNotification(`${message}: ${JSON.stringify(newChatMessageCap)}`, true)
+          await sessionStore.setStatus(phone, 'standby')
+          await close()
+        } else {
+          await onNotification(`ack.error: ${attrs}`, true)
+        }
+      })
       event('creds.update', verifyAndSaveCreds)
       sock.ev.process(async (events) => {
         const keys = Object.keys(events)

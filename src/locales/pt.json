@@ -28,5 +28,7 @@
   "session_conflict": "O número the sessão usado é o %s mas o número da configuração é %s",
   "waiting_information": "Esperando por qrcode/pairing code",
   "retry_decrypt": "Não estou conseguindo ler uma das mensagens, vou tentar novamente...",
-  "reload": "Recarregar"
+  "reload": "Recarregar",
+  "blocked": "Conta Bloqueada",
+  "new_chat_message_cap": "Cap new chat messages"
 }
