@@ -4,6 +4,7 @@ import { setConfig } from '../services/redis'
 import logger from '../services/logger'
 import { Logout } from '../services/logout'
 import { Reload } from '../services/reload'
+import { syncChatwootInboxes } from '../services/chatwoot'
 
 export class RegistrationController {
   private getConfig: getConfig
@@ -27,6 +28,7 @@ export class RegistrationController {
       await setConfig(phone, req.body)
       this.reload.run(phone)
       const config = await this.getConfig(phone)
+      await syncChatwootInboxes(phone, config)
       return res.status(200).json(config)
     } catch (e) {
       return res.status(400).json({ status: 'error', message: `${phone} could not create, error: ${e.message}` })

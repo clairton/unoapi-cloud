@@ -24,8 +24,11 @@ export interface GetMessageMetadata {
 
 export const getMessageMetadataDefault: GetMessageMetadata = async <T>(data: T) => data
 
+export type WebhookType = 'http' | 'chatwoot'
+
 export type Webhook = {
   id: string
+  type: WebhookType
   url: string
   urlAbsolute: string
   token: string
@@ -39,6 +42,11 @@ export type Webhook = {
   sendIncomingMessages: boolean
   sendTranscribeAudio: boolean
   addToBlackListOnOutgoingMessageWithTtl: number | undefined
+  // used only when type is chatwoot, to create/update the whatsapp inbox by chatwoot api pointing to unoapi
+  chatwootUrl: string | undefined
+  chatwootAccountId: string | undefined
+  chatwootToken: string | undefined
+  chatwootNameInbox: string | undefined
 }
 
 export type WebhookForward = {
@@ -138,6 +146,7 @@ export const defaultConfig: Config = {
   webhooks: [
     {
       id: 'default',
+      type: 'http',
       url: '',
       urlAbsolute: '',
       token: '',
@@ -151,6 +160,10 @@ export const defaultConfig: Config = {
       sendIncomingMessages: true,
       sendTranscribeAudio: false,
       addToBlackListOnOutgoingMessageWithTtl: undefined,
+      chatwootUrl: undefined,
+      chatwootAccountId: undefined,
+      chatwootToken: undefined,
+      chatwootNameInbox: undefined,
     },
   ],
   webhookForward: {},

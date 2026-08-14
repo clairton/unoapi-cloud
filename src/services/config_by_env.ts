@@ -1,5 +1,5 @@
 import { MessageFilter } from './message_filter'
-import { getConfig, defaultConfig, Config, configs, connectionType } from './config'
+import { getConfig, defaultConfig, Config, configs, connectionType, WebhookType } from './config'
 import logger from './logger'
 import { Level } from 'pino'
 
@@ -13,10 +13,15 @@ import {
   REJECT_CALLS_WEBHOOK,
   MESSAGE_CALLS_WEBHOOK,
   WEBHOOK_SESSION,
+  WEBHOOK_TYPE,
   WEBHOOK_HEADER,
   WEBHOOK_URL,
   WEBHOOK_URL_ABSOLUTE,
   WEBHOOK_TOKEN,
+  WEBHOOK_CHATWOOT_URL,
+  WEBHOOK_CHATWOOT_ACCOUNT_ID,
+  WEBHOOK_CHATWOOT_TOKEN,
+  WEBHOOK_CHATWOOT_NAME_INBOX,
   IGNORE_GROUP_MESSAGES,
   IGNORE_OWN_MESSAGES,
   IGNORE_BROADCAST_STATUSES,
@@ -106,10 +111,15 @@ export const getConfigByEnv: getConfig = async (phone: string): Promise<Config> 
     config.openaiBaseUrl = OPENAI_API_BASE_URL
     config.useRedis = !!process.env.REDIS_URL
     config.useS3 = !!process.env.STORAGE_ENDPOINT
+    config.webhooks[0].type = WEBHOOK_TYPE as WebhookType
     config.webhooks[0].url = WEBHOOK_URL
     config.webhooks[0].urlAbsolute = WEBHOOK_URL_ABSOLUTE
     config.webhooks[0].token = WEBHOOK_TOKEN
     config.webhooks[0].header = WEBHOOK_HEADER
+    config.webhooks[0].chatwootUrl = WEBHOOK_CHATWOOT_URL
+    config.webhooks[0].chatwootAccountId = WEBHOOK_CHATWOOT_ACCOUNT_ID
+    config.webhooks[0].chatwootToken = WEBHOOK_CHATWOOT_TOKEN
+    config.webhooks[0].chatwootNameInbox = WEBHOOK_CHATWOOT_NAME_INBOX
     config.webhooks[0].timeoutMs = WEBHOOK_TIMEOUT_MS
     config.webhooks[0].sendNewMessages = WEBHOOK_SEND_NEW_MESSAGES
     config.webhooks[0].sendGroupMessages = WEBHOOK_SEND_GROUP_MESSAGES
