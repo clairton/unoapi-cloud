@@ -214,17 +214,17 @@ export const getJid = async (phone: string, jid: any) => {
 
 export const setJid = async (phone: string, jid: string, validJid: string) => {
   const key = jidKey(phone, jid)
-  await client.set(key, validJid)
+  await redisSet(key, validJid)
 }
 
 export const setBlacklist = async (from: string, webhookId: string, to: string, ttl: number) => {
   const key = blacklist(from, webhookId, to)
   if (ttl > 0) {
-    return client.set(key, '1', { EX: ttl })
+    return redisSetAndExpire(key, '1', ttl)
   } else if (ttl == 0) {
-    return client.del(key)
+    return redisDel(key)
   } else {
-    return client.set(key, '1')
+    return redisSet(key, '1')
   }
 }
 
@@ -235,7 +235,7 @@ export const getSessionStatus = async (phone: string) => {
 
 export const setSessionStatus = async (phone: string, status: string) => {
   const key = sessionStatusKey(phone)
-  await client.set(key, status)
+  await redisSet(key, status)
 }
 
 export const getMessageStatus = async (phone: string, id: string) => {
@@ -245,7 +245,7 @@ export const getMessageStatus = async (phone: string, id: string) => {
 
 export const setMessageStatus = async (phone: string, id: string, status: string) => {
   const key = messageStatusKey(phone, id)
-  await client.set(key, status, { EX: DATA_TTL })
+  await redisSetAndExpire(key, status, DATA_TTL)
 }
 
 export const getMessageDirection = async (phone: string, phoneClient: string) => {
@@ -255,7 +255,7 @@ export const getMessageDirection = async (phone: string, phoneClient: string) =>
 
 export const setMessageDirection = async (phone: string, phoneClient: string, direction: string) => {
   const key = messageDirectionKey(phone, phoneClient)
-  return client.set(key, direction, { EX: DATA_TTL })
+  return redisSetAndExpire(key, direction, DATA_TTL)
 }
 
 export const getTemplates = async (phone: string) => {
