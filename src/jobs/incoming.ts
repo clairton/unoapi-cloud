@@ -8,6 +8,7 @@ import logger from '../services/logger'
 import fetch, { Response } from 'node-fetch'
 import mime from 'mime-types'
 import { generateUnoId } from '../utils/id'
+import { convertToWebpSticker, MAX_STICKER_BYTES } from '../utils/sticker_convert'
 
 export class IncomingJob {
   private incoming: Incoming
@@ -65,11 +66,16 @@ export class IncomingJob {
         const { mediaStore } = await config.getStore(phone, config)
         const mediaKey = `${phone}/${idUno}`
         const link = payload[payload.type].link
-        const mimetype = getMimetype(payload)
+        let mimetype = getMimetype(payload)
         const extension = mime.extension(mimetype)
         const fileName = `${mediaKey}.${extension}`
         const response: Response = await fetch(link, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), method: 'GET' })
-        const buffer = toBuffer(await response.arrayBuffer())
+        let buffer: Buffer = toBuffer(await response.arrayBuffer())
+        if (payload.type === 'sticker' && buffer.byteLength <= MAX_STICKER_BYTES) {
+          const animated = extension == 'gif'
+          buffer = await convertToWebpSticker(buffer, { animated })
+          mimetype = 'image/webp'
+        }
         await mediaStore.saveMediaBuffer(fileName, buffer)
         messagePayload = {
           filename: payload[payload.type].filename,
