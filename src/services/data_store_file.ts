@@ -38,6 +38,44 @@ const deepMerge = (obj1, obj2) => {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const binaryNodeToJson = (node: any): any => {
+  if (Buffer.isBuffer(node) || node instanceof Uint8Array) {
+    return Buffer.from(node).toString()
+  }
+  if (Array.isArray(node)) {
+    return node.map(binaryNodeToJson)
+  }
+  if (node && typeof node === 'object') {
+    return { tag: node.tag, attrs: node.attrs, content: binaryNodeToJson(node.content) }
+  }
+  return node
+}
+
+// onWhatsApp of baileys discard usync protocol errors (ex: rate limit) and users with type != in,
+// this query the same usync to log the raw response and discover why the number is not found
+const logRawUsyncContact = async (phone: string, sock: Partial<WASocket>) => {
+  try {
+    const result = await sock?.query!({
+      tag: 'iq',
+      attrs: { to: 's.whatsapp.net', type: 'get', xmlns: 'usync' },
+      content: [
+        {
+          tag: 'usync',
+          attrs: { sid: `${Date.now()}`, mode: 'query', last: 'true', index: '0', context: 'interactive' },
+          content: [
+            { tag: 'query', attrs: {}, content: [{ tag: 'contact', attrs: {} }, { tag: 'lid', attrs: {} }] },
+            { tag: 'list', attrs: {}, content: [{ tag: 'user', attrs: {}, content: [{ tag: 'contact', attrs: {}, content: Buffer.from(`+${phone}`) }] }] },
+          ],
+        },
+      ],
+    })
+    logger.warn(`${phone} raw usync contact response ${JSON.stringify(binaryNodeToJson(result))}`)
+  } catch (error) {
+    logger.error(error, `${phone} error on raw usync contact query`)
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> => {
   const keys: Map<string, proto.IMessageKey> = new Map()
   const jids: Map<string, string> = new Map()
@@ -206,6 +244,7 @@ const dataStoreFile = async (phone: string, config: Config): Promise<DataStore> 
           return lid
         } else {
           logger.warn(`${phoneOrJid} not exists on WhatsApp baileys onWhatsApp return results ${results ? JSON.stringify(results) : null}`)
+          await logRawUsyncContact(phoneOrJid, sock)
         }
       }
     }
