@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import logger from '../services/logger'
 import path from 'path'
+import { UNOAPI_APP_ID } from '../defaults'
 
 class IndexController {
   public root(req: Request, res: Response) {
@@ -41,8 +42,8 @@ class IndexController {
     return res.status(200).send({
       data: {
         is_valid: true,
-        app_id: 'unoapi',
-        application: 'unoapi',
+        app_id: UNOAPI_APP_ID,
+        application: UNOAPI_APP_ID,
         expires_at: 0,
         scopes: ['whatsapp_business_management', 'whatsapp_business_messaging'],
       },

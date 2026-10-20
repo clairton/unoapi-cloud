@@ -6,6 +6,8 @@ const _undefined: any = undefined
 
 // security
 export const UNOAPI_AUTH_TOKEN = process.env.UNOAPI_AUTH_TOKEN
+// app id returned by debug_token and subscribed_apps, the Graph API callers (ex: Typebot) compare both
+export const UNOAPI_APP_ID = 'unoapi'
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 export const OPENAI_API_ASSISTANT_ID = process.env.OPENAI_API_ASSISTANT_ID
 export const OPENAI_API_TRANSCRIBE_MODEL = process.env.OPENAI_API_TRANSCRIBE_MODEL || 'whisper-1'

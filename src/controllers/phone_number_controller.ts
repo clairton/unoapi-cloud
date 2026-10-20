@@ -3,7 +3,7 @@ import { getConfig } from '../services/config'
 import { SessionStore } from '../services/session_store'
 import logger from '../services/logger'
 import { getAuthHeaderToken } from '../services/security'
-import { UNOAPI_AUTH_TOKEN } from '../defaults'
+import { UNOAPI_APP_ID, UNOAPI_AUTH_TOKEN } from '../defaults'
 
 export class PhoneNumberController {
   private getConfig: getConfig
@@ -57,7 +57,9 @@ export class PhoneNumberController {
         const { sessionStore } = store
         const status = config.provider == 'forwarder' ? 'forwarder' : await sessionStore.getStatus(phone)
         if ([UNOAPI_AUTH_TOKEN, config.authToken].includes(token)) {
-          configs.push({ ...config, display_phone_number: phone.replace('+', ''), status })
+          // id like the graph api phone number id: callers (ex: Typebot) find the number by it
+          const number = phone.replace('+', '')
+          configs.push({ ...config, id: number, display_phone_number: number, status })
         }
       }
       logger.debug('Configs retrieved!')
@@ -65,5 +67,22 @@ export class PhoneNumberController {
     } catch (e) {
       return res.status(500).json({ status: 'error', message: e.message })
     }
+  }
+
+  // https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account/subscribed_apps/
+  // unoapi has no meta app to subscribe: the webhooks are in the config of number,
+  // so the only app is unoapi itself, the same app id returned by debug_token
+  public async subscribedApps(req: Request, res: Response) {
+    logger.debug('subscribed apps method %s', req.method)
+    logger.debug('subscribed apps params %s', JSON.stringify(req.params))
+    return res.status(200).json({
+      data: [{ whatsapp_business_api_data: { id: UNOAPI_APP_ID, name: UNOAPI_APP_ID, link: '' } }],
+    })
+  }
+
+  public async subscribeApp(req: Request, res: Response) {
+    logger.debug('subscribe app method %s', req.method)
+    logger.debug('subscribe app params %s', JSON.stringify(req.params))
+    return res.status(200).json({ success: true })
   }
 }

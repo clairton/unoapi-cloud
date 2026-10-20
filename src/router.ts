@@ -86,6 +86,10 @@ export const router = (
   router.get('/:version/:phone', middleware, phoneNumberController.get.bind(phoneNumberController))
   // https://developers.facebook.com/docs/whatsapp/business-management-api/manage-phone-numbers/
   router.get('/:version/:phone/phone_numbers', middleware, phoneNumberController.list.bind(phoneNumberController))
+  // https://developers.facebook.com/docs/graph-api/reference/whats-app-business-account/subscribed_apps/
+  // before /:version/:phone/:media_id, that otherwise would get the GET
+  router.get('/:version/:phone/subscribed_apps', middleware, phoneNumberController.subscribedApps.bind(phoneNumberController))
+  router.post('/:version/:phone/subscribed_apps', middleware, phoneNumberController.subscribeApp.bind(phoneNumberController))
   router.get('/:version/:phone/message_templates', middleware, templatesController.index.bind(templatesController))
   router.post('/:version/:phone/templates', middleware, templatesController.templates.bind(templatesController))
   router.post('/:version/:phone/messages', middleware, messagesController.index.bind(messagesController))
